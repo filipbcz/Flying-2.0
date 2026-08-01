@@ -1,0 +1,26 @@
+name: Native Skeleton
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    name: Native modules and smoke test
+    runs-on: windows-latest
+    env:
+      FLYING_RUNTIME_NETWORK: "OFF"
+      FLYING_REQUIRE_MAP_API_KEYS: "OFF"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Configure native test preset
+        run: cmake --preset test
+
+      - name: Build native test preset
+        run: cmake --build --preset test
+
+      - name: Run smoke test
+        run: ctest --preset smoke --output-on-failure

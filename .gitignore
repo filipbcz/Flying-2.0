@@ -1,0 +1,17 @@
+# Local build products
+/build/
+/out/
+/dist/
+
+# CMake local state
+CMakeUserPresets.json
+
+# Unreal generated directories, once the UE project is added.
+/unreal/**/Binaries/
+/unreal/**/DerivedDataCache/
+/unreal/**/Intermediate/
+/unreal/**/Saved/
+
+# Editor and OS noise
+.DS_Store
+Thumbs.db

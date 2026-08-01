@@ -1,0 +1,101 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "development",
+      "displayName": "Development",
+      "description": "Debug native build with smoke-test targets enabled.",
+      "binaryDir": "${sourceDir}/out/build/development",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "FLYING_BUILD_TESTS": "ON",
+        "FLYING_RUNTIME_NETWORK": "OFF",
+        "FLYING_REQUIRE_MAP_API_KEYS": "OFF",
+        "FLYING_PACKAGE_WIN64": "OFF"
+      }
+    },
+    {
+      "name": "test",
+      "displayName": "Test",
+      "description": "Narrow native validation build for CI and local smoke testing.",
+      "binaryDir": "${sourceDir}/out/build/test",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "FLYING_BUILD_TESTS": "ON",
+        "FLYING_RUNTIME_NETWORK": "OFF",
+        "FLYING_REQUIRE_MAP_API_KEYS": "OFF",
+        "FLYING_PACKAGE_WIN64": "OFF"
+      }
+    },
+    {
+      "name": "win64-packaging",
+      "displayName": "Win64 Packaging",
+      "description": "Release native configuration for future Windows x64 package assembly.",
+      "binaryDir": "${sourceDir}/out/build/win64-packaging",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "FLYING_BUILD_TESTS": "ON",
+        "FLYING_RUNTIME_NETWORK": "OFF",
+        "FLYING_REQUIRE_MAP_API_KEYS": "OFF",
+        "FLYING_PACKAGE_WIN64": "ON",
+        "FLYING_TARGET_PLATFORM": "Win64"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "development",
+      "displayName": "Build Development",
+      "configurePreset": "development",
+      "configuration": "Debug"
+    },
+    {
+      "name": "test",
+      "displayName": "Build Test",
+      "configurePreset": "test",
+      "configuration": "Debug"
+    },
+    {
+      "name": "win64-packaging",
+      "displayName": "Build Win64 Packaging",
+      "configurePreset": "win64-packaging",
+      "configuration": "Release"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "smoke",
+      "displayName": "Smoke Tests",
+      "configurePreset": "test",
+      "configuration": "Debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "local-validation",
+      "displayName": "Configure, build, and smoke test",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "test"
+        },
+        {
+          "type": "build",
+          "name": "test"
+        },
+        {
+          "type": "test",
+          "name": "smoke"
+        }
+      ]
+    }
+  ]
+}

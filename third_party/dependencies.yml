@@ -1,0 +1,41 @@
+schema_version: 1
+status: initial-intent
+runtime_network_credentials_required: false
+external_map_api_required: false
+
+dependencies:
+  unreal_engine:
+    intended_version: "5.8.x"
+    role: "Win64 rendering, audio, UI, input and distribution engine."
+    acquisition: "Developer-installed through Epic-approved channels; not fetched by CMake."
+    license_note: "Unreal Engine EULA applies; review current terms before release."
+  cesium_for_unreal:
+    intended_version: ">=2.28.0 <3.0.0"
+    role: "Unreal georeferencing, WGS-84/ECEF integration and 3D Tiles runtime layer."
+    acquisition: "Integrated with the future Unreal project; not required by native smoke build."
+    license_note: "Preserve Cesium for Unreal notices and licenses."
+  jsbsim:
+    intended_version: "1.2.x, exact tag or commit to be pinned during the JSBSim integration step."
+    role: "Baseline flight dynamics model library for CoreSim infrastructure."
+    acquisition: "Not vendored in this skeleton."
+    license_note: "Record JSBSim license obligations before integration or redistribution."
+  proj:
+    intended_version: "9.5.x, exact version to be pinned during the geodesy implementation step."
+    role: "Offline CRS transformation support for GIS pipeline and geodesy tooling."
+    acquisition: "Not vendored in this skeleton."
+    license_note: "Record PROJ license and grid-data obligations before use."
+  test_framework:
+    intended_version: "Catch2 3.7.x, exact version to be pinned when non-smoke tests are added."
+    role: "Native unit and integration test framework."
+    acquisition: "Not required for the current smoke test."
+    license_note: "Preserve Catch2 license notice if vendored or redistributed."
+  packaging_tools:
+    intended_version: "WiX Toolset 5.x or later for MSI packaging; exact toolchain to be pinned in the packaging milestone."
+    role: "Future Win64 installer/package generation."
+    acquisition: "Not required by native smoke build."
+    license_note: "Installer tooling license review required before release."
+  signing_requirements:
+    intended_version: "Microsoft SignTool from Windows SDK 10.0.26100.x or a compatible release SDK."
+    role: "Future Authenticode signing for Win64 Shipping builds and installers."
+    acquisition: "Provisioned by release infrastructure; private keys must never enter the repository."
+    license_note: "Signing certificate policy and key custody must be documented before release."

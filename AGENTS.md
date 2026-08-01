@@ -6,7 +6,7 @@
 - default branch: main
 
 ## Task
-- title: Flying: 1. Freeze Product Scope And Legal Data Gate
+- title: Flying: 2. Establish Repository Build Skeleton
 - prompt: Project: Flying
 
 Parent objective:
@@ -385,24 +385,25 @@ Produkt je hotový pouze tehdy, když lze na čisté podporované instalaci Wind
 Licenční shrnutí je technické doporučení, nikoli právní stanovisko.
 
 Current implementation step:
-1. Freeze Product Scope And Legal Data Gate
+2. Establish Repository Build Skeleton
 
 Step description and scope:
-Create the project governance documents that freeze version 1 scope, legal assumptions, data permissions, attribution text, aircraft-data licensing, and go/no-go criteria. This step is documentation-only and must not add simulator code, import tools, or runtime assets.
+Add the initial repository structure, build presets, dependency documentation, CI entry points, and empty module boundaries for CoreSim, Geo/Terrain, Data Pipeline, Unreal presentation, tests, tools, and documentation.
 
 In scope:
-- Version 1 scope document
-- Legal and data-source decision record
-- Attribution requirements
-- Aircraft data availability and licensing decision record
-- Go/No-Go checklist for M0
+- Directory layout
+- CMake or equivalent native build presets
+- Initial CI scripts
+- Dependency/version manifest
+- Empty module scaffolding
+- Initial smoke test
 
 Out of scope:
-- Implementing importers
-- Downloading or transforming GIS data
-- Creating aircraft physics models
-- Creating Unreal project code
-- Building installer or runtime assets
+- Flight dynamics implementation
+- GIS processing implementation
+- Airport importer implementation
+- Unreal gameplay features
+- Real aircraft data
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -410,8 +411,10 @@ Execution boundary:
 - Reuse existing functionality. If part of this step is already satisfied, verify it instead of rewriting it.
 - Keep unrelated repository files unchanged.
 
+Already completed roadmap steps (existing repository context):
+- 1. Freeze Product Scope And Legal Data Gate
+
 Future roadmap steps (explicitly out of scope):
-- 2. Establish Repository Build Skeleton
 - 3. Implement CoreSim Fixed-Step Kernel
 - 4. Implement Geodesy And Units Library
 - 5. Integrate JSBSim Into CoreSim
@@ -442,10 +445,10 @@ Future roadmap steps (explicitly out of scope):
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- Repository contains a versioned scope document naming Win64, Unreal Engine 5.8, Cesium for Unreal 2.28+, offline Czech Republic coverage, one piston trainer aircraft, and all explicit version 1 exclusions.
-- Repository contains a legal/data gate document recording the allowed CUZK datasets, required CC BY 4.0 attribution, AIM/AIP/VFR permission status or approved fallback process, and redistribution constraints.
-- Repository contains an aircraft data gate document identifying the selected reference aircraft or documenting that selection is blocked until POH/AFM and validation data are licensed.
-- No application source code, runtime data importer, Unreal asset, or CoreSim implementation is changed by this documentation-only step.
+- Repository has separate top-level areas for CoreSim, Geo/Terrain, data pipeline tools, Unreal project integration, tests, documentation, packaging, and third-party notices.
+- Build configuration defines named development, test, and Win64 packaging presets without requiring external map APIs or runtime network credentials.
+- CI or local validation entry point can build empty/native modules and run an initial smoke test successfully.
+- Dependency manifest records intended versions for Unreal Engine 5.8, Cesium for Unreal 2.28+, JSBSim, PROJ, test framework, packaging tools, and signing requirements.
 - mode: full_auto
 - max iterations: 10
 - max budget: 5 USD
