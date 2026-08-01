@@ -5,7 +5,7 @@ namespace flying::core_sim {
 ModuleBoundary describe_module() noexcept {
   return {
     "CoreSim",
-    "Standalone native boundary for future fixed-step flight dynamics.",
+    "Standalone fixed-step native boundary for deterministic flight dynamics.",
     false,
   };
 }

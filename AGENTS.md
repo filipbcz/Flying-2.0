@@ -6,7 +6,7 @@
 - default branch: main
 
 ## Task
-- title: Flying: 2. Establish Repository Build Skeleton
+- title: Flying: 3. Implement CoreSim Fixed-Step Kernel
 - prompt: Project: Flying
 
 Parent objective:
@@ -385,25 +385,25 @@ Produkt je hotový pouze tehdy, když lze na čisté podporované instalaci Wind
 Licenční shrnutí je technické doporučení, nikoli právní stanovisko.
 
 Current implementation step:
-2. Establish Repository Build Skeleton
+3. Implement CoreSim Fixed-Step Kernel
 
 Step description and scope:
-Add the initial repository structure, build presets, dependency documentation, CI entry points, and empty module boundaries for CoreSim, Geo/Terrain, Data Pipeline, Unreal presentation, tests, tools, and documentation.
+Implement the standalone C++ CoreSim library with a 240 Hz fixed-step scheduler, deterministic state container, SI unit policy, headless executable, and minimal synthetic rigid-body integration hooks independent of rendering.
 
 In scope:
-- Directory layout
-- CMake or equivalent native build presets
-- Initial CI scripts
-- Dependency/version manifest
-- Empty module scaffolding
-- Initial smoke test
+- CoreSim library
+- Fixed-step accumulator
+- Authoritative state model
+- Headless runner
+- Determinism hash test
+- SI unit conventions
 
 Out of scope:
-- Flight dynamics implementation
-- GIS processing implementation
-- Airport importer implementation
-- Unreal gameplay features
-- Real aircraft data
+- Full JSBSim aircraft model
+- Terrain streaming
+- Weather rendering
+- Cockpit instruments
+- Replay file format beyond minimal deterministic test input
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -413,9 +413,9 @@ Execution boundary:
 
 Already completed roadmap steps (existing repository context):
 - 1. Freeze Product Scope And Legal Data Gate
+- 2. Establish Repository Build Skeleton
 
 Future roadmap steps (explicitly out of scope):
-- 3. Implement CoreSim Fixed-Step Kernel
 - 4. Implement Geodesy And Units Library
 - 5. Integrate JSBSim Into CoreSim
 - 6. Build Terrain Height Service Contract
@@ -445,10 +445,10 @@ Future roadmap steps (explicitly out of scope):
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- Repository has separate top-level areas for CoreSim, Geo/Terrain, data pipeline tools, Unreal project integration, tests, documentation, packaging, and third-party notices.
-- Build configuration defines named development, test, and Win64 packaging presets without requiring external map APIs or runtime network credentials.
-- CI or local validation entry point can build empty/native modules and run an initial smoke test successfully.
-- Dependency manifest records intended versions for Unreal Engine 5.8, Cesium for Unreal 2.28+, JSBSim, PROJ, test framework, packaging tools, and signing requirements.
+- CoreSim builds as a standalone library with no dependency on Unreal frame timing or rendering APIs.
+- Headless runner advances simulation using a fixed 1/240 second physics step and exposes accumulated-step behavior for variable caller frame intervals.
+- CoreSim state uses double precision for authoritative positions, velocities, rotations, forces, and moments.
+- Unit tests prove identical input streams produce identical state hashes across repeated runs on the same platform build.
 - mode: full_auto
 - max iterations: 10
 - max budget: 5 USD
