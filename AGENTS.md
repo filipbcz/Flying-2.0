@@ -6,29 +6,29 @@
 - default branch: main
 
 ## Task
-- title: Flying: 4. Implement Geodesy And Units Library
+- title: Flying: 5. Integrate JSBSim Into CoreSim
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-4. Implement Geodesy And Units Library
+5. Integrate JSBSim Into CoreSim
 
 Step description and scope:
-Add the shared geodesy and unit-conversion library used by CoreSim, terrain tools, and Unreal integration. Implement WGS-84 ECEF, geodetic, NED/ENU, body-frame transforms, height-type separation, and test reference cases.
+Integrate JSBSim as the initial flight dynamics backend inside CoreSim while preserving CoreSim ownership of stepping, state transfer, deterministic inputs, and headless execution.
 
 In scope:
-- Coordinate transforms
-- Height-type value objects
-- Unit conversion boundaries
-- Reference-value tests
-- Shared API documentation
+- JSBSim dependency integration
+- CoreSim-to-JSBSim adapter
+- Placeholder aircraft config for infrastructure
+- State extraction API
+- Repeatability regression test
 
 Out of scope:
-- GIS source-data transformation pipeline
-- Cesium rendering integration
-- Aircraft aerodynamics
-- Airport geometry import
+- Claiming fidelity for the production aircraft
+- Aircraft validation tolerance sign-off
+- Cockpit systems
+- Terrain collision coupling
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -40,9 +40,9 @@ Already completed roadmap steps (existing repository context):
 - 1. Freeze Product Scope And Legal Data Gate
 - 2. Establish Repository Build Skeleton
 - 3. Implement CoreSim Fixed-Step Kernel
+- 4. Implement Geodesy And Units Library
 
 Future roadmap steps (explicitly out of scope):
-- 5. Integrate JSBSim Into CoreSim
 - 6. Build Terrain Height Service Contract
 - 7. Create GIS Data Pipeline Foundation
 - 8. Implement DMR 5G Terrain Processing For Pilot Region
@@ -70,10 +70,10 @@ Future roadmap steps (explicitly out of scope):
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- Library converts WGS-84 geodetic coordinates to ECEF and back within documented numerical tolerances using double precision.
-- Library supports local NED/ENU frames without losing authoritative ECEF precision during origin shifts.
-- Data model distinguishes ellipsoidal height, orthometric height, pressure altitude, QNH/QFE, and indicated instrument altitude.
-- Unit tests compare atmosphere-independent coordinate transforms and unit conversions against checked reference values.
+- JSBSim can be stepped from CoreSim at 240 Hz through a stable adapter API.
+- CoreSim remains runnable headless without Unreal or GPU dependencies.
+- Adapter records input controls, aircraft configuration identity, and output state required by telemetry and replay.
+- Regression tests demonstrate repeatable results for a placeholder/community aircraft model used only for infrastructure testing.
 
 ## Agent Configuration
 - no project config provided, using defaults

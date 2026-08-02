@@ -33,6 +33,22 @@
       }
     },
     {
+      "name": "jsbsim-validation",
+      "displayName": "JSBSim Adapter Validation",
+      "description": "Requires JSBSim so CoreSim adapter repeatability coverage cannot be skipped.",
+      "binaryDir": "${sourceDir}/out/build/jsbsim-validation",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "FLYING_BUILD_TESTS": "ON",
+        "FLYING_RUNTIME_NETWORK": "OFF",
+        "FLYING_REQUIRE_MAP_API_KEYS": "OFF",
+        "FLYING_PACKAGE_WIN64": "OFF",
+        "FLYING_CORE_SIM_ENABLE_JSBSIM": "ON",
+        "FLYING_CORE_SIM_REQUIRE_JSBSIM": "ON",
+        "FLYING_CORE_SIM_FETCH_JSBSIM": "ON"
+      }
+    },
+    {
       "name": "win64-packaging",
       "displayName": "Win64 Packaging",
       "description": "Release native configuration for future Windows x64 package assembly.",
@@ -61,6 +77,12 @@
       "configuration": "Debug"
     },
     {
+      "name": "jsbsim-validation",
+      "displayName": "Build JSBSim Adapter Validation",
+      "configurePreset": "jsbsim-validation",
+      "configuration": "Debug"
+    },
+    {
       "name": "win64-packaging",
       "displayName": "Build Win64 Packaging",
       "configurePreset": "win64-packaging",
@@ -73,6 +95,20 @@
       "displayName": "Smoke Tests",
       "configurePreset": "test",
       "configuration": "Debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "jsbsim-adapter",
+      "displayName": "JSBSim Adapter Tests",
+      "configurePreset": "jsbsim-validation",
+      "configuration": "Debug",
+      "filter": {
+        "include": {
+          "name": "^flying\\.core_sim\\.jsbsim_adapter$"
+        }
+      },
       "output": {
         "outputOnFailure": true
       }
@@ -94,6 +130,24 @@
         {
           "type": "test",
           "name": "smoke"
+        }
+      ]
+    },
+    {
+      "name": "jsbsim-validation",
+      "displayName": "Configure, build, and test JSBSim adapter",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "jsbsim-validation"
+        },
+        {
+          "type": "build",
+          "name": "jsbsim-validation"
+        },
+        {
+          "type": "test",
+          "name": "jsbsim-adapter"
         }
       ]
     }

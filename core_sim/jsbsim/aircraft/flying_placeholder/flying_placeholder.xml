@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<fdm_config name="Flying Infrastructure Placeholder" version="2.0" release="BETA">
+  <fileheader>
+    <author>Flying project</author>
+    <filecreationdate>2026-08-02</filecreationdate>
+    <version>infrastructure-v1</version>
+    <description>
+      Generic placeholder model used only to exercise CoreSim JSBSim loading,
+      stepping, state extraction, and repeatability tests.
+    </description>
+  </fileheader>
+
+  <metrics>
+    <wingarea unit="FT2"> 120.0 </wingarea>
+    <wingspan unit="FT"> 32.0 </wingspan>
+    <chord unit="FT"> 4.0 </chord>
+    <htailarea unit="FT2"> 24.0 </htailarea>
+    <htailarm unit="FT"> 14.0 </htailarm>
+    <vtailarea unit="FT2"> 16.0 </vtailarea>
+    <vtailarm unit="FT"> 14.0 </vtailarm>
+    <location name="AERORP" unit="IN">
+      <x> 48.0 </x>
+      <y> 0.0 </y>
+      <z> 0.0 </z>
+    </location>
+    <location name="EYEPOINT" unit="IN">
+      <x> 24.0 </x>
+      <y> 0.0 </y>
+      <z> 36.0 </z>
+    </location>
+    <location name="VRP" unit="IN">
+      <x> 0.0 </x>
+      <y> 0.0 </y>
+      <z> 0.0 </z>
+    </location>
+  </metrics>
+
+  <mass_balance>
+    <ixx unit="SLUG*FT2"> 700.0 </ixx>
+    <iyy unit="SLUG*FT2"> 950.0 </iyy>
+    <izz unit="SLUG*FT2"> 1200.0 </izz>
+    <ixy unit="SLUG*FT2"> 0.0 </ixy>
+    <ixz unit="SLUG*FT2"> 0.0 </ixz>
+    <iyz unit="SLUG*FT2"> 0.0 </iyz>
+    <emptywt unit="LBS"> 1500.0 </emptywt>
+    <location name="CG" unit="IN">
+      <x> 0.0 </x>
+      <y> 0.0 </y>
+      <z> 0.0 </z>
+    </location>
+  </mass_balance>
+
+  <ground_reactions>
+    <contact type="BOGEY" name="CENTER">
+      <location unit="IN">
+        <x> 0.0 </x>
+        <y> 0.0 </y>
+        <z> -24.0 </z>
+      </location>
+      <static_friction> 0.6 </static_friction>
+      <dynamic_friction> 0.5 </dynamic_friction>
+      <rolling_friction> 0.02 </rolling_friction>
+      <spring_coeff unit="LBS/FT"> 5000.0 </spring_coeff>
+      <damping_coeff unit="LBS/FT/SEC"> 400.0 </damping_coeff>
+      <max_steer unit="DEG"> 0.0 </max_steer>
+      <brake_group> NONE </brake_group>
+      <retractable> 0 </retractable>
+    </contact>
+  </ground_reactions>
+
+  <propulsion/>
+  <flight_control name="FlyingPlaceholderFCS"/>
+
+  <aerodynamics>
+    <axis name="DRAG">
+      <function name="aero/coefficient/CD">
+        <product>
+          <property>aero/qbar-psf</property>
+          <property>metrics/Sw-sqft</property>
+          <value>0.0</value>
+        </product>
+      </function>
+    </axis>
+  </aerodynamics>
+</fdm_config>

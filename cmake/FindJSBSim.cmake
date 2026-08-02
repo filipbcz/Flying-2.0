@@ -1,0 +1,41 @@
+include(FindPackageHandleStandardArgs)
+
+find_package(PkgConfig QUIET)
+if(PkgConfig_FOUND)
+  pkg_search_module(PC_JSBSIM QUIET IMPORTED_TARGET JSBSim jsbsim)
+endif()
+
+find_path(JSBSIM_INCLUDE_DIR
+  NAMES FGFDMExec.h
+  HINTS ${PC_JSBSIM_INCLUDE_DIRS}
+  PATH_SUFFIXES JSBSim jsbsim
+)
+
+find_library(JSBSIM_LIBRARY
+  NAMES JSBSim libJSBSim jsbsim libjsbsim
+  HINTS ${PC_JSBSIM_LIBRARY_DIRS}
+)
+
+find_package_handle_standard_args(JSBSim
+  REQUIRED_VARS JSBSIM_INCLUDE_DIR JSBSIM_LIBRARY
+  VERSION_VAR PC_JSBSIM_VERSION
+)
+
+if(JSBSim_FOUND AND NOT TARGET JSBSim::JSBSim AND TARGET PkgConfig::PC_JSBSIM)
+  add_library(JSBSim::JSBSim INTERFACE IMPORTED)
+  set_target_properties(JSBSim::JSBSim PROPERTIES
+    INTERFACE_LINK_LIBRARIES PkgConfig::PC_JSBSIM
+  )
+elseif(JSBSim_FOUND AND NOT TARGET JSBSim::JSBSim)
+  add_library(JSBSim::JSBSim UNKNOWN IMPORTED)
+  set_target_properties(JSBSim::JSBSim PROPERTIES
+    IMPORTED_LOCATION "${JSBSIM_LIBRARY}"
+    INTERFACE_INCLUDE_DIRECTORIES "${JSBSIM_INCLUDE_DIR}"
+  )
+endif()
+
+set(JSBSIM_FOUND "${JSBSim_FOUND}")
+set(JSBSIM_INCLUDE_DIRS "${JSBSIM_INCLUDE_DIR}")
+set(JSBSIM_LIBRARIES "${JSBSIM_LIBRARY}")
+
+mark_as_advanced(JSBSIM_INCLUDE_DIR JSBSIM_LIBRARY)
