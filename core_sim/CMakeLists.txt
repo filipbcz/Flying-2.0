@@ -4,6 +4,7 @@ add_library(flying_core_sim STATIC
   src/fixed_step.cpp
   src/module.cpp
   src/simulator.cpp
+  src/terrain_contact.cpp
 )
 
 add_library(Flying::CoreSim ALIAS flying_core_sim)
@@ -15,6 +16,7 @@ target_include_directories(flying_core_sim
 
 target_link_libraries(flying_core_sim
   PUBLIC
+    Flying::GeoTerrain
     Flying::CompilerOptions
 )
 

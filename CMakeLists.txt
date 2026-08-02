@@ -24,8 +24,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(FlyingCompilerOptions)
 
-add_subdirectory(core_sim)
 add_subdirectory(geo_terrain)
+add_subdirectory(core_sim)
 add_subdirectory(data_pipeline)
 
 if(FLYING_BUILD_TESTS)

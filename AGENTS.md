@@ -6,29 +6,30 @@
 - default branch: main
 
 ## Task
-- title: Flying: 5. Integrate JSBSim Into CoreSim
+- title: Flying: 6. Build Terrain Height Service Contract
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-5. Integrate JSBSim Into CoreSim
+6. Build Terrain Height Service Contract
 
 Step description and scope:
-Integrate JSBSim as the initial flight dynamics backend inside CoreSim while preserving CoreSim ownership of stepping, state transfer, deterministic inputs, and headless execution.
+Implement the unified Terrain Height Service API and local test backend returning height, normal, surface type, collision metadata, and runway override priority to both CoreSim and presentation clients.
 
 In scope:
-- JSBSim dependency integration
-- CoreSim-to-JSBSim adapter
-- Placeholder aircraft config for infrastructure
-- State extraction API
-- Repeatability regression test
+- Terrain service interface
+- In-memory test backend
+- Surface material taxonomy
+- Runway override priority rules
+- CoreSim query adapter
+- Unit tests
 
 Out of scope:
-- Claiming fidelity for the production aircraft
-- Aircraft validation tolerance sign-off
-- Cockpit systems
-- Terrain collision coupling
+- DMR 5G production import
+- Cesium 3D Tiles generation
+- Full airport database
+- Visual terrain rendering
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -41,9 +42,9 @@ Already completed roadmap steps (existing repository context):
 - 2. Establish Repository Build Skeleton
 - 3. Implement CoreSim Fixed-Step Kernel
 - 4. Implement Geodesy And Units Library
+- 5. Integrate JSBSim Into CoreSim
 
 Future roadmap steps (explicitly out of scope):
-- 6. Build Terrain Height Service Contract
 - 7. Create GIS Data Pipeline Foundation
 - 8. Implement DMR 5G Terrain Processing For Pilot Region
 - 9. Implement Ortofoto And Vector Package Processing For Pilot Region
@@ -70,10 +71,10 @@ Future roadmap steps (explicitly out of scope):
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- JSBSim can be stepped from CoreSim at 240 Hz through a stable adapter API.
-- CoreSim remains runnable headless without Unreal or GPU dependencies.
-- Adapter records input controls, aircraft configuration identity, and output state required by telemetry and replay.
-- Regression tests demonstrate repeatable results for a placeholder/community aircraft model used only for infrastructure testing.
+- Terrain Height Service exposes one API for height, surface normal, surface material, collision availability, source tile identity, and confidence metadata.
+- CoreSim can query terrain contact data through the service without depending on Cesium or Unreal types.
+- Service supports runway-surface overrides with higher authority than generic DEM terrain.
+- Tests cover flat, sloped, discontinuous, and runway-over-generic-terrain cases.
 
 ## Agent Configuration
 - no project config provided, using defaults

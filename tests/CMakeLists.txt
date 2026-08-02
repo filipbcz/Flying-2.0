@@ -36,6 +36,18 @@ target_link_libraries(flying_core_sim_flight_dynamics_api_tests
 
 add_test(NAME flying.core_sim.flight_dynamics_api COMMAND flying_core_sim_flight_dynamics_api_tests)
 
+add_executable(flying_core_sim_terrain_contact_tests
+  core_sim/terrain_contact_test.cpp
+)
+
+target_link_libraries(flying_core_sim_terrain_contact_tests
+  PRIVATE
+    Flying::CoreSim
+    Flying::CompilerOptions
+)
+
+add_test(NAME flying.core_sim.terrain_contact COMMAND flying_core_sim_terrain_contact_tests)
+
 if(TARGET Flying::CoreSimJsbsim)
   add_executable(flying_core_sim_jsbsim_adapter_tests
     core_sim/jsbsim_adapter_test.cpp
@@ -61,3 +73,15 @@ target_link_libraries(flying_geo_terrain_geodesy_units_tests
 )
 
 add_test(NAME flying.geo_terrain.geodesy_units COMMAND flying_geo_terrain_geodesy_units_tests)
+
+add_executable(flying_geo_terrain_terrain_service_tests
+  geo_terrain/terrain_service_test.cpp
+)
+
+target_link_libraries(flying_geo_terrain_terrain_service_tests
+  PRIVATE
+    Flying::GeoTerrain
+    Flying::CompilerOptions
+)
+
+add_test(NAME flying.geo_terrain.terrain_service COMMAND flying_geo_terrain_terrain_service_tests)

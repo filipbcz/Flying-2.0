@@ -1,6 +1,7 @@
 add_library(flying_geo_terrain STATIC
   src/geodesy.cpp
   src/module.cpp
+  src/terrain_service.cpp
 )
 
 add_library(Flying::GeoTerrain ALIAS flying_geo_terrain)

@@ -16,6 +16,10 @@ tools and Unreal integration:
 - Aerospace body-frame vector transforms using roll, pitch and yaw relative to NED.
 - Value objects for ellipsoidal height, orthometric height, geoid undulation, pressure altitude,
   QNH, QFE and indicated instrument altitude.
+- Terrain height service contract returning orthometric height, ENU surface normal, material,
+  collision metadata, source tile identity, confidence metadata and source authority.
+- In-memory terrain backend for deterministic tests, including generic DEM layers and
+  higher-authority runway surface overrides.
 - Unit boundary conversions for degrees/radians, meters/feet, meters/nautical miles,
   meters-per-second/knots and Pa/hPa/inHg.
 
@@ -29,6 +33,10 @@ tools and Unreal integration:
   authoritative global positions.
 - Body axes follow the aerospace convention: `forward`, `right`, `down`. With zero roll, pitch and
   yaw, body forward aligns with NED north, body right with east and body down with down.
+- Terrain surface normals are returned in local ENU coordinates. CoreSim adapters convert them to
+  NED with no Cesium or Unreal runtime types in the contract.
+- Runway surface overrides have higher source authority than generic DEM terrain. Between matching
+  runway overrides, the highest `runway_override_priority` wins.
 
 ## Numerical Tolerances
 
@@ -42,5 +50,5 @@ terrain altitudes:
 - Re-anchoring across local origin shifts copies authoritative ECEF coordinates exactly and
   recomputes only the derived local offset.
 
-This scope intentionally excludes PROJ-backed GIS source-data transformations, DEM processing,
-runway surface logic, Cesium rendering integration and terrain collision implementation.
+This scope intentionally excludes PROJ-backed GIS source-data transformations, DMR 5G import,
+Cesium rendering integration and production terrain collision implementation.
