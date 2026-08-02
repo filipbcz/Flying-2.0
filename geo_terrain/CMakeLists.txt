@@ -1,4 +1,5 @@
 add_library(flying_geo_terrain STATIC
+  src/geodesy.cpp
   src/module.cpp
 )
 

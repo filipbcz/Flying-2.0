@@ -5,7 +5,7 @@ namespace flying::geo_terrain {
 ModuleBoundary describe_module() noexcept {
   return {
     "GeoTerrain",
-    "Native boundary for future geodesy, terrain height and collision authority.",
+    "Shared WGS-84 geodesy, local frames, height semantics and future terrain authority.",
     false,
   };
 }
