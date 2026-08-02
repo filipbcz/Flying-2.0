@@ -12,6 +12,20 @@ target_link_libraries(flying_skeleton_smoke
 
 add_test(NAME flying.skeleton_smoke COMMAND flying_skeleton_smoke)
 
+add_executable(flying_data_pipeline_manifest_tests
+  data_pipeline/manifest_test.cpp
+)
+
+target_link_libraries(flying_data_pipeline_manifest_tests
+  PRIVATE
+    Flying::DataPipeline
+    Flying::CompilerOptions
+)
+
+add_test(NAME flying.data_pipeline.manifest COMMAND flying_data_pipeline_manifest_tests)
+
+add_test(NAME flying.data_pipeline.cli_help COMMAND flying_data_pipeline_cli --help)
+
 add_executable(flying_core_sim_kernel_tests
   core_sim/kernel_test.cpp
 )

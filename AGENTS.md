@@ -6,30 +6,30 @@
 - default branch: main
 
 ## Task
-- title: Flying: 6. Build Terrain Height Service Contract
+- title: Flying: 7. Create GIS Data Pipeline Foundation
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-6. Build Terrain Height Service Contract
+7. Create GIS Data Pipeline Foundation
 
 Step description and scope:
-Implement the unified Terrain Height Service API and local test backend returning height, normal, surface type, collision metadata, and runway override priority to both CoreSim and presentation clients.
+Implement the offline data pipeline framework for source manifests, checksums, provenance records, coordinate-system declarations, transform configuration, validation reports, and reproducible package manifests.
 
 In scope:
-- Terrain service interface
-- In-memory test backend
-- Surface material taxonomy
-- Runway override priority rules
-- CoreSim query adapter
-- Unit tests
+- Pipeline CLI skeleton
+- Source manifest schema
+- Package manifest schema
+- Checksum verification
+- Provenance validation
+- Report generation
 
 Out of scope:
-- DMR 5G production import
-- Cesium 3D Tiles generation
-- Full airport database
-- Visual terrain rendering
+- Full DMR 5G conversion
+- Full ortho tiling
+- Airport runway import
+- Runtime map display
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -43,9 +43,9 @@ Already completed roadmap steps (existing repository context):
 - 3. Implement CoreSim Fixed-Step Kernel
 - 4. Implement Geodesy And Units Library
 - 5. Integrate JSBSim Into CoreSim
+- 6. Build Terrain Height Service Contract
 
 Future roadmap steps (explicitly out of scope):
-- 7. Create GIS Data Pipeline Foundation
 - 8. Implement DMR 5G Terrain Processing For Pilot Region
 - 9. Implement Ortofoto And Vector Package Processing For Pilot Region
 - 10. Implement Airport Master List And Runway Schema
@@ -71,10 +71,10 @@ Future roadmap steps (explicitly out of scope):
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- Terrain Height Service exposes one API for height, surface normal, surface material, collision availability, source tile identity, and confidence metadata.
-- CoreSim can query terrain contact data through the service without depending on Cesium or Unreal types.
-- Service supports runway-surface overrides with higher authority than generic DEM terrain.
-- Tests cover flat, sloped, discontinuous, and runway-over-generic-terrain cases.
+- Pipeline accepts declared source datasets with version, license, attribution, checksum, coordinate reference system, and permitted-use metadata.
+- Pipeline refuses to process source records missing required provenance or checksum fields.
+- Pipeline produces versioned package manifests with source lineage and deterministic package identifiers.
+- Automated validation reports fail the build when mandatory source metadata is incomplete.
 
 ## Agent Configuration
 - no project config provided, using defaults

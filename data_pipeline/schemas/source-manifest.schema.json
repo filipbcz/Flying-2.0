@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flying.local/schemas/source-manifest.schema.json",
+  "title": "Flying GIS Source Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "manifestVersion",
+    "transform",
+    "sources"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "flying.source-manifest.v1"
+    },
+    "manifestVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "transform": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "targetCrs",
+        "steps"
+      ],
+      "properties": {
+        "targetCrs": {
+          "$ref": "#/$defs/coordinateReferenceSystem"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/sourceDataset"
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "coordinateReferenceSystem": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "authority",
+        "code"
+      ],
+      "properties": {
+        "authority": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "code": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "sourceDataset": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "id",
+        "datasetName",
+        "version",
+        "license",
+        "attribution",
+        "checksum",
+        "coordinateReferenceSystem",
+        "permittedUse",
+        "provenance"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]+$"
+        },
+        "datasetName": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "version": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "license": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "name": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "url": {
+              "type": "string"
+            }
+          }
+        },
+        "attribution": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "text"
+          ],
+          "properties": {
+            "text": {
+              "$ref": "#/$defs/nonEmptyString"
+            }
+          }
+        },
+        "checksum": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "algorithm",
+            "value"
+          ],
+          "properties": {
+            "path": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "algorithm": {
+              "const": "sha256"
+            },
+            "value": {
+              "type": "string",
+              "pattern": "^[A-Fa-f0-9]{64}$"
+            }
+          }
+        },
+        "coordinateReferenceSystem": {
+          "$ref": "#/$defs/coordinateReferenceSystem"
+        },
+        "permittedUse": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "terrainDerivatives",
+            "runtimeRedistribution",
+            "attributionRequired"
+          ],
+          "properties": {
+            "terrainDerivatives": {
+              "type": "boolean"
+            },
+            "runtimeRedistribution": {
+              "type": "boolean"
+            },
+            "attributionRequired": {
+              "type": "boolean"
+            },
+            "notes": {
+              "type": "string"
+            }
+          }
+        },
+        "provenance": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "publisher",
+            "sourceUrl",
+            "retrievedAtUtc"
+          ],
+          "properties": {
+            "publisher": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "sourceUrl": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "retrievedAtUtc": {
+              "$ref": "#/$defs/nonEmptyString"
+            }
+          }
+        }
+      }
+    }
+  }
+}
