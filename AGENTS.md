@@ -6,31 +6,29 @@
 - default branch: main
 
 ## Task
-- title: Flying: 14. Implement Telemetry, Replay, And Export V1
+- title: Flying: 15. Build Vertical Slice Flight And Performance Tests
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-14. Implement Telemetry, Replay, And Export V1
+15. Build Vertical Slice Flight And Performance Tests
 
 Step description and scope:
-Implement versioned telemetry capture, deterministic input recording, replay playback, state hashing, flight metadata, and CSV/JSON export from headless CoreSim and Unreal sessions.
+Create automated and manual validation for the M1 vertical slice: pilot-region loading, takeoff, circuit, landing, replay, terrain continuity, CoreSim timing, and basic performance budgets.
 
 In scope:
-- Telemetry file format
-- Replay input stream
-- State hash generation
-- CSV export
-- JSON export
-- Version compatibility checks
-- Basic replay UI
+- M1 automated test suite
+- Scripted takeoff-circuit-landing scenario
+- Pilot-region performance capture
+- M1 validation report
+- Known limitations document
 
 Out of scope:
-- Video capture
-- Cloud telemetry
-- Multiplayer replay
-- External analytics
+- Whole-country performance certification
+- Final aircraft validation
+- Installer signing
+- Full airport coverage
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -52,9 +50,9 @@ Already completed roadmap steps (existing repository context):
 - 11. Implement Runway Importer And Pilot Airport Surfaces
 - 12. Create Unreal UE 5.8 Project And Cesium Runtime Integration
 - 13. Implement Input Device Mapping And Scenario Start Flow
+- 14. Implement Telemetry, Replay, And Export V1
 
 Future roadmap steps (explicitly out of scope):
-- 15. Build Vertical Slice Flight And Performance Tests
 - 16. Complete Production Aircraft Data Model
 - 17. Implement Aircraft Systems And Sensor Models
 - 18. Implement Cockpit And Aircraft Presentation
@@ -72,10 +70,10 @@ Future roadmap steps (explicitly out of scope):
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- Telemetry records inputs, authoritative state, forces, moments, configuration IDs, data package versions, CoreSim version, and timestamps.
-- Replay playback of the same recording with the same CoreSim and data versions reproduces the recorded state hash within the configured deterministic tolerance.
-- CSV and JSON export include flight path, key aircraft states, control inputs, engine states, and metadata needed for validation reports.
-- Replay refuses or warns on incompatible CoreSim, aircraft, or data package versions instead of silently claiming determinism.
+- Automated test suite runs CoreSim unit tests, geodesy tests, terrain service tests, runway importer tests, replay hash tests, and pilot package validation.
+- A scripted pilot-region flight can taxi, take off, fly a circuit, land, stop, and produce telemetry without loading screens.
+- Performance capture for the reference-class PC reports FPS, 1% low, CoreSim step misses, input latency, hitch count, RAM, and VRAM for the vertical slice.
+- M1 report documents pass/fail status and known limitations without marking unvalidated aircraft fidelity as complete.
 
 ## Agent Configuration
 - no project config provided, using defaults

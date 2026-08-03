@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "flying.m1-performance-capture.v1",
+  "scenarioId": "m1.pilot-region.takeoff-circuit-landing.v1",
+  "captureClass": "reference-class-pc-vertical-slice",
+  "captureMode": "manual-unreal-or-automated-headless",
+  "referenceClassPc": {
+    "os": "Windows 11 64-bit",
+    "cpuClass": "6 physical cores / 12 hardware threads or better",
+    "gpuClass": "DirectX 12 GPU with 8 GiB VRAM class",
+    "ramGiB": 32,
+    "storage": "NVMe SSD"
+  },
+  "metrics": {
+    "averageFps": 0.0,
+    "onePercentLowFps": 0.0,
+    "coreSimStepMisses": 0,
+    "inputLatencyMsP95": 0.0,
+    "hitchCountOver50Ms": 0,
+    "ramPeakMiB": 0.0,
+    "vramPeakMiB": 0.0
+  },
+  "budgets": {
+    "averageFpsMin": 55.0,
+    "onePercentLowFpsMin": 45.0,
+    "coreSimStepMissesMax": 0,
+    "inputLatencyMsP95Max": 35.0,
+    "hitchCountOver50MsMax": 1,
+    "ramPeakMiBMax": 12288.0,
+    "vramPeakMiBMax": 8192.0
+  },
+  "result": "replace_with_pass_or_fail",
+  "notes": "Populate metrics from the M1 reference-class PC run. The native M1 test validates this metric contract with a deterministic headless capture fixture."
+}

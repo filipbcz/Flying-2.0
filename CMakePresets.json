@@ -112,6 +112,20 @@
       "output": {
         "outputOnFailure": true
       }
+    },
+    {
+      "name": "m1-vertical-slice",
+      "displayName": "M1 Vertical Slice Tests",
+      "configurePreset": "test",
+      "configuration": "Debug",
+      "filter": {
+        "include": {
+          "label": "m1-vertical-slice"
+        }
+      },
+      "output": {
+        "outputOnFailure": true
+      }
     }
   ],
   "workflowPresets": [

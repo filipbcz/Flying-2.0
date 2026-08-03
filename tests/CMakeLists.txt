@@ -196,3 +196,38 @@ target_link_libraries(flying_geo_terrain_terrain_service_tests
 )
 
 add_test(NAME flying.geo_terrain.terrain_service COMMAND flying_geo_terrain_terrain_service_tests)
+
+add_executable(flying_m1_vertical_slice_tests
+  m1/vertical_slice_validation_test.cpp
+)
+
+target_link_libraries(flying_m1_vertical_slice_tests
+  PRIVATE
+    Flying::CoreSim
+    Flying::GeoTerrain
+    Flying::CompilerOptions
+)
+
+target_compile_definitions(flying_m1_vertical_slice_tests
+  PRIVATE
+    FLYING_REPO_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+)
+
+add_test(NAME flying.m1.vertical_slice COMMAND flying_m1_vertical_slice_tests)
+
+set_tests_properties(
+  flying.core_sim.kernel
+  flying.core_sim.flight_dynamics_api
+  flying.core_sim.input_mapping
+  flying.core_sim.scenario_start
+  flying.core_sim.telemetry_replay
+  flying.core_sim.terrain_contact
+  flying.geo_terrain.geodesy_units
+  flying.geo_terrain.terrain_service
+  flying.data_pipeline.dmr5g_terrain
+  flying.data_pipeline.runway_importer
+  flying.data_pipeline.pilot_region_packages
+  flying.m1.vertical_slice
+  PROPERTIES
+    LABELS "m1-vertical-slice"
+)

@@ -19,6 +19,7 @@
 #include <set>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 #include <string_view>
 #include <utility>
 #include <vector>
@@ -776,11 +777,12 @@ AirportDatabase parse_airport_database(const JsonValue& root, ValidationReport& 
     }
     const JsonValue::Object& aerodrome_object = aerodrome_value.object;
     AerodromeRecord aerodrome;
-    aerodrome.id = optional_string(aerodrome_object, "id").value_or({});
-    aerodrome.name = optional_string(aerodrome_object, "name").value_or({});
-    aerodrome.classification = optional_string(aerodrome_object, "classification").value_or({});
+    aerodrome.id = optional_string(aerodrome_object, "id").value_or(std::string{});
+    aerodrome.name = optional_string(aerodrome_object, "name").value_or(std::string{});
+    aerodrome.classification =
+      optional_string(aerodrome_object, "classification").value_or(std::string{});
     aerodrome.operational_status =
-      optional_string(aerodrome_object, "operationalStatus").value_or({});
+      optional_string(aerodrome_object, "operationalStatus").value_or(std::string{});
     if (const JsonValue::Object* reference =
           optional_object(aerodrome_object, "referencePointWgs84")) {
       aerodrome.reference_point = parse_wgs84_position(*reference);
@@ -802,11 +804,12 @@ AirportDatabase parse_airport_database(const JsonValue& root, ValidationReport& 
       }
       const JsonValue::Object& runway_object = runway_value.object;
       RunwayRecord runway;
-      runway.id = optional_string(runway_object, "id").value_or({});
-      runway.designator = optional_string(runway_object, "designator").value_or({});
+      runway.id = optional_string(runway_object, "id").value_or(std::string{});
+      runway.designator =
+        optional_string(runway_object, "designator").value_or(std::string{});
       if (const JsonValue::Object* surface = optional_object(runway_object, "surface")) {
-        runway.surface_type = optional_string(*surface, "surfaceType").value_or({});
-        runway.material = optional_string(*surface, "material").value_or({});
+        runway.surface_type = optional_string(*surface, "surfaceType").value_or(std::string{});
+        runway.material = optional_string(*surface, "material").value_or(std::string{});
       }
       if (const JsonValue::Object* dimensions = optional_object(runway_object, "dimensionsM")) {
         runway.length_m = optional_number(*dimensions, "length").value_or(0.0);
@@ -846,8 +849,8 @@ AirportDatabase parse_airport_database(const JsonValue& root, ValidationReport& 
           continue;
         }
         const JsonValue::Object& end_object = end_value.object;
-        end.id = optional_string(end_object, "id").value_or({});
-        end.designator = optional_string(end_object, "designator").value_or({});
+        end.id = optional_string(end_object, "id").value_or(std::string{});
+        end.designator = optional_string(end_object, "designator").value_or(std::string{});
         end.true_bearing_deg = optional_number(end_object, "trueBearingDeg").value_or(0.0);
         if (const JsonValue::Object* threshold_set = optional_object(end_object, "threshold")) {
           if (const JsonValue::Object* physical =
@@ -866,7 +869,7 @@ AirportDatabase parse_airport_database(const JsonValue& root, ValidationReport& 
               optional_number(*physical, "sourceAccuracyM").value_or(
                 std::numeric_limits<double>::infinity());
             end.provenance_ref =
-              optional_string(*physical, "provenanceRef").value_or({});
+              optional_string(*physical, "provenanceRef").value_or(std::string{});
           } else {
             add_issue(report,
                       "error",
