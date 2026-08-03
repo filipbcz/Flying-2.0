@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "FlyingCoreSimStateSnapshot.h"
+#include "FlyingInputMappingTypes.h"
 #include "FlyingScenarioTypes.h"
 #include "Templates/UniquePtr.h"
 
@@ -50,6 +51,15 @@ public:
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Scenario")
   FFlyingScenarioSelection InitialScenario;
 
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Replay")
+  bool bTelemetryRecording = false;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Replay")
+  bool bReplayLoaded = false;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Replay")
+  FString LastTelemetryStatus;
+
   UFUNCTION(BlueprintCallable, Category="Flying|CoreSim")
   void ResetCoreSim();
 
@@ -65,12 +75,42 @@ public:
   UFUNCTION(BlueprintCallable, Category="Flying|CoreSim")
   void AdvanceCoreSim(double DeltaSeconds);
 
+  UFUNCTION(BlueprintCallable, Category="Flying|CoreSim")
+  void AdvanceCoreSimWithInputs(
+    double DeltaSeconds,
+    FVector ForceBodyNewtons,
+    FVector MomentBodyNewtonMeters,
+    const FFlyingMappedInputState& MappedInputState,
+    bool bEngineRunning);
+
   UFUNCTION(BlueprintPure, Category="Flying|CoreSim")
   const FFlyingCoreSimStateSnapshot& GetCurrentSnapshot() const;
+
+  UFUNCTION(BlueprintCallable, Category="Flying|Replay")
+  bool StartTelemetryRecording(const FString& OutputPath, const FString& SessionId);
+
+  UFUNCTION(BlueprintCallable, Category="Flying|Replay")
+  bool StopTelemetryRecording();
+
+  UFUNCTION(BlueprintCallable, Category="Flying|Replay")
+  bool SaveTelemetryRecording(const FString& OutputPath);
+
+  UFUNCTION(BlueprintCallable, Category="Flying|Replay")
+  bool LoadTelemetryReplay(const FString& InputPath, bool bWarnOnIncompatible);
+
+  UFUNCTION(BlueprintCallable, Category="Flying|Replay")
+  bool PlayLoadedTelemetryReplay(bool bWarnOnIncompatible);
+
+  UFUNCTION(BlueprintCallable, Category="Flying|Replay")
+  bool ExportTelemetryCsv(const FString& OutputPath);
+
+  UFUNCTION(BlueprintCallable, Category="Flying|Replay")
+  bool ExportTelemetryJson(const FString& OutputPath);
 
 private:
   void EnsureBridge();
   void PublishSnapshot();
+  void PublishTelemetryStatus();
 
   TUniquePtr<FFlyingCoreSimBridgeImpl> Bridge;
 

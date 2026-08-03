@@ -135,6 +135,18 @@ target_link_libraries(flying_core_sim_scenario_start_tests
 
 add_test(NAME flying.core_sim.scenario_start COMMAND flying_core_sim_scenario_start_tests)
 
+add_executable(flying_core_sim_telemetry_replay_tests
+  core_sim/telemetry_replay_test.cpp
+)
+
+target_link_libraries(flying_core_sim_telemetry_replay_tests
+  PRIVATE
+    Flying::CoreSim
+    Flying::CompilerOptions
+)
+
+add_test(NAME flying.core_sim.telemetry_replay COMMAND flying_core_sim_telemetry_replay_tests)
+
 add_executable(flying_core_sim_terrain_contact_tests
   core_sim/terrain_contact_test.cpp
 )

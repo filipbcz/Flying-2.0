@@ -6,6 +6,7 @@ add_library(flying_core_sim STATIC
   src/module.cpp
   src/scenario.cpp
   src/simulator.cpp
+  src/telemetry.cpp
   src/terrain_contact.cpp
 )
 
@@ -20,6 +21,11 @@ target_link_libraries(flying_core_sim
   PUBLIC
     Flying::GeoTerrain
     Flying::CompilerOptions
+)
+
+target_compile_definitions(flying_core_sim
+  PUBLIC
+    FLYING_CORE_SIM_VERSION="${PROJECT_VERSION}"
 )
 
 option(FLYING_CORE_SIM_ENABLE_JSBSIM "Enable the JSBSim CoreSim adapter when JSBSim is available." ON)

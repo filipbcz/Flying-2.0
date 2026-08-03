@@ -6,30 +6,31 @@
 - default branch: main
 
 ## Task
-- title: Flying: 13. Implement Input Device Mapping And Scenario Start Flow
+- title: Flying: 14. Implement Telemetry, Replay, And Export V1
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-13. Implement Input Device Mapping And Scenario Start Flow
+14. Implement Telemetry, Replay, And Export V1
 
 Step description and scope:
-Add keyboard, mouse, gamepad, and USB/HID flight-control mapping infrastructure, axis calibration, dead zones, response curves, multiple device profiles, and scenario selection for pilot airports and initial aircraft states.
+Implement versioned telemetry capture, deterministic input recording, replay playback, state hashing, flight metadata, and CSV/JSON export from headless CoreSim and Unreal sessions.
 
 In scope:
-- Input abstraction
-- HID profile persistence
-- Axis calibration UI
-- Scenario selection UI
-- Initial state handoff to CoreSim
-- Atomic settings writes
+- Telemetry file format
+- Replay input stream
+- State hash generation
+- CSV export
+- JSON export
+- Version compatibility checks
+- Basic replay UI
 
 Out of scope:
-- Full save-game system
-- Replay UI
-- All Czech airports
-- Advanced avionics
+- Video capture
+- Cloud telemetry
+- Multiplayer replay
+- External analytics
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -50,9 +51,9 @@ Already completed roadmap steps (existing repository context):
 - 10. Implement Airport Master List And Runway Schema
 - 11. Implement Runway Importer And Pilot Airport Surfaces
 - 12. Create Unreal UE 5.8 Project And Cesium Runtime Integration
+- 13. Implement Input Device Mapping And Scenario Start Flow
 
 Future roadmap steps (explicitly out of scope):
-- 14. Implement Telemetry, Replay, And Export V1
 - 15. Build Vertical Slice Flight And Performance Tests
 - 16. Complete Production Aircraft Data Model
 - 17. Implement Aircraft Systems And Sensor Models
@@ -71,10 +72,10 @@ Future roadmap steps (explicitly out of scope):
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- User can bind pitch, roll, yaw, throttle, mixture, propeller, brakes, trim, view controls, and core cockpit commands across supported input classes.
-- Axis calibration supports dead zone, response curve, inversion, saturation, and per-device profile persistence.
-- Scenario flow can start cold-and-dark, ready-to-taxi, and airborne states at pilot-region locations.
-- Input settings are saved atomically and corrupted settings files are rejected without crashing the application.
+- Telemetry records inputs, authoritative state, forces, moments, configuration IDs, data package versions, CoreSim version, and timestamps.
+- Replay playback of the same recording with the same CoreSim and data versions reproduces the recorded state hash within the configured deterministic tolerance.
+- CSV and JSON export include flight path, key aircraft states, control inputs, engine states, and metadata needed for validation reports.
+- Replay refuses or warns on incompatible CoreSim, aircraft, or data package versions instead of silently claiming determinism.
 
 ## Agent Configuration
 - no project config provided, using defaults
