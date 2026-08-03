@@ -2,6 +2,7 @@ add_library(flying_data_pipeline STATIC
   src/dmr5g_terrain.cpp
   src/manifest.cpp
   src/module.cpp
+  src/pilot_region_packages.cpp
 )
 
 if(NOT MSVC)

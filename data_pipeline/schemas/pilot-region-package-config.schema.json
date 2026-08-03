@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flying.local/schemas/pilot-region-package-config.schema.json",
+  "title": "Flying Pilot Region Package Config",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schemaVersion",
+    "pilotRegion",
+    "transform",
+    "orthoImagery",
+    "vectorLayers",
+    "geonamesLabels",
+    "masks"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "flying.pilot-region-package-config.v1"
+    },
+    "packageIdHint": {
+      "type": "string"
+    },
+    "pilotRegion": {
+      "type": "object",
+      "required": ["id", "minEastM", "minNorthM", "widthM", "heightM"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "minEastM": {"type": "number"},
+        "minNorthM": {"type": "number"},
+        "widthM": {"type": "number", "exclusiveMinimum": 0},
+        "heightM": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "transform": {
+      "type": "object",
+      "required": ["sourceToProject"],
+      "properties": {
+        "sourceToProject": {
+          "type": "object",
+          "required": [
+            "eastFromSourceXScale",
+            "eastFromSourceYScale",
+            "eastOffsetM",
+            "northFromSourceXScale",
+            "northFromSourceYScale",
+            "northOffsetM"
+          ],
+          "properties": {
+            "eastFromSourceXScale": {"type": "number"},
+            "eastFromSourceYScale": {"type": "number"},
+            "eastOffsetM": {"type": "number"},
+            "northFromSourceXScale": {"type": "number"},
+            "northFromSourceYScale": {"type": "number"},
+            "northOffsetM": {"type": "number"}
+          }
+        }
+      }
+    },
+    "orthoImagery": {
+      "type": "object",
+      "required": ["tileSizePx", "mipLevels", "sources"],
+      "properties": {
+        "tileSizePx": {"type": "integer", "minimum": 1},
+        "mipLevels": {"type": "integer", "minimum": 2},
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "path", "format", "bounds"],
+            "properties": {
+              "id": {"type": "string", "minLength": 1},
+              "path": {"$ref": "#/$defs/localPath"},
+              "format": {"const": "ppm-p3"},
+              "bounds": {"$ref": "#/$defs/bounds"}
+            }
+          }
+        }
+      }
+    },
+    "vectorLayers": {
+      "type": "array",
+      "minItems": 6,
+      "items": {
+        "type": "object",
+        "required": ["category", "path", "format"],
+        "properties": {
+          "category": {
+            "enum": [
+              "roads",
+              "rail",
+              "water",
+              "settlements",
+              "vegetationAreas",
+              "notableObjects"
+            ]
+          },
+          "path": {"$ref": "#/$defs/localPath"},
+          "format": {"const": "geojson"},
+          "lineWidthM": {"type": "number", "minimum": 0}
+        }
+      }
+    },
+    "geonamesLabels": {
+      "type": "object",
+      "required": ["path", "format"],
+      "properties": {
+        "path": {"$ref": "#/$defs/localPath"},
+        "format": {"const": "csv"},
+        "xField": {"type": "string"},
+        "yField": {"type": "string"}
+      }
+    },
+    "masks": {
+      "type": "object",
+      "required": ["cellSizeM", "materialLayers"],
+      "properties": {
+        "cellSizeM": {"type": "number", "exclusiveMinimum": 0},
+        "defaultMaterial": {"type": "string"},
+        "materialLayers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["category", "material"],
+            "properties": {
+              "category": {"type": "string", "minLength": 1},
+              "material": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "localPath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!//)(?!.*://)(?!.*(^|/)\\.\\.(/|$)).+$"
+    },
+    "bounds": {
+      "type": "object",
+      "required": ["minEastM", "maxEastM", "minNorthM", "maxNorthM"],
+      "properties": {
+        "minEastM": {"type": "number"},
+        "maxEastM": {"type": "number"},
+        "minNorthM": {"type": "number"},
+        "maxNorthM": {"type": "number"}
+      }
+    }
+  }
+}

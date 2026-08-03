@@ -1,5 +1,6 @@
 #include "flying/data_pipeline/dmr5g_terrain.hpp"
 #include "flying/data_pipeline/manifest.hpp"
+#include "flying/data_pipeline/pilot_region_packages.hpp"
 
 #include <filesystem>
 #include <exception>
@@ -21,6 +22,10 @@ void print_usage(std::ostream& output) {
     << "  flying-data-pipeline dmr5g-pilot-terrain --source-manifest PATH "
        "--terrain-config PATH --package-version VERSION --output-dir DIR --report PATH "
        "[--source-root DIR] [--package-name NAME]\n";
+  output
+    << "  flying-data-pipeline pilot-region-packages --source-manifest PATH "
+       "--package-config PATH --package-version VERSION --output-dir DIR --report PATH "
+       "[--source-root DIR] [--package-name NAME]\n";
 }
 
 struct ParsedArgs {
@@ -31,6 +36,7 @@ struct ParsedArgs {
   std::filesystem::path output;
   std::filesystem::path output_dir;
   std::filesystem::path terrain_config;
+  std::filesystem::path package_config;
   std::string package_name = "flying-gis-package";
   std::string package_version;
 };
@@ -64,7 +70,8 @@ std::optional<ParsedArgs> parse_args(int argc, char** argv) {
   ParsedArgs parsed;
   parsed.command = std::string{args[1]};
   if (parsed.command != "validate" && parsed.command != "package" &&
-      parsed.command != "dmr5g-pilot-terrain") {
+      parsed.command != "dmr5g-pilot-terrain" &&
+      parsed.command != "pilot-region-packages") {
     std::cerr << "Unknown command: " << parsed.command << "\n";
     return std::nullopt;
   }
@@ -108,6 +115,12 @@ std::optional<ParsedArgs> parse_args(int argc, char** argv) {
         return std::nullopt;
       }
       parsed.terrain_config = *value;
+    } else if (flag == "--package-config") {
+      value = take_value(args, i, flag);
+      if (!value.has_value()) {
+        return std::nullopt;
+      }
+      parsed.package_config = *value;
     } else if (flag == "--package-name") {
       value = take_value(args, i, flag);
       if (!value.has_value()) {
@@ -134,7 +147,8 @@ std::optional<ParsedArgs> parse_args(int argc, char** argv) {
     std::cerr << "--report is required\n";
     return std::nullopt;
   }
-  if (parsed.command == "package" || parsed.command == "dmr5g-pilot-terrain") {
+  if (parsed.command == "package" || parsed.command == "dmr5g-pilot-terrain" ||
+      parsed.command == "pilot-region-packages") {
     if (parsed.package_version.empty()) {
       std::cerr << "--package-version is required for " << parsed.command << "\n";
       return std::nullopt;
@@ -156,6 +170,19 @@ std::optional<ParsedArgs> parse_args(int argc, char** argv) {
     }
     if (parsed.output_dir.empty()) {
       std::cerr << "--output-dir is required for dmr5g-pilot-terrain\n";
+      return std::nullopt;
+    }
+  }
+  if (parsed.command == "pilot-region-packages") {
+    if (parsed.package_name == "flying-gis-package") {
+      parsed.package_name = "flying-pilot-region-offline-gis";
+    }
+    if (parsed.package_config.empty()) {
+      std::cerr << "--package-config is required for pilot-region-packages\n";
+      return std::nullopt;
+    }
+    if (parsed.output_dir.empty()) {
+      std::cerr << "--output-dir is required for pilot-region-packages\n";
       return std::nullopt;
     }
   }
@@ -208,6 +235,27 @@ int main(int argc, char** argv) {
         return 2;
       }
       std::cout << "DMR 5G pilot terrain package " << result.report.package_id
+                << " written to " << result.package_manifest_path << "\n";
+      return 0;
+    }
+
+    if (parsed->command == "pilot-region-packages") {
+      flying::data_pipeline::PilotRegionPackageOptions options;
+      options.source_manifest_path = parsed->source_manifest;
+      options.source_root = parsed->source_root;
+      options.package_config_path = parsed->package_config;
+      options.output_directory = parsed->output_dir;
+      options.report_path = parsed->report;
+      options.package_name = parsed->package_name;
+      options.package_version = parsed->package_version;
+      const flying::data_pipeline::PilotRegionPackageResult result =
+        flying::data_pipeline::process_pilot_region_packages(options);
+      if (!result.created()) {
+        std::cerr << "Pilot region package processing failed; report written to "
+                  << parsed->report << "\n";
+        return 2;
+      }
+      std::cout << "Pilot region offline package " << result.report.package_id
                 << " written to " << result.package_manifest_path << "\n";
       return 0;
     }

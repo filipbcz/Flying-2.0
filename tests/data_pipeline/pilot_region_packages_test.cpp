@@ -1,0 +1,391 @@
+#include "flying/data_pipeline/pilot_region_packages.hpp"
+
+#include <cassert>
+#include <chrono>
+#include <filesystem>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <string_view>
+
+namespace {
+
+constexpr std::string_view kChecksumFixture =
+  "0000000000000000000000000000000000000000000000000000000000000000";
+
+void write_file(const std::filesystem::path& path, std::string_view content) {
+  std::filesystem::create_directories(path.parent_path());
+  std::ofstream output(path, std::ios::binary);
+  output << content;
+}
+
+std::string read_file(const std::filesystem::path& path) {
+  std::ifstream input(path, std::ios::binary);
+  std::ostringstream buffer;
+  buffer << input.rdbuf();
+  return buffer.str();
+}
+
+std::filesystem::path make_temp_root() {
+  const auto stamp = std::chrono::steady_clock::now().time_since_epoch().count();
+  return std::filesystem::temp_directory_path() /
+         ("flying-pilot-region-package-test-" + std::to_string(stamp));
+}
+
+std::string replace_once(std::string text,
+                         std::string_view needle,
+                         std::string_view replacement) {
+  const std::size_t position = text.find(needle);
+  assert(position != std::string::npos);
+  text.replace(position, needle.size(), replacement);
+  return text;
+}
+
+std::string source_entry(std::string_view id,
+                         std::string_view dataset_name,
+                         std::string_view path,
+                         std::string_view attribution) {
+  std::ostringstream output;
+  output
+    << "    {\n"
+    << "      \"id\": \"" << id << "\",\n"
+    << "      \"datasetName\": \"" << dataset_name << "\",\n"
+    << "      \"version\": \"2026.08.fixture\",\n"
+    << "      \"license\": {\"name\": \"CUZK Open Data / Geonames Fixture License\"},\n"
+    << "      \"attribution\": {\"text\": \"" << attribution << "\"},\n"
+    << "      \"coordinateReferenceSystem\": {\"authority\": \"EPSG\", \"code\": \"5514\", \"name\": \"S-JTSK / Krovak East North\"},\n"
+    << "      \"permittedUse\": {\"terrainDerivatives\": true, \"runtimeRedistribution\": true, \"attributionRequired\": true},\n"
+    << "      \"provenance\": {\"publisher\": \"Fixture Publisher\", \"sourceUrl\": \"https://example.invalid/pilot-source\", \"retrievedAtUtc\": \"2026-08-02T00:00:00Z\"},\n"
+    << "      \"checksum\": {\"path\": \"" << path
+    << "\", \"algorithm\": \"sha256\", \"value\": \"" << kChecksumFixture << "\"}\n"
+    << "    }";
+  return output.str();
+}
+
+std::string source_manifest() {
+  std::ostringstream output;
+  output
+    << "{\n"
+    << "  \"schemaVersion\": \"flying.source-manifest.v1\",\n"
+    << "  \"manifestVersion\": \"2026.08.pilot-fixture\",\n"
+    << "  \"transform\": {\n"
+    << "    \"targetCrs\": {\"authority\": \"FLYING\", \"code\": \"PILOT-ENU\", \"name\": \"Flying pilot local ENU\"},\n"
+    << "    \"steps\": [{\"name\": \"pilot-region-packages\", \"operation\": \"ortho-vector-mask-package\"}]\n"
+    << "  },\n"
+    << "  \"sources\": [\n"
+    << source_entry("cuzk-ortofoto-fixture", "CUZK Ortofoto Fixture", "ortofoto/pilot.ppm", "Contains CUZK Ortofoto pilot fixture imagery.") << ",\n"
+    << source_entry("cuzk-zabaged-roads-fixture", "CUZK ZABAGED Roads Fixture", "zabaged/roads.geojson", "Contains CUZK ZABAGED pilot roads.") << ",\n"
+    << source_entry("cuzk-zabaged-rail-fixture", "CUZK ZABAGED Rail Fixture", "zabaged/rail.geojson", "Contains CUZK ZABAGED pilot rail.") << ",\n"
+    << source_entry("cuzk-zabaged-water-fixture", "CUZK ZABAGED Water Fixture", "zabaged/water.geojson", "Contains CUZK ZABAGED pilot water.") << ",\n"
+    << source_entry("cuzk-zabaged-settlements-fixture", "CUZK ZABAGED Settlements Fixture", "zabaged/settlements.geojson", "Contains CUZK ZABAGED pilot settlements.") << ",\n"
+    << source_entry("cuzk-zabaged-vegetation-fixture", "CUZK ZABAGED Vegetation Fixture", "zabaged/vegetation.geojson", "Contains CUZK ZABAGED pilot vegetation.") << ",\n"
+    << source_entry("cuzk-zabaged-notable-fixture", "CUZK ZABAGED Notable Objects Fixture", "zabaged/notable.geojson", "Contains CUZK ZABAGED pilot notable objects.") << ",\n"
+    << source_entry("geonames-pilot-fixture", "Geonames Pilot Fixture", "geonames/labels.csv", "Contains Geonames pilot labels.") << "\n"
+    << "  ]\n"
+    << "}\n";
+  return output.str();
+}
+
+std::string package_config() {
+  return R"({
+  "schemaVersion": "flying.pilot-region-package-config.v1",
+  "packageIdHint": "pilot-region-fixture",
+  "pilotRegion": {
+    "id": "pilot-fixture-4m",
+    "minEastM": 0,
+    "minNorthM": 0,
+    "widthM": 4,
+    "heightM": 4
+  },
+  "transform": {
+    "sourceToProject": {
+      "eastFromSourceXScale": 1,
+      "eastFromSourceYScale": 0,
+      "eastOffsetM": 0,
+      "northFromSourceXScale": 0,
+      "northFromSourceYScale": 1,
+      "northOffsetM": 0
+    }
+  },
+  "orthoImagery": {
+    "tileSizePx": 2,
+    "mipLevels": 2,
+    "sources": [
+      {
+        "id": "ortho",
+        "path": "ortofoto/pilot.ppm",
+        "format": "ppm-p3",
+        "bounds": {"minEastM": 0, "maxEastM": 4, "minNorthM": 0, "maxNorthM": 4}
+      }
+    ]
+  },
+  "vectorLayers": [
+    {"category": "roads", "path": "zabaged/roads.geojson", "format": "geojson", "lineWidthM": 1},
+    {"category": "rail", "path": "zabaged/rail.geojson", "format": "geojson", "lineWidthM": 1},
+    {"category": "water", "path": "zabaged/water.geojson", "format": "geojson"},
+    {"category": "settlements", "path": "zabaged/settlements.geojson", "format": "geojson"},
+    {"category": "vegetationAreas", "path": "zabaged/vegetation.geojson", "format": "geojson"},
+    {"category": "notableObjects", "path": "zabaged/notable.geojson", "format": "geojson"}
+  ],
+  "geonamesLabels": {
+    "path": "geonames/labels.csv",
+    "format": "csv",
+    "xField": "eastM",
+    "yField": "northM"
+  },
+  "masks": {
+    "cellSizeM": 1,
+    "defaultMaterial": "terrain",
+    "materialLayers": [
+      {"category": "roads", "material": "asphalt"},
+      {"category": "rail", "material": "ballast"},
+      {"category": "settlements", "material": "settlement"},
+      {"category": "vegetationAreas", "material": "vegetation"},
+      {"category": "water", "material": "water"}
+    ]
+  }
+}
+)";
+}
+
+std::string feature_collection(std::string_view id,
+                               std::string_view name,
+                               std::string_view geometry_type,
+                               std::string_view coordinates) {
+  std::ostringstream output;
+  output
+    << "{\n"
+    << "  \"type\": \"FeatureCollection\",\n"
+    << "  \"features\": [\n"
+    << "    {\n"
+    << "      \"type\": \"Feature\",\n"
+    << "      \"id\": \"" << id << "\",\n"
+    << "      \"properties\": {\"name\": \"" << name << "\"},\n"
+    << "      \"geometry\": {\"type\": \"" << geometry_type
+    << "\", \"coordinates\": " << coordinates << "}\n"
+    << "    }\n"
+    << "  ]\n"
+    << "}\n";
+  return output.str();
+}
+
+void write_fixture_inputs(const std::filesystem::path& root) {
+  write_file(root / "source-manifest.json", source_manifest());
+  write_file(root / "pilot-config.json", package_config());
+  write_file(root / "ortofoto" / "pilot.ppm",
+             "P3\n"
+             "4 4\n"
+             "255\n"
+             "255 0 0  255 32 0  255 64 0  255 96 0\n"
+             "0 255 0  32 255 0  64 255 0  96 255 0\n"
+             "0 0 255  32 0 255  64 0 255  96 0 255\n"
+             "255 255 0  255 255 32  255 255 64  255 255 96\n");
+  write_file(root / "zabaged" / "roads.geojson",
+             feature_collection("road-1", "Pilot road", "LineString", "[[0,1],[4,1]]"));
+  write_file(root / "zabaged" / "rail.geojson",
+             feature_collection("rail-1", "Pilot rail", "LineString", "[[0,3],[4,3]]"));
+  write_file(root / "zabaged" / "water.geojson",
+             feature_collection("water-1",
+                                "Pilot pond",
+                                "Polygon",
+                                "[[[0,0],[2,0],[2,2],[0,2],[0,0]]]"));
+  write_file(root / "zabaged" / "settlements.geojson",
+             feature_collection("settlement-1",
+                                "Pilot settlement",
+                                "Polygon",
+                                "[[[2,0],[4,0],[4,2],[2,2],[2,0]]]"));
+  write_file(root / "zabaged" / "vegetation.geojson",
+             feature_collection("vegetation-1",
+                                "Pilot forest",
+                                "Polygon",
+                                "[[[0,2],[2,2],[2,4],[0,4],[0,2]]]"));
+  write_file(root / "zabaged" / "notable.geojson",
+             feature_collection("notable-1", "Pilot mast", "Point", "[3,3]"));
+  write_file(root / "geonames" / "labels.csv",
+             "id,name,eastM,northM,featureClass\n"
+             "gn-1,Pilot Village,3,1,P\n"
+             "gn-out,Outside,12,12,P\n");
+}
+
+flying::data_pipeline::PilotRegionPackageOptions make_options(
+  const std::filesystem::path& root) {
+  flying::data_pipeline::PilotRegionPackageOptions options;
+  options.source_manifest_path = root / "source-manifest.json";
+  options.source_root = root;
+  options.package_config_path = root / "pilot-config.json";
+  options.output_directory = root / "out";
+  options.report_path = root / "reports" / "pilot-region-validation.json";
+  options.package_name = "Pilot Region Offline GIS";
+  options.package_version = "2026.08.0";
+  options.verify_checksums = false;
+  return options;
+}
+
+} // namespace
+
+int main() {
+  namespace pipeline = flying::data_pipeline;
+
+  const std::filesystem::path root = make_temp_root();
+  write_fixture_inputs(root);
+  pipeline::PilotRegionPackageOptions options = make_options(root);
+
+  const pipeline::PilotRegionPackageResult result =
+    pipeline::process_pilot_region_packages(options);
+  assert(result.created());
+  assert(std::filesystem::exists(root / "out" / "pilot-region-package.json"));
+  assert(std::filesystem::exists(root / "out" / "imagery" / "lod0" / "ortho_z0_r0_c0.ppm"));
+  assert(std::filesystem::exists(root / "out" / "imagery" / "lod0" / "ortho_z0_r1_c1.ppm"));
+  assert(std::filesystem::exists(root / "out" / "imagery" / "lod1" / "ortho_z1_r0_c0.ppm"));
+  assert(std::filesystem::exists(root / "out" / "vectors" / "roads.json"));
+  assert(std::filesystem::exists(root / "out" / "vectors" / "rail.json"));
+  assert(std::filesystem::exists(root / "out" / "vectors" / "water.json"));
+  assert(std::filesystem::exists(root / "out" / "vectors" / "settlements.json"));
+  assert(std::filesystem::exists(root / "out" / "vectors" / "vegetationAreas.json"));
+  assert(std::filesystem::exists(root / "out" / "vectors" / "notableObjects.json"));
+  assert(std::filesystem::exists(root / "out" / "vectors" / "labels.json"));
+  assert(std::filesystem::exists(root / "out" / "masks" / "water-mask.csv"));
+  assert(std::filesystem::exists(root / "out" / "masks" / "material-mask.csv"));
+
+  const std::string package_manifest = read_file(root / "out" / "pilot-region-package.json");
+  assert(package_manifest.find("\"schemaVersion\": \"flying.pilot-region-package.v1\"") !=
+         std::string::npos);
+  assert(package_manifest.find("\"mipmapped\": true") != std::string::npos);
+  assert(package_manifest.find("\"level\": 1") != std::string::npos);
+  assert(package_manifest.find("\"runtimeNetworkRequired\": false") != std::string::npos);
+  assert(package_manifest.find("\"externalMapApiKeys\": 0") != std::string::npos);
+  assert(package_manifest.find("\"remoteTileServerUrls\": 0") != std::string::npos);
+  assert(package_manifest.find("\"CUZK Ortofoto Fixture\"") != std::string::npos);
+  assert(package_manifest.find("\"license\"") != std::string::npos);
+  assert(package_manifest.find("\"checksum\"") != std::string::npos);
+  assert(package_manifest.find("tiles.example") == std::string::npos);
+  assert(package_manifest.find("apiKey") == std::string::npos);
+
+  const std::string labels = read_file(root / "out" / "vectors" / "labels.json");
+  assert(labels.find("Pilot Village") != std::string::npos);
+  assert(labels.find("Outside") == std::string::npos);
+
+  const std::string water_mask = read_file(root / "out" / "masks" / "water-mask.csv");
+  assert(water_mask.find(",1\n") != std::string::npos);
+  const std::string material_mask = read_file(root / "out" / "masks" / "material-mask.csv");
+  assert(material_mask.find(",vegetation\n") != std::string::npos);
+  assert(material_mask.find(",water\n") != std::string::npos);
+
+  const std::string report = read_file(options.report_path);
+  assert(report.find("\"passed\": true") != std::string::npos);
+  assert(report.find("\"orthoTileCount\": 5") != std::string::npos);
+  assert(report.find("\"vectorLayerCount\": 6") != std::string::npos);
+  assert(report.find("\"labelCount\": 1") != std::string::npos);
+
+  std::filesystem::remove_all(root);
+
+  {
+    const std::filesystem::path remote_root = make_temp_root();
+    write_fixture_inputs(remote_root);
+    write_file(remote_root / "pilot-config.json",
+               replace_once(package_config(),
+                            "\"path\": \"ortofoto/pilot.ppm\"",
+                            "\"path\": \"https://tiles.example.invalid/{z}/{x}/{y}.png\""));
+    pipeline::PilotRegionPackageOptions remote_options = make_options(remote_root);
+    const pipeline::PilotRegionPackageResult remote_result =
+      pipeline::process_pilot_region_packages(remote_options);
+    assert(!remote_result.created());
+    assert(!std::filesystem::exists(remote_root / "out" / "pilot-region-package.json"));
+    const std::string remote_report = read_file(remote_options.report_path);
+    assert(remote_report.find("\"code\": \"pilot.config.orthoImagery.sources.path.remote_url\"") !=
+           std::string::npos);
+    std::filesystem::remove_all(remote_root);
+  }
+
+  {
+    const std::filesystem::path mip_root = make_temp_root();
+    write_fixture_inputs(mip_root);
+    write_file(mip_root / "pilot-config.json",
+               replace_once(package_config(), "\"mipLevels\": 2", "\"mipLevels\": 1"));
+    pipeline::PilotRegionPackageOptions mip_options = make_options(mip_root);
+    const pipeline::PilotRegionPackageResult mip_result =
+      pipeline::process_pilot_region_packages(mip_options);
+    assert(!mip_result.created());
+    assert(!std::filesystem::exists(mip_root / "out" / "pilot-region-package.json"));
+    const std::string mip_report = read_file(mip_options.report_path);
+    assert(mip_report.find(
+             "\"code\": \"pilot.config.orthoImagery.mipLevels.too_low\"") !=
+           std::string::npos);
+    std::filesystem::remove_all(mip_root);
+  }
+
+  {
+    const std::filesystem::path traversal_root = make_temp_root();
+    write_fixture_inputs(traversal_root);
+    write_file(traversal_root / "pilot-config.json",
+               replace_once(package_config(),
+                            "\"path\": \"zabaged/roads.geojson\"",
+                            "\"path\": \"../outside.geojson\""));
+    pipeline::PilotRegionPackageOptions traversal_options = make_options(traversal_root);
+    const pipeline::PilotRegionPackageResult traversal_result =
+      pipeline::process_pilot_region_packages(traversal_options);
+    assert(!traversal_result.created());
+    assert(!std::filesystem::exists(traversal_root / "out" / "pilot-region-package.json"));
+    const std::string traversal_report = read_file(traversal_options.report_path);
+    assert(traversal_report.find(
+             "\"code\": \"pilot.config.vectorLayers.path.parent_traversal\"") !=
+           std::string::npos);
+    std::filesystem::remove_all(traversal_root);
+  }
+
+  {
+    const std::filesystem::path vector_root = make_temp_root();
+    write_fixture_inputs(vector_root);
+    write_file(vector_root / "zabaged" / "roads.geojson",
+               "{\n"
+               "  \"type\": \"FeatureCollection\",\n"
+               "  \"features\": [\n"
+               "    {\n"
+               "      \"type\": \"Feature\",\n"
+               "      \"id\": \"road-unsafe\",\n"
+               "      \"properties\": {\n"
+               "        \"name\": \"Pilot road\",\n"
+               "        \"apiKey\": \"secret\",\n"
+               "        \"urlTemplate\": \"https://tiles.example.invalid/{z}/{x}/{y}.png\",\n"
+               "        \"notes\": \"https://tiles.example.invalid/{z}/{x}/{y}.png\",\n"
+               "        \"safe\": \"kept\"\n"
+               "      },\n"
+               "      \"geometry\": {\"type\": \"LineString\", \"coordinates\": [[0,1],[4,1]]}\n"
+               "    }\n"
+               "  ]\n"
+               "}\n");
+    pipeline::PilotRegionPackageOptions vector_options = make_options(vector_root);
+    const pipeline::PilotRegionPackageResult vector_result =
+      pipeline::process_pilot_region_packages(vector_options);
+    assert(vector_result.created());
+    const std::string roads = read_file(vector_root / "out" / "vectors" / "roads.json");
+    assert(roads.find("apiKey") == std::string::npos);
+    assert(roads.find("urlTemplate") == std::string::npos);
+    assert(roads.find("tiles.example") == std::string::npos);
+    assert(roads.find("\"safe\":\"kept\"") != std::string::npos);
+    const std::string vector_report = read_file(vector_options.report_path);
+    assert(vector_report.find("\"passed\": true") != std::string::npos);
+    std::filesystem::remove_all(vector_root);
+  }
+
+  {
+    const std::filesystem::path water_line_root = make_temp_root();
+    write_fixture_inputs(water_line_root);
+    write_file(water_line_root / "zabaged" / "water.geojson",
+               feature_collection("water-line-1",
+                                  "Pilot watercourse",
+                                  "LineString",
+                                  "[[0.5,0.5],[0.5,3.5]]"));
+    pipeline::PilotRegionPackageOptions water_line_options = make_options(water_line_root);
+    const pipeline::PilotRegionPackageResult water_line_result =
+      pipeline::process_pilot_region_packages(water_line_options);
+    assert(water_line_result.created());
+    const std::string line_water_mask =
+      read_file(water_line_root / "out" / "masks" / "water-mask.csv");
+    assert(line_water_mask.find("0,0,0.5,0.5,1\n") != std::string::npos);
+    assert(line_water_mask.find("3,0,0.5,3.5,1\n") != std::string::npos);
+    std::filesystem::remove_all(water_line_root);
+  }
+
+  return 0;
+}

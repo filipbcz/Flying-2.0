@@ -6,30 +6,30 @@
 - default branch: main
 
 ## Task
-- title: Flying: 8. Implement DMR 5G Terrain Processing For Pilot Region
+- title: Flying: 9. Implement Ortofoto And Vector Package Processing For Pilot Region
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-8. Implement DMR 5G Terrain Processing For Pilot Region
+9. Implement Ortofoto And Vector Package Processing For Pilot Region
 
 Step description and scope:
-Extend the data pipeline to ingest a 50 x 50 km pilot area from DMR 5G, transform coordinates and height systems, clean tile boundaries, generate terrain LOD packages, and emit physical collision tiles.
+Process pilot-region CUZK Ortofoto, ZABAGED, and Geonames data into offline imagery and vector packages with attribution, material masks, water masks, names, and package manifests.
 
 In scope:
-- DMR 5G pilot ingest
-- Coordinate and height transformation
-- LOD terrain package generation
-- Physical collision tile generation
-- Normals and terrain metadata
-- Control-point and edge validation
+- Ortofoto pilot tiling
+- ZABAGED vector conversion
+- Geonames label conversion
+- Water and material masks
+- Attribution propagation
+- Offline package validation
 
 Out of scope:
-- Whole-country processing
-- Ortofoto imagery
-- Airport-specific runway mesh generation
-- Runtime Cesium integration beyond package format needs
+- Whole-country data generation
+- Airport database import
+- 2D navigation UI
+- Procedural buildings and vegetation runtime placement
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -45,9 +45,9 @@ Already completed roadmap steps (existing repository context):
 - 5. Integrate JSBSim Into CoreSim
 - 6. Build Terrain Height Service Contract
 - 7. Create GIS Data Pipeline Foundation
+- 8. Implement DMR 5G Terrain Processing For Pilot Region
 
 Future roadmap steps (explicitly out of scope):
-- 9. Implement Ortofoto And Vector Package Processing For Pilot Region
 - 10. Implement Airport Master List And Runway Schema
 - 11. Implement Runway Importer And Pilot Airport Surfaces
 - 12. Create Unreal UE 5.8 Project And Cesium Runtime Integration
@@ -71,10 +71,10 @@ Future roadmap steps (explicitly out of scope):
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- Pilot-region DMR 5G source tiles are transformed into the project coordinate and height model with recorded PROJ/geoid configuration.
-- Generated terrain package contains render LOD metadata and separate physical collision tiles for the active aircraft zone.
-- Automated control-point validation reports transformed terrain heights within 0.10 m above declared source error for selected test points.
-- Adjacent generated pilot tiles pass an automated edge-continuity test with no cracks or unintended height steps.
+- Pilot-region ortho imagery is tiled into offline multi-level packages with mipmaps and no dependency on public tile servers.
+- ZABAGED and Geonames layers are transformed into local vector packages for roads, rail, water, settlements, vegetation areas, notable objects, and labels.
+- Generated packages include CUZK attribution, source versions, checksums, and license metadata.
+- Validation confirms runtime package manifests contain no external map API keys or remote tile-server URLs.
 
 ## Agent Configuration
 - no project config provided, using defaults

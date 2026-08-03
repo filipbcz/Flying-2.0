@@ -38,6 +38,19 @@ target_link_libraries(flying_data_pipeline_dmr5g_terrain_tests
 
 add_test(NAME flying.data_pipeline.dmr5g_terrain COMMAND flying_data_pipeline_dmr5g_terrain_tests)
 
+add_executable(flying_data_pipeline_pilot_region_package_tests
+  data_pipeline/pilot_region_packages_test.cpp
+)
+
+target_link_libraries(flying_data_pipeline_pilot_region_package_tests
+  PRIVATE
+    Flying::DataPipeline
+    Flying::CompilerOptions
+)
+
+add_test(NAME flying.data_pipeline.pilot_region_packages
+  COMMAND flying_data_pipeline_pilot_region_package_tests)
+
 add_executable(flying_core_sim_kernel_tests
   core_sim/kernel_test.cpp
 )
