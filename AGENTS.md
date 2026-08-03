@@ -6,32 +6,30 @@
 - default branch: main
 
 ## Task
-- title: Flying: 11. Implement Runway Importer And Pilot Airport Surfaces
+- title: Flying: 12. Create Unreal UE 5.8 Project And Cesium Runtime Integration
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-11. Implement Runway Importer And Pilot Airport Surfaces
+12. Create Unreal UE 5.8 Project And Cesium Runtime Integration
 
 Step description and scope:
-Build the runway importer that creates georeferenced runway, taxi connection, start-point, material, collision, marking, and LOD data for the two pilot airports from approved seed records and open/approved sources.
+Create the Unreal Engine project, add Cesium for Unreal integration, configure georeference handling, load pilot terrain and imagery packages, and display the authoritative CoreSim state in a basic aircraft actor.
 
 In scope:
-- Runway importer
-- Pilot paved runway surface
-- Pilot grass runway surface
-- Collision mesh
-- Safe start positions
-- Basic runway markings
-- Terrain transition smoothing
-- Pilot coverage report
+- UE project setup
+- Cesium plugin configuration
+- Local pilot terrain loading
+- CoreSim runtime bridge
+- Basic aircraft actor
+- Origin-shift handling
 
 Out of scope:
-- All Czech airports
-- Detailed terminal/hangar modeling
-- Full lighting system
-- AI traffic or ATC
+- Production aircraft cockpit
+- Weather visuals
+- Full Czech terrain
+- Installer and signing
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -50,9 +48,9 @@ Already completed roadmap steps (existing repository context):
 - 8. Implement DMR 5G Terrain Processing For Pilot Region
 - 9. Implement Ortofoto And Vector Package Processing For Pilot Region
 - 10. Implement Airport Master List And Runway Schema
+- 11. Implement Runway Importer And Pilot Airport Surfaces
 
 Future roadmap steps (explicitly out of scope):
-- 12. Create Unreal UE 5.8 Project And Cesium Runtime Integration
 - 13. Implement Input Device Mapping And Scenario Start Flow
 - 14. Implement Telemetry, Replay, And Export V1
 - 15. Build Vertical Slice Flight And Performance Tests
@@ -73,10 +71,10 @@ Future roadmap steps (explicitly out of scope):
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- Importer builds runway geometry from published or verified threshold coordinates, not from ARP plus runway name and length alone.
-- Generated pilot runway surfaces preserve longitudinal and transverse slope instead of flattening all runways to one horizontal plane.
-- Runway collision surface takes priority over generic terrain and matches visual runway surface within 0.05 m in wheel-contact zones.
-- Pilot airport validation reports include coordinate, heading, dimension, Ortofoto alignment, terrain transition, and provenance checks.
+- Win64 Unreal project opens with UE 5.8 and builds in Development configuration.
+- Cesium georeference maps authoritative ECEF aircraft state into Unreal without modifying CoreSim authoritative coordinates during origin shifts.
+- Pilot region terrain and imagery packages render from local data without runtime dependence on external map APIs.
+- A basic aircraft actor follows CoreSim state from the standalone library while presentation code remains separate from physics equations.
 
 ## Agent Configuration
 - no project config provided, using defaults
