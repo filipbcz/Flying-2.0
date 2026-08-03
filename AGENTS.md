@@ -6,30 +6,30 @@
 - default branch: main
 
 ## Task
-- title: Flying: 7. Create GIS Data Pipeline Foundation
+- title: Flying: 8. Implement DMR 5G Terrain Processing For Pilot Region
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-7. Create GIS Data Pipeline Foundation
+8. Implement DMR 5G Terrain Processing For Pilot Region
 
 Step description and scope:
-Implement the offline data pipeline framework for source manifests, checksums, provenance records, coordinate-system declarations, transform configuration, validation reports, and reproducible package manifests.
+Extend the data pipeline to ingest a 50 x 50 km pilot area from DMR 5G, transform coordinates and height systems, clean tile boundaries, generate terrain LOD packages, and emit physical collision tiles.
 
 In scope:
-- Pipeline CLI skeleton
-- Source manifest schema
-- Package manifest schema
-- Checksum verification
-- Provenance validation
-- Report generation
+- DMR 5G pilot ingest
+- Coordinate and height transformation
+- LOD terrain package generation
+- Physical collision tile generation
+- Normals and terrain metadata
+- Control-point and edge validation
 
 Out of scope:
-- Full DMR 5G conversion
-- Full ortho tiling
-- Airport runway import
-- Runtime map display
+- Whole-country processing
+- Ortofoto imagery
+- Airport-specific runway mesh generation
+- Runtime Cesium integration beyond package format needs
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -44,9 +44,9 @@ Already completed roadmap steps (existing repository context):
 - 4. Implement Geodesy And Units Library
 - 5. Integrate JSBSim Into CoreSim
 - 6. Build Terrain Height Service Contract
+- 7. Create GIS Data Pipeline Foundation
 
 Future roadmap steps (explicitly out of scope):
-- 8. Implement DMR 5G Terrain Processing For Pilot Region
 - 9. Implement Ortofoto And Vector Package Processing For Pilot Region
 - 10. Implement Airport Master List And Runway Schema
 - 11. Implement Runway Importer And Pilot Airport Surfaces
@@ -71,10 +71,10 @@ Future roadmap steps (explicitly out of scope):
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- Pipeline accepts declared source datasets with version, license, attribution, checksum, coordinate reference system, and permitted-use metadata.
-- Pipeline refuses to process source records missing required provenance or checksum fields.
-- Pipeline produces versioned package manifests with source lineage and deterministic package identifiers.
-- Automated validation reports fail the build when mandatory source metadata is incomplete.
+- Pilot-region DMR 5G source tiles are transformed into the project coordinate and height model with recorded PROJ/geoid configuration.
+- Generated terrain package contains render LOD metadata and separate physical collision tiles for the active aircraft zone.
+- Automated control-point validation reports transformed terrain heights within 0.10 m above declared source error for selected test points.
+- Adjacent generated pilot tiles pass an automated edge-continuity test with no cracks or unintended height steps.
 
 ## Agent Configuration
 - no project config provided, using defaults

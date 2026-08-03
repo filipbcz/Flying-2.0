@@ -1,3 +1,4 @@
+#include "flying/data_pipeline/dmr5g_terrain.hpp"
 #include "flying/data_pipeline/manifest.hpp"
 
 #include <filesystem>
@@ -16,7 +17,10 @@ void print_usage(std::ostream& output) {
     << "  flying-data-pipeline validate --source-manifest PATH --report PATH "
        "[--source-root DIR]\n"
     << "  flying-data-pipeline package --source-manifest PATH --package-version VERSION "
-       "--output PATH --report PATH [--source-root DIR] [--package-name NAME]\n";
+       "--output PATH --report PATH [--source-root DIR] [--package-name NAME]\n"
+    << "  flying-data-pipeline dmr5g-pilot-terrain --source-manifest PATH "
+       "--terrain-config PATH --package-version VERSION --output-dir DIR --report PATH "
+       "[--source-root DIR] [--package-name NAME]\n";
 }
 
 struct ParsedArgs {
@@ -25,6 +29,8 @@ struct ParsedArgs {
   std::filesystem::path source_root;
   std::filesystem::path report;
   std::filesystem::path output;
+  std::filesystem::path output_dir;
+  std::filesystem::path terrain_config;
   std::string package_name = "flying-gis-package";
   std::string package_version;
 };
@@ -57,7 +63,8 @@ std::optional<ParsedArgs> parse_args(int argc, char** argv) {
 
   ParsedArgs parsed;
   parsed.command = std::string{args[1]};
-  if (parsed.command != "validate" && parsed.command != "package") {
+  if (parsed.command != "validate" && parsed.command != "package" &&
+      parsed.command != "dmr5g-pilot-terrain") {
     std::cerr << "Unknown command: " << parsed.command << "\n";
     return std::nullopt;
   }
@@ -89,6 +96,18 @@ std::optional<ParsedArgs> parse_args(int argc, char** argv) {
         return std::nullopt;
       }
       parsed.output = *value;
+    } else if (flag == "--output-dir") {
+      value = take_value(args, i, flag);
+      if (!value.has_value()) {
+        return std::nullopt;
+      }
+      parsed.output_dir = *value;
+    } else if (flag == "--terrain-config") {
+      value = take_value(args, i, flag);
+      if (!value.has_value()) {
+        return std::nullopt;
+      }
+      parsed.terrain_config = *value;
     } else if (flag == "--package-name") {
       value = take_value(args, i, flag);
       if (!value.has_value()) {
@@ -115,13 +134,28 @@ std::optional<ParsedArgs> parse_args(int argc, char** argv) {
     std::cerr << "--report is required\n";
     return std::nullopt;
   }
+  if (parsed.command == "package" || parsed.command == "dmr5g-pilot-terrain") {
+    if (parsed.package_version.empty()) {
+      std::cerr << "--package-version is required for " << parsed.command << "\n";
+      return std::nullopt;
+    }
+  }
   if (parsed.command == "package") {
     if (parsed.output.empty()) {
       std::cerr << "--output is required for package\n";
       return std::nullopt;
     }
-    if (parsed.package_version.empty()) {
-      std::cerr << "--package-version is required for package\n";
+  }
+  if (parsed.command == "dmr5g-pilot-terrain") {
+    if (parsed.package_name == "flying-gis-package") {
+      parsed.package_name = "flying-dmr5g-pilot-terrain";
+    }
+    if (parsed.terrain_config.empty()) {
+      std::cerr << "--terrain-config is required for dmr5g-pilot-terrain\n";
+      return std::nullopt;
+    }
+    if (parsed.output_dir.empty()) {
+      std::cerr << "--output-dir is required for dmr5g-pilot-terrain\n";
       return std::nullopt;
     }
   }
@@ -154,6 +188,27 @@ int main(int argc, char** argv) {
       }
       std::cout << "Source manifest validation passed; report written to "
                 << parsed->report << "\n";
+      return 0;
+    }
+
+    if (parsed->command == "dmr5g-pilot-terrain") {
+      flying::data_pipeline::Dmr5gPilotTerrainOptions options;
+      options.source_manifest_path = parsed->source_manifest;
+      options.source_root = parsed->source_root;
+      options.terrain_config_path = parsed->terrain_config;
+      options.output_directory = parsed->output_dir;
+      options.report_path = parsed->report;
+      options.package_name = parsed->package_name;
+      options.package_version = parsed->package_version;
+      const flying::data_pipeline::Dmr5gPilotTerrainResult result =
+        flying::data_pipeline::process_dmr5g_pilot_terrain(options);
+      if (!result.created()) {
+        std::cerr << "DMR 5G pilot terrain processing failed; report written to "
+                  << parsed->report << "\n";
+        return 2;
+      }
+      std::cout << "DMR 5G pilot terrain package " << result.report.package_id
+                << " written to " << result.package_manifest_path << "\n";
       return 0;
     }
 

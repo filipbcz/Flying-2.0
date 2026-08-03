@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flying.local/schemas/terrain-package.schema.json",
+  "title": "Flying Terrain Package",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "packageName",
+    "packageVersion",
+    "packageId",
+    "sourceManifestVersion",
+    "sourceLineage",
+    "pilotRegion",
+    "recordedProjGeoidConfiguration",
+    "terrainMetadata",
+    "renderLods",
+    "collisionTiles",
+    "validation"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "flying.terrain-package.v1"
+    },
+    "packageName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "packageVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "packageId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourceManifestVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourceLineage": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object"
+      }
+    },
+    "pilotRegion": {
+      "type": "object"
+    },
+    "recordedProjGeoidConfiguration": {
+      "type": "object"
+    },
+    "terrainMetadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "heightEncoding",
+        "heightFields",
+        "normalFrame",
+        "normalEncoding",
+        "edgeCleaned",
+        "collisionTilesAreSeparate"
+      ],
+      "properties": {
+        "heightEncoding": {
+          "type": "string"
+        },
+        "heightFields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "normalFrame": {
+          "type": "string"
+        },
+        "normalEncoding": {
+          "type": "string"
+        },
+        "edgeCleaned": {
+          "type": "boolean"
+        },
+        "collisionTilesAreSeparate": {
+          "type": "boolean"
+        }
+      }
+    },
+    "renderLods": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "level",
+          "sampleStride",
+          "tiles"
+        ],
+        "properties": {
+          "level": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sampleStride": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "tiles": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/$defs/tileMetadata"
+            }
+          }
+        }
+      }
+    },
+    "collisionTiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/tileMetadata"
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "controlPoints",
+        "edgeContinuity"
+      ],
+      "properties": {
+        "controlPoints": {
+          "type": "object"
+        },
+        "edgeContinuity": {
+          "type": "object"
+        },
+        "boundaryCleaning": {
+          "type": "object"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "tileMetadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "tileId",
+        "path",
+        "rows",
+        "cols",
+        "bounds"
+      ],
+      "properties": {
+        "tileId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rows": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "cols": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "bounds": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

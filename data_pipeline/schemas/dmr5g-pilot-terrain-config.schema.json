@@ -1,0 +1,334 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flying.local/schemas/dmr5g-pilot-terrain-config.schema.json",
+  "title": "Flying DMR 5G Pilot Terrain Config",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schemaVersion",
+    "pilotRegion",
+    "transform",
+    "sourceTiles",
+    "renderLods",
+    "activeAircraftZone",
+    "controlPoints"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "flying.dmr5g-pilot-terrain-config.v1"
+    },
+    "packageIdHint": {
+      "type": "string"
+    },
+    "pilotRegion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "minEastM",
+        "minNorthM",
+        "widthM",
+        "heightM"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minEastM": {
+          "type": "number"
+        },
+        "minNorthM": {
+          "type": "number"
+        },
+        "widthM": {
+          "const": 50000
+        },
+        "heightM": {
+          "const": 50000
+        }
+      }
+    },
+    "transform": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "sourceCrs",
+        "targetCrs",
+        "sourceHeightSystem",
+        "targetHeightSystem",
+        "proj",
+        "geoid",
+        "sourceToProject",
+        "heightTransform"
+      ],
+      "properties": {
+        "sourceCrs": {
+          "$ref": "#/$defs/crs"
+        },
+        "targetCrs": {
+          "$ref": "#/$defs/crs"
+        },
+        "sourceHeightSystem": {
+          "$ref": "#/$defs/heightSystem"
+        },
+        "targetHeightSystem": {
+          "$ref": "#/$defs/heightSystem"
+        },
+        "proj": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "version",
+            "pipeline"
+          ],
+          "properties": {
+            "version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "pipeline": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "geoid": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "model",
+            "grid",
+            "undulationMeters"
+          ],
+          "properties": {
+            "model": {
+              "type": "string",
+              "minLength": 1
+            },
+            "grid": {
+              "type": "string",
+              "minLength": 1
+            },
+            "undulationMeters": {
+              "type": "number"
+            }
+          }
+        },
+        "sourceToProject": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "eastFromSourceXScale",
+            "eastOffsetM",
+            "northFromSourceYScale",
+            "northOffsetM"
+          ],
+          "properties": {
+            "eastFromSourceXScale": {
+              "type": "number"
+            },
+            "eastFromSourceYScale": {
+              "const": 0
+            },
+            "eastOffsetM": {
+              "type": "number"
+            },
+            "northFromSourceXScale": {
+              "const": 0
+            },
+            "northFromSourceYScale": {
+              "type": "number"
+            },
+            "northOffsetM": {
+              "type": "number"
+            }
+          }
+        },
+        "heightTransform": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sourceHeightScale",
+            "orthometricOffsetM"
+          ],
+          "properties": {
+            "sourceHeightScale": {
+              "type": "number"
+            },
+            "orthometricOffsetM": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "sourceTiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "path",
+          "format",
+          "declaredVerticalErrorM"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "format": {
+            "enum": [
+              "xyz",
+              "arc-ascii-grid"
+            ]
+          },
+          "declaredVerticalErrorM": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "renderLods": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "level",
+          "sampleStride"
+        ],
+        "properties": {
+          "level": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sampleStride": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "activeAircraftZone": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minEastM",
+        "maxEastM",
+        "minNorthM",
+        "maxNorthM"
+      ],
+      "properties": {
+        "minEastM": {
+          "type": "number"
+        },
+        "maxEastM": {
+          "type": "number"
+        },
+        "minNorthM": {
+          "type": "number"
+        },
+        "maxNorthM": {
+          "type": "number"
+        },
+        "sampleStride": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "controlPoints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "sourceX",
+          "sourceY",
+          "expectedOrthometricHeightM",
+          "sourceVerticalErrorM"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sourceX": {
+            "type": "number"
+          },
+          "sourceY": {
+            "type": "number"
+          },
+          "expectedOrthometricHeightM": {
+            "type": "number"
+          },
+          "sourceVerticalErrorM": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "edgeToleranceM": {
+      "type": "number",
+      "minimum": 0
+    },
+    "boundaryCleanMaxAdjustmentM": {
+      "type": "number",
+      "minimum": 0
+    }
+  },
+  "$defs": {
+    "crs": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "authority",
+        "code"
+      ],
+      "properties": {
+        "authority": {
+          "type": "string",
+          "minLength": 1
+        },
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "heightSystem": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "name",
+        "kind"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

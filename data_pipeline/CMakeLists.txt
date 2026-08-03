@@ -1,7 +1,15 @@
 add_library(flying_data_pipeline STATIC
+  src/dmr5g_terrain.cpp
   src/manifest.cpp
   src/module.cpp
 )
+
+if(NOT MSVC)
+  set_source_files_properties(src/dmr5g_terrain.cpp
+    PROPERTIES
+      COMPILE_OPTIONS "$<$<CONFIG:Debug>:-g1>"
+  )
+endif()
 
 add_library(Flying::DataPipeline ALIAS flying_data_pipeline)
 
@@ -13,6 +21,8 @@ target_include_directories(flying_data_pipeline
 target_link_libraries(flying_data_pipeline
   PUBLIC
     Flying::CompilerOptions
+  PRIVATE
+    Flying::GeoTerrain
 )
 
 add_executable(flying_data_pipeline_cli

@@ -27,4 +27,23 @@ The command exits non-zero when required provenance, checksum, CRS, license,
 attribution or permitted-use metadata is missing or when checksum verification
 fails.
 
-No downloader, importer, terrain transformer, airport processor or runtime GIS renderer is implemented in this foundation step.
+Generate a DMR 5G pilot-region terrain package after the same source manifest
+gate succeeds:
+
+```sh
+flying-data-pipeline dmr5g-pilot-terrain \
+  --source-manifest path/to/source-manifest.json \
+  --source-root path/to/source-payloads \
+  --terrain-config path/to/dmr5g-pilot-terrain-config.json \
+  --package-version 2026.08.0 \
+  --output-dir out/dmr5g-pilot-terrain \
+  --report out/dmr5g-pilot-terrain-validation.json
+```
+
+The terrain config declares the 50 x 50 km pilot bounds, DMR 5G source tile
+paths, recorded PROJ/geoid setup, render LOD strides, active aircraft collision
+zone and control points. The output package contains CSV render LOD tiles with
+ENU normals plus separate collision CSV tiles.
+
+No downloader, ortofoto tiler, runway importer or runtime GIS renderer is
+implemented in this step.
