@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flying.local/schemas/pilot-runway-surfaces-package.schema.json",
+  "title": "Flying Pilot Runway Surfaces Package",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schemaVersion",
+    "packageName",
+    "packageVersion",
+    "packageId",
+    "airportDatabaseVersion",
+    "coordinateFrame",
+    "runtimeDependencies",
+    "collision",
+    "surfaces",
+    "validation"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "flying.pilot-runway-surfaces-package.v1"
+    },
+    "packageName": {"type": "string", "minLength": 1},
+    "packageVersion": {"type": "string", "minLength": 1},
+    "packageId": {"type": "string", "minLength": 1},
+    "airportDatabaseVersion": {"type": "string", "minLength": 1},
+    "coordinateFrame": {"const": "airport-local-ENU-per-aerodrome"},
+    "runtimeDependencies": {
+      "type": "object",
+      "required": [
+        "runtimeNetworkRequired",
+        "externalMapApis",
+        "remoteTileServerUrls"
+      ],
+      "properties": {
+        "runtimeNetworkRequired": {"const": false},
+        "externalMapApis": {"type": "array", "maxItems": 0},
+        "remoteTileServerUrls": {"type": "array", "maxItems": 0}
+      }
+    },
+    "collision": {
+      "type": "object",
+      "required": [
+        "authority",
+        "runwayOverridePriority",
+        "genericTerrainPriority",
+        "wheelContactToleranceM"
+      ],
+      "properties": {
+        "authority": {"const": "runway_override"},
+        "runwayOverridePriority": {"type": "integer", "minimum": 1},
+        "genericTerrainPriority": {"type": "integer", "minimum": 1},
+        "wheelContactToleranceM": {"type": "number", "maximum": 0.05}
+      }
+    },
+    "surfaces": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "required": [
+          "airportId",
+          "runwayId",
+          "surfaceType",
+          "file",
+          "thresholdCoordinateLengthM",
+          "longitudinalPercent",
+          "transversePercent"
+        ],
+        "properties": {
+          "airportId": {"type": "string", "minLength": 1},
+          "runwayId": {"type": "string", "minLength": 1},
+          "surfaceType": {"enum": ["paved", "grass"]},
+          "file": {"type": "string", "minLength": 1},
+          "thresholdCoordinateLengthM": {"type": "number", "exclusiveMinimum": 0},
+          "longitudinalPercent": {"type": "number"},
+          "transversePercent": {"type": "number"}
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "required": [
+        "coverageReport",
+        "coordinateChecksIncluded",
+        "headingChecksIncluded",
+        "dimensionChecksIncluded",
+        "ortofotoAlignmentChecksIncluded",
+        "terrainTransitionChecksIncluded",
+        "provenanceChecksIncluded"
+      ],
+      "properties": {
+        "coverageReport": {"type": "string"},
+        "coordinateChecksIncluded": {"const": true},
+        "headingChecksIncluded": {"const": true},
+        "dimensionChecksIncluded": {"const": true},
+        "ortofotoAlignmentChecksIncluded": {"const": true},
+        "terrainTransitionChecksIncluded": {"const": true},
+        "provenanceChecksIncluded": {"const": true}
+      }
+    }
+  }
+}

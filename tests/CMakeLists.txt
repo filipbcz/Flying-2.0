@@ -69,6 +69,24 @@ target_compile_definitions(flying_data_pipeline_airport_database_tests
 add_test(NAME flying.data_pipeline.airport_database
   COMMAND flying_data_pipeline_airport_database_tests)
 
+add_executable(flying_data_pipeline_runway_importer_tests
+  data_pipeline/runway_importer_test.cpp
+)
+
+target_link_libraries(flying_data_pipeline_runway_importer_tests
+  PRIVATE
+    Flying::DataPipeline
+    Flying::CompilerOptions
+)
+
+target_compile_definitions(flying_data_pipeline_runway_importer_tests
+  PRIVATE
+    FLYING_REPO_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+)
+
+add_test(NAME flying.data_pipeline.runway_importer
+  COMMAND flying_data_pipeline_runway_importer_tests)
+
 add_executable(flying_core_sim_kernel_tests
   core_sim/kernel_test.cpp
 )

@@ -6,30 +6,32 @@
 - default branch: main
 
 ## Task
-- title: Flying: 10. Implement Airport Master List And Runway Schema
+- title: Flying: 11. Implement Runway Importer And Pilot Airport Surfaces
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-10. Implement Airport Master List And Runway Schema
+11. Implement Runway Importer And Pilot Airport Surfaces
 
 Step description and scope:
-Create the versioned airport database schema, master checklist model, runway/runway-end schema, data provenance fields, validation states, AIRAC versioning, and non-code seed records for pilot airports only.
+Build the runway importer that creates georeferenced runway, taxi connection, start-point, material, collision, marking, and LOD data for the two pilot airports from approved seed records and open/approved sources.
 
 In scope:
-- Airport database schema
-- Runway and runway-end schema
-- Master list schema
-- AIRAC/version fields
-- Pilot seed records
-- Schema validation tests
+- Runway importer
+- Pilot paved runway surface
+- Pilot grass runway surface
+- Collision mesh
+- Safe start positions
+- Basic runway markings
+- Terrain transition smoothing
+- Pilot coverage report
 
 Out of scope:
-- Importing all Czech airports
-- Generating runway meshes
-- Implementing runway lights in Unreal
-- Using restricted AIP/VFR content without documented permission
+- All Czech airports
+- Detailed terminal/hangar modeling
+- Full lighting system
+- AI traffic or ATC
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -47,9 +49,9 @@ Already completed roadmap steps (existing repository context):
 - 7. Create GIS Data Pipeline Foundation
 - 8. Implement DMR 5G Terrain Processing For Pilot Region
 - 9. Implement Ortofoto And Vector Package Processing For Pilot Region
+- 10. Implement Airport Master List And Runway Schema
 
 Future roadmap steps (explicitly out of scope):
-- 11. Implement Runway Importer And Pilot Airport Surfaces
 - 12. Create Unreal UE 5.8 Project And Cesium Runtime Integration
 - 13. Implement Input Device Mapping And Scenario Start Flow
 - 14. Implement Telemetry, Replay, And Export V1
@@ -71,10 +73,10 @@ Future roadmap steps (explicitly out of scope):
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- Schema represents Aerodrome, Runway, RunwayEnd, thresholds, declared distances, surfaces, lighting, markings, slopes, materials, provenance, AIRAC effective date, confidence, and manual verification status.
-- Master list model can classify active airports, SLZ fields, closed fields, validated records, derived records, and records blocked by missing permission or source data.
-- Pilot airport seed data includes one paved and one grass runway with source provenance and explicit validation status.
-- Schema validation rejects production-validated runway records that lack physical threshold coordinates or source provenance.
+- Importer builds runway geometry from published or verified threshold coordinates, not from ARP plus runway name and length alone.
+- Generated pilot runway surfaces preserve longitudinal and transverse slope instead of flattening all runways to one horizontal plane.
+- Runway collision surface takes priority over generic terrain and matches visual runway surface within 0.05 m in wheel-contact zones.
+- Pilot airport validation reports include coordinate, heading, dimension, Ortofoto alignment, terrain transition, and provenance checks.
 
 ## Agent Configuration
 - no project config provided, using defaults

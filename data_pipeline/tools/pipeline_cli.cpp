@@ -1,6 +1,7 @@
 #include "flying/data_pipeline/dmr5g_terrain.hpp"
 #include "flying/data_pipeline/manifest.hpp"
 #include "flying/data_pipeline/pilot_region_packages.hpp"
+#include "flying/data_pipeline/runway_importer.hpp"
 
 #include <filesystem>
 #include <exception>
@@ -26,6 +27,9 @@ void print_usage(std::ostream& output) {
     << "  flying-data-pipeline pilot-region-packages --source-manifest PATH "
        "--package-config PATH --package-version VERSION --output-dir DIR --report PATH "
        "[--source-root DIR] [--package-name NAME]\n";
+  output
+    << "  flying-data-pipeline runway-import --airport-database PATH "
+       "--package-version VERSION --output-dir DIR --report PATH [--package-name NAME]\n";
 }
 
 struct ParsedArgs {
@@ -37,6 +41,7 @@ struct ParsedArgs {
   std::filesystem::path output_dir;
   std::filesystem::path terrain_config;
   std::filesystem::path package_config;
+  std::filesystem::path airport_database;
   std::string package_name = "flying-gis-package";
   std::string package_version;
 };
@@ -71,7 +76,8 @@ std::optional<ParsedArgs> parse_args(int argc, char** argv) {
   parsed.command = std::string{args[1]};
   if (parsed.command != "validate" && parsed.command != "package" &&
       parsed.command != "dmr5g-pilot-terrain" &&
-      parsed.command != "pilot-region-packages") {
+      parsed.command != "pilot-region-packages" &&
+      parsed.command != "runway-import") {
     std::cerr << "Unknown command: " << parsed.command << "\n";
     return std::nullopt;
   }
@@ -121,6 +127,12 @@ std::optional<ParsedArgs> parse_args(int argc, char** argv) {
         return std::nullopt;
       }
       parsed.package_config = *value;
+    } else if (flag == "--airport-database") {
+      value = take_value(args, i, flag);
+      if (!value.has_value()) {
+        return std::nullopt;
+      }
+      parsed.airport_database = *value;
     } else if (flag == "--package-name") {
       value = take_value(args, i, flag);
       if (!value.has_value()) {
@@ -139,7 +151,7 @@ std::optional<ParsedArgs> parse_args(int argc, char** argv) {
     }
   }
 
-  if (parsed.source_manifest.empty()) {
+  if (parsed.command != "runway-import" && parsed.source_manifest.empty()) {
     std::cerr << "--source-manifest is required\n";
     return std::nullopt;
   }
@@ -148,7 +160,7 @@ std::optional<ParsedArgs> parse_args(int argc, char** argv) {
     return std::nullopt;
   }
   if (parsed.command == "package" || parsed.command == "dmr5g-pilot-terrain" ||
-      parsed.command == "pilot-region-packages") {
+      parsed.command == "pilot-region-packages" || parsed.command == "runway-import") {
     if (parsed.package_version.empty()) {
       std::cerr << "--package-version is required for " << parsed.command << "\n";
       return std::nullopt;
@@ -183,6 +195,19 @@ std::optional<ParsedArgs> parse_args(int argc, char** argv) {
     }
     if (parsed.output_dir.empty()) {
       std::cerr << "--output-dir is required for pilot-region-packages\n";
+      return std::nullopt;
+    }
+  }
+  if (parsed.command == "runway-import") {
+    if (parsed.package_name == "flying-gis-package") {
+      parsed.package_name = "flying-pilot-runway-surfaces";
+    }
+    if (parsed.airport_database.empty()) {
+      std::cerr << "--airport-database is required for runway-import\n";
+      return std::nullopt;
+    }
+    if (parsed.output_dir.empty()) {
+      std::cerr << "--output-dir is required for runway-import\n";
       return std::nullopt;
     }
   }
@@ -256,6 +281,25 @@ int main(int argc, char** argv) {
         return 2;
       }
       std::cout << "Pilot region offline package " << result.report.package_id
+                << " written to " << result.package_manifest_path << "\n";
+      return 0;
+    }
+
+    if (parsed->command == "runway-import") {
+      flying::data_pipeline::RunwayImportOptions options;
+      options.airport_database_path = parsed->airport_database;
+      options.output_directory = parsed->output_dir;
+      options.report_path = parsed->report;
+      options.package_name = parsed->package_name;
+      options.package_version = parsed->package_version;
+      const flying::data_pipeline::RunwayImportResult result =
+        flying::data_pipeline::import_pilot_runways(options);
+      if (!result.created()) {
+        std::cerr << "Pilot runway import failed; report written to "
+                  << parsed->report << "\n";
+        return 2;
+      }
+      std::cout << "Pilot runway surface package " << result.report.package_id
                 << " written to " << result.package_manifest_path << "\n";
       return 0;
     }

@@ -45,5 +45,20 @@ paths, recorded PROJ/geoid setup, render LOD strides, active aircraft collision
 zone and control points. The output package contains CSV render LOD tiles with
 ENU normals plus separate collision CSV tiles.
 
-No downloader, ortofoto tiler, runway importer or runtime GIS renderer is
-implemented in this step.
+No downloader or runtime GIS renderer is implemented in this step.
+
+Import the two pilot airport runway surfaces from the approved airport seed:
+
+```sh
+flying-data-pipeline runway-import \
+  --airport-database data_pipeline/seeds/pilot-airport-master-list.json \
+  --package-version 2026.08.0 \
+  --output-dir out/pilot-runway-surfaces \
+  --report out/pilot-runway-coverage-report.json
+```
+
+The runway importer rejects runway geometry that cannot be built from physical
+threshold coordinates. Generated artifacts include sloped visual and collision
+meshes, runway override priority metadata, safe start positions, material
+mapping, basic markings, taxi-connection stubs, LOD declarations and terrain
+transition smoothing bands.

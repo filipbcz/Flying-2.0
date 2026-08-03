@@ -4,6 +4,7 @@ add_library(flying_data_pipeline STATIC
   src/manifest.cpp
   src/module.cpp
   src/pilot_region_packages.cpp
+  src/runway_importer.cpp
 )
 
 if(NOT MSVC)
