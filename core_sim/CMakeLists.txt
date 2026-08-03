@@ -2,7 +2,9 @@ add_library(flying_core_sim STATIC
   src/determinism.cpp
   src/flight_dynamics.cpp
   src/fixed_step.cpp
+  src/input.cpp
   src/module.cpp
+  src/scenario.cpp
   src/simulator.cpp
   src/terrain_contact.cpp
 )

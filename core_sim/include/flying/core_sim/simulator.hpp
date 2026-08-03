@@ -21,10 +21,16 @@ public:
   explicit CoreSimulator(RigidBodyParameters parameters = {});
 
   [[nodiscard]] const AuthoritativeState& state() const noexcept;
+  [[nodiscard]] const FlightDynamicsInitialCondition& flight_dynamics_initial_condition()
+      const noexcept;
+  [[nodiscard]] const AircraftControlInputSample& initial_aircraft_controls() const noexcept;
   [[nodiscard]] const RigidBodyParameters& parameters() const noexcept;
   [[nodiscard]] double fixed_step_s() const noexcept;
 
   void reset(AuthoritativeState state = {}) noexcept;
+  void reset(AuthoritativeState state,
+             const FlightDynamicsInitialCondition& flight_dynamics_initial_condition,
+             const AircraftControlInputSample& initial_aircraft_controls);
   AdvanceReport advance(double caller_delta_s, const ControlInputSample& input);
   void integrate_fixed_step(const ControlInputSample& input);
 
@@ -32,6 +38,8 @@ private:
   FixedStepAccumulator accumulator_;
   RigidBodyParameters parameters_;
   AuthoritativeState state_;
+  FlightDynamicsInitialCondition flight_dynamics_initial_condition_{};
+  AircraftControlInputSample initial_aircraft_controls_{};
 };
 
 } // namespace flying::core_sim

@@ -16,7 +16,8 @@ public class FlyingPresentation : ModuleRules
             "CoreUObject",
             "Engine",
             "CesiumRuntime",
-            "ProceduralMeshComponent"
+            "ProceduralMeshComponent",
+            "UMG"
         });
 
         PrivateDependencyModuleNames.AddRange(new[]

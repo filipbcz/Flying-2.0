@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "FlyingCoreSimStateSnapshot.h"
+#include "FlyingScenarioTypes.h"
 #include "Templates/UniquePtr.h"
 
 #include "FlyingCoreSimComponent.generated.h"
@@ -43,8 +44,23 @@ public:
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|CoreSim")
   FVector InitialVelocityEnuMetersPerSecond = FVector(35.0, 0.0, 0.0);
 
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Scenario")
+  bool bUseScenarioSelectionOnBeginPlay = true;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Scenario")
+  FFlyingScenarioSelection InitialScenario;
+
   UFUNCTION(BlueprintCallable, Category="Flying|CoreSim")
   void ResetCoreSim();
+
+  UFUNCTION(BlueprintCallable, Category="Flying|Scenario")
+  bool StartScenario(const FFlyingScenarioSelection& Selection);
+
+  UFUNCTION(BlueprintPure, Category="Flying|Scenario")
+  TArray<FFlyingScenarioLocation> GetPilotScenarioLocations() const;
+
+  UFUNCTION(BlueprintPure, Category="Flying|Scenario")
+  const FFlyingScenarioRuntimeState& GetCurrentScenarioState() const;
 
   UFUNCTION(BlueprintCallable, Category="Flying|CoreSim")
   void AdvanceCoreSim(double DeltaSeconds);
@@ -60,4 +76,7 @@ private:
 
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|CoreSim", meta=(AllowPrivateAccess="true"))
   FFlyingCoreSimStateSnapshot CurrentSnapshot;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Scenario", meta=(AllowPrivateAccess="true"))
+  FFlyingScenarioRuntimeState CurrentScenarioState;
 };

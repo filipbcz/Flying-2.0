@@ -59,6 +59,15 @@ const AuthoritativeState& CoreSimulator::state() const noexcept {
   return state_;
 }
 
+const FlightDynamicsInitialCondition& CoreSimulator::flight_dynamics_initial_condition()
+    const noexcept {
+  return flight_dynamics_initial_condition_;
+}
+
+const AircraftControlInputSample& CoreSimulator::initial_aircraft_controls() const noexcept {
+  return initial_aircraft_controls_;
+}
+
 const RigidBodyParameters& CoreSimulator::parameters() const noexcept {
   return parameters_;
 }
@@ -70,6 +79,20 @@ double CoreSimulator::fixed_step_s() const noexcept {
 void CoreSimulator::reset(AuthoritativeState state) noexcept {
   state_ = state;
   state_.body_to_ecef = state_.body_to_ecef.normalized();
+  flight_dynamics_initial_condition_ = {};
+  initial_aircraft_controls_ = {};
+  accumulator_.reset();
+}
+
+void CoreSimulator::reset(AuthoritativeState state,
+                          const FlightDynamicsInitialCondition& flight_dynamics_initial_condition,
+                          const AircraftControlInputSample& initial_aircraft_controls) {
+  validate_flight_dynamics_initial_condition(flight_dynamics_initial_condition);
+  validate_aircraft_controls(initial_aircraft_controls);
+  state_ = state;
+  state_.body_to_ecef = state_.body_to_ecef.normalized();
+  flight_dynamics_initial_condition_ = flight_dynamics_initial_condition;
+  initial_aircraft_controls_ = initial_aircraft_controls;
   accumulator_.reset();
 }
 

@@ -25,11 +25,15 @@ public:
   FString PilotRegionPackageManifestPath =
     TEXT("Saved/Flying/PilotRegion/GIS/pilot-region-package.json");
 
+  UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Input")
+  FString InputSettingsPath =
+    TEXT("Saved/Flying/Input/input-settings.txt");
+
   UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Georeference")
   double PilotOriginLatitudeDegrees = 49.2;
 
   UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Georeference")
-  double PilotOriginLongitudeDegrees = 16.6;
+  double PilotOriginLongitudeDegrees = 14.5;
 
   UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Georeference")
   double PilotOriginHeightMeters = 1500.0;

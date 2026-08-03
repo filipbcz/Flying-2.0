@@ -2,12 +2,15 @@
 
 #include "FlyingPresentationSettings.h"
 #include "flying/core_sim/determinism.hpp"
+#include "flying/core_sim/scenario.hpp"
 #include "flying/core_sim/simulator.hpp"
 #include "flying/geo_terrain/geodesy.hpp"
 
 #include <algorithm>
 #include <cstdint>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 namespace {
 
@@ -30,6 +33,96 @@ FQuat ToUnrealQuat(Quaterniond Value)
 {
   const Quaterniond Normalized = Value.normalized();
   return FQuat(Normalized.x, Normalized.y, Normalized.z, Normalized.w);
+}
+
+std::string ToStdString(const FString& Value)
+{
+  return std::string(TCHAR_TO_UTF8(*Value));
+}
+
+std::string ToStdString(FName Value)
+{
+  return ToStdString(Value.ToString());
+}
+
+FString ToFString(const std::string& Value)
+{
+  return FString(UTF8_TO_TCHAR(Value.c_str()));
+}
+
+FName ToFName(const std::string& Value)
+{
+  return FName(*ToFString(Value));
+}
+
+flying::core_sim::ScenarioStartMode ToCore(EFlyingScenarioStartMode Value)
+{
+  switch (Value)
+  {
+  case EFlyingScenarioStartMode::ColdAndDark:
+    return flying::core_sim::ScenarioStartMode::ColdAndDark;
+  case EFlyingScenarioStartMode::ReadyToTaxi:
+    return flying::core_sim::ScenarioStartMode::ReadyToTaxi;
+  case EFlyingScenarioStartMode::Airborne:
+    return flying::core_sim::ScenarioStartMode::Airborne;
+  }
+
+  return flying::core_sim::ScenarioStartMode::ReadyToTaxi;
+}
+
+EFlyingScenarioStartMode ToUnreal(flying::core_sim::ScenarioStartMode Value)
+{
+  switch (Value)
+  {
+  case flying::core_sim::ScenarioStartMode::ColdAndDark:
+    return EFlyingScenarioStartMode::ColdAndDark;
+  case flying::core_sim::ScenarioStartMode::ReadyToTaxi:
+    return EFlyingScenarioStartMode::ReadyToTaxi;
+  case flying::core_sim::ScenarioStartMode::Airborne:
+    return EFlyingScenarioStartMode::Airborne;
+  }
+
+  return EFlyingScenarioStartMode::ReadyToTaxi;
+}
+
+flying::core_sim::ScenarioSelection ToCore(const FFlyingScenarioSelection& Value)
+{
+  return {ToStdString(Value.LocationId), ToCore(Value.StartMode)};
+}
+
+FFlyingScenarioLocation ToUnreal(const flying::core_sim::PilotScenarioLocation& Value)
+{
+  FFlyingScenarioLocation Result;
+  Result.LocationId = ToFName(Value.location_id);
+  Result.AerodromeId = ToFString(Value.aerodrome_id);
+  Result.RunwayEndId = ToFString(Value.runway_end_id);
+  Result.DisplayName = ToFString(Value.display_name);
+  Result.LatitudeDegrees = Value.latitude_deg;
+  Result.LongitudeDegrees = Value.longitude_deg;
+  Result.ElevationMeters = Value.elevation_m;
+  Result.TrueHeadingDegrees = Value.true_heading_deg;
+  Result.bSelectable = Value.selectable;
+  return Result;
+}
+
+FFlyingScenarioSelection ToUnreal(const flying::core_sim::ScenarioSelection& Value)
+{
+  FFlyingScenarioSelection Result;
+  Result.LocationId = ToFName(Value.location_id);
+  Result.StartMode = ToUnreal(Value.start_mode);
+  return Result;
+}
+
+FFlyingScenarioRuntimeState ToUnreal(const flying::core_sim::ScenarioInitialState& Value)
+{
+  FFlyingScenarioRuntimeState Result;
+  Result.Selection = ToUnreal(Value.selection);
+  Result.Location = ToUnreal(Value.location);
+  Result.bBatteryOn = Value.battery_on;
+  Result.bEngineRunning = Value.engine_running;
+  Result.bAvionicsOn = Value.avionics_on;
+  Result.bParkingBrakeSet = Value.parking_brake_set;
+  return Result;
 }
 
 GeodeticCoordinates MakeGeodeticDegrees(double LatitudeDegrees,
@@ -92,6 +185,12 @@ struct FFlyingCoreSimBridgeImpl
     Simulator.advance(DeltaSeconds, ControlInputSample{});
   }
 
+  flying::core_sim::ScenarioInitialState ResetScenario(
+    const flying::core_sim::ScenarioSelection& Selection)
+  {
+    return flying::core_sim::reset_simulator_to_scenario(Simulator, Selection);
+  }
+
   FFlyingCoreSimStateSnapshot Snapshot() const
   {
     const AuthoritativeState& State = Simulator.state();
@@ -131,7 +230,14 @@ void UFlyingCoreSimComponent::BeginPlay()
   InitialVelocityEnuMetersPerSecond.X =
     Settings->DefaultAircraftInitialSpeedEastMetersPerSecond;
 
-  ResetCoreSim();
+  if (bUseScenarioSelectionOnBeginPlay)
+  {
+    StartScenario(InitialScenario);
+  }
+  else
+  {
+    ResetCoreSim();
+  }
 }
 
 void UFlyingCoreSimComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -170,6 +276,44 @@ void UFlyingCoreSimComponent::ResetCoreSim()
     UE_LOG(LogTemp, Error, TEXT("CoreSim reset failed: %s"), ANSI_TO_TCHAR(Error.what()));
     CurrentSnapshot = {};
   }
+}
+
+bool UFlyingCoreSimComponent::StartScenario(const FFlyingScenarioSelection& Selection)
+{
+  EnsureBridge();
+  try
+  {
+    const flying::core_sim::ScenarioInitialState ScenarioState =
+      Bridge->ResetScenario(ToCore(Selection));
+    CurrentScenarioState = ToUnreal(ScenarioState);
+    PublishSnapshot();
+    return true;
+  }
+  catch (const std::exception& Error)
+  {
+    UE_LOG(LogTemp, Error, TEXT("CoreSim scenario start failed: %s"), ANSI_TO_TCHAR(Error.what()));
+    CurrentSnapshot = {};
+    CurrentScenarioState = {};
+    return false;
+  }
+}
+
+TArray<FFlyingScenarioLocation> UFlyingCoreSimComponent::GetPilotScenarioLocations() const
+{
+  TArray<FFlyingScenarioLocation> Result;
+  const std::vector<flying::core_sim::PilotScenarioLocation> Locations =
+    flying::core_sim::default_pilot_scenario_locations();
+  Result.Reserve(static_cast<int32>(Locations.size()));
+  for (const flying::core_sim::PilotScenarioLocation& Location : Locations)
+  {
+    Result.Add(ToUnreal(Location));
+  }
+  return Result;
+}
+
+const FFlyingScenarioRuntimeState& UFlyingCoreSimComponent::GetCurrentScenarioState() const
+{
+  return CurrentScenarioState;
 }
 
 void UFlyingCoreSimComponent::AdvanceCoreSim(double DeltaSeconds)

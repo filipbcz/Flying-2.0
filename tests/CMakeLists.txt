@@ -111,6 +111,30 @@ target_link_libraries(flying_core_sim_flight_dynamics_api_tests
 
 add_test(NAME flying.core_sim.flight_dynamics_api COMMAND flying_core_sim_flight_dynamics_api_tests)
 
+add_executable(flying_core_sim_input_mapping_tests
+  core_sim/input_mapping_test.cpp
+)
+
+target_link_libraries(flying_core_sim_input_mapping_tests
+  PRIVATE
+    Flying::CoreSim
+    Flying::CompilerOptions
+)
+
+add_test(NAME flying.core_sim.input_mapping COMMAND flying_core_sim_input_mapping_tests)
+
+add_executable(flying_core_sim_scenario_start_tests
+  core_sim/scenario_start_test.cpp
+)
+
+target_link_libraries(flying_core_sim_scenario_start_tests
+  PRIVATE
+    Flying::CoreSim
+    Flying::CompilerOptions
+)
+
+add_test(NAME flying.core_sim.scenario_start COMMAND flying_core_sim_scenario_start_tests)
+
 add_executable(flying_core_sim_terrain_contact_tests
   core_sim/terrain_contact_test.cpp
 )

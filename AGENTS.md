@@ -6,30 +6,30 @@
 - default branch: main
 
 ## Task
-- title: Flying: 12. Create Unreal UE 5.8 Project And Cesium Runtime Integration
+- title: Flying: 13. Implement Input Device Mapping And Scenario Start Flow
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-12. Create Unreal UE 5.8 Project And Cesium Runtime Integration
+13. Implement Input Device Mapping And Scenario Start Flow
 
 Step description and scope:
-Create the Unreal Engine project, add Cesium for Unreal integration, configure georeference handling, load pilot terrain and imagery packages, and display the authoritative CoreSim state in a basic aircraft actor.
+Add keyboard, mouse, gamepad, and USB/HID flight-control mapping infrastructure, axis calibration, dead zones, response curves, multiple device profiles, and scenario selection for pilot airports and initial aircraft states.
 
 In scope:
-- UE project setup
-- Cesium plugin configuration
-- Local pilot terrain loading
-- CoreSim runtime bridge
-- Basic aircraft actor
-- Origin-shift handling
+- Input abstraction
+- HID profile persistence
+- Axis calibration UI
+- Scenario selection UI
+- Initial state handoff to CoreSim
+- Atomic settings writes
 
 Out of scope:
-- Production aircraft cockpit
-- Weather visuals
-- Full Czech terrain
-- Installer and signing
+- Full save-game system
+- Replay UI
+- All Czech airports
+- Advanced avionics
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -49,9 +49,9 @@ Already completed roadmap steps (existing repository context):
 - 9. Implement Ortofoto And Vector Package Processing For Pilot Region
 - 10. Implement Airport Master List And Runway Schema
 - 11. Implement Runway Importer And Pilot Airport Surfaces
+- 12. Create Unreal UE 5.8 Project And Cesium Runtime Integration
 
 Future roadmap steps (explicitly out of scope):
-- 13. Implement Input Device Mapping And Scenario Start Flow
 - 14. Implement Telemetry, Replay, And Export V1
 - 15. Build Vertical Slice Flight And Performance Tests
 - 16. Complete Production Aircraft Data Model
@@ -71,10 +71,10 @@ Future roadmap steps (explicitly out of scope):
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- Win64 Unreal project opens with UE 5.8 and builds in Development configuration.
-- Cesium georeference maps authoritative ECEF aircraft state into Unreal without modifying CoreSim authoritative coordinates during origin shifts.
-- Pilot region terrain and imagery packages render from local data without runtime dependence on external map APIs.
-- A basic aircraft actor follows CoreSim state from the standalone library while presentation code remains separate from physics equations.
+- User can bind pitch, roll, yaw, throttle, mixture, propeller, brakes, trim, view controls, and core cockpit commands across supported input classes.
+- Axis calibration supports dead zone, response curve, inversion, saturation, and per-device profile persistence.
+- Scenario flow can start cold-and-dark, ready-to-taxi, and airborne states at pilot-region locations.
+- Input settings are saved atomically and corrupted settings files are rejected without crashing the application.
 
 ## Agent Configuration
 - no project config provided, using defaults

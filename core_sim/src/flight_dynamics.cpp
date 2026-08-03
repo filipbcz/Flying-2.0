@@ -95,7 +95,11 @@ void require_unit_interval(double value, const char* field_name) {
   hash = append_double(hash, controls.flaps_norm);
   hash = append_double(hash, controls.brake_left_norm);
   hash = append_double(hash, controls.brake_right_norm);
-  return append_double(hash, controls.mixture_norm);
+  hash = append_double(hash, controls.mixture_norm);
+  hash = append_double(hash, controls.propeller_norm);
+  hash = append_double(hash, controls.elevator_trim_norm);
+  hash = append_double(hash, controls.aileron_trim_norm);
+  return append_double(hash, controls.rudder_trim_norm);
 }
 
 [[nodiscard]] std::uint64_t append_stable_aircraft_identity(
@@ -199,6 +203,10 @@ void validate_aircraft_controls(const AircraftControlInputSample& controls) {
   require_unit_interval(controls.brake_left_norm, "brake_left_norm");
   require_unit_interval(controls.brake_right_norm, "brake_right_norm");
   require_unit_interval(controls.mixture_norm, "mixture_norm");
+  require_unit_interval(controls.propeller_norm, "propeller_norm");
+  require_signed_unit(controls.elevator_trim_norm, "elevator_trim_norm");
+  require_signed_unit(controls.aileron_trim_norm, "aileron_trim_norm");
+  require_signed_unit(controls.rudder_trim_norm, "rudder_trim_norm");
 }
 
 std::uint64_t hash_flight_dynamics_state(const FlightDynamicsState& state) noexcept {

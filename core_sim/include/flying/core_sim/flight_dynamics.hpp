@@ -42,6 +42,10 @@ struct AircraftControlInputSample {
   double brake_left_norm{};
   double brake_right_norm{};
   double mixture_norm{1.0};
+  double propeller_norm{1.0};
+  double elevator_trim_norm{};
+  double aileron_trim_norm{};
+  double rudder_trim_norm{};
 };
 
 struct FlightDynamicsState {
