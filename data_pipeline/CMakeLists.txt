@@ -1,4 +1,5 @@
 add_library(flying_data_pipeline STATIC
+  src/airport_database.cpp
   src/dmr5g_terrain.cpp
   src/manifest.cpp
   src/module.cpp

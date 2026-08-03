@@ -51,6 +51,24 @@ target_link_libraries(flying_data_pipeline_pilot_region_package_tests
 add_test(NAME flying.data_pipeline.pilot_region_packages
   COMMAND flying_data_pipeline_pilot_region_package_tests)
 
+add_executable(flying_data_pipeline_airport_database_tests
+  data_pipeline/airport_database_schema_test.cpp
+)
+
+target_link_libraries(flying_data_pipeline_airport_database_tests
+  PRIVATE
+    Flying::DataPipeline
+    Flying::CompilerOptions
+)
+
+target_compile_definitions(flying_data_pipeline_airport_database_tests
+  PRIVATE
+    FLYING_REPO_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+)
+
+add_test(NAME flying.data_pipeline.airport_database
+  COMMAND flying_data_pipeline_airport_database_tests)
+
 add_executable(flying_core_sim_kernel_tests
   core_sim/kernel_test.cpp
 )

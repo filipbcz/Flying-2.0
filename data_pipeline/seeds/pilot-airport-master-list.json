@@ -1,0 +1,725 @@
+{
+  "schemaVersion": "flying.airport-database.v1",
+  "databaseVersion": "2026.08.pilot-seed",
+  "airac": {
+    "cycleId": "2026-08",
+    "effectiveDate": "2026-08-03",
+    "source": "Flying project pilot seed",
+    "notes": "Synthetic non-operational records for schema validation only; no AIP or VFR manual content is embedded."
+  },
+  "metadata": {
+    "scope": "pilot_airports_only",
+    "restrictedSourcePolicy": "no_aip_vfr_content_without_permission",
+    "generatedAtUtc": "2026-08-03T00:00:00Z",
+    "notes": "Pilot seeds demonstrate the airport master list and runway schema without importing the Czech airport catalogue."
+  },
+  "masterList": [
+    {
+      "aerodromeId": "FPPV",
+      "name": "Flying Pilot Paved Airport",
+      "classification": "active_airport",
+      "operationalStatus": "active",
+      "recordStatus": "derived",
+      "sourceDataStatus": "permitted",
+      "airacEffectiveDate": "2026-08-03",
+      "provenance": [
+        {
+          "sourceId": "project-pilot-fixture-2026-08",
+          "sourceType": "project_fixture",
+          "publisher": "Flying project",
+          "sourceDocument": "data_pipeline/seeds/pilot-airport-master-list.json",
+          "license": {
+            "name": "Project-internal fixture data"
+          },
+          "permissionStatus": "permitted",
+          "retrievedAtUtc": "2026-08-03T00:00:00Z",
+          "accuracyM": 25,
+          "notes": "Synthetic paved-airport seed record, not suitable for navigation."
+        }
+      ],
+      "validation": {
+        "status": "derived",
+        "confidence": {
+          "overall": 0.45,
+          "geometry": 0.4,
+          "surface": 0.7,
+          "declaredDistances": 0.35
+        },
+        "manualVerification": {
+          "status": "unverified",
+          "notes": "Fixture record awaits project review before it can be production validated."
+        }
+      },
+      "notes": "Detailed pilot seed with one paved runway."
+    },
+    {
+      "aerodromeId": "FPGS",
+      "name": "Flying Pilot Grass SLZ Field",
+      "classification": "slz_field",
+      "operationalStatus": "active",
+      "recordStatus": "derived",
+      "sourceDataStatus": "permitted",
+      "airacEffectiveDate": "2026-08-03",
+      "provenance": [
+        {
+          "sourceId": "project-pilot-fixture-2026-08",
+          "sourceType": "project_fixture",
+          "publisher": "Flying project",
+          "sourceDocument": "data_pipeline/seeds/pilot-airport-master-list.json",
+          "license": {
+            "name": "Project-internal fixture data"
+          },
+          "permissionStatus": "permitted",
+          "retrievedAtUtc": "2026-08-03T00:00:00Z",
+          "accuracyM": 30,
+          "notes": "Synthetic SLZ-field seed record, not suitable for navigation."
+        }
+      ],
+      "validation": {
+        "status": "derived",
+        "confidence": {
+          "overall": 0.4,
+          "geometry": 0.35,
+          "surface": 0.65,
+          "declaredDistances": 0.3
+        },
+        "manualVerification": {
+          "status": "unverified",
+          "notes": "Fixture record awaits project review before it can be production validated."
+        }
+      },
+      "notes": "Detailed pilot seed with one grass runway."
+    },
+    {
+      "aerodromeId": "FPCL",
+      "name": "Flying Pilot Closed Checklist Field",
+      "classification": "closed_field",
+      "operationalStatus": "closed",
+      "recordStatus": "validated",
+      "sourceDataStatus": "permitted",
+      "airacEffectiveDate": "2026-08-03",
+      "provenance": [
+        {
+          "sourceId": "project-closed-field-fixture-2026-08",
+          "sourceType": "project_fixture",
+          "publisher": "Flying project",
+          "sourceDocument": "docs/governance/m0-legal-data-gate.md",
+          "license": {
+            "name": "Project-internal checklist fixture"
+          },
+          "permissionStatus": "permitted",
+          "retrievedAtUtc": "2026-08-03T00:00:00Z",
+          "notes": "Checklist-only fixture proving closed-field classification."
+        }
+      ],
+      "validation": {
+        "status": "manually_verified",
+        "confidence": {
+          "overall": 0.8,
+          "geometry": 0,
+          "surface": 0,
+          "declaredDistances": 0
+        },
+        "manualVerification": {
+          "status": "reviewer_approved",
+          "reviewer": "fixture-review",
+          "verifiedAtUtc": "2026-08-03T00:00:00Z",
+          "notes": "Checklist-only validation state; no runway data are implied."
+        }
+      },
+      "notes": "Master-list only fixture; no aerodrome geometry is packaged."
+    },
+    {
+      "aerodromeId": "FPBP",
+      "name": "Flying Pilot Blocked Permission Airport",
+      "classification": "active_airport",
+      "operationalStatus": "unknown",
+      "recordStatus": "blocked_missing_permission",
+      "sourceDataStatus": "blocked_missing_permission",
+      "airacEffectiveDate": "2026-08-03",
+      "provenance": [
+        {
+          "sourceId": "aip-vfr-permission-gate",
+          "sourceType": "restricted_aip_pending_permission",
+          "publisher": "Flying governance",
+          "sourceDocument": "docs/governance/m0-legal-data-gate.md",
+          "permissionStatus": "blocked_missing_permission",
+          "retrievedAtUtc": "2026-08-03T00:00:00Z",
+          "notes": "Placeholder classifies a record blocked by missing written permission without storing restricted data."
+        }
+      ],
+      "validation": {
+        "status": "blocked_missing_permission",
+        "confidence": {
+          "overall": 0,
+          "geometry": 0,
+          "surface": 0,
+          "declaredDistances": 0
+        },
+        "manualVerification": {
+          "status": "blocked",
+          "notes": "Blocked until permission evidence is archived."
+        }
+      }
+    },
+    {
+      "aerodromeId": "FPBD",
+      "name": "Flying Pilot Blocked Source Data SLZ",
+      "classification": "slz_field",
+      "operationalStatus": "unknown",
+      "recordStatus": "blocked_missing_source_data",
+      "sourceDataStatus": "blocked_missing_source_data",
+      "airacEffectiveDate": "2026-08-03",
+      "provenance": [
+        {
+          "sourceId": "operator-source-request-2026-08",
+          "sourceType": "operator_confirmation",
+          "publisher": "Flying project",
+          "sourceDocument": "docs/governance/m0-legal-data-gate.md",
+          "permissionStatus": "blocked_missing_source_data",
+          "retrievedAtUtc": "2026-08-03T00:00:00Z",
+          "notes": "Placeholder classifies a record blocked by missing operator source data."
+        }
+      ],
+      "validation": {
+        "status": "blocked_missing_source_data",
+        "confidence": {
+          "overall": 0,
+          "geometry": 0,
+          "surface": 0,
+          "declaredDistances": 0
+        },
+        "manualVerification": {
+          "status": "blocked",
+          "notes": "Blocked until source data are available."
+        }
+      }
+    }
+  ],
+  "aerodromes": [
+    {
+      "id": "FPPV",
+      "icaoCode": "",
+      "localCode": "FPPV",
+      "name": "Flying Pilot Paved Airport",
+      "classification": "active_airport",
+      "operationalStatus": "active",
+      "referencePointWgs84": {
+        "latDeg": 49.2,
+        "lonDeg": 14.5,
+        "elevationM": 430
+      },
+      "trafficPatternAltitudeFtAgl": 1000,
+      "airacEffectiveDate": "2026-08-03",
+      "provenance": [
+        {
+          "sourceId": "project-pilot-fixture-2026-08",
+          "sourceType": "project_fixture",
+          "publisher": "Flying project",
+          "sourceDocument": "data_pipeline/seeds/pilot-airport-master-list.json",
+          "license": {
+            "name": "Project-internal fixture data"
+          },
+          "permissionStatus": "permitted",
+          "retrievedAtUtc": "2026-08-03T00:00:00Z",
+          "accuracyM": 25,
+          "notes": "Synthetic paved-airport geometry for schema validation only."
+        }
+      ],
+      "validation": {
+        "status": "derived",
+        "confidence": {
+          "overall": 0.45,
+          "geometry": 0.4,
+          "surface": 0.7,
+          "declaredDistances": 0.35
+        },
+        "manualVerification": {
+          "status": "unverified",
+          "notes": "Not production validated."
+        }
+      },
+      "runways": [
+        {
+          "id": "FPPV-RWY-09-27",
+          "designator": "09/27",
+          "surface": {
+            "surfaceType": "paved",
+            "material": "asphalt",
+            "condition": "serviceable",
+            "loadRating": "fixture-only",
+            "notes": "Paved surface type seed."
+          },
+          "dimensionsM": {
+            "length": 850,
+            "width": 23
+          },
+          "lighting": {
+            "edgeLights": false,
+            "thresholdLights": false,
+            "approachLights": false,
+            "papi": false,
+            "runwayEndIdentifierLights": false,
+            "intensity": "none",
+            "notes": "No lighting implemented; schema records declared lighting state only."
+          },
+          "markings": {
+            "designator": true,
+            "centerline": true,
+            "threshold": true,
+            "aimingPoint": false,
+            "touchdownZone": false,
+            "edge": true,
+            "notes": "Fixture marking state."
+          },
+          "slope": {
+            "longitudinalPercent": 0.2,
+            "transversePercent": 1.2,
+            "sourceAccuracyPercent": 0.5,
+            "notes": "Synthetic slope value."
+          },
+          "airacEffectiveDate": "2026-08-03",
+          "provenance": [
+            {
+              "sourceId": "project-pilot-fixture-2026-08",
+              "sourceType": "project_fixture",
+              "publisher": "Flying project",
+              "sourceDocument": "data_pipeline/seeds/pilot-airport-master-list.json",
+              "license": {
+                "name": "Project-internal fixture data"
+              },
+              "permissionStatus": "permitted",
+              "retrievedAtUtc": "2026-08-03T00:00:00Z",
+              "accuracyM": 25,
+              "notes": "Runway dimensions, thresholds, markings and lighting are synthetic."
+            }
+          ],
+          "validation": {
+            "status": "derived",
+            "confidence": {
+              "overall": 0.45,
+              "geometry": 0.4,
+              "surface": 0.7,
+              "declaredDistances": 0.35
+            },
+            "manualVerification": {
+              "status": "unverified",
+              "notes": "Production validation requires physical threshold source evidence."
+            }
+          },
+          "ends": [
+            {
+              "id": "FPPV-RWY-09",
+              "designator": "09",
+              "trueBearingDeg": 90,
+              "threshold": {
+                "physicalThreshold": {
+                  "positionWgs84": {
+                    "latDeg": 49.2,
+                    "lonDeg": 14.4942,
+                    "elevationM": 429.2
+                  },
+                  "sourceAccuracyM": 25,
+                  "provenanceRef": "project-pilot-fixture-2026-08"
+                },
+                "displacedThreshold": {
+                  "present": false
+                }
+              },
+              "declaredDistancesM": {
+                "tora": 850,
+                "toda": 850,
+                "asda": 850,
+                "lda": 850,
+                "provenanceRef": "project-pilot-fixture-2026-08",
+                "notes": "Fixture declared distances equal physical runway length."
+              },
+              "lighting": {
+                "edgeLights": false,
+                "thresholdLights": false,
+                "approachLights": false,
+                "papi": false,
+                "runwayEndIdentifierLights": false,
+                "intensity": "none"
+              },
+              "markings": {
+                "designator": true,
+                "centerline": true,
+                "threshold": true,
+                "aimingPoint": false,
+                "touchdownZone": false,
+                "edge": true
+              },
+              "slope": {
+                "longitudinalPercent": 0.2,
+                "transversePercent": 1.2,
+                "sourceAccuracyPercent": 0.5
+              },
+              "provenance": [
+                {
+                  "sourceId": "project-pilot-fixture-2026-08",
+                  "sourceType": "project_fixture",
+                  "publisher": "Flying project",
+                  "sourceDocument": "data_pipeline/seeds/pilot-airport-master-list.json",
+                  "license": {
+                    "name": "Project-internal fixture data"
+                  },
+                  "permissionStatus": "permitted",
+                  "retrievedAtUtc": "2026-08-03T00:00:00Z",
+                  "accuracyM": 25
+                }
+              ],
+              "validation": {
+                "status": "derived",
+                "confidence": {
+                  "overall": 0.45,
+                  "geometry": 0.4,
+                  "surface": 0.7,
+                  "declaredDistances": 0.35
+                },
+                "manualVerification": {
+                  "status": "unverified"
+                }
+              }
+            },
+            {
+              "id": "FPPV-RWY-27",
+              "designator": "27",
+              "trueBearingDeg": 270,
+              "threshold": {
+                "physicalThreshold": {
+                  "positionWgs84": {
+                    "latDeg": 49.2,
+                    "lonDeg": 14.5058,
+                    "elevationM": 430.9
+                  },
+                  "sourceAccuracyM": 25,
+                  "provenanceRef": "project-pilot-fixture-2026-08"
+                },
+                "displacedThreshold": {
+                  "present": false
+                }
+              },
+              "declaredDistancesM": {
+                "tora": 850,
+                "toda": 850,
+                "asda": 850,
+                "lda": 850,
+                "provenanceRef": "project-pilot-fixture-2026-08",
+                "notes": "Fixture declared distances equal physical runway length."
+              },
+              "lighting": {
+                "edgeLights": false,
+                "thresholdLights": false,
+                "approachLights": false,
+                "papi": false,
+                "runwayEndIdentifierLights": false,
+                "intensity": "none"
+              },
+              "markings": {
+                "designator": true,
+                "centerline": true,
+                "threshold": true,
+                "aimingPoint": false,
+                "touchdownZone": false,
+                "edge": true
+              },
+              "slope": {
+                "longitudinalPercent": -0.2,
+                "transversePercent": 1.2,
+                "sourceAccuracyPercent": 0.5
+              },
+              "provenance": [
+                {
+                  "sourceId": "project-pilot-fixture-2026-08",
+                  "sourceType": "project_fixture",
+                  "publisher": "Flying project",
+                  "sourceDocument": "data_pipeline/seeds/pilot-airport-master-list.json",
+                  "license": {
+                    "name": "Project-internal fixture data"
+                  },
+                  "permissionStatus": "permitted",
+                  "retrievedAtUtc": "2026-08-03T00:00:00Z",
+                  "accuracyM": 25
+                }
+              ],
+              "validation": {
+                "status": "derived",
+                "confidence": {
+                  "overall": 0.45,
+                  "geometry": 0.4,
+                  "surface": 0.7,
+                  "declaredDistances": 0.35
+                },
+                "manualVerification": {
+                  "status": "unverified"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "FPGS",
+      "icaoCode": "",
+      "localCode": "FPGS",
+      "name": "Flying Pilot Grass SLZ Field",
+      "classification": "slz_field",
+      "operationalStatus": "active",
+      "referencePointWgs84": {
+        "latDeg": 49.206,
+        "lonDeg": 14.516,
+        "elevationM": 422
+      },
+      "airacEffectiveDate": "2026-08-03",
+      "provenance": [
+        {
+          "sourceId": "project-pilot-fixture-2026-08",
+          "sourceType": "project_fixture",
+          "publisher": "Flying project",
+          "sourceDocument": "data_pipeline/seeds/pilot-airport-master-list.json",
+          "license": {
+            "name": "Project-internal fixture data"
+          },
+          "permissionStatus": "permitted",
+          "retrievedAtUtc": "2026-08-03T00:00:00Z",
+          "accuracyM": 30,
+          "notes": "Synthetic grass-field geometry for schema validation only."
+        }
+      ],
+      "validation": {
+        "status": "derived",
+        "confidence": {
+          "overall": 0.4,
+          "geometry": 0.35,
+          "surface": 0.65,
+          "declaredDistances": 0.3
+        },
+        "manualVerification": {
+          "status": "unverified",
+          "notes": "Not production validated."
+        }
+      },
+      "runways": [
+        {
+          "id": "FPGS-RWY-16-34",
+          "designator": "16/34",
+          "surface": {
+            "surfaceType": "grass",
+            "material": "turf",
+            "condition": "serviceable",
+            "loadRating": "fixture-only",
+            "notes": "Grass surface type seed."
+          },
+          "dimensionsM": {
+            "length": 550,
+            "width": 30
+          },
+          "lighting": {
+            "edgeLights": false,
+            "thresholdLights": false,
+            "approachLights": false,
+            "papi": false,
+            "runwayEndIdentifierLights": false,
+            "intensity": "none"
+          },
+          "markings": {
+            "designator": false,
+            "centerline": false,
+            "threshold": false,
+            "aimingPoint": false,
+            "touchdownZone": false,
+            "edge": false,
+            "notes": "Unmarked grass strip fixture."
+          },
+          "slope": {
+            "longitudinalPercent": 0.6,
+            "transversePercent": 1,
+            "sourceAccuracyPercent": 0.8,
+            "notes": "Synthetic slope value."
+          },
+          "airacEffectiveDate": "2026-08-03",
+          "provenance": [
+            {
+              "sourceId": "project-pilot-fixture-2026-08",
+              "sourceType": "project_fixture",
+              "publisher": "Flying project",
+              "sourceDocument": "data_pipeline/seeds/pilot-airport-master-list.json",
+              "license": {
+                "name": "Project-internal fixture data"
+              },
+              "permissionStatus": "permitted",
+              "retrievedAtUtc": "2026-08-03T00:00:00Z",
+              "accuracyM": 30,
+              "notes": "Runway dimensions, thresholds, markings and lighting are synthetic."
+            }
+          ],
+          "validation": {
+            "status": "derived",
+            "confidence": {
+              "overall": 0.4,
+              "geometry": 0.35,
+              "surface": 0.65,
+              "declaredDistances": 0.3
+            },
+            "manualVerification": {
+              "status": "unverified",
+              "notes": "Production validation requires physical threshold source evidence."
+            }
+          },
+          "ends": [
+            {
+              "id": "FPGS-RWY-16",
+              "designator": "16",
+              "trueBearingDeg": 160,
+              "threshold": {
+                "physicalThreshold": {
+                  "positionWgs84": {
+                    "latDeg": 49.2083,
+                    "lonDeg": 14.5146,
+                    "elevationM": 420.4
+                  },
+                  "sourceAccuracyM": 30,
+                  "provenanceRef": "project-pilot-fixture-2026-08"
+                },
+                "displacedThreshold": {
+                  "present": false
+                }
+              },
+              "declaredDistancesM": {
+                "tora": 550,
+                "toda": 550,
+                "asda": 550,
+                "lda": 550,
+                "provenanceRef": "project-pilot-fixture-2026-08",
+                "notes": "Fixture declared distances equal physical runway length."
+              },
+              "lighting": {
+                "edgeLights": false,
+                "thresholdLights": false,
+                "approachLights": false,
+                "papi": false,
+                "runwayEndIdentifierLights": false,
+                "intensity": "none"
+              },
+              "markings": {
+                "designator": false,
+                "centerline": false,
+                "threshold": false,
+                "aimingPoint": false,
+                "touchdownZone": false,
+                "edge": false
+              },
+              "slope": {
+                "longitudinalPercent": 0.6,
+                "transversePercent": 1,
+                "sourceAccuracyPercent": 0.8
+              },
+              "provenance": [
+                {
+                  "sourceId": "project-pilot-fixture-2026-08",
+                  "sourceType": "project_fixture",
+                  "publisher": "Flying project",
+                  "sourceDocument": "data_pipeline/seeds/pilot-airport-master-list.json",
+                  "license": {
+                    "name": "Project-internal fixture data"
+                  },
+                  "permissionStatus": "permitted",
+                  "retrievedAtUtc": "2026-08-03T00:00:00Z",
+                  "accuracyM": 30
+                }
+              ],
+              "validation": {
+                "status": "derived",
+                "confidence": {
+                  "overall": 0.4,
+                  "geometry": 0.35,
+                  "surface": 0.65,
+                  "declaredDistances": 0.3
+                },
+                "manualVerification": {
+                  "status": "unverified"
+                }
+              }
+            },
+            {
+              "id": "FPGS-RWY-34",
+              "designator": "34",
+              "trueBearingDeg": 340,
+              "threshold": {
+                "physicalThreshold": {
+                  "positionWgs84": {
+                    "latDeg": 49.2037,
+                    "lonDeg": 14.5174,
+                    "elevationM": 423.6
+                  },
+                  "sourceAccuracyM": 30,
+                  "provenanceRef": "project-pilot-fixture-2026-08"
+                },
+                "displacedThreshold": {
+                  "present": false
+                }
+              },
+              "declaredDistancesM": {
+                "tora": 550,
+                "toda": 550,
+                "asda": 550,
+                "lda": 550,
+                "provenanceRef": "project-pilot-fixture-2026-08",
+                "notes": "Fixture declared distances equal physical runway length."
+              },
+              "lighting": {
+                "edgeLights": false,
+                "thresholdLights": false,
+                "approachLights": false,
+                "papi": false,
+                "runwayEndIdentifierLights": false,
+                "intensity": "none"
+              },
+              "markings": {
+                "designator": false,
+                "centerline": false,
+                "threshold": false,
+                "aimingPoint": false,
+                "touchdownZone": false,
+                "edge": false
+              },
+              "slope": {
+                "longitudinalPercent": -0.6,
+                "transversePercent": 1,
+                "sourceAccuracyPercent": 0.8
+              },
+              "provenance": [
+                {
+                  "sourceId": "project-pilot-fixture-2026-08",
+                  "sourceType": "project_fixture",
+                  "publisher": "Flying project",
+                  "sourceDocument": "data_pipeline/seeds/pilot-airport-master-list.json",
+                  "license": {
+                    "name": "Project-internal fixture data"
+                  },
+                  "permissionStatus": "permitted",
+                  "retrievedAtUtc": "2026-08-03T00:00:00Z",
+                  "accuracyM": 30
+                }
+              ],
+              "validation": {
+                "status": "derived",
+                "confidence": {
+                  "overall": 0.4,
+                  "geometry": 0.35,
+                  "surface": 0.65,
+                  "declaredDistances": 0.3
+                },
+                "manualVerification": {
+                  "status": "unverified"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

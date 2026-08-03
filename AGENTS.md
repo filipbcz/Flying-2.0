@@ -6,30 +6,30 @@
 - default branch: main
 
 ## Task
-- title: Flying: 9. Implement Ortofoto And Vector Package Processing For Pilot Region
+- title: Flying: 10. Implement Airport Master List And Runway Schema
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-9. Implement Ortofoto And Vector Package Processing For Pilot Region
+10. Implement Airport Master List And Runway Schema
 
 Step description and scope:
-Process pilot-region CUZK Ortofoto, ZABAGED, and Geonames data into offline imagery and vector packages with attribution, material masks, water masks, names, and package manifests.
+Create the versioned airport database schema, master checklist model, runway/runway-end schema, data provenance fields, validation states, AIRAC versioning, and non-code seed records for pilot airports only.
 
 In scope:
-- Ortofoto pilot tiling
-- ZABAGED vector conversion
-- Geonames label conversion
-- Water and material masks
-- Attribution propagation
-- Offline package validation
+- Airport database schema
+- Runway and runway-end schema
+- Master list schema
+- AIRAC/version fields
+- Pilot seed records
+- Schema validation tests
 
 Out of scope:
-- Whole-country data generation
-- Airport database import
-- 2D navigation UI
-- Procedural buildings and vegetation runtime placement
+- Importing all Czech airports
+- Generating runway meshes
+- Implementing runway lights in Unreal
+- Using restricted AIP/VFR content without documented permission
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -46,9 +46,9 @@ Already completed roadmap steps (existing repository context):
 - 6. Build Terrain Height Service Contract
 - 7. Create GIS Data Pipeline Foundation
 - 8. Implement DMR 5G Terrain Processing For Pilot Region
+- 9. Implement Ortofoto And Vector Package Processing For Pilot Region
 
 Future roadmap steps (explicitly out of scope):
-- 10. Implement Airport Master List And Runway Schema
 - 11. Implement Runway Importer And Pilot Airport Surfaces
 - 12. Create Unreal UE 5.8 Project And Cesium Runtime Integration
 - 13. Implement Input Device Mapping And Scenario Start Flow
@@ -71,10 +71,10 @@ Future roadmap steps (explicitly out of scope):
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- Pilot-region ortho imagery is tiled into offline multi-level packages with mipmaps and no dependency on public tile servers.
-- ZABAGED and Geonames layers are transformed into local vector packages for roads, rail, water, settlements, vegetation areas, notable objects, and labels.
-- Generated packages include CUZK attribution, source versions, checksums, and license metadata.
-- Validation confirms runtime package manifests contain no external map API keys or remote tile-server URLs.
+- Schema represents Aerodrome, Runway, RunwayEnd, thresholds, declared distances, surfaces, lighting, markings, slopes, materials, provenance, AIRAC effective date, confidence, and manual verification status.
+- Master list model can classify active airports, SLZ fields, closed fields, validated records, derived records, and records blocked by missing permission or source data.
+- Pilot airport seed data includes one paved and one grass runway with source provenance and explicit validation status.
+- Schema validation rejects production-validated runway records that lack physical threshold coordinates or source provenance.
 
 ## Agent Configuration
 - no project config provided, using defaults
