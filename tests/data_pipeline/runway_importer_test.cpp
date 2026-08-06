@@ -68,6 +68,20 @@ void require_field(std::string_view text, std::string_view needle) {
           std::string{"expected JSON field "} + std::string{needle});
 }
 
+std::string replace_all(std::string text,
+                        std::string_view needle,
+                        std::string_view replacement) {
+  std::size_t offset = 0U;
+  while (true) {
+    const std::size_t position = text.find(needle, offset);
+    if (position == std::string::npos) {
+      return text;
+    }
+    text.replace(position, needle.size(), replacement);
+    offset = position + replacement.size();
+  }
+}
+
 void require_non_flat_surface(std::string_view surface_json) {
   const std::vector<double> up_values = numbers_after(surface_json, "\"upM\":");
   require(up_values.size() >= 4U, "surface JSON must include local ENU vertex heights");
@@ -91,6 +105,58 @@ std::string remove_first_paved_threshold_position(std::string text) {
   const std::size_t next_field = text.find("                  \"sourceAccuracyM\"", position);
   require(next_field != std::string::npos, "physical threshold coordinate block end not found");
   text.erase(position, next_field - position);
+  return text;
+}
+
+std::string add_second_paved_runway_with_coincident_thresholds(std::string text) {
+  const std::size_t runway_id = text.find("\"id\": \"FPPV-RWY-09-27\"");
+  require(runway_id != std::string::npos, "paved runway fixture not found");
+  const std::size_t runway_begin = text.rfind("        {", runway_id);
+  require(runway_begin != std::string::npos, "paved runway object start not found");
+
+  int depth = 0;
+  bool in_string = false;
+  bool escaping = false;
+  std::size_t runway_end = std::string::npos;
+  for (std::size_t i = runway_begin; i < text.size(); ++i) {
+    const char ch = text[i];
+    if (escaping) {
+      escaping = false;
+      continue;
+    }
+    if (ch == '\\' && in_string) {
+      escaping = true;
+      continue;
+    }
+    if (ch == '"') {
+      in_string = !in_string;
+      continue;
+    }
+    if (in_string) {
+      continue;
+    }
+    if (ch == '{') {
+      ++depth;
+    } else if (ch == '}') {
+      --depth;
+      if (depth == 0) {
+        runway_end = i + 1U;
+        break;
+      }
+    }
+  }
+  require(runway_end != std::string::npos, "paved runway object end not found");
+
+  std::string duplicate = text.substr(runway_begin, runway_end - runway_begin);
+  duplicate = replace_all(duplicate, "FPPV-RWY-09-27", "FPPV-RWY-10-28");
+  duplicate = replace_all(duplicate, "FPPV-RWY-09", "FPPV-RWY-10");
+  duplicate = replace_all(duplicate, "FPPV-RWY-27", "FPPV-RWY-28");
+  duplicate = replace_all(duplicate, "\"designator\": \"09/27\"", "\"designator\": \"10/28\"");
+  duplicate = replace_all(duplicate, "\"designator\": \"09\"", "\"designator\": \"10\"");
+  duplicate = replace_all(duplicate, "\"designator\": \"27\"", "\"designator\": \"28\"");
+  duplicate = replace_all(duplicate, "\"lonDeg\": 14.5058", "\"lonDeg\": 14.4942");
+  duplicate = replace_all(duplicate, "\"elevationM\": 430.9", "\"elevationM\": 429.2");
+  text.insert(runway_end, ",\n" + duplicate);
   return text;
 }
 
@@ -164,6 +230,9 @@ int main() {
   require_field(coverage_report,
                 "\"schemaVersion\": \"flying.pilot-runway-coverage-report.v1\"");
   require_field(coverage_report, "\"passed\": true");
+  require_field(coverage_report,
+                "\"comparison\": \"generated_runway_surfaces_vs_approved_master_list\"");
+  require_field(coverage_report, "\"missingActiveValidatedRunways\": 0");
   require_field(coverage_report, "\"pilotAirportCount\": 2");
   require_field(coverage_report, "\"runwaySurfaceCount\": 2");
   for (const std::string_view check :
@@ -173,6 +242,67 @@ int main() {
   }
 
   std::filesystem::remove_all(root);
+
+  const std::filesystem::path national_root = make_temp_root();
+  const std::filesystem::path national_seed = national_root / "national-airport-master-list.json";
+  std::string national_seed_text =
+    replace_all(read_file(seed_path), "\"scope\": \"pilot_airports_only\"",
+                "\"scope\": \"national_airport_master_list\"");
+  national_seed_text =
+    replace_all(national_seed_text, "\"status\": \"derived\"",
+                "\"status\": \"production_validated\"");
+  national_seed_text =
+    replace_all(national_seed_text, "\"status\": \"unverified\"",
+                "\"status\": \"reviewer_approved\"");
+  write_file(national_seed, national_seed_text);
+  const pipeline::RunwayImportOptions national_options =
+    make_options(national_root, national_seed);
+  const pipeline::RunwayImportResult national_result =
+    pipeline::import_pilot_runways(national_options);
+  require(national_result.created(),
+          "national runway import must accept approved master-list scope");
+  const std::string national_report = read_file(national_options.report_path);
+  require_field(national_report, "\"scope\": \"national_airport_master_list\"");
+  require_field(national_report, "\"activeValidatedRunwayCount\": 2");
+  require_field(national_report, "\"missingActiveValidatedRunways\": 0");
+  std::filesystem::remove_all(national_root);
+
+  const std::filesystem::path missing_runway_root = make_temp_root();
+  const std::filesystem::path missing_runway_seed =
+    missing_runway_root / "national-airport-master-list-missing-runway.json";
+  write_file(missing_runway_seed,
+             add_second_paved_runway_with_coincident_thresholds(national_seed_text));
+  const pipeline::RunwayImportOptions missing_runway_options =
+    make_options(missing_runway_root, missing_runway_seed);
+  const pipeline::RunwayImportResult missing_runway_result =
+    pipeline::import_pilot_runways(missing_runway_options);
+  require(!missing_runway_result.created(),
+          "national runway import must fail when one same-aerodrome production runway is missing");
+  const std::string missing_runway_report = read_file(missing_runway_options.report_path);
+  require_field(missing_runway_report, "\"missingActiveValidatedRunways\": 1");
+  require_field(missing_runway_report, "\"FPPV/FPPV-RWY-10-28\"");
+  require_field(missing_runway_report,
+                "\"sourceId\": \"FPPV/FPPV-RWY-10-28\"");
+  std::filesystem::remove_all(missing_runway_root);
+
+  const std::filesystem::path overwrite_root = make_temp_root();
+  const pipeline::RunwayImportOptions overwrite_options =
+    make_options(overwrite_root, seed_path);
+  write_file(overwrite_root / "out" / "runways" / "FPGS" /
+               "FPGS-RWY-16-34.surface.json",
+             "{\n  \"manualGeometryReviewLock\": true\n}\n");
+  const pipeline::RunwayImportResult overwrite_result =
+    pipeline::import_pilot_runways(overwrite_options);
+  require(!overwrite_result.created(),
+          "runway importer must reject automatic overwrite of manually verified geometry");
+  require(read_file(overwrite_options.report_path)
+            .find("runway_import.runway.manual_geometry_overwrite_blocked") !=
+          std::string::npos,
+          "manual geometry overwrite must be reported");
+  require(!std::filesystem::exists(overwrite_root / "out" / "runways" / "FPPV" /
+                                   "FPPV-RWY-09-27.surface.json"),
+          "runway importer must preflight locks before writing any surface files");
+  std::filesystem::remove_all(overwrite_root);
 
   const std::filesystem::path bad_root = make_temp_root();
   const std::filesystem::path bad_seed = bad_root / "airport-without-threshold-position.json";

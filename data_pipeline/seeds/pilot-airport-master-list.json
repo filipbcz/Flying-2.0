@@ -50,6 +50,11 @@
           "notes": "Fixture record awaits project review before it can be production validated."
         }
       },
+      "startLocationEligibility": {
+        "defaultStartLocation": true,
+        "historicalModeOnly": false,
+        "reason": "Active pilot fixture is selectable for default start-flow validation."
+      },
       "notes": "Detailed pilot seed with one paved runway."
     },
     {
@@ -87,6 +92,11 @@
           "status": "unverified",
           "notes": "Fixture record awaits project review before it can be production validated."
         }
+      },
+      "startLocationEligibility": {
+        "defaultStartLocation": true,
+        "historicalModeOnly": false,
+        "reason": "Active pilot fixture is selectable for default start-flow validation."
       },
       "notes": "Detailed pilot seed with one grass runway."
     },
@@ -127,6 +137,11 @@
           "notes": "Checklist-only validation state; no runway data are implied."
         }
       },
+      "startLocationEligibility": {
+        "defaultStartLocation": false,
+        "historicalModeOnly": false,
+        "reason": "Closed aerodrome records are not offered as default start locations."
+      },
       "notes": "Master-list only fixture; no aerodrome geometry is packaged."
     },
     {
@@ -160,6 +175,11 @@
           "status": "blocked",
           "notes": "Blocked until permission evidence is archived."
         }
+      },
+      "startLocationEligibility": {
+        "defaultStartLocation": false,
+        "historicalModeOnly": false,
+        "reason": "Unavailable aerodrome data are blocked from default start locations."
       }
     },
     {
@@ -193,6 +213,11 @@
           "status": "blocked",
           "notes": "Blocked until source data are available."
         }
+      },
+      "startLocationEligibility": {
+        "defaultStartLocation": false,
+        "historicalModeOnly": false,
+        "reason": "Unavailable SLZ source data are blocked from default start locations."
       }
     }
   ],
@@ -238,6 +263,11 @@
           "status": "unverified",
           "notes": "Not production validated."
         }
+      },
+      "startLocationEligibility": {
+        "defaultStartLocation": true,
+        "historicalModeOnly": false,
+        "reason": "Active pilot paved airport fixture remains selectable."
       },
       "runways": [
         {
@@ -500,6 +530,11 @@
           "status": "unverified",
           "notes": "Not production validated."
         }
+      },
+      "startLocationEligibility": {
+        "defaultStartLocation": true,
+        "historicalModeOnly": false,
+        "reason": "Active pilot SLZ fixture remains selectable."
       },
       "runways": [
         {

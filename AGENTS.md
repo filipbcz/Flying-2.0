@@ -6,31 +6,31 @@
 - default branch: main
 
 ## Task
-- title: Flying: 21. Scale Terrain Pipeline To Full Czech Republic
+- title: Flying: 22. Complete Airport And SLZ Coverage
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-21. Scale Terrain Pipeline To Full Czech Republic
+22. Complete Airport And SLZ Coverage
 
 Step description and scope:
-Run and harden the terrain, imagery, vector, water, material, and collision package pipeline for the full Czech Republic, including manifests, checksums, tile continuity, streaming metadata, and packaging layout.
+Populate and validate the full approved master list of active Czech airports, active runways, AIP/VFR airports, and VFR-published SLZ fields using permitted sources and manual verification where required.
 
 In scope:
-- Whole-country DMR processing
-- Whole-country ortho processing
-- Whole-country vector processing
-- Water/material masks
-- Tile manifests
-- Collision package generation
-- Streaming metadata
+- Full airport database population
+- SLZ field records
+- Runway geometry verification
+- Coverage report
+- Manual verification workflow
+- AIRAC/source diff reports
+- Start-location eligibility rules
 
 Out of scope:
-- Foreign territory
-- Airport runway validation
-- Final installer
-- Live weather data
+- Restricted AIP/VFR redistribution without permission
+- Detailed art pass for every airport
+- Multiplayer ATC
+- Historical airport mode implementation
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -59,9 +59,9 @@ Already completed roadmap steps (existing repository context):
 - 18. Implement Cockpit And Aircraft Presentation
 - 19. Implement Weather And Atmosphere Coupling
 - 20. Build Aircraft Validation Suite
+- 21. Scale Terrain Pipeline To Full Czech Republic
 
 Future roadmap steps (explicitly out of scope):
-- 22. Complete Airport And SLZ Coverage
 - 23. Implement Detailed Airport Set
 - 24. Implement Offline 2D Navigation Map
 - 25. Implement World Objects, Vegetation, Water, Obstacles, And Audio
@@ -72,10 +72,10 @@ Future roadmap steps (explicitly out of scope):
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- Full Czech Republic terrain packages are generated from approved CUZK sources with versioned manifests, checksums, source provenance, and required attribution.
-- Automated edge-continuity and control-point reports pass across generated terrain package boundaries.
-- Runtime package metadata supports uninterrupted streaming across the entire Czech Republic without external map API dependencies.
-- Generated package sizes, tile hierarchy, and collision-tile availability are documented for release packaging and performance testing.
+- Coverage report compares the generated airport database against the approved master list and reports zero missing active validated runways for release scope.
+- Each production-validated runway has verified threshold coordinates, heading, length, width, surface, declared distances where available, provenance, AIRAC/source effective date, confidence, and manual verification state.
+- Closed or temporarily unavailable aerodromes are not offered as default start locations unless explicitly marked for a separate historical mode.
+- Importer prevents automatic overwrite of manually verified runway geometry without review.
 
 ## Agent Configuration
 - no project config provided, using defaults

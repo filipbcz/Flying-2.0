@@ -384,6 +384,15 @@ std::optional<std::string> optional_string(const JsonValue::Object& object,
   return value->string;
 }
 
+const JsonValue::Object* optional_object(const JsonValue::Object& object,
+                                         std::string_view key) {
+  const JsonValue* value = find_member(object, key);
+  if (value == nullptr || value->type != JsonValue::Type::object_value) {
+    return nullptr;
+  }
+  return &value->object;
+}
+
 std::string require_non_empty_string(const JsonValue::Object& object,
                                      std::string_view key,
                                      ValidationReport& report,
@@ -893,6 +902,43 @@ void validate_declared_distances(const JsonValue::Object& object,
     object, "provenanceRef", report, code_prefix, subject, source_id);
 }
 
+void validate_start_location_eligibility(const JsonValue::Object& object,
+                                         ValidationReport& report,
+                                         std::string_view code_prefix,
+                                         std::string_view subject,
+                                         std::string_view source_id,
+                                         std::string_view operational_status) {
+  (void)require_bool(
+    object, "defaultStartLocation", report, code_prefix, subject, source_id);
+  (void)require_bool(
+    object, "historicalModeOnly", report, code_prefix, subject, source_id);
+  const JsonValue* default_start = find_member(object, "defaultStartLocation");
+  const JsonValue* historical_only = find_member(object, "historicalModeOnly");
+  if (default_start != nullptr && default_start->type == JsonValue::Type::bool_value &&
+      default_start->boolean && operational_status != "active") {
+    const bool explicitly_historical =
+      historical_only != nullptr && historical_only->type == JsonValue::Type::bool_value &&
+      historical_only->boolean;
+    if (!explicitly_historical) {
+      add_issue(report,
+                "error",
+                std::string{code_prefix} + ".defaultStartLocation.ineligible",
+                std::string{subject} +
+                  " cannot be a default start location unless active or historical-mode-only.",
+                std::string{source_id});
+    }
+  }
+}
+
+void validate_geometry_review(const JsonValue::Object& object,
+                              ValidationReport& report,
+                              std::string_view code_prefix,
+                              std::string_view subject,
+                              std::string_view source_id) {
+  (void)require_bool(
+    object, "manualOverwriteRequiresReview", report, code_prefix, subject, source_id);
+}
+
 void validate_runway_end(const JsonValue& value,
                          std::size_t index,
                          bool production_validated_runway,
@@ -1082,6 +1128,14 @@ void validate_runway(const JsonValue& value,
   const bool production_validated =
     validation_status.has_value() && *validation_status == "production_validated";
 
+  if (const JsonValue::Object* geometry_review = optional_object(runway, "geometryReview")) {
+    validate_geometry_review(*geometry_review,
+                             report,
+                             "airport.runway.geometryReview",
+                             fallback_subject,
+                             issue_id);
+  }
+
   const JsonValue::Array* ends =
     require_array(runway, "ends", report, "airport.runway", fallback_subject, issue_id, 2U);
   if (ends != nullptr) {
@@ -1166,6 +1220,18 @@ void validate_master_list_record(const JsonValue& value,
     record, "provenance", report, "airport.master_list", subject, issue_id);
   (void)validate_validation_state(
     record, "validation", report, "airport.master_list", subject, issue_id);
+
+  const std::optional<std::string> operational_status =
+    optional_string(record, "operationalStatus");
+  if (const JsonValue::Object* start_eligibility =
+        optional_object(record, "startLocationEligibility")) {
+    validate_start_location_eligibility(*start_eligibility,
+                                        report,
+                                        "airport.master_list.startLocationEligibility",
+                                        subject,
+                                        issue_id,
+                                        operational_status.value_or(std::string{}));
+  }
 }
 
 void validate_aerodrome(const JsonValue& value, std::size_t index, ValidationReport& report) {
@@ -1199,6 +1265,8 @@ void validate_aerodrome(const JsonValue& value, std::size_t index, ValidationRep
                             "airport.aerodrome",
                             subject,
                             issue_id);
+  const std::optional<std::string> operational_status =
+    optional_string(aerodrome, "operationalStatus");
   const JsonValue::Object* reference_point = require_object(aerodrome,
                                                            "referencePointWgs84",
                                                            report,
@@ -1215,6 +1283,16 @@ void validate_aerodrome(const JsonValue& value, std::size_t index, ValidationRep
     aerodrome, "provenance", report, "airport.aerodrome", subject, issue_id);
   (void)validate_validation_state(
     aerodrome, "validation", report, "airport.aerodrome", subject, issue_id);
+
+  if (const JsonValue::Object* start_eligibility =
+        optional_object(aerodrome, "startLocationEligibility")) {
+    validate_start_location_eligibility(*start_eligibility,
+                                        report,
+                                        "airport.aerodrome.startLocationEligibility",
+                                        subject,
+                                        issue_id,
+                                        operational_status.value_or(std::string{}));
+  }
 
   const JsonValue::Array* runways =
     require_array(aerodrome, "runways", report, "airport.aerodrome", subject, issue_id);

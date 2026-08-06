@@ -95,7 +95,9 @@ void schema_represents_airport_master_list_and_runways() {
         "provenance",
         "airacVersion",
         "confidence",
-        "manualVerification"}) {
+        "manualVerification",
+        "startLocationEligibility",
+        "geometryReview"}) {
     require(schema.find(required) != std::string::npos,
             "airport database schema is missing an accepted runway/master-list field");
   }
@@ -157,6 +159,28 @@ void production_validated_runways_require_thresholds_and_provenance() {
           "missing runway source provenance must report the production provenance issue");
 }
 
+void closed_aerodromes_cannot_be_default_start_locations() {
+  std::string seed = read_file(
+    repo_root() / "data_pipeline" / "seeds" / "pilot-airport-master-list.json");
+  const std::size_t closed = seed.find("\"aerodromeId\": \"FPCL\"");
+  require(closed != std::string::npos, "closed master-list fixture not found");
+  const std::size_t eligibility = seed.find("\"defaultStartLocation\": false", closed);
+  require(eligibility != std::string::npos,
+          "closed master-list start eligibility fixture not found");
+  seed.replace(eligibility,
+               std::string{"\"defaultStartLocation\": false"}.size(),
+               "\"defaultStartLocation\": true");
+
+  const flying::data_pipeline::ValidationReport report =
+    flying::data_pipeline::validate_airport_database_text(seed);
+  require(!report.passed,
+          "closed aerodrome default start location must be rejected");
+  require(has_issue_code(
+            report,
+            "airport.master_list.startLocationEligibility.defaultStartLocation.ineligible"),
+          "closed default start location must report the eligibility issue");
+}
+
 } // namespace
 
 int main() {
@@ -164,6 +188,7 @@ int main() {
     schema_represents_airport_master_list_and_runways();
     pilot_seed_validates_and_includes_paved_and_grass_runways();
     production_validated_runways_require_thresholds_and_provenance();
+    closed_aerodromes_cannot_be_default_start_locations();
   } catch (const std::exception& error) {
     std::cerr << error.what() << "\n";
     return 1;

@@ -368,6 +368,8 @@ struct RunwayEndRecord {
 struct RunwayRecord {
   std::string id;
   std::string designator;
+  std::string validation_status;
+  std::string manual_verification_status;
   std::string surface_type;
   std::string material;
   double length_m = 0.0;
@@ -376,6 +378,7 @@ struct RunwayRecord {
   double declared_longitudinal_percent = 0.0;
   double transverse_percent = 0.0;
   std::string provenance_json = "[]";
+  bool manual_overwrite_requires_review = false;
   std::vector<RunwayEndRecord> ends;
 };
 
@@ -384,14 +387,25 @@ struct AerodromeRecord {
   std::string name;
   std::string classification;
   std::string operational_status;
+  bool default_start_location = false;
+  bool historical_mode_only = false;
   Wgs84Position reference_point;
   std::vector<RunwayRecord> runways;
+};
+
+struct MasterListRecord {
+  std::string aerodrome_id;
+  std::string classification;
+  std::string operational_status;
+  std::string record_status;
+  std::string source_data_status;
 };
 
 struct AirportDatabase {
   std::string database_version;
   std::string generated_at_utc;
   std::string scope;
+  std::vector<MasterListRecord> master_list;
   std::vector<AerodromeRecord> aerodromes;
 };
 
@@ -438,6 +452,8 @@ struct GeneratedRunway {
   double max_collision_visual_delta_m = 0.0;
   bool paved = false;
   bool grass = false;
+  bool production_validated = false;
+  bool manual_overwrite_requires_review = false;
   std::string provenance_json = "[]";
 };
 
@@ -578,6 +594,43 @@ bool has_errors(const ValidationReport& report) {
   return std::any_of(report.issues.begin(), report.issues.end(), [](const ValidationIssue& issue) {
     return issue.severity == "error";
   });
+}
+
+std::string runway_coverage_id(std::string_view airport_id, std::string_view runway_id) {
+  return std::string{airport_id} + "/" + std::string{runway_id};
+}
+
+bool master_record_is_release_scoped(const MasterListRecord& master) {
+  return master.operational_status == "active" &&
+         (master.classification == "active_airport" ||
+          master.classification == "slz_field") &&
+         (master.record_status == "validated" || master.record_status == "derived") &&
+         master.source_data_status == "permitted";
+}
+
+std::vector<std::string> release_scoped_production_runway_ids(
+  const AirportDatabase& database) {
+  std::vector<std::string> runway_ids;
+  for (const MasterListRecord& master : database.master_list) {
+    if (!master_record_is_release_scoped(master)) {
+      continue;
+    }
+    const auto aerodrome = std::find_if(
+      database.aerodromes.begin(),
+      database.aerodromes.end(),
+      [&](const AerodromeRecord& candidate) {
+        return candidate.id == master.aerodrome_id;
+      });
+    if (aerodrome == database.aerodromes.end()) {
+      continue;
+    }
+    for (const RunwayRecord& runway : aerodrome->runways) {
+      if (runway.validation_status == "production_validated") {
+        runway_ids.push_back(runway_coverage_id(master.aerodrome_id, runway.id));
+      }
+    }
+  }
+  return runway_ids;
 }
 
 void finalize_report(ValidationReport& report) {
@@ -724,6 +777,38 @@ SurfaceMarkings parse_markings(const JsonValue::Object& object) {
   return markings;
 }
 
+std::string parse_validation_status(const JsonValue::Object& object,
+                                    std::string_view field,
+                                    std::string_view nested_field = "status") {
+  const JsonValue::Object* validation = optional_object(object, field);
+  if (validation == nullptr) {
+    return {};
+  }
+  return optional_string(*validation, nested_field).value_or(std::string{});
+}
+
+std::string parse_manual_verification_status(const JsonValue::Object& object) {
+  const JsonValue::Object* validation = optional_object(object, "validation");
+  if (validation == nullptr) {
+    return {};
+  }
+  const JsonValue::Object* manual = optional_object(*validation, "manualVerification");
+  if (manual == nullptr) {
+    return {};
+  }
+  return optional_string(*manual, "status").value_or(std::string{});
+}
+
+bool parse_start_eligibility_bool(const JsonValue::Object& object,
+                                  std::string_view key,
+                                  bool fallback) {
+  const JsonValue::Object* eligibility = optional_object(object, "startLocationEligibility");
+  if (eligibility == nullptr) {
+    return fallback;
+  }
+  return optional_bool(*eligibility, key).value_or(fallback);
+}
+
 AirportDatabase parse_airport_database(const JsonValue& root, ValidationReport& report) {
   AirportDatabase database;
   if (root.type != JsonValue::Type::object_value) {
@@ -750,12 +835,33 @@ AirportDatabase parse_airport_database(const JsonValue& root, ValidationReport& 
       database.scope = *value;
     }
   }
-  if (database.scope != "pilot_airports_only") {
+  if (database.scope != "pilot_airports_only" &&
+      database.scope != "national_airport_master_list") {
     add_issue(report,
               "error",
               "runway_import.airport_database.scope.unsupported",
-              "Runway importer step 11 is limited to pilot_airports_only data.",
+              "Runway importer requires pilot or national airport master-list data.",
               database.scope);
+  }
+
+  if (const JsonValue::Array* master_list = optional_array(object, "masterList")) {
+    for (const JsonValue& master_value : *master_list) {
+      if (master_value.type != JsonValue::Type::object_value) {
+        continue;
+      }
+      MasterListRecord master;
+      master.aerodrome_id =
+        optional_string(master_value.object, "aerodromeId").value_or(std::string{});
+      master.classification =
+        optional_string(master_value.object, "classification").value_or(std::string{});
+      master.operational_status =
+        optional_string(master_value.object, "operationalStatus").value_or(std::string{});
+      master.record_status =
+        optional_string(master_value.object, "recordStatus").value_or(std::string{});
+      master.source_data_status =
+        optional_string(master_value.object, "sourceDataStatus").value_or(std::string{});
+      database.master_list.push_back(std::move(master));
+    }
   }
 
   const JsonValue::Array* aerodromes = optional_array(object, "aerodromes");
@@ -783,6 +889,12 @@ AirportDatabase parse_airport_database(const JsonValue& root, ValidationReport& 
       optional_string(aerodrome_object, "classification").value_or(std::string{});
     aerodrome.operational_status =
       optional_string(aerodrome_object, "operationalStatus").value_or(std::string{});
+    aerodrome.default_start_location =
+      parse_start_eligibility_bool(aerodrome_object,
+                                   "defaultStartLocation",
+                                   aerodrome.operational_status == "active");
+    aerodrome.historical_mode_only =
+      parse_start_eligibility_bool(aerodrome_object, "historicalModeOnly", false);
     if (const JsonValue::Object* reference =
           optional_object(aerodrome_object, "referencePointWgs84")) {
       aerodrome.reference_point = parse_wgs84_position(*reference);
@@ -807,6 +919,8 @@ AirportDatabase parse_airport_database(const JsonValue& root, ValidationReport& 
       runway.id = optional_string(runway_object, "id").value_or(std::string{});
       runway.designator =
         optional_string(runway_object, "designator").value_or(std::string{});
+      runway.validation_status = parse_validation_status(runway_object, "validation");
+      runway.manual_verification_status = parse_manual_verification_status(runway_object);
       if (const JsonValue::Object* surface = optional_object(runway_object, "surface")) {
         runway.surface_type = optional_string(*surface, "surfaceType").value_or(std::string{});
         runway.material = optional_string(*surface, "material").value_or(std::string{});
@@ -826,6 +940,11 @@ AirportDatabase parse_airport_database(const JsonValue& root, ValidationReport& 
       }
       if (const JsonValue* provenance = find_member(runway_object, "provenance")) {
         runway.provenance_json = render_canonical_json(*provenance);
+      }
+      if (const JsonValue::Object* geometry_review =
+            optional_object(runway_object, "geometryReview")) {
+        runway.manual_overwrite_requires_review =
+          optional_bool(*geometry_review, "manualOverwriteRequiresReview").value_or(false);
       }
 
       const JsonValue::Array* ends = optional_array(runway_object, "ends");
@@ -1096,6 +1215,10 @@ std::string render_surface_json(const RunwayRecord& source,
   output << "  \"geometrySource\": {\n";
   output << "    \"method\": \"physical_threshold_coordinates\",\n";
   output << "    \"forbiddenFallback\": \"arp_plus_runway_name_and_length\",\n";
+  output << "    \"manualOverwriteRequiresReview\": "
+         << (runway.manual_overwrite_requires_review ? "true" : "false") << ",\n";
+  output << "    \"manualGeometryReviewLock\": "
+         << (runway.manual_overwrite_requires_review ? "true" : "false") << ",\n";
   output << "    \"thresholds\": [\n";
   for (std::size_t i = 0U; i < source.ends.size(); ++i) {
     const RunwayEndRecord& end = source.ends[i];
@@ -1325,6 +1448,8 @@ GeneratedRunway generate_runway_surface(const AerodromeRecord& aerodrome,
   generated.transition_band_width_m = runway.surface_type == "paved" ? 12.0 : 18.0;
   generated.paved = runway.surface_type == "paved";
   generated.grass = runway.surface_type == "grass";
+  generated.production_validated = runway.validation_status == "production_validated";
+  generated.manual_overwrite_requires_review = runway.manual_overwrite_requires_review;
   generated.provenance_json = runway.provenance_json;
 
   const double half_width = runway.width_m * 0.5;
@@ -1367,18 +1492,20 @@ GeneratedRunway generate_runway_surface(const AerodromeRecord& aerodrome,
     point_at(threshold0, length_from_thresholds - start_offset, 0.0, forward_east,
              forward_north, right_east, right_north, slope_east_m_per_m,
              slope_north_m_per_m);
-  generated.start_positions = {
-    {runway.ends[0].id + "-safe-start",
-     runway.ends[0].designator,
-     runway.ends[0].true_bearing_deg,
-     start0,
-     wgs84_from_local(frame, start0)},
-    {runway.ends[1].id + "-safe-start",
-     runway.ends[1].designator,
-     runway.ends[1].true_bearing_deg,
-     start1,
-     wgs84_from_local(frame, start1)},
-  };
+  if (aerodrome.default_start_location && !aerodrome.historical_mode_only) {
+    generated.start_positions = {
+      {runway.ends[0].id + "-safe-start",
+       runway.ends[0].designator,
+       runway.ends[0].true_bearing_deg,
+       start0,
+       wgs84_from_local(frame, start0)},
+      {runway.ends[1].id + "-safe-start",
+       runway.ends[1].designator,
+       runway.ends[1].true_bearing_deg,
+       start1,
+       wgs84_from_local(frame, start1)},
+    };
+  }
 
   const double length_tolerance_m =
     std::max(15.0, runway.ends[0].source_accuracy_m + runway.ends[1].source_accuracy_m);
@@ -1401,6 +1528,14 @@ GeneratedRunway generate_runway_surface(const AerodromeRecord& aerodrome,
               "error",
               "runway_import.runway.surface.unsupported",
               "Pilot runway importer accepts only the paved and grass pilot runway surfaces in step 11.",
+              runway.id);
+  }
+  if (runway.validation_status == "production_validated" &&
+      runway.manual_verification_status != "reviewer_approved") {
+    add_issue(report,
+              "error",
+              "runway_import.runway.production_manual_verification.missing",
+              "Production-validated runway geometry must have reviewer-approved manual verification.",
               runway.id);
   }
   if (std::abs(generated.max_collision_visual_delta_m) > kCollisionVisualToleranceM) {
@@ -1463,11 +1598,18 @@ std::string render_coverage_report(const ValidationReport& report,
                                    const AirportDatabase& database,
                                    const std::vector<GeneratedRunway>& runways) {
   std::set<std::string> airport_ids;
+  std::set<std::string> generated_production_runway_ids;
   int paved_count = 0;
   int grass_count = 0;
+  int production_validated_runway_count = 0;
   double max_collision_delta = 0.0;
   for (const GeneratedRunway& runway : runways) {
     airport_ids.insert(runway.airport_id);
+    if (runway.production_validated) {
+      generated_production_runway_ids.insert(
+        runway_coverage_id(runway.airport_id, runway.runway_id));
+      ++production_validated_runway_count;
+    }
     if (runway.paved) {
       ++paved_count;
     }
@@ -1476,6 +1618,13 @@ std::string render_coverage_report(const ValidationReport& report,
     }
     max_collision_delta =
       std::max(max_collision_delta, std::abs(runway.max_collision_visual_delta_m));
+  }
+  std::vector<std::string> missing_active_validated_runways;
+  for (const std::string& runway_id : release_scoped_production_runway_ids(database)) {
+    if (generated_production_runway_ids.find(runway_id) ==
+        generated_production_runway_ids.end()) {
+      missing_active_validated_runways.push_back(runway_id);
+    }
   }
 
   std::ostringstream output;
@@ -1489,7 +1638,13 @@ std::string render_coverage_report(const ValidationReport& report,
          << ",\n";
   output << "  \"issues\": " << render_issues(report, "  ") << ",\n";
   output << "  \"summary\": {\n";
+  output << "    \"scope\": " << json_quote(database.scope) << ",\n";
+  output << "    \"masterListCount\": " << database.master_list.size() << ",\n";
   output << "    \"pilotAirportCount\": " << airport_ids.size() << ",\n";
+  output << "    \"activeValidatedRunwayCount\": "
+         << production_validated_runway_count << ",\n";
+  output << "    \"missingActiveValidatedRunways\": "
+         << missing_active_validated_runways.size() << ",\n";
   output << "    \"runwaySurfaceCount\": " << runways.size() << ",\n";
   output << "    \"pavedRunwaySurfaces\": " << paved_count << ",\n";
   output << "    \"grassRunwaySurfaces\": " << grass_count << ",\n";
@@ -1500,6 +1655,18 @@ std::string render_coverage_report(const ValidationReport& report,
          << flying::geo_terrain::kDefaultGenericDemPriority << ",\n";
   output << "    \"maxCollisionVisualDeltaM\": " << render_number(max_collision_delta)
          << "\n";
+  output << "  },\n";
+  output << "  \"masterListCoverage\": {\n";
+  output << "    \"comparison\": \"generated_runway_surfaces_vs_approved_master_list\",\n";
+  output << "    \"releaseScope\": \"active_permitted_production_validated_runways\",\n";
+  output << "    \"missingActiveValidatedRunways\": [";
+  for (std::size_t i = 0U; i < missing_active_validated_runways.size(); ++i) {
+    if (i != 0U) {
+      output << ",";
+    }
+    output << json_quote(missing_active_validated_runways[i]);
+  }
+  output << "]\n";
   output << "  },\n";
   output << "  \"pilotCoverage\": [\n";
   for (std::size_t i = 0U; i < runways.size(); ++i) {
@@ -1642,7 +1809,7 @@ std::vector<GeneratedRunway> generate_surfaces(const AirportDatabase& database,
       }
     }
   }
-  if (runways.size() != 2U) {
+  if (database.scope == "pilot_airports_only" && runways.size() != 2U) {
     add_issue(report,
               "error",
               "runway_import.pilot_coverage.count",
@@ -1655,11 +1822,28 @@ std::vector<GeneratedRunway> generate_surfaces(const AirportDatabase& database,
   const bool has_grass = std::any_of(runways.begin(), runways.end(), [](const auto& runway) {
     return runway.grass;
   });
-  if (!has_paved || !has_grass) {
+  if (database.scope == "pilot_airports_only" && (!has_paved || !has_grass)) {
     add_issue(report,
               "error",
               "runway_import.pilot_coverage.surface_mix",
               "Step 11 requires one pilot paved runway surface and one pilot grass runway surface.");
+  }
+  std::set<std::string> generated_production_runway_ids;
+  for (const GeneratedRunway& runway : runways) {
+    if (runway.production_validated) {
+      generated_production_runway_ids.insert(
+        runway_coverage_id(runway.airport_id, runway.runway_id));
+    }
+  }
+  for (const std::string& runway_id : release_scoped_production_runway_ids(database)) {
+    if (generated_production_runway_ids.find(runway_id) ==
+        generated_production_runway_ids.end()) {
+      add_issue(report,
+                "error",
+                "runway_import.coverage.active_validated_runway_missing",
+                "Coverage report requires every active permitted production-validated runway in release scope to generate a surface.",
+                runway_id);
+    }
   }
   (void)options;
   return runways;
@@ -1677,7 +1861,31 @@ void write_outputs(const RunwayImportOptions& options,
     (options.output_directory / "runway-surfaces-package.json").generic_string();
 
   for (const GeneratedRunway& runway : runways) {
-    write_text_file(options.output_directory / runway.file_relative_path, runway.surface_json);
+    const std::filesystem::path surface_path = options.output_directory / runway.file_relative_path;
+    if (std::filesystem::exists(surface_path)) {
+      const std::string existing = read_text_file(surface_path);
+      if (existing.find("\"manualGeometryReviewLock\": true") != std::string::npos ||
+          existing.find("\"manualOverwriteRequiresReview\": true") != std::string::npos) {
+        add_issue(report,
+                  "error",
+                  "runway_import.runway.manual_geometry_overwrite_blocked",
+                  "Importer will not automatically overwrite manually verified runway geometry.",
+                  runway.runway_id);
+      }
+    }
+  }
+
+  if (has_errors(report)) {
+    return;
+  }
+
+  for (const GeneratedRunway& runway : runways) {
+    const std::filesystem::path surface_path = options.output_directory / runway.file_relative_path;
+    write_text_file(surface_path, runway.surface_json);
+  }
+
+  if (has_errors(report)) {
+    return;
   }
 
   write_text_file(options.output_directory / "runway-surfaces-package.json",
@@ -1755,9 +1963,11 @@ RunwayImportResult import_pilot_runways(const RunwayImportOptions& options) {
       return result;
     }
 
-    finalize_report(result.report);
     write_outputs(options, database, runways, result.report);
-    result.package_manifest_path = options.output_directory / "runway-surfaces-package.json";
+    finalize_report(result.report);
+    if (!has_errors(result.report)) {
+      result.package_manifest_path = options.output_directory / "runway-surfaces-package.json";
+    }
     write_report_if_requested(options, result.report, database, runways);
   } catch (const std::exception& error) {
     add_issue(result.report, "error", "runway_import.processing.failed", error.what());

@@ -341,6 +341,9 @@
         "validation": {
           "$ref": "#/$defs/validationState"
         },
+        "startLocationEligibility": {
+          "$ref": "#/$defs/startLocationEligibility"
+        },
         "notes": {
           "type": "string"
         }
@@ -409,6 +412,9 @@
         },
         "validation": {
           "$ref": "#/$defs/validationState"
+        },
+        "startLocationEligibility": {
+          "$ref": "#/$defs/startLocationEligibility"
         },
         "runways": {
           "type": "array",
@@ -483,6 +489,9 @@
         },
         "validation": {
           "$ref": "#/$defs/validationState"
+        },
+        "geometryReview": {
+          "$ref": "#/$defs/geometryReview"
         },
         "ends": {
           "type": "array",
@@ -606,6 +615,43 @@
           ]
         },
         "loadRating": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "startLocationEligibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "defaultStartLocation",
+        "historicalModeOnly"
+      ],
+      "properties": {
+        "defaultStartLocation": {
+          "type": "boolean"
+        },
+        "historicalModeOnly": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+    "geometryReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "manualOverwriteRequiresReview"
+      ],
+      "properties": {
+        "manualOverwriteRequiresReview": {
+          "type": "boolean"
+        },
+        "reviewTicket": {
           "type": "string"
         },
         "notes": {
