@@ -15,7 +15,16 @@
   ],
   "properties": {
     "schemaVersion": {
-      "const": "flying.dmr5g-pilot-terrain-config.v1"
+      "enum": [
+        "flying.dmr5g-pilot-terrain-config.v1",
+        "flying.dmr5g-czech-republic-terrain-config.v1"
+      ]
+    },
+    "coverageScope": {
+      "enum": [
+        "pilot-region",
+        "czech-republic"
+      ]
     },
     "packageIdHint": {
       "type": "string"
@@ -42,10 +51,12 @@
           "type": "number"
         },
         "widthM": {
-          "const": 50000
+          "type": "number",
+          "exclusiveMinimum": 0
         },
         "heightM": {
-          "const": 50000
+          "type": "number",
+          "exclusiveMinimum": 0
         }
       }
     },

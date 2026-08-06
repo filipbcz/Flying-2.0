@@ -218,6 +218,17 @@ std::string make_unmanifested_tile_config() {
                       R"({"id": "east", "path": "dmr5g/unlisted.xyz", "format": "xyz", "declaredVerticalErrorM": 0.18})");
 }
 
+std::string make_czech_republic_terrain_config() {
+  std::string config = replace_once(make_terrain_config(),
+                                    "\"schemaVersion\": \"flying.dmr5g-pilot-terrain-config.v1\"",
+                                    "\"schemaVersion\": \"flying.dmr5g-czech-republic-terrain-config.v1\",\n  \"coverageScope\": \"czech-republic\"");
+  config = replace_once(config, "\"packageIdHint\": \"dmr5g-pilot-fixture\"", "\"packageIdHint\": \"dmr5g-czech-republic-fixture\"");
+  config = replace_once(config, "\"id\": \"pilot-50km-fixture\"", "\"id\": \"czech-republic-fixture\"");
+  config = replace_once(config, "\"widthM\": 50000", "\"widthM\": 430000");
+  config = replace_once(config, "\"heightM\": 50000", "\"heightM\": 280000");
+  return config;
+}
+
 void write_fixture_inputs(const std::filesystem::path& root,
                           std::string_view east_tile,
                           std::string_view terrain_config) {
@@ -255,7 +266,12 @@ int main() {
   assert(package_manifest.find("\"renderLods\"") != std::string::npos);
   assert(package_manifest.find("\"level\": 1") != std::string::npos);
   assert(package_manifest.find("\"collisionTiles\"") != std::string::npos);
+  assert(package_manifest.find("\"sizeBytes\"") != std::string::npos);
   assert(package_manifest.find("\"collisionTilesAreSeparate\": true") != std::string::npos);
+  assert(package_manifest.find("\"streaming\"") != std::string::npos);
+  assert(package_manifest.find("\"runtimeNetworkRequired\": false") != std::string::npos);
+  assert(package_manifest.find("\"packagingLayout\"") != std::string::npos);
+  assert(package_manifest.find("\"collisionTileCount\": 2") != std::string::npos);
   assert(package_manifest.find("\"normalFrame\": \"project-local-ENU\"") != std::string::npos);
   assert(package_manifest.find("\"edgeCleaned\": true") != std::string::npos);
   assert(package_manifest.find("\"maxAbsStepM\": 0") != std::string::npos);
@@ -276,6 +292,39 @@ int main() {
          std::string::npos);
 
   std::filesystem::remove_all(root);
+
+  {
+    const std::filesystem::path czech_root = make_temp_root();
+    write_fixture_inputs(czech_root, kEastTile, make_czech_republic_terrain_config());
+    pipeline::Dmr5gPilotTerrainOptions czech_options = make_options(czech_root);
+    czech_options.package_name = "DMR 5G Czech Republic Terrain";
+    const pipeline::Dmr5gPilotTerrainResult czech_result =
+      pipeline::process_dmr5g_czech_republic_terrain(czech_options);
+    assert(!czech_result.created());
+    assert(!std::filesystem::exists(czech_root / "out" / "terrain-package.json"));
+    const std::string czech_report = read_file(czech_options.report_path);
+    assert(czech_report.find(
+             "\"code\": \"terrain_config.czechRepublic.sourceTiles.coverage_incomplete\"") !=
+           std::string::npos);
+    std::filesystem::remove_all(czech_root);
+  }
+
+  {
+    const std::filesystem::path czech_command_root = make_temp_root();
+    write_fixture_inputs(czech_command_root, kEastTile, make_terrain_config());
+    pipeline::Dmr5gPilotTerrainOptions czech_command_options =
+      make_options(czech_command_root);
+    czech_command_options.package_name = "DMR 5G Czech Republic Terrain";
+    const pipeline::Dmr5gPilotTerrainResult czech_command_result =
+      pipeline::process_dmr5g_czech_republic_terrain(czech_command_options);
+    assert(!czech_command_result.created());
+    const std::string czech_command_report =
+      read_file(czech_command_options.report_path);
+    assert(czech_command_report.find(
+             "\"code\": \"terrain.options.czech_republic_config.required\"") !=
+           std::string::npos);
+    std::filesystem::remove_all(czech_command_root);
+  }
 
   {
     const std::filesystem::path collision_root = make_temp_root();

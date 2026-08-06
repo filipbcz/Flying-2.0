@@ -6,31 +6,31 @@
 - default branch: main
 
 ## Task
-- title: Flying: 20. Build Aircraft Validation Suite
+- title: Flying: 21. Scale Terrain Pipeline To Full Czech Republic
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-20. Build Aircraft Validation Suite
+21. Scale Terrain Pipeline To Full Czech Republic
 
 Step description and scope:
-Create and run the formal aircraft validation package for the selected aircraft, comparing controlled scenarios against licensed POH/AFM, flight-test, CFD, wind-tunnel, or other credible reference data.
+Run and harden the terrain, imagery, vector, water, material, and collision package pipeline for the full Czech Republic, including manifests, checksums, tile continuity, streaming metadata, and packaging layout.
 
 In scope:
-- Validation scenario definitions
-- Reference data registry
-- Tolerance checks
-- Deviation reports
-- Graphs
-- Release-blocking test classification
-- Aircraft validation report
+- Whole-country DMR processing
+- Whole-country ortho processing
+- Whole-country vector processing
+- Water/material masks
+- Tile manifests
+- Collision package generation
+- Streaming metadata
 
 Out of scope:
-- Certification as EASA/FAA FSTD
-- Adding more aircraft
-- Inventing tolerances where no credible data exists
-- Changing legal licensing decisions
+- Foreign territory
+- Airport runway validation
+- Final installer
+- Live weather data
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -58,9 +58,9 @@ Already completed roadmap steps (existing repository context):
 - 17. Implement Aircraft Systems And Sensor Models
 - 18. Implement Cockpit And Aircraft Presentation
 - 19. Implement Weather And Atmosphere Coupling
+- 20. Build Aircraft Validation Suite
 
 Future roadmap steps (explicitly out of scope):
-- 21. Scale Terrain Pipeline To Full Czech Republic
 - 22. Complete Airport And SLZ Coverage
 - 23. Implement Detailed Airport Set
 - 24. Implement Offline 2D Navigation Map
@@ -72,10 +72,10 @@ Future roadmap steps (explicitly out of scope):
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- Validation scenarios cover stall speeds, maximum and cruise speeds, climb rate, service ceiling, glide, sink rate, takeoff distance, landing distance, engine RPM/power/fuel/temperature points, stability modes, control-step responses, coordinated turns, ground effect, crosswind, tire slip, and braking where reference data exists.
-- Each validation test stores inputs, outputs, reference source, tolerance, result status, state hash, and deviation graph.
-- Release-blocking validation fails when a mandatory reference-backed test exceeds documented tolerances.
-- Aircraft model is not labeled faithful to the selected type unless all mandatory validation tests pass or have approved documented exclusions due to missing credible data.
+- Full Czech Republic terrain packages are generated from approved CUZK sources with versioned manifests, checksums, source provenance, and required attribution.
+- Automated edge-continuity and control-point reports pass across generated terrain package boundaries.
+- Runtime package metadata supports uninterrupted streaming across the entire Czech Republic without external map API dependencies.
+- Generated package sizes, tile hierarchy, and collision-tile availability are documented for release packaging and performance testing.
 
 ## Agent Configuration
 - no project config provided, using defaults

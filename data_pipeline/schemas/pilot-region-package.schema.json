@@ -11,12 +11,15 @@
     "packageId",
     "contentHash",
     "sourceManifestVersion",
+    "coverage",
     "sourceLineage",
     "pilotRegion",
     "runtimeDependencies",
     "imagery",
     "vectorPackages",
     "masks",
+    "streaming",
+    "packagingLayout",
     "validation"
   ],
   "properties": {
@@ -28,6 +31,15 @@
     "packageId": {"type": "string", "minLength": 1},
     "contentHash": {"type": "string", "pattern": "^[A-Fa-f0-9]{64}$"},
     "sourceManifestVersion": {"type": "string", "minLength": 1},
+    "coverage": {
+      "type": "object",
+      "required": ["scope", "countryCode", "completeWithinDeclaredBounds"],
+      "properties": {
+        "scope": {"enum": ["pilot-region", "czech-republic"]},
+        "countryCode": {"const": "CZ"},
+        "completeWithinDeclaredBounds": {"type": "boolean"}
+      }
+    },
     "sourceLineage": {
       "type": "array",
       "minItems": 1,
@@ -110,6 +122,54 @@
         "grid": {"type": "object"},
         "waterMask": {"$ref": "#/$defs/fileMetadata"},
         "materialMask": {"$ref": "#/$defs/fileMetadata"}
+      }
+    },
+    "streaming": {
+      "type": "object",
+      "required": [
+        "runtimeNetworkRequired",
+        "externalMapApis",
+        "remoteTileServerUrls",
+        "addressing",
+        "coverageScope",
+        "interruptionFreeWithinDeclaredBounds"
+      ],
+      "properties": {
+        "runtimeNetworkRequired": {"const": false},
+        "externalMapApis": {"type": "array", "maxItems": 0},
+        "remoteTileServerUrls": {"type": "array", "maxItems": 0},
+        "addressing": {"type": "string", "minLength": 1},
+        "coverageScope": {"enum": ["pilot-region", "czech-republic"]},
+        "interruptionFreeWithinDeclaredBounds": {"const": true}
+      }
+    },
+    "packagingLayout": {
+      "type": "object",
+      "required": [
+        "imageryRoot",
+        "vectorRoot",
+        "maskRoot",
+        "orthoTileCount",
+        "vectorLayerCount",
+        "waterMaskAvailable",
+        "materialMaskAvailable",
+        "imageryBytes",
+        "vectorBytes",
+        "maskBytes",
+        "totalBytes"
+      ],
+      "properties": {
+        "imageryRoot": {"const": "imagery"},
+        "vectorRoot": {"const": "vectors"},
+        "maskRoot": {"const": "masks"},
+        "orthoTileCount": {"type": "integer", "minimum": 1},
+        "vectorLayerCount": {"type": "integer", "minimum": 6},
+        "waterMaskAvailable": {"const": true},
+        "materialMaskAvailable": {"const": true},
+        "imageryBytes": {"type": "integer", "minimum": 1},
+        "vectorBytes": {"type": "integer", "minimum": 1},
+        "maskBytes": {"type": "integer", "minimum": 1},
+        "totalBytes": {"type": "integer", "minimum": 1}
       }
     },
     "validation": {

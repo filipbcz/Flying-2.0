@@ -148,6 +148,17 @@ std::string package_config() {
 )";
 }
 
+std::string czech_republic_package_config() {
+  std::string config = replace_once(package_config(),
+                                    "\"schemaVersion\": \"flying.pilot-region-package-config.v1\"",
+                                    "\"schemaVersion\": \"flying.czech-republic-package-config.v1\",\n  \"coverageScope\": \"czech-republic\"");
+  config = replace_once(config, "\"packageIdHint\": \"pilot-region-fixture\"", "\"packageIdHint\": \"czech-republic-fixture\"");
+  config = replace_once(config, "\"id\": \"pilot-fixture-4m\"", "\"id\": \"czech-republic-fixture\"");
+  config = replace_once(config, "\"widthM\": 4", "\"widthM\": 430000");
+  config = replace_once(config, "\"heightM\": 4", "\"heightM\": 280000");
+  return config;
+}
+
 std::string feature_collection(std::string_view id,
                                std::string_view name,
                                std::string_view geometry_type,
@@ -253,6 +264,10 @@ int main() {
   assert(package_manifest.find("\"mipmapped\": true") != std::string::npos);
   assert(package_manifest.find("\"level\": 1") != std::string::npos);
   assert(package_manifest.find("\"runtimeNetworkRequired\": false") != std::string::npos);
+  assert(package_manifest.find("\"streaming\"") != std::string::npos);
+  assert(package_manifest.find("\"packagingLayout\"") != std::string::npos);
+  assert(package_manifest.find("\"waterMaskAvailable\": true") != std::string::npos);
+  assert(package_manifest.find("\"materialMaskAvailable\": true") != std::string::npos);
   assert(package_manifest.find("\"externalMapApiKeys\": 0") != std::string::npos);
   assert(package_manifest.find("\"remoteTileServerUrls\": 0") != std::string::npos);
   assert(package_manifest.find("\"CUZK Ortofoto Fixture\"") != std::string::npos);
@@ -295,6 +310,40 @@ int main() {
     assert(remote_report.find("\"code\": \"pilot.config.orthoImagery.sources.path.remote_url\"") !=
            std::string::npos);
     std::filesystem::remove_all(remote_root);
+  }
+
+  {
+    const std::filesystem::path czech_root = make_temp_root();
+    write_fixture_inputs(czech_root);
+    write_file(czech_root / "pilot-config.json", czech_republic_package_config());
+    pipeline::PilotRegionPackageOptions czech_options = make_options(czech_root);
+    czech_options.package_name = "Czech Republic Offline GIS";
+    const pipeline::PilotRegionPackageResult czech_result =
+      pipeline::process_czech_republic_packages(czech_options);
+    assert(!czech_result.created());
+    assert(!std::filesystem::exists(czech_root / "out" / "pilot-region-package.json"));
+    const std::string czech_report = read_file(czech_options.report_path);
+    assert(czech_report.find(
+             "\"code\": \"pilot.config.czechRepublic.orthoImagery.coverage_incomplete\"") !=
+           std::string::npos);
+    std::filesystem::remove_all(czech_root);
+  }
+
+  {
+    const std::filesystem::path czech_command_root = make_temp_root();
+    write_fixture_inputs(czech_command_root);
+    pipeline::PilotRegionPackageOptions czech_command_options =
+      make_options(czech_command_root);
+    czech_command_options.package_name = "Czech Republic Offline GIS";
+    const pipeline::PilotRegionPackageResult czech_command_result =
+      pipeline::process_czech_republic_packages(czech_command_options);
+    assert(!czech_command_result.created());
+    const std::string czech_command_report =
+      read_file(czech_command_options.report_path);
+    assert(czech_command_report.find(
+             "\"code\": \"pilot.options.czech_republic_config.required\"") !=
+           std::string::npos);
+    std::filesystem::remove_all(czech_command_root);
   }
 
   {

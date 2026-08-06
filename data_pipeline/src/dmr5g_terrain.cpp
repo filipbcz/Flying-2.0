@@ -7,6 +7,7 @@
 #include <cctype>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
@@ -26,11 +27,20 @@ namespace {
 
 constexpr std::string_view kTerrainConfigSchemaVersion =
   "flying.dmr5g-pilot-terrain-config.v1";
+constexpr std::string_view kCzechTerrainConfigSchemaVersion =
+  "flying.dmr5g-czech-republic-terrain-config.v1";
 constexpr std::string_view kTerrainPackageSchemaVersion = "flying.terrain-package.v1";
 constexpr std::string_view kValidationReportSchemaVersion = "flying.validation-report.v1";
 constexpr double kPilotRegionWidthM = 50'000.0;
 constexpr double kPilotRegionHeightM = 50'000.0;
 constexpr double kCoordinateToleranceM = 1.0e-6;
+
+struct Bounds {
+  double min_east_m = 0.0;
+  double max_east_m = 0.0;
+  double min_north_m = 0.0;
+  double max_north_m = 0.0;
+};
 
 struct JsonValue {
   enum class Type {
@@ -366,7 +376,9 @@ struct ControlPoint {
 };
 
 struct TerrainConfig {
+  std::string schema_version;
   std::string package_id_hint;
+  std::string coverage_scope = "pilot-region";
   std::string transform_json;
   PilotRegion pilot_region;
   AxisAlignedTransform transform;
@@ -407,6 +419,84 @@ struct TerrainTile {
   [[nodiscard]] double max_north_m() const noexcept { return north_values.back(); }
 };
 
+bool continuous_rect_coverage(const std::vector<Bounds>& bounds,
+                              const Bounds& required_bounds) {
+  if (bounds.empty()) {
+    return false;
+  }
+
+  std::vector<double> east_breaks = {
+    required_bounds.min_east_m,
+    required_bounds.max_east_m,
+  };
+  for (const Bounds& candidate : bounds) {
+    if (candidate.max_east_m < required_bounds.min_east_m + kCoordinateToleranceM ||
+        candidate.min_east_m > required_bounds.max_east_m - kCoordinateToleranceM ||
+        candidate.max_north_m < required_bounds.min_north_m + kCoordinateToleranceM ||
+        candidate.min_north_m > required_bounds.max_north_m - kCoordinateToleranceM) {
+      continue;
+    }
+    east_breaks.push_back(
+      std::clamp(candidate.min_east_m, required_bounds.min_east_m, required_bounds.max_east_m));
+    east_breaks.push_back(
+      std::clamp(candidate.max_east_m, required_bounds.min_east_m, required_bounds.max_east_m));
+  }
+  std::sort(east_breaks.begin(), east_breaks.end());
+  east_breaks.erase(std::unique(east_breaks.begin(),
+                                east_breaks.end(),
+                                [](double lhs, double rhs) {
+                                  return std::fabs(lhs - rhs) <= kCoordinateToleranceM;
+                                }),
+                    east_breaks.end());
+
+  if (east_breaks.size() < 2U ||
+      east_breaks.front() > required_bounds.min_east_m + kCoordinateToleranceM ||
+      east_breaks.back() < required_bounds.max_east_m - kCoordinateToleranceM) {
+    return false;
+  }
+
+  for (std::size_t i = 0U; i + 1U < east_breaks.size(); ++i) {
+    const double slab_min = east_breaks[i];
+    const double slab_max = east_breaks[i + 1U];
+    if (slab_max - slab_min <= kCoordinateToleranceM) {
+      continue;
+    }
+    const double slab_mid = (slab_min + slab_max) * 0.5;
+    std::vector<std::pair<double, double>> north_intervals;
+    for (const Bounds& candidate : bounds) {
+      if (slab_mid >= candidate.min_east_m - kCoordinateToleranceM &&
+          slab_mid <= candidate.max_east_m + kCoordinateToleranceM) {
+        const double clipped_min =
+          std::max(candidate.min_north_m, required_bounds.min_north_m);
+        const double clipped_max =
+          std::min(candidate.max_north_m, required_bounds.max_north_m);
+        if (clipped_max > clipped_min + kCoordinateToleranceM) {
+          north_intervals.emplace_back(clipped_min, clipped_max);
+        }
+      }
+    }
+    if (north_intervals.empty()) {
+      return false;
+    }
+    std::sort(north_intervals.begin(), north_intervals.end());
+    double covered_until = required_bounds.min_north_m;
+    for (const auto& [north_min, north_max] : north_intervals) {
+      if (north_min > covered_until + kCoordinateToleranceM) {
+        return false;
+      }
+      covered_until = std::max(covered_until, north_max);
+      if (covered_until >= required_bounds.max_north_m - kCoordinateToleranceM) {
+        break;
+      }
+    }
+    if (covered_until < required_bounds.max_north_m - kCoordinateToleranceM) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 struct ControlPointResult {
   std::string id;
   double east_m = 0.0;
@@ -436,6 +526,7 @@ struct BoundaryCleanResult {
 struct TileFileMetadata {
   std::string tile_id;
   std::string path;
+  std::uintmax_t size_bytes = 0U;
   std::size_t rows = 0U;
   std::size_t cols = 0U;
   double min_east_m = 0.0;
@@ -834,12 +925,45 @@ std::optional<TerrainConfig> parse_terrain_config(const JsonValue& root,
   TerrainConfig config;
   const std::optional<std::string> schema = require_string(
     object, "schemaVersion", report, "terrain_config", "Terrain config");
-  if (schema.has_value() && *schema != kTerrainConfigSchemaVersion) {
+  if (schema.has_value()) {
+    config.schema_version = *schema;
+  }
+  if (schema.has_value() && *schema != kTerrainConfigSchemaVersion &&
+      *schema != kCzechTerrainConfigSchemaVersion) {
     add_issue(report,
               "error",
               "terrain_config.schemaVersion.unsupported",
               "Terrain config schemaVersion must be '" +
-                std::string{kTerrainConfigSchemaVersion} + "'.");
+                std::string{kTerrainConfigSchemaVersion} + "' or '" +
+                std::string{kCzechTerrainConfigSchemaVersion} + "'.");
+  }
+  if (schema.has_value() && *schema == kCzechTerrainConfigSchemaVersion) {
+    config.coverage_scope = "czech-republic";
+  }
+  if (const JsonValue* coverage_scope = find_member(object, "coverageScope");
+      coverage_scope != nullptr && coverage_scope->type == JsonValue::Type::string_value &&
+      !coverage_scope->string.empty()) {
+    config.coverage_scope = coverage_scope->string;
+  }
+  if (config.coverage_scope != "pilot-region" && config.coverage_scope != "czech-republic") {
+    add_issue(report,
+              "error",
+              "terrain_config.coverageScope.unsupported",
+              "Terrain config coverageScope must be 'pilot-region' or 'czech-republic'.");
+  }
+  if (schema.has_value() && *schema == kCzechTerrainConfigSchemaVersion &&
+      config.coverage_scope != "czech-republic") {
+    add_issue(report,
+              "error",
+              "terrain_config.coverageScope.schema_mismatch",
+              "Czech Republic terrain config schema requires coverageScope 'czech-republic'.");
+  }
+  if (schema.has_value() && *schema == kTerrainConfigSchemaVersion &&
+      config.coverage_scope == "czech-republic") {
+    add_issue(report,
+              "error",
+              "terrain_config.coverageScope.schema_mismatch",
+              "Czech Republic coverage requires the Czech Republic terrain config schema.");
   }
   if (const JsonValue* package_id_hint = find_member(object, "packageIdHint");
       package_id_hint != nullptr && package_id_hint->type == JsonValue::Type::string_value) {
@@ -869,12 +993,21 @@ std::optional<TerrainConfig> parse_terrain_config(const JsonValue& root,
           *pilot_region, "heightM", report, "terrain_config.pilotRegion", "Pilot region")) {
       config.pilot_region.height_m = *value;
     }
-    if (!nearly_equal(config.pilot_region.width_m, kPilotRegionWidthM, 1.0e-3) ||
-        !nearly_equal(config.pilot_region.height_m, kPilotRegionHeightM, 1.0e-3)) {
+    if (config.coverage_scope != "czech-republic" &&
+        (!nearly_equal(config.pilot_region.width_m, kPilotRegionWidthM, 1.0e-3) ||
+         !nearly_equal(config.pilot_region.height_m, kPilotRegionHeightM, 1.0e-3))) {
       add_issue(report,
                 "error",
                 "terrain_config.pilotRegion.size.invalid",
                 "DMR 5G pilot terrain processing requires a declared 50 x 50 km region.");
+    }
+    if (config.coverage_scope == "czech-republic" &&
+        (config.pilot_region.width_m <= kPilotRegionWidthM ||
+         config.pilot_region.height_m <= kPilotRegionHeightM)) {
+      add_issue(report,
+                "error",
+                "terrain_config.czechRepublic.extent.invalid",
+                "Full Czech Republic terrain processing requires an extent larger than the 50 x 50 km pilot region.");
     }
   }
 
@@ -1660,6 +1793,38 @@ std::vector<TerrainTile> load_tiles(const TerrainConfig& config,
   return tiles;
 }
 
+void validate_czech_republic_terrain_coverage(const TerrainConfig& config,
+                                              const std::vector<TerrainTile>& tiles,
+                                              ValidationReport& report) {
+  if (config.coverage_scope != "czech-republic" || tiles.empty()) {
+    return;
+  }
+
+  std::vector<Bounds> tile_bounds;
+  tile_bounds.reserve(tiles.size());
+  for (const TerrainTile& tile : tiles) {
+    tile_bounds.push_back({
+      tile.min_east_m(),
+      tile.max_east_m(),
+      tile.min_north_m(),
+      tile.max_north_m(),
+    });
+  }
+
+  const Bounds required_bounds{
+    config.pilot_region.min_east_m,
+    config.pilot_region.max_east_m(),
+    config.pilot_region.min_north_m,
+    config.pilot_region.max_north_m(),
+  };
+  if (!continuous_rect_coverage(tile_bounds, required_bounds)) {
+    add_issue(report,
+              "error",
+              "terrain_config.czechRepublic.sourceTiles.coverage_incomplete",
+              "Full Czech Republic terrain processing requires continuous DMR source tile coverage across the declared package bounds.");
+  }
+}
+
 bool interval_overlaps(double lhs_min, double lhs_max, double rhs_min, double rhs_max) noexcept {
   return lhs_min <= rhs_max + kCoordinateToleranceM && rhs_min <= lhs_max + kCoordinateToleranceM;
 }
@@ -1922,9 +2087,14 @@ TileFileMetadata write_render_tile(const TerrainTile& tile,
   if (!output) {
     throw std::runtime_error("failed to write " + path.string());
   }
+  output.close();
+  if (!output) {
+    throw std::runtime_error("failed to close " + path.string());
+  }
   return TileFileMetadata{
     tile.id,
     relative_output_path(output_directory, path),
+    std::filesystem::file_size(path),
     row_indices.size(),
     col_indices.size(),
     tile.min_east_m(),
@@ -2007,10 +2177,15 @@ std::optional<TileFileMetadata> write_collision_tile(const TerrainTile& tile,
   if (!output) {
     throw std::runtime_error("failed to write " + path.string());
   }
+  output.close();
+  if (!output) {
+    throw std::runtime_error("failed to close " + path.string());
+  }
 
   return TileFileMetadata{
     tile.id,
     relative_output_path(output_directory, path),
+    std::filesystem::file_size(path),
     row_indices.size(),
     col_indices.size(),
     tile.east_values[col_indices.front()],
@@ -2289,6 +2464,7 @@ std::string render_tile_metadata_array(const std::vector<TileFileMetadata>& tile
     output << indent << "  {\n";
     output << indent << "    \"tileId\": " << json_quote(tile.tile_id) << ",\n";
     output << indent << "    \"path\": " << json_quote(tile.path) << ",\n";
+    output << indent << "    \"sizeBytes\": " << tile.size_bytes << ",\n";
     output << indent << "    \"rows\": " << tile.rows << ",\n";
     output << indent << "    \"cols\": " << tile.cols << ",\n";
     output << indent << "    \"bounds\": {\"minEastM\": " << render_number(tile.min_east_m)
@@ -2331,6 +2507,30 @@ std::string render_control_point_results(const std::vector<ControlPointResult>& 
   }
   output << indent << "]";
   return output.str();
+}
+
+std::uintmax_t total_tile_bytes(const std::vector<TileFileMetadata>& tiles) {
+  std::uintmax_t total = 0U;
+  for (const TileFileMetadata& tile : tiles) {
+    total += tile.size_bytes;
+  }
+  return total;
+}
+
+std::uintmax_t total_render_bytes(const TerrainPackageOutputs& outputs) {
+  std::uintmax_t total = 0U;
+  for (const LodOutputMetadata& lod : outputs.render_lods) {
+    total += total_tile_bytes(lod.tiles);
+  }
+  return total;
+}
+
+std::size_t total_render_tiles(const TerrainPackageOutputs& outputs) {
+  std::size_t total = 0U;
+  for (const LodOutputMetadata& lod : outputs.render_lods) {
+    total += lod.tiles.size();
+  }
+  return total;
 }
 
 std::string render_issues(const ValidationReport& report, std::string_view indent) {
@@ -2446,6 +2646,12 @@ std::string render_terrain_package_manifest(
   output << "  \"packageId\": " << json_quote(package_id) << ",\n";
   output << "  \"sourceManifestVersion\": "
          << json_quote(source_manifest.manifest_version) << ",\n";
+  output << "  \"coverage\": {\n";
+  output << "    \"scope\": " << json_quote(config.coverage_scope) << ",\n";
+  output << "    \"countryCode\": \"CZ\",\n";
+  output << "    \"completeWithinDeclaredBounds\": "
+         << (config.coverage_scope == "czech-republic" ? "true" : "false") << "\n";
+  output << "  },\n";
   output << "  \"sourceLineage\": [\n";
   const std::vector<const SourceDataset*> lineage_sources =
     terrain_lineage_sources(source_manifest, config);
@@ -2492,6 +2698,23 @@ std::string render_terrain_package_manifest(
   output << "  ],\n";
   output << "  \"collisionTiles\": " << render_tile_metadata_array(outputs.collision_tiles, "  ")
          << ",\n";
+  output << "  \"streaming\": {\n";
+  output << "    \"runtimeNetworkRequired\": false,\n";
+  output << "    \"externalMapApis\": [],\n";
+  output << "    \"addressing\": \"project-local-ENU-tile-bounds\",\n";
+  output << "    \"coverageScope\": " << json_quote(config.coverage_scope) << ",\n";
+  output << "    \"interruptionFreeWithinDeclaredBounds\": true\n";
+  output << "  },\n";
+  output << "  \"packagingLayout\": {\n";
+  output << "    \"renderRoot\": \"render\",\n";
+  output << "    \"collisionRoot\": \"collision\",\n";
+  output << "    \"renderTileCount\": " << total_render_tiles(outputs) << ",\n";
+  output << "    \"collisionTileCount\": " << outputs.collision_tiles.size() << ",\n";
+  output << "    \"renderBytes\": " << total_render_bytes(outputs) << ",\n";
+  output << "    \"collisionBytes\": " << total_tile_bytes(outputs.collision_tiles) << ",\n";
+  output << "    \"totalBytes\": "
+         << (total_render_bytes(outputs) + total_tile_bytes(outputs.collision_tiles)) << "\n";
+  output << "  },\n";
   output << "  \"validation\": {\n";
   output << "    \"controlPoints\": {\n";
   output << "      \"maximumAllowedErrorMarginM\": 0.10,\n";
@@ -2596,6 +2819,14 @@ Dmr5gPilotTerrainResult process_dmr5g_pilot_terrain(
       write_report_if_requested(options, result.report);
       return result;
     }
+    if (options.require_czech_republic_scope &&
+        (config->schema_version != kCzechTerrainConfigSchemaVersion ||
+         config->coverage_scope != "czech-republic")) {
+      add_issue(result.report,
+                "error",
+                "terrain.options.czech_republic_config.required",
+                "The Czech Republic terrain command requires the Czech Republic schema and coverageScope 'czech-republic'.");
+    }
     bind_source_tiles_to_manifest(*config, *source_validation.manifest, result.report);
     if (has_errors(result.report)) {
       finalize_report(result.report);
@@ -2612,6 +2843,7 @@ Dmr5gPilotTerrainResult process_dmr5g_pilot_terrain(
                 "terrain.dmr5g.tiles.empty",
                 "No DMR 5G pilot terrain tiles were ingested.");
     }
+    validate_czech_republic_terrain_coverage(*config, tiles, result.report);
     if (has_errors(result.report)) {
       finalize_report(result.report);
       write_report_if_requested(options, result.report);
@@ -2661,6 +2893,13 @@ Dmr5gPilotTerrainResult process_dmr5g_pilot_terrain(
   }
 
   return result;
+}
+
+Dmr5gPilotTerrainResult process_dmr5g_czech_republic_terrain(
+  const Dmr5gCzechRepublicTerrainOptions& options) {
+  Dmr5gCzechRepublicTerrainOptions scoped_options = options;
+  scoped_options.require_czech_republic_scope = true;
+  return process_dmr5g_pilot_terrain(scoped_options);
 }
 
 } // namespace flying::data_pipeline

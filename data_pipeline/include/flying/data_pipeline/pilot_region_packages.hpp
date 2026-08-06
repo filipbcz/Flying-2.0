@@ -16,7 +16,10 @@ struct PilotRegionPackageOptions {
   std::string package_name = "flying-pilot-region-offline-gis";
   std::string package_version;
   bool verify_checksums = true;
+  bool require_czech_republic_scope = false;
 };
+
+using CzechRepublicPackageOptions = PilotRegionPackageOptions;
 
 struct PilotRegionPackageResult {
   ValidationReport report;
@@ -29,5 +32,8 @@ struct PilotRegionPackageResult {
 
 PilotRegionPackageResult process_pilot_region_packages(
   const PilotRegionPackageOptions& options);
+
+PilotRegionPackageResult process_czech_republic_packages(
+  const CzechRepublicPackageOptions& options);
 
 } // namespace flying::data_pipeline

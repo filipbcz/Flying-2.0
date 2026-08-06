@@ -10,12 +10,15 @@
     "packageVersion",
     "packageId",
     "sourceManifestVersion",
+    "coverage",
     "sourceLineage",
     "pilotRegion",
     "recordedProjGeoidConfiguration",
     "terrainMetadata",
     "renderLods",
     "collisionTiles",
+    "streaming",
+    "packagingLayout",
     "validation"
   ],
   "properties": {
@@ -37,6 +40,15 @@
     "sourceManifestVersion": {
       "type": "string",
       "minLength": 1
+    },
+    "coverage": {
+      "type": "object",
+      "required": ["scope", "countryCode", "completeWithinDeclaredBounds"],
+      "properties": {
+        "scope": {"enum": ["pilot-region", "czech-republic"]},
+        "countryCode": {"const": "CZ"},
+        "completeWithinDeclaredBounds": {"type": "boolean"}
+      }
     },
     "sourceLineage": {
       "type": "array",
@@ -122,6 +134,44 @@
         "$ref": "#/$defs/tileMetadata"
       }
     },
+    "streaming": {
+      "type": "object",
+      "required": [
+        "runtimeNetworkRequired",
+        "externalMapApis",
+        "addressing",
+        "coverageScope",
+        "interruptionFreeWithinDeclaredBounds"
+      ],
+      "properties": {
+        "runtimeNetworkRequired": {"const": false},
+        "externalMapApis": {"type": "array", "maxItems": 0},
+        "addressing": {"type": "string", "minLength": 1},
+        "coverageScope": {"enum": ["pilot-region", "czech-republic"]},
+        "interruptionFreeWithinDeclaredBounds": {"const": true}
+      }
+    },
+    "packagingLayout": {
+      "type": "object",
+      "required": [
+        "renderRoot",
+        "collisionRoot",
+        "renderTileCount",
+        "collisionTileCount",
+        "renderBytes",
+        "collisionBytes",
+        "totalBytes"
+      ],
+      "properties": {
+        "renderRoot": {"const": "render"},
+        "collisionRoot": {"const": "collision"},
+        "renderTileCount": {"type": "integer", "minimum": 1},
+        "collisionTileCount": {"type": "integer", "minimum": 1},
+        "renderBytes": {"type": "integer", "minimum": 1},
+        "collisionBytes": {"type": "integer", "minimum": 1},
+        "totalBytes": {"type": "integer", "minimum": 1}
+      }
+    },
     "validation": {
       "type": "object",
       "additionalProperties": true,
@@ -161,6 +211,10 @@
         "path": {
           "type": "string",
           "minLength": 1
+        },
+        "sizeBytes": {
+          "type": "integer",
+          "minimum": 1
         },
         "rows": {
           "type": "integer",

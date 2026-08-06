@@ -16,7 +16,10 @@ struct Dmr5gPilotTerrainOptions {
   std::string package_name = "flying-dmr5g-pilot-terrain";
   std::string package_version;
   bool verify_checksums = true;
+  bool require_czech_republic_scope = false;
 };
+
+using Dmr5gCzechRepublicTerrainOptions = Dmr5gPilotTerrainOptions;
 
 struct Dmr5gPilotTerrainResult {
   ValidationReport report;
@@ -29,5 +32,8 @@ struct Dmr5gPilotTerrainResult {
 
 Dmr5gPilotTerrainResult process_dmr5g_pilot_terrain(
   const Dmr5gPilotTerrainOptions& options);
+
+Dmr5gPilotTerrainResult process_dmr5g_czech_republic_terrain(
+  const Dmr5gCzechRepublicTerrainOptions& options);
 
 } // namespace flying::data_pipeline

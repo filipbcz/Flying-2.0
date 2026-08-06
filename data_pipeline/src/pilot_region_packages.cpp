@@ -25,10 +25,13 @@ namespace {
 
 constexpr std::string_view kConfigSchemaVersion =
   "flying.pilot-region-package-config.v1";
+constexpr std::string_view kCzechConfigSchemaVersion =
+  "flying.czech-republic-package-config.v1";
 constexpr std::string_view kPackageSchemaVersion = "flying.pilot-region-package.v1";
 constexpr std::string_view kVectorSchemaVersion = "flying.vector-layer-package.v1";
 constexpr std::string_view kValidationReportSchemaVersion =
   "flying.validation-report.v1";
+constexpr double kCoordinateToleranceM = 1.0e-6;
 
 struct JsonValue {
   enum class Type {
@@ -999,6 +1002,7 @@ struct VectorLayerConfig {
   std::filesystem::path path;
   std::string format = "geojson";
   double line_width_m = 0.0;
+  std::optional<Bounds> bounds;
   std::string source_manifest_id;
 };
 
@@ -1022,7 +1026,9 @@ struct MaskConfig {
 };
 
 struct PilotPackageConfig {
+  std::string schema_version;
   std::string package_id_hint;
+  std::string coverage_scope = "pilot-region";
   PilotRegion pilot_region;
   SourceToProjectTransform transform;
   std::string transform_json;
@@ -1117,12 +1123,45 @@ std::optional<PilotPackageConfig> parse_package_config(const JsonValue& root,
   PilotPackageConfig config;
   const std::optional<std::string> schema_version =
     require_string(object, "schemaVersion", report, "pilot.config", "Pilot package config");
-  if (schema_version.has_value() && *schema_version != kConfigSchemaVersion) {
+  if (schema_version.has_value()) {
+    config.schema_version = *schema_version;
+  }
+  if (schema_version.has_value() && *schema_version != kConfigSchemaVersion &&
+      *schema_version != kCzechConfigSchemaVersion) {
     add_issue(report,
               "error",
               "pilot.config.schemaVersion.unsupported",
               "Pilot package config schemaVersion must be '" +
-                std::string{kConfigSchemaVersion} + "'.");
+                std::string{kConfigSchemaVersion} + "' or '" +
+                std::string{kCzechConfigSchemaVersion} + "'.");
+  }
+  if (schema_version.has_value() && *schema_version == kCzechConfigSchemaVersion) {
+    config.coverage_scope = "czech-republic";
+  }
+  if (const JsonValue* coverage_scope = find_member(object, "coverageScope");
+      coverage_scope != nullptr && coverage_scope->type == JsonValue::Type::string_value &&
+      !coverage_scope->string.empty()) {
+    config.coverage_scope = coverage_scope->string;
+  }
+  if (config.coverage_scope != "pilot-region" && config.coverage_scope != "czech-republic") {
+    add_issue(report,
+              "error",
+              "pilot.config.coverageScope.unsupported",
+              "Pilot package config coverageScope must be 'pilot-region' or 'czech-republic'.");
+  }
+  if (schema_version.has_value() && *schema_version == kCzechConfigSchemaVersion &&
+      config.coverage_scope != "czech-republic") {
+    add_issue(report,
+              "error",
+              "pilot.config.coverageScope.schema_mismatch",
+              "Czech Republic package config schema requires coverageScope 'czech-republic'.");
+  }
+  if (schema_version.has_value() && *schema_version == kConfigSchemaVersion &&
+      config.coverage_scope == "czech-republic") {
+    add_issue(report,
+              "error",
+              "pilot.config.coverageScope.schema_mismatch",
+              "Czech Republic coverage requires the Czech Republic package config schema.");
   }
   if (const JsonValue* package_id_hint = find_member(object, "packageIdHint");
       package_id_hint != nullptr && package_id_hint->type == JsonValue::Type::string_value) {
@@ -1156,6 +1195,13 @@ std::optional<PilotPackageConfig> parse_package_config(const JsonValue& root,
                 "error",
                 "pilot.config.pilotRegion.extent.invalid",
                 "Pilot region widthM and heightM must be positive.");
+    }
+    if (config.coverage_scope == "czech-republic" &&
+        (config.pilot_region.width_m <= 50000.0 || config.pilot_region.height_m <= 50000.0)) {
+      add_issue(report,
+                "error",
+                "pilot.config.czechRepublic.extent.invalid",
+                "Full Czech Republic package processing requires an extent larger than the pilot region.");
     }
   }
 
@@ -1359,6 +1405,12 @@ std::optional<PilotPackageConfig> parse_package_config(const JsonValue& root,
       if (const JsonValue* line_width = find_member(layer, "lineWidthM");
           line_width != nullptr && line_width->type == JsonValue::Type::number_value) {
         layer_config.line_width_m = line_width->number;
+      }
+      if (find_member(layer, "bounds") != nullptr) {
+        if (const auto bounds =
+              parse_bounds(layer, "bounds", report, "pilot.config.vectorLayers", "Vector layer")) {
+          layer_config.bounds = *bounds;
+        }
       }
       config.vector_layers.push_back(std::move(layer_config));
     }
@@ -2027,6 +2079,84 @@ bool geometry_intersects_region(const LocalGeometry& geometry, const PilotRegion
   return !(bounds.max_east_m < region.min_east_m || bounds.min_east_m > region.max_east_m() ||
            bounds.max_north_m < region.min_north_m ||
            bounds.min_north_m > region.max_north_m());
+}
+
+bool continuous_rect_coverage(const std::vector<Bounds>& bounds,
+                              const Bounds& required_bounds) {
+  if (bounds.empty()) {
+    return false;
+  }
+
+  std::vector<double> east_breaks = {
+    required_bounds.min_east_m,
+    required_bounds.max_east_m,
+  };
+  for (const Bounds& candidate : bounds) {
+    if (candidate.max_east_m < required_bounds.min_east_m + kCoordinateToleranceM ||
+        candidate.min_east_m > required_bounds.max_east_m - kCoordinateToleranceM ||
+        candidate.max_north_m < required_bounds.min_north_m + kCoordinateToleranceM ||
+        candidate.min_north_m > required_bounds.max_north_m - kCoordinateToleranceM) {
+      continue;
+    }
+    east_breaks.push_back(
+      std::clamp(candidate.min_east_m, required_bounds.min_east_m, required_bounds.max_east_m));
+    east_breaks.push_back(
+      std::clamp(candidate.max_east_m, required_bounds.min_east_m, required_bounds.max_east_m));
+  }
+  std::sort(east_breaks.begin(), east_breaks.end());
+  east_breaks.erase(std::unique(east_breaks.begin(),
+                                east_breaks.end(),
+                                [](double lhs, double rhs) {
+                                  return std::fabs(lhs - rhs) <= kCoordinateToleranceM;
+                                }),
+                    east_breaks.end());
+
+  if (east_breaks.size() < 2U ||
+      east_breaks.front() > required_bounds.min_east_m + kCoordinateToleranceM ||
+      east_breaks.back() < required_bounds.max_east_m - kCoordinateToleranceM) {
+    return false;
+  }
+
+  for (std::size_t i = 0U; i + 1U < east_breaks.size(); ++i) {
+    const double slab_min = east_breaks[i];
+    const double slab_max = east_breaks[i + 1U];
+    if (slab_max - slab_min <= kCoordinateToleranceM) {
+      continue;
+    }
+    const double slab_mid = (slab_min + slab_max) * 0.5;
+    std::vector<std::pair<double, double>> north_intervals;
+    for (const Bounds& candidate : bounds) {
+      if (slab_mid >= candidate.min_east_m - kCoordinateToleranceM &&
+          slab_mid <= candidate.max_east_m + kCoordinateToleranceM) {
+        const double clipped_min =
+          std::max(candidate.min_north_m, required_bounds.min_north_m);
+        const double clipped_max =
+          std::min(candidate.max_north_m, required_bounds.max_north_m);
+        if (clipped_max > clipped_min + kCoordinateToleranceM) {
+          north_intervals.emplace_back(clipped_min, clipped_max);
+        }
+      }
+    }
+    if (north_intervals.empty()) {
+      return false;
+    }
+    std::sort(north_intervals.begin(), north_intervals.end());
+    double covered_until = required_bounds.min_north_m;
+    for (const auto& [north_min, north_max] : north_intervals) {
+      if (north_min > covered_until + kCoordinateToleranceM) {
+        return false;
+      }
+      covered_until = std::max(covered_until, north_max);
+      if (covered_until >= required_bounds.max_north_m - kCoordinateToleranceM) {
+        break;
+      }
+    }
+    if (covered_until < required_bounds.max_north_m - kCoordinateToleranceM) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 std::string optional_property_string(const JsonValue::Object& properties,
@@ -2703,6 +2833,31 @@ std::string make_package_id(const PilotRegionPackageOptions& options,
          std::string{content_hash.substr(0U, 16U)};
 }
 
+std::size_t imagery_tile_count(const ImageryPackageMetadata& imagery);
+
+std::size_t imagery_byte_count(const ImageryPackageMetadata& imagery) {
+  std::size_t total = 0U;
+  for (const ImageryLodMetadata& lod : imagery.lods) {
+    for (const ImageryTileMetadata& tile : lod.tiles) {
+      total += tile.file.size_bytes;
+    }
+  }
+  return total;
+}
+
+std::size_t vector_byte_count(const std::vector<VectorLayerOutput>& vector_layers,
+                              const LabelOutput& labels) {
+  std::size_t total = labels.file.size_bytes;
+  for (const VectorLayerOutput& layer : vector_layers) {
+    total += layer.file.size_bytes;
+  }
+  return total;
+}
+
+std::size_t mask_byte_count(const MaskOutputs& masks) {
+  return masks.water_mask.size_bytes + masks.material_mask.size_bytes;
+}
+
 std::string render_package_manifest(const PilotRegionPackageOptions& options,
                                     const SourceManifest& source_manifest,
                                     const PilotPackageConfig& config,
@@ -2722,6 +2877,12 @@ std::string render_package_manifest(const PilotRegionPackageOptions& options,
   output << "  \"contentHash\": " << json_quote(content_hash) << ",\n";
   output << "  \"sourceManifestVersion\": "
          << json_quote(source_manifest.manifest_version) << ",\n";
+  output << "  \"coverage\": {\n";
+  output << "    \"scope\": " << json_quote(config.coverage_scope) << ",\n";
+  output << "    \"countryCode\": \"CZ\",\n";
+  output << "    \"completeWithinDeclaredBounds\": "
+         << (config.coverage_scope == "czech-republic" ? "true" : "false") << "\n";
+  output << "  },\n";
   output << "  \"sourceLineage\": "
          << render_source_lineage(source_manifest, used_source_ids, "  ") << ",\n";
   output << "  \"pilotRegion\": {\n";
@@ -2741,6 +2902,29 @@ std::string render_package_manifest(const PilotRegionPackageOptions& options,
   output << "  \"vectorPackages\": "
          << render_vector_package_metadata(vector_layers, labels, "  ") << ",\n";
   output << "  \"masks\": " << render_masks_metadata(masks, "  ") << ",\n";
+  output << "  \"streaming\": {\n";
+  output << "    \"runtimeNetworkRequired\": false,\n";
+  output << "    \"externalMapApis\": [],\n";
+  output << "    \"remoteTileServerUrls\": [],\n";
+  output << "    \"addressing\": \"project-local-ENU-tile-bounds\",\n";
+  output << "    \"coverageScope\": " << json_quote(config.coverage_scope) << ",\n";
+  output << "    \"interruptionFreeWithinDeclaredBounds\": true\n";
+  output << "  },\n";
+  output << "  \"packagingLayout\": {\n";
+  output << "    \"imageryRoot\": \"imagery\",\n";
+  output << "    \"vectorRoot\": \"vectors\",\n";
+  output << "    \"maskRoot\": \"masks\",\n";
+  output << "    \"orthoTileCount\": " << imagery_tile_count(imagery) << ",\n";
+  output << "    \"vectorLayerCount\": " << vector_layers.size() << ",\n";
+  output << "    \"waterMaskAvailable\": true,\n";
+  output << "    \"materialMaskAvailable\": true,\n";
+  output << "    \"imageryBytes\": " << imagery_byte_count(imagery) << ",\n";
+  output << "    \"vectorBytes\": " << vector_byte_count(vector_layers, labels) << ",\n";
+  output << "    \"maskBytes\": " << mask_byte_count(masks) << ",\n";
+  output << "    \"totalBytes\": "
+         << (imagery_byte_count(imagery) + vector_byte_count(vector_layers, labels) +
+             mask_byte_count(masks)) << "\n";
+  output << "  },\n";
   output << "  \"validation\": {\n";
   output << "    \"offlineRuntime\": {\n";
   output << "      \"manifestsChecked\": " << (vector_layers.size() + 2U) << ",\n";
@@ -2854,6 +3038,84 @@ std::size_t imagery_tile_count(const ImageryPackageMetadata& imagery) {
   return count;
 }
 
+void validate_czech_republic_package_coverage(const PilotPackageConfig& config,
+                                              ValidationReport& report) {
+  if (config.coverage_scope != "czech-republic") {
+    return;
+  }
+
+  const Bounds required_bounds{
+    config.pilot_region.min_east_m,
+    config.pilot_region.max_east_m(),
+    config.pilot_region.min_north_m,
+    config.pilot_region.max_north_m(),
+  };
+
+  std::vector<Bounds> ortho_bounds;
+  ortho_bounds.reserve(config.ortho.sources.size());
+  for (const OrthoSourceConfig& source : config.ortho.sources) {
+    ortho_bounds.push_back(source.bounds);
+  }
+  if (!continuous_rect_coverage(ortho_bounds, required_bounds)) {
+    add_issue(report,
+              "error",
+              "pilot.config.czechRepublic.orthoImagery.coverage_incomplete",
+              "Full Czech Republic package processing requires continuous ortho imagery source coverage across the declared package bounds.");
+  }
+
+  std::map<std::string, std::vector<Bounds>> vector_bounds_by_category;
+  for (const VectorLayerConfig& layer : config.vector_layers) {
+    if (!layer.bounds.has_value()) {
+      add_issue(report,
+                "error",
+                "pilot.config.czechRepublic.vectorLayers.bounds_missing",
+                "Full Czech Republic package processing requires each vector layer to declare source coverage bounds.",
+                layer.category);
+      continue;
+    }
+    vector_bounds_by_category[layer.category].push_back(*layer.bounds);
+  }
+
+  for (const auto& [category, layer_bounds] : vector_bounds_by_category) {
+    if (!continuous_rect_coverage(layer_bounds, required_bounds)) {
+      add_issue(report,
+                "error",
+                "pilot.config.czechRepublic.vectorLayers.coverage_incomplete",
+                "Full Czech Republic package processing requires every declared vector layer category to cover the declared package bounds.",
+                category);
+    }
+  }
+
+  const std::set<std::string> material_categories = [&config] {
+    std::set<std::string> categories;
+    for (const MaterialLayerConfig& material_layer : config.masks.material_layers) {
+      categories.insert(material_layer.category);
+    }
+    return categories;
+  }();
+
+  const auto water_bounds = vector_bounds_by_category.find("water");
+  if (water_bounds == vector_bounds_by_category.end() ||
+      !continuous_rect_coverage(water_bounds->second, required_bounds)) {
+    add_issue(report,
+              "error",
+              "pilot.config.czechRepublic.waterMask.coverage_incomplete",
+              "Full Czech Republic package processing requires water-mask source coverage across the declared package bounds.");
+  }
+
+  for (const std::string& category : material_categories) {
+    const auto layer_bounds = vector_bounds_by_category.find(category);
+    if (layer_bounds == vector_bounds_by_category.end() ||
+        !continuous_rect_coverage(layer_bounds->second, required_bounds)) {
+      add_issue(report,
+                "error",
+                "pilot.config.czechRepublic.materialMasks.coverage_incomplete",
+                "Full Czech Republic package processing requires material-mask source layer coverage across the declared package bounds.",
+                category);
+    }
+  }
+}
+
 } // namespace
 
 PilotRegionPackageResult process_pilot_region_packages(
@@ -2919,6 +3181,15 @@ PilotRegionPackageResult process_pilot_region_packages(
       write_report_if_requested(options, result.report);
       return result;
     }
+    if (options.require_czech_republic_scope &&
+        (config->schema_version != kCzechConfigSchemaVersion ||
+         config->coverage_scope != "czech-republic")) {
+      add_issue(result.report,
+                "error",
+                "pilot.options.czech_republic_config.required",
+                "The Czech Republic package command requires the Czech Republic schema and coverageScope 'czech-republic'.");
+    }
+    validate_czech_republic_package_coverage(*config, result.report);
     bind_config_sources(*config, *source_validation.manifest, result.report);
     if (has_errors(result.report)) {
       finalize_report(result.report);
@@ -2994,6 +3265,13 @@ PilotRegionPackageResult process_pilot_region_packages(
     write_report_if_requested(options, result.report);
     return result;
   }
+}
+
+PilotRegionPackageResult process_czech_republic_packages(
+  const CzechRepublicPackageOptions& options) {
+  CzechRepublicPackageOptions scoped_options = options;
+  scoped_options.require_czech_republic_scope = true;
+  return process_pilot_region_packages(scoped_options);
 }
 
 } // namespace flying::data_pipeline

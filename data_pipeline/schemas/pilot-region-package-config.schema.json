@@ -15,7 +15,16 @@
   ],
   "properties": {
     "schemaVersion": {
-      "const": "flying.pilot-region-package-config.v1"
+      "enum": [
+        "flying.pilot-region-package-config.v1",
+        "flying.czech-republic-package-config.v1"
+      ]
+    },
+    "coverageScope": {
+      "enum": [
+        "pilot-region",
+        "czech-republic"
+      ]
     },
     "packageIdHint": {
       "type": "string"
@@ -97,7 +106,8 @@
           },
           "path": {"$ref": "#/$defs/localPath"},
           "format": {"const": "geojson"},
-          "lineWidthM": {"type": "number", "minimum": 0}
+          "lineWidthM": {"type": "number", "minimum": 0},
+          "bounds": {"$ref": "#/$defs/bounds"}
         }
       }
     },
