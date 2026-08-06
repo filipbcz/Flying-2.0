@@ -1,0 +1,4 @@
+metric,reference,actual,deviation,tolerance,status
+lateralDeviationM,,,,,approved_exclusion_missing_credible_data
+rudderNorm,,,,,approved_exclusion_missing_credible_data
+aileronNorm,,,,,approved_exclusion_missing_credible_data

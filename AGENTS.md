@@ -6,31 +6,31 @@
 - default branch: main
 
 ## Task
-- title: Flying: 19. Implement Weather And Atmosphere Coupling
+- title: Flying: 20. Build Aircraft Validation Suite
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-19. Implement Weather And Atmosphere Coupling
+20. Build Aircraft Validation Suite
 
 Step description and scope:
-Implement the numerical atmosphere and weather model shared by CoreSim, visual effects, vegetation, particles, and sound, including wind profiles, gusts, turbulence, pressure, temperature, humidity, clouds, precipitation, visibility, icing, and wet surfaces.
+Create and run the formal aircraft validation package for the selected aircraft, comparing controlled scenarios against licensed POH/AFM, flight-test, CFD, wind-tunnel, or other credible reference data.
 
 In scope:
-- Atmosphere model
-- Wind field
-- Gust and turbulence model
-- Manual weather UI/data
-- Optional live weather adapter interface
-- Weather-to-physics coupling
-- Weather visuals integration
+- Validation scenario definitions
+- Reference data registry
+- Tolerance checks
+- Deviation reports
+- Graphs
+- Release-blocking test classification
+- Aircraft validation report
 
 Out of scope:
-- Mandatory online weather
-- Multiplayer weather synchronization
-- Unverified aquaplaning model
-- Global weather outside Czech coverage
+- Certification as EASA/FAA FSTD
+- Adding more aircraft
+- Inventing tolerances where no credible data exists
+- Changing legal licensing decisions
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -57,9 +57,9 @@ Already completed roadmap steps (existing repository context):
 - 16. Complete Production Aircraft Data Model
 - 17. Implement Aircraft Systems And Sensor Models
 - 18. Implement Cockpit And Aircraft Presentation
+- 19. Implement Weather And Atmosphere Coupling
 
 Future roadmap steps (explicitly out of scope):
-- 20. Build Aircraft Validation Suite
 - 21. Scale Terrain Pipeline To Full Czech Republic
 - 22. Complete Airport And SLZ Coverage
 - 23. Implement Detailed Airport Set
@@ -72,10 +72,10 @@ Future roadmap steps (explicitly out of scope):
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- CoreSim receives numerical wind, turbulence, pressure, temperature, density, and humidity data independent of weather visuals.
-- Weather model supports manual scenarios and a clearly optional METAR/GRIB adapter path that is disabled or unavailable without explicit user action.
-- Gust and turbulence tests validate deterministic Dryden or von Karman model behavior for fixed seeds and scenario inputs.
-- Enabled clouds, precipitation, icing, and wet surfaces have corresponding physical effects on aircraft, sensors, runway friction, visibility, or engine behavior.
+- Validation scenarios cover stall speeds, maximum and cruise speeds, climb rate, service ceiling, glide, sink rate, takeoff distance, landing distance, engine RPM/power/fuel/temperature points, stability modes, control-step responses, coordinated turns, ground effect, crosswind, tire slip, and braking where reference data exists.
+- Each validation test stores inputs, outputs, reference source, tolerance, result status, state hash, and deviation graph.
+- Release-blocking validation fails when a mandatory reference-backed test exceeds documented tolerances.
+- Aircraft model is not labeled faithful to the selected type unless all mandatory validation tests pass or have approved documented exclusions due to missing credible data.
 
 ## Agent Configuration
 - no project config provided, using defaults

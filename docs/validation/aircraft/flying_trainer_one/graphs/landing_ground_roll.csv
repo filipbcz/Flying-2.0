@@ -1,0 +1,3 @@
+metric,reference,actual,deviation,tolerance,status
+distanceM,,,,,approved_exclusion_missing_credible_data
+touchdownSpeedMps,,,,,approved_exclusion_missing_credible_data

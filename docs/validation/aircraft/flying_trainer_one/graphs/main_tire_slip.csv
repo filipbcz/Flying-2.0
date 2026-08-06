@@ -1,0 +1,4 @@
+metric,reference,actual,deviation,tolerance,status
+longitudinalSlipRatio,,,,,approved_exclusion_missing_credible_data
+lateralSlipAngleDeg,,,,,approved_exclusion_missing_credible_data
+frictionCoefficient,,,,,approved_exclusion_missing_credible_data

@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "flying.aircraft_reference_registry.v1",
+  "aircraftModel": "flying_trainer_one",
+  "referenceAircraftIdentity": {
+    "type": "unbranded_project_authored_trainer",
+    "faithfulTypeClaimPermitted": false,
+    "claimStatus": "not_faithful",
+    "gateDocument": "docs/governance/m0-aircraft-data-gate.md"
+  },
+  "sources": [
+    {
+      "id": "fto-step16-owned-model",
+      "title": "Flying Step 16 Unbranded Piston Trainer Aircraft Data Workbook",
+      "document": "internal:flying/step16/aircraft-data-workbook",
+      "license": "CC0-1.0 project-owned data",
+      "credibilityClass": "engineering_model",
+      "credibleForTypeValidation": false,
+      "permittedUse": "Simulator integration and regression comparison for the unbranded model.",
+      "redistributable": false,
+      "notes": "Project-authored parameters are useful for configuration provenance but are not POH/AFM, flight-test, CFD, wind-tunnel, or named-type validation data."
+    },
+    {
+      "id": "core-sim-telemetry-v1",
+      "title": "CoreSim Telemetry and Deterministic State Hash Contract",
+      "document": "core_sim/include/flying/core_sim/telemetry.hpp",
+      "license": "Flying repository",
+      "credibilityClass": "implementation_contract",
+      "credibleForTypeValidation": false,
+      "permittedUse": "State-hash and output capture contract for validation records.",
+      "redistributable": true,
+      "notes": "Defines recorded simulator outputs; not an aircraft performance reference."
+    },
+    {
+      "id": "missing-poh-afm-flight-test-cfd-windtunnel",
+      "title": "Missing licensed POH/AFM, flight-test, CFD, or wind-tunnel validation source",
+      "document": "docs/governance/m0-aircraft-data-gate.md",
+      "license": "not_available",
+      "credibilityClass": "approved_exclusion",
+      "credibleForTypeValidation": false,
+      "permittedUse": "Documents why mandatory type-fidelity validation points are excluded instead of assigned invented tolerances.",
+      "redistributable": true,
+      "approvedExclusion": {
+        "status": "approved",
+        "reason": "The selected V1 aircraft is unbranded and no licensed credible type reference data is present in the repository.",
+        "approvalRecord": "docs/governance/m0-aircraft-data-gate.md"
+      }
+    }
+  ]
+}

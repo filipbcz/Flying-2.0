@@ -1,0 +1,5 @@
+metric,reference,actual,deviation,tolerance,status
+phugoidPeriodS,,,,,approved_exclusion_missing_credible_data
+phugoidDampingRatio,,,,,approved_exclusion_missing_credible_data
+dutchRollPeriodS,,,,,approved_exclusion_missing_credible_data
+spiralTimeConstantS,,,,,approved_exclusion_missing_credible_data

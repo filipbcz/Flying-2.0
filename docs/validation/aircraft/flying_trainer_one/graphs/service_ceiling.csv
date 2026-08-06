@@ -1,0 +1,2 @@
+metric,reference,actual,deviation,tolerance,status
+pressureAltitudeM,,,,,approved_exclusion_missing_credible_data

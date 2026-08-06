@@ -1,0 +1,4 @@
+metric,reference,actual,deviation,tolerance,status
+turnRateRadPerS,,,,,approved_exclusion_missing_credible_data
+sideslipDeg,,,,,approved_exclusion_missing_credible_data
+loadFactor,,,,,approved_exclusion_missing_credible_data

@@ -1,0 +1,211 @@
+{
+  "schemaVersion": "flying.aircraft_validation_scenarios.v1",
+  "aircraftModel": "flying_trainer_one",
+  "suiteId": "flying.aircraft_validation_suite.v1",
+  "scenarioPolicy": {
+    "units": "si",
+    "mandatoryReferenceBackedTestsAreReleaseBlocking": true,
+    "noInventedTolerances": true,
+    "faithfulTypeClaimPermitted": false
+  },
+  "scenarios": [
+    {
+      "id": "stall_speed_clean",
+      "category": "stall_speeds",
+      "title": "Clean stall speed",
+      "referenceSource": "missing-poh-afm-flight-test-cfd-windtunnel",
+      "mandatoryWhenReferenceExists": true,
+      "classification": "release_blocking_if_reference_backed",
+      "inputs": {"massKg": 842.4, "flapsNorm": 0.0, "power": "idle", "bankDeg": 0.0},
+      "outputs": ["stallSpeedMps"],
+      "tolerance": {"status": "not_defined_missing_credible_data"}
+    },
+    {
+      "id": "stall_speed_landing",
+      "category": "stall_speeds",
+      "title": "Landing-configuration stall speed",
+      "referenceSource": "missing-poh-afm-flight-test-cfd-windtunnel",
+      "mandatoryWhenReferenceExists": true,
+      "classification": "release_blocking_if_reference_backed",
+      "inputs": {"massKg": 842.4, "flapsNorm": 1.0, "power": "idle", "bankDeg": 0.0},
+      "outputs": ["stallSpeedMps"],
+      "tolerance": {"status": "not_defined_missing_credible_data"}
+    },
+    {
+      "id": "maximum_level_speed",
+      "category": "maximum_and_cruise_speeds",
+      "title": "Maximum level speed at rated power",
+      "referenceSource": "missing-poh-afm-flight-test-cfd-windtunnel",
+      "mandatoryWhenReferenceExists": true,
+      "classification": "release_blocking_if_reference_backed",
+      "inputs": {"pressureAltitudeM": 0.0, "isaDeviationC": 0.0, "power": "rated"},
+      "outputs": ["trueAirspeedMps"],
+      "tolerance": {"status": "not_defined_missing_credible_data"}
+    },
+    {
+      "id": "cruise_speed_65_percent",
+      "category": "maximum_and_cruise_speeds",
+      "title": "65 percent cruise speed",
+      "referenceSource": "missing-poh-afm-flight-test-cfd-windtunnel",
+      "mandatoryWhenReferenceExists": true,
+      "classification": "release_blocking_if_reference_backed",
+      "inputs": {"pressureAltitudeM": 1828.8, "isaDeviationC": 0.0, "powerPercent": 65.0},
+      "outputs": ["trueAirspeedMps", "fuelFlowKgPerHour"],
+      "tolerance": {"status": "not_defined_missing_credible_data"}
+    },
+    {
+      "id": "best_rate_climb",
+      "category": "climb_rate",
+      "title": "Best-rate climb",
+      "referenceSource": "missing-poh-afm-flight-test-cfd-windtunnel",
+      "mandatoryWhenReferenceExists": true,
+      "classification": "release_blocking_if_reference_backed",
+      "inputs": {"pressureAltitudeM": 0.0, "isaDeviationC": 0.0, "massKg": 842.4},
+      "outputs": ["verticalSpeedMps", "climbSpeedMps"],
+      "tolerance": {"status": "not_defined_missing_credible_data"}
+    },
+    {
+      "id": "service_ceiling",
+      "category": "service_ceiling",
+      "title": "Service ceiling at residual climb rate",
+      "referenceSource": "missing-poh-afm-flight-test-cfd-windtunnel",
+      "mandatoryWhenReferenceExists": true,
+      "classification": "release_blocking_if_reference_backed",
+      "inputs": {"residualClimbRateMps": 0.508, "massKg": 842.4, "isaDeviationC": 0.0},
+      "outputs": ["pressureAltitudeM"],
+      "tolerance": {"status": "not_defined_missing_credible_data"}
+    },
+    {
+      "id": "best_glide",
+      "category": "glide",
+      "title": "Best glide speed and glide ratio",
+      "referenceSource": "missing-poh-afm-flight-test-cfd-windtunnel",
+      "mandatoryWhenReferenceExists": true,
+      "classification": "release_blocking_if_reference_backed",
+      "inputs": {"massKg": 842.4, "engine": "windmilling", "flapsNorm": 0.0},
+      "outputs": ["glideSpeedMps", "glideRatio"],
+      "tolerance": {"status": "not_defined_missing_credible_data"}
+    },
+    {
+      "id": "power_off_sink",
+      "category": "sink_rate",
+      "title": "Power-off sink rate",
+      "referenceSource": "missing-poh-afm-flight-test-cfd-windtunnel",
+      "mandatoryWhenReferenceExists": true,
+      "classification": "release_blocking_if_reference_backed",
+      "inputs": {"massKg": 842.4, "engine": "idle", "flapsNorm": 1.0},
+      "outputs": ["verticalSpeedMps"],
+      "tolerance": {"status": "not_defined_missing_credible_data"}
+    },
+    {
+      "id": "takeoff_ground_roll",
+      "category": "takeoff_distance",
+      "title": "Takeoff ground roll",
+      "referenceSource": "missing-poh-afm-flight-test-cfd-windtunnel",
+      "mandatoryWhenReferenceExists": true,
+      "classification": "release_blocking_if_reference_backed",
+      "inputs": {"massKg": 842.4, "surface": "dry_paved", "windMps": 0.0},
+      "outputs": ["distanceM", "liftoffSpeedMps"],
+      "tolerance": {"status": "not_defined_missing_credible_data"}
+    },
+    {
+      "id": "landing_ground_roll",
+      "category": "landing_distance",
+      "title": "Landing ground roll",
+      "referenceSource": "missing-poh-afm-flight-test-cfd-windtunnel",
+      "mandatoryWhenReferenceExists": true,
+      "classification": "release_blocking_if_reference_backed",
+      "inputs": {"massKg": 842.4, "surface": "dry_paved", "windMps": 0.0},
+      "outputs": ["distanceM", "touchdownSpeedMps"],
+      "tolerance": {"status": "not_defined_missing_credible_data"}
+    },
+    {
+      "id": "engine_static_rpm_power_fuel_temperature",
+      "category": "engine_rpm_power_fuel_temperature_points",
+      "title": "Static engine RPM, power, fuel flow, and temperatures",
+      "referenceSource": "missing-poh-afm-flight-test-cfd-windtunnel",
+      "mandatoryWhenReferenceExists": true,
+      "classification": "release_blocking_if_reference_backed",
+      "inputs": {"throttleNorm": 1.0, "mixtureNorm": 1.0, "propellerNorm": 1.0, "pressureAltitudeM": 0.0},
+      "outputs": ["rpm", "powerW", "fuelFlowKgPerHour", "oilTemperatureC", "cylinderHeadTemperatureC"],
+      "tolerance": {"status": "not_defined_missing_credible_data"}
+    },
+    {
+      "id": "phugoid_dutch_roll_spiral",
+      "category": "stability_modes",
+      "title": "Longitudinal and lateral stability modes",
+      "referenceSource": "missing-poh-afm-flight-test-cfd-windtunnel",
+      "mandatoryWhenReferenceExists": true,
+      "classification": "release_blocking_if_reference_backed",
+      "inputs": {"trimCondition": "hands_off_cruise", "initialPerturbations": ["pitch", "yaw", "bank"]},
+      "outputs": ["phugoidPeriodS", "phugoidDampingRatio", "dutchRollPeriodS", "spiralTimeConstantS"],
+      "tolerance": {"status": "not_defined_missing_credible_data"}
+    },
+    {
+      "id": "control_step_response",
+      "category": "control_step_responses",
+      "title": "Elevator, aileron, and rudder step responses",
+      "referenceSource": "missing-poh-afm-flight-test-cfd-windtunnel",
+      "mandatoryWhenReferenceExists": true,
+      "classification": "release_blocking_if_reference_backed",
+      "inputs": {"trimCondition": "cruise", "stepSizeNorm": 0.1, "durationS": 10.0},
+      "outputs": ["pitchRateResponseRadPerS", "rollRateResponseRadPerS", "yawRateResponseRadPerS"],
+      "tolerance": {"status": "not_defined_missing_credible_data"}
+    },
+    {
+      "id": "coordinated_turn_30_deg",
+      "category": "coordinated_turns",
+      "title": "30 degree coordinated turn",
+      "referenceSource": "missing-poh-afm-flight-test-cfd-windtunnel",
+      "mandatoryWhenReferenceExists": true,
+      "classification": "release_blocking_if_reference_backed",
+      "inputs": {"bankDeg": 30.0, "airspeedMps": 45.0, "altitudeHold": true},
+      "outputs": ["turnRateRadPerS", "sideslipDeg", "loadFactor"],
+      "tolerance": {"status": "not_defined_missing_credible_data"}
+    },
+    {
+      "id": "ground_effect_liftoff",
+      "category": "ground_effect",
+      "title": "Ground-effect lift/drag near liftoff",
+      "referenceSource": "missing-poh-afm-flight-test-cfd-windtunnel",
+      "mandatoryWhenReferenceExists": true,
+      "classification": "release_blocking_if_reference_backed",
+      "inputs": {"heightOverWingSpan": [0.05, 0.1, 0.25, 1.0], "airspeedMps": 32.0},
+      "outputs": ["liftCoefficientDelta", "dragCoefficientDelta"],
+      "tolerance": {"status": "not_defined_missing_credible_data"}
+    },
+    {
+      "id": "crosswind_takeoff_landing",
+      "category": "crosswind",
+      "title": "Demonstrated crosswind handling",
+      "referenceSource": "missing-poh-afm-flight-test-cfd-windtunnel",
+      "mandatoryWhenReferenceExists": true,
+      "classification": "release_blocking_if_reference_backed",
+      "inputs": {"crosswindMps": [2.5, 5.0, 7.5], "surface": "dry_paved"},
+      "outputs": ["lateralDeviationM", "rudderNorm", "aileronNorm"],
+      "tolerance": {"status": "not_defined_missing_credible_data"}
+    },
+    {
+      "id": "main_tire_slip",
+      "category": "tire_slip",
+      "title": "Main tire longitudinal and lateral slip",
+      "referenceSource": "missing-poh-afm-flight-test-cfd-windtunnel",
+      "mandatoryWhenReferenceExists": true,
+      "classification": "release_blocking_if_reference_backed",
+      "inputs": {"surface": "dry_paved", "normalLoadN": [1500.0, 3000.0, 4500.0]},
+      "outputs": ["longitudinalSlipRatio", "lateralSlipAngleDeg", "frictionCoefficient"],
+      "tolerance": {"status": "not_defined_missing_credible_data"}
+    },
+    {
+      "id": "maximum_braking",
+      "category": "braking",
+      "title": "Maximum braking deceleration and stop distance",
+      "referenceSource": "missing-poh-afm-flight-test-cfd-windtunnel",
+      "mandatoryWhenReferenceExists": true,
+      "classification": "release_blocking_if_reference_backed",
+      "inputs": {"speedMps": 30.0, "surface": "dry_paved", "brakeNorm": 1.0},
+      "outputs": ["decelerationMps2", "stopDistanceM"],
+      "tolerance": {"status": "not_defined_missing_credible_data"}
+    }
+  ]
+}

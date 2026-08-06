@@ -1,0 +1,4 @@
+metric,reference,actual,deviation,tolerance,status
+pitchRateResponseRadPerS,,,,,approved_exclusion_missing_credible_data
+rollRateResponseRadPerS,,,,,approved_exclusion_missing_credible_data
+yawRateResponseRadPerS,,,,,approved_exclusion_missing_credible_data
