@@ -6,31 +6,31 @@
 - default branch: main
 
 ## Task
-- title: Flying: 17. Implement Aircraft Systems And Sensor Models
+- title: Flying: 18. Implement Cockpit And Aircraft Presentation
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-17. Implement Aircraft Systems And Sensor Models
+18. Implement Cockpit And Aircraft Presentation
 
 Step description and scope:
-Implement electrical, fuel, vacuum, pitot-static, compass, gyro, GPS, engine-instrument, icing/blockage, and failure-state models so cockpit instruments consume sensor outputs rather than raw truth state.
+Build the interactive 3D cockpit and aircraft presentation in Unreal, including required controls, readable instruments, lighting, materials, night illumination, cameras, and sound driven by engine and airflow state.
 
 In scope:
-- Sensor models
-- Electrical system
-- Fuel system
-- Vacuum system
-- Failure state model
-- Instrument data API
-- System tests
+- 3D cockpit controls
+- Instrument rendering
+- Cockpit interactions
+- Day/night cockpit lighting
+- Camera modes
+- Aircraft exterior presentation
+- State-driven audio
 
 Out of scope:
-- Visual cockpit mesh and textures
-- Advanced avionics from every manufacturer
-- Random health-point damage system
-- Certification-grade instrumentation
+- Full avionics suite coverage for unrelated manufacturers
+- VR
+- Force feedback
+- Additional aircraft
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -55,9 +55,9 @@ Already completed roadmap steps (existing repository context):
 - 14. Implement Telemetry, Replay, And Export V1
 - 15. Build Vertical Slice Flight And Performance Tests
 - 16. Complete Production Aircraft Data Model
+- 17. Implement Aircraft Systems And Sensor Models
 
 Future roadmap steps (explicitly out of scope):
-- 18. Implement Cockpit And Aircraft Presentation
 - 19. Implement Weather And Atmosphere Coupling
 - 20. Build Aircraft Validation Suite
 - 21. Scale Terrain Pipeline To Full Czech Republic
@@ -72,10 +72,10 @@ Future roadmap steps (explicitly out of scope):
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- Pitot-static instruments respond to pressure, temperature, density, blockage, icing, QNH/QFE, and sensor dynamics rather than directly reading true airspeed or altitude.
-- Electrical, fuel, and vacuum systems are modeled as stateful networks with sources, consumers, switches, failures, and dependencies.
-- Engine instruments display sensor-modeled RPM, manifold pressure, temperatures, fuel flow, and failure effects.
-- Unit and integration tests verify representative sensor lag, failure, and dependency cases.
+- Cockpit contains all controls required for normal cold-and-dark startup, taxi, takeoff, cruise, landing, shutdown, emergency handling, and replay inspection for the selected aircraft.
+- All flight, engine, electrical, fuel, vacuum, and navigation displays consume the sensor/instrument API rather than raw simulation truth values.
+- Cockpit labels and instruments remain readable in day and night lighting at supported desktop resolutions.
+- Engine, propeller, cabin, airflow, and damage audio respond to modeled RPM, load, mixture, airspeed, and failure state.
 
 ## Agent Configuration
 - no project config provided, using defaults

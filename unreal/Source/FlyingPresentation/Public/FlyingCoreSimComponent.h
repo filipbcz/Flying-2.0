@@ -83,8 +83,25 @@ public:
     const FFlyingMappedInputState& MappedInputState,
     bool bEngineRunning);
 
+  UFUNCTION(BlueprintCallable, Category="Flying|Aircraft Systems")
+  void ApplyMappedAircraftControls(
+    const FFlyingMappedInputState& MappedInputState,
+    bool bEngineRunning);
+
   UFUNCTION(BlueprintPure, Category="Flying|CoreSim")
   const FFlyingCoreSimStateSnapshot& GetCurrentSnapshot() const;
+
+  UFUNCTION(BlueprintPure, Category="Flying|Instruments")
+  const FFlyingAircraftInstrumentSnapshot& GetCurrentInstrumentSnapshot() const;
+
+  UFUNCTION(BlueprintCallable, Category="Flying|Aircraft Systems")
+  void SetAircraftSystemSwitch(FName SwitchId, bool bEnabled);
+
+  UFUNCTION(BlueprintCallable, Category="Flying|Aircraft Systems")
+  void SetAircraftFuelSelector(FName SelectorId);
+
+  UFUNCTION(BlueprintCallable, Category="Flying|Aircraft Systems")
+  void SetAircraftFailure(FName FailureId, bool bFailed);
 
   UFUNCTION(BlueprintCallable, Category="Flying|Replay")
   bool StartTelemetryRecording(const FString& OutputPath, const FString& SessionId);
@@ -102,6 +119,9 @@ public:
   bool PlayLoadedTelemetryReplay(bool bWarnOnIncompatible);
 
   UFUNCTION(BlueprintCallable, Category="Flying|Replay")
+  bool ScrubTelemetryReplayNormalized(double PositionNorm);
+
+  UFUNCTION(BlueprintCallable, Category="Flying|Replay")
   bool ExportTelemetryCsv(const FString& OutputPath);
 
   UFUNCTION(BlueprintCallable, Category="Flying|Replay")
@@ -116,6 +136,9 @@ private:
 
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|CoreSim", meta=(AllowPrivateAccess="true"))
   FFlyingCoreSimStateSnapshot CurrentSnapshot;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Instruments", meta=(AllowPrivateAccess="true"))
+  FFlyingAircraftInstrumentSnapshot CurrentInstrumentSnapshot;
 
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Scenario", meta=(AllowPrivateAccess="true"))
   FFlyingScenarioRuntimeState CurrentScenarioState;

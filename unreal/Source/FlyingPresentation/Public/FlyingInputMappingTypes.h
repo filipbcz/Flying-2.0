@@ -205,6 +205,9 @@ struct FLYINGPRESENTATION_API FFlyingMappedInputState
   double PropellerNorm = 1.0;
 
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Input")
+  double FlapsNorm = 0.0;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Input")
   double BrakeLeftNorm = 0.0;
 
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Input")

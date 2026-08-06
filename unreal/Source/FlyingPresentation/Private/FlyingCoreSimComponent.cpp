@@ -6,12 +6,14 @@
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "flying/core_sim/determinism.hpp"
+#include "flying/core_sim/aircraft_systems.hpp"
 #include "flying/core_sim/scenario.hpp"
 #include "flying/core_sim/simulator.hpp"
 #include "flying/core_sim/telemetry.hpp"
 #include "flying/geo_terrain/geodesy.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <filesystem>
 #include <optional>
@@ -24,6 +26,8 @@ namespace {
 
 using flying::core_sim::AuthoritativeState;
 using flying::core_sim::AircraftControlInputSample;
+using flying::core_sim::AircraftSystemsInput;
+using flying::core_sim::AircraftSystemsModel;
 using flying::core_sim::ControlInputSample;
 using flying::core_sim::CoreSimulator;
 using flying::core_sim::DataPackageVersion;
@@ -89,6 +93,111 @@ FString ToFString(const std::string& Value)
 FName ToFName(const std::string& Value)
 {
   return FName(*ToFString(Value));
+}
+
+double WrapDegrees(double Value)
+{
+  double Wrapped = std::fmod(Value, 360.0);
+  if (Wrapped < 0.0)
+  {
+    Wrapped += 360.0;
+  }
+  return Wrapped;
+}
+
+double EstimateEngineRpm(const AircraftControlInputSample& Controls, bool bEngineRunning)
+{
+  if (!bEngineRunning || Controls.mixture_norm <= 0.02)
+  {
+    return 0.0;
+  }
+
+  const double Throttle = FMath::Clamp(Controls.throttle_norm, 0.0, 1.0);
+  const double Propeller = FMath::Clamp(Controls.propeller_norm, 0.35, 1.0);
+  return (650.0 + Throttle * 2050.0) * Propeller;
+}
+
+flying::core_sim::FlightDynamicsState MakeSystemsTruth(const AuthoritativeState& State)
+{
+  flying::core_sim::FlightDynamicsState Truth;
+  Truth.simulation_time_s = State.simulation_time_s;
+  Truth.step_index = State.step_index;
+  Truth.ecef_position_m = State.ecef_position_m;
+  Truth.ecef_velocity_mps = State.ecef_velocity_mps;
+  Truth.body_to_ecef = State.body_to_ecef;
+  Truth.angular_velocity_body_radps = State.angular_velocity_body_radps;
+  Truth.total_force_body_n = State.accumulated_force_body_n;
+  Truth.total_moment_body_nm = State.accumulated_moment_body_nm;
+
+  const EcefPosition Ecef{
+    {State.ecef_position_m.x, State.ecef_position_m.y, State.ecef_position_m.z}};
+  const GeodeticCoordinates Geodetic = flying::geo_terrain::ecef_to_geodetic(Ecef);
+  Truth.latitude_deg = Geodetic.latitude_degrees();
+  Truth.longitude_deg = Geodetic.longitude_degrees();
+  Truth.altitude_m = Geodetic.ellipsoidal_height.meters;
+
+  const LocalTangentFrame Frame = flying::geo_terrain::make_local_tangent_frame(Geodetic);
+  const flying::geo_terrain::NedVector Ned =
+    flying::geo_terrain::ned_from_ecef_vector(
+      Frame,
+      flying::geo_terrain::EcefVector{
+        {State.ecef_velocity_mps.x, State.ecef_velocity_mps.y, State.ecef_velocity_mps.z}});
+  Truth.ned_velocity_mps = {Ned.north_m, Ned.east_m, Ned.down_m};
+
+  const Quaterniond BodyToEcef = State.body_to_ecef.normalized();
+  const Quaterniond EcefToBody = BodyToEcef.conjugated();
+  const Vector3d BodyVelocity = EcefToBody.rotate(State.ecef_velocity_mps);
+  Truth.body_velocity_mps = BodyVelocity;
+
+  const FQuat UnrealBodyToEcef(BodyToEcef.x, BodyToEcef.y, BodyToEcef.z, BodyToEcef.w);
+  const FRotator BodyRotator = UnrealBodyToEcef.Rotator();
+  Truth.euler_rad = {
+    FMath::DegreesToRadians(BodyRotator.Roll),
+    FMath::DegreesToRadians(BodyRotator.Pitch),
+    FMath::DegreesToRadians(BodyRotator.Yaw)};
+  Truth.calibrated_airspeed_mps =
+    std::sqrt(std::max(0.0, BodyVelocity.x * BodyVelocity.x + BodyVelocity.y * BodyVelocity.y));
+  return Truth;
+}
+
+FFlyingAircraftInstrumentSnapshot ToUnreal(
+  const flying::core_sim::InstrumentData& Instruments)
+{
+  FFlyingAircraftInstrumentSnapshot Result;
+  Result.bValid = true;
+  Result.Sequence = static_cast<int64>(Instruments.sequence);
+  Result.IndicatedAirspeedMetersPerSecond = Instruments.indicated_airspeed_mps;
+  Result.IndicatedAltitudeMeters = Instruments.indicated_altitude_m;
+  Result.VerticalSpeedMetersPerSecond = Instruments.vertical_speed_mps;
+  Result.MagneticHeadingDegrees =
+    WrapDegrees(FMath::RadiansToDegrees(Instruments.magnetic_heading_rad));
+  Result.AttitudeRollDegrees = FMath::RadiansToDegrees(Instruments.attitude_roll_rad);
+  Result.AttitudePitchDegrees = FMath::RadiansToDegrees(Instruments.attitude_pitch_rad);
+  Result.VacuumSuctionInHg = Instruments.vacuum.suction_inhg;
+  Result.bGpsValid = Instruments.gps.valid;
+  Result.bPitotBlocked = Instruments.pitot_static.pitot_blocked;
+  Result.bStaticBlocked = Instruments.pitot_static.static_blocked;
+
+  Result.Engine.Rpm = Instruments.engine.rpm;
+  Result.Engine.ManifoldPressureKpa = Instruments.engine.manifold_pressure_kpa;
+  Result.Engine.OilTemperatureKelvin = Instruments.engine.oil_temperature_k;
+  Result.Engine.CylinderHeadTemperatureKelvin = Instruments.engine.cylinder_head_temperature_k;
+  Result.Engine.ExhaustGasTemperatureKelvin = Instruments.engine.exhaust_gas_temperature_k;
+  Result.Engine.bValid = Instruments.engine.valid;
+
+  Result.Electrical.BusVoltageVolts = Instruments.electrical.bus_voltage_v;
+  Result.Electrical.BatteryChargeNorm = Instruments.electrical.battery_charge_norm;
+  Result.Electrical.AlternatorOutputWatts = Instruments.electrical.alternator_output_w;
+  Result.Electrical.bBatteryOnline = Instruments.electrical.battery_online;
+  Result.Electrical.bAlternatorOnline = Instruments.electrical.alternator_online;
+  Result.Electrical.bAvionicsBusPowered = Instruments.electrical.avionics_bus_powered;
+
+  Result.Fuel.LeftQuantityKg = Instruments.fuel.tanks.left_quantity_kg;
+  Result.Fuel.RightQuantityKg = Instruments.fuel.tanks.right_quantity_kg;
+  Result.Fuel.FuelPressureKpa = Instruments.fuel.fuel_pressure_kpa;
+  Result.Fuel.FuelFlowKgPerSecond = Instruments.engine.fuel_flow_kgps;
+  Result.Fuel.bEngineFuelStarved = Instruments.fuel.engine_fuel_starved;
+  return Result;
 }
 
 std::string MakePackageVersionError(
@@ -238,7 +347,7 @@ AircraftControlInputSample ToCoreAircraftControls(const FFlyingMappedInputState&
   Controls.elevator_norm = Value.PitchNorm;
   Controls.rudder_norm = Value.YawNorm;
   Controls.throttle_norm = Value.ThrottleNorm;
-  Controls.flaps_norm = 0.0;
+  Controls.flaps_norm = Value.FlapsNorm;
   Controls.brake_left_norm = Value.BrakeLeftNorm;
   Controls.brake_right_norm = Value.BrakeRightNorm;
   Controls.mixture_norm = Value.MixtureNorm;
@@ -361,6 +470,9 @@ AuthoritativeState MakeInitialState(double LatitudeDegrees,
 struct FFlyingCoreSimBridgeImpl
 {
   CoreSimulator Simulator;
+  AircraftSystemsModel Systems;
+  AircraftControlInputSample LastAircraftControls;
+  bool bLastEngineRunning = false;
   std::optional<flying::core_sim::TelemetryRecorder> Recorder;
   flying::core_sim::TelemetryRecording StoredRecording;
   bool bHasStoredRecording = false;
@@ -378,6 +490,10 @@ struct FFlyingCoreSimBridgeImpl
       LongitudeDegrees,
       HeightMeters,
       InitialVelocityEnuMetersPerSecond));
+    Systems.reset();
+    LastAircraftControls = Simulator.initial_aircraft_controls();
+    bLastEngineRunning = LastAircraftControls.mixture_norm > 0.0;
+    StepSystems(0.0, LastAircraftControls, bLastEngineRunning);
     LastStatus = "CoreSim reset; active telemetry recording stopped";
   }
 
@@ -396,6 +512,9 @@ struct FFlyingCoreSimBridgeImpl
                bool bEngineRunning)
   {
     const auto Report = Simulator.advance(DeltaSeconds, Input);
+    LastAircraftControls = AircraftControls;
+    bLastEngineRunning = bEngineRunning;
+    StepSystems(DeltaSeconds, AircraftControls, bEngineRunning);
     if (Recorder)
     {
       const flying::core_sim::EngineStateSample Engine =
@@ -411,12 +530,49 @@ struct FFlyingCoreSimBridgeImpl
     }
   }
 
+  void ApplyAircraftControls(const AircraftControlInputSample& AircraftControls,
+                             bool bEngineRunning)
+  {
+    LastAircraftControls = AircraftControls;
+    bLastEngineRunning = bEngineRunning;
+    StepSystems(0.0, LastAircraftControls, bLastEngineRunning);
+  }
+
+  bool ScrubReplay(double PositionNorm)
+  {
+    if (!bHasStoredRecording || StoredRecording.frames.empty())
+    {
+      LastStatus = "No telemetry replay frames are loaded";
+      return false;
+    }
+
+    const double ClampedPosition = std::clamp(PositionNorm, 0.0, 1.0);
+    const std::size_t FrameIndex = static_cast<std::size_t>(std::llround(
+      ClampedPosition * static_cast<double>(StoredRecording.frames.size() - 1)));
+    const flying::core_sim::TelemetryFrame& Frame = StoredRecording.frames[FrameIndex];
+
+    Simulator.reset(
+      Frame.state,
+      StoredRecording.initial_flight_dynamics,
+      Frame.aircraft_controls);
+    Systems.reset();
+    LastAircraftControls = Frame.aircraft_controls;
+    bLastEngineRunning = Frame.engine.engine_running;
+    StepSystems(0.0, LastAircraftControls, bLastEngineRunning);
+    LastStatus = "Telemetry replay scrubbed to frame " + std::to_string(Frame.frame_index);
+    return true;
+  }
+
   flying::core_sim::ScenarioInitialState ResetScenario(
     const flying::core_sim::ScenarioSelection& Selection)
   {
     Recorder.reset();
     flying::core_sim::ScenarioInitialState State =
       flying::core_sim::reset_simulator_to_scenario(Simulator, Selection);
+    Systems.reset();
+    LastAircraftControls = Simulator.initial_aircraft_controls();
+    bLastEngineRunning = State.engine_running;
+    StepSystems(0.0, LastAircraftControls, bLastEngineRunning);
     LastStatus = "Scenario started; active telemetry recording stopped";
     return State;
   }
@@ -588,6 +744,10 @@ struct FFlyingCoreSimBridgeImpl
     }
 
     Simulator = ReplaySimulator;
+    Systems.reset();
+    LastAircraftControls = Simulator.initial_aircraft_controls();
+    bLastEngineRunning = LastAircraftControls.mixture_norm > 0.0;
+    StepSystems(0.0, LastAircraftControls, bLastEngineRunning);
     LastStatus = Replay.warnings.empty()
                    ? "Telemetry replay reproduced recorded state hashes"
                    : "Telemetry replay reproduced recorded state hashes with compatibility warnings";
@@ -672,6 +832,112 @@ struct FFlyingCoreSimBridgeImpl
     return Snapshot;
   }
 
+  FFlyingAircraftInstrumentSnapshot InstrumentSnapshot() const
+  {
+    return ToUnreal(Systems.instruments());
+  }
+
+  void SetSystemSwitch(const std::string& SwitchId, bool bEnabled)
+  {
+    auto& Switches = Systems.switches();
+    if (SwitchId == "battery_master")
+    {
+      Switches.battery_master_on = bEnabled;
+    }
+    else if (SwitchId == "alternator")
+    {
+      Switches.alternator_on = bEnabled;
+    }
+    else if (SwitchId == "avionics_master")
+    {
+      Switches.avionics_master_on = bEnabled;
+    }
+    else if (SwitchId == "pitot_heat")
+    {
+      Switches.pitot_heat_on = bEnabled;
+    }
+    else if (SwitchId == "electric_fuel_pump")
+    {
+      Switches.electric_fuel_pump_on = bEnabled;
+    }
+    else if (SwitchId == "standby_vacuum_pump")
+    {
+      Switches.standby_vacuum_pump_on = bEnabled;
+    }
+    StepSystems(0.0, LastAircraftControls, bLastEngineRunning);
+  }
+
+  void SetFuelSelector(const std::string& SelectorId)
+  {
+    if (SelectorId == "left")
+    {
+      Systems.fuel().set_selector(flying::core_sim::FuelTankSelector::left);
+    }
+    else if (SelectorId == "right")
+    {
+      Systems.fuel().set_selector(flying::core_sim::FuelTankSelector::right);
+    }
+    else if (SelectorId == "off")
+    {
+      Systems.fuel().set_selector(flying::core_sim::FuelTankSelector::off);
+    }
+    else
+    {
+      Systems.fuel().set_selector(flying::core_sim::FuelTankSelector::both);
+    }
+    StepSystems(0.0, LastAircraftControls, bLastEngineRunning);
+  }
+
+  void SetFailure(const std::string& FailureId, bool bFailed)
+  {
+    auto& Failures = Systems.failures();
+    if (FailureId == "battery")
+    {
+      Failures.battery_failed = bFailed;
+    }
+    else if (FailureId == "alternator")
+    {
+      Failures.alternator_failed = bFailed;
+    }
+    else if (FailureId == "avionics_bus")
+    {
+      Failures.avionics_bus_failed = bFailed;
+    }
+    else if (FailureId == "vacuum_pump")
+    {
+      Failures.vacuum_pump_failed = bFailed;
+    }
+    else if (FailureId == "pitot")
+    {
+      Failures.pitot_blocked = bFailed;
+    }
+    else if (FailureId == "static")
+    {
+      Failures.static_port_blocked = bFailed;
+    }
+    else if (FailureId == "gps")
+    {
+      Failures.gps_failed = bFailed;
+    }
+    else if (FailureId == "engine_sensor_power")
+    {
+      Failures.engine_sensor_power_failed = bFailed;
+    }
+    StepSystems(0.0, LastAircraftControls, bLastEngineRunning);
+  }
+
+  void StepSystems(double DeltaSeconds,
+                   const AircraftControlInputSample& AircraftControls,
+                   bool bEngineRunning)
+  {
+    AircraftSystemsInput Input;
+    Input.truth = MakeSystemsTruth(Simulator.state());
+    Input.controls = AircraftControls;
+    Input.engine_rpm = EstimateEngineRpm(AircraftControls, bEngineRunning);
+    Input.outside_air_temperature_k = 288.15;
+    Systems.step(std::max(0.0, DeltaSeconds), Input);
+  }
+
   bool IsRecording() const
   {
     return Recorder.has_value();
@@ -748,6 +1014,7 @@ void UFlyingCoreSimComponent::ResetCoreSim()
   {
     UE_LOG(LogTemp, Error, TEXT("CoreSim reset failed: %s"), ANSI_TO_TCHAR(Error.what()));
     CurrentSnapshot = {};
+    CurrentInstrumentSnapshot = {};
     if (Bridge)
     {
       Bridge->LastStatus = Error.what();
@@ -772,6 +1039,7 @@ bool UFlyingCoreSimComponent::StartScenario(const FFlyingScenarioSelection& Sele
   {
     UE_LOG(LogTemp, Error, TEXT("CoreSim scenario start failed: %s"), ANSI_TO_TCHAR(Error.what()));
     CurrentSnapshot = {};
+    CurrentInstrumentSnapshot = {};
     CurrentScenarioState = {};
     if (Bridge)
     {
@@ -850,9 +1118,56 @@ void UFlyingCoreSimComponent::AdvanceCoreSimWithInputs(
   }
 }
 
+void UFlyingCoreSimComponent::ApplyMappedAircraftControls(
+  const FFlyingMappedInputState& MappedInputState,
+  bool bEngineRunning)
+{
+  EnsureBridge();
+  try
+  {
+    Bridge->ApplyAircraftControls(ToCoreAircraftControls(MappedInputState), bEngineRunning);
+    PublishSnapshot();
+  }
+  catch (const std::exception& Error)
+  {
+    UE_LOG(LogTemp, Error, TEXT("CoreSim cockpit control update failed: %s"), ANSI_TO_TCHAR(Error.what()));
+    if (Bridge)
+    {
+      Bridge->LastStatus = Error.what();
+    }
+    PublishTelemetryStatus();
+  }
+}
+
 const FFlyingCoreSimStateSnapshot& UFlyingCoreSimComponent::GetCurrentSnapshot() const
 {
   return CurrentSnapshot;
+}
+
+const FFlyingAircraftInstrumentSnapshot& UFlyingCoreSimComponent::GetCurrentInstrumentSnapshot() const
+{
+  return CurrentInstrumentSnapshot;
+}
+
+void UFlyingCoreSimComponent::SetAircraftSystemSwitch(FName SwitchId, bool bEnabled)
+{
+  EnsureBridge();
+  Bridge->SetSystemSwitch(ToStdString(SwitchId), bEnabled);
+  PublishSnapshot();
+}
+
+void UFlyingCoreSimComponent::SetAircraftFuelSelector(FName SelectorId)
+{
+  EnsureBridge();
+  Bridge->SetFuelSelector(ToStdString(SelectorId));
+  PublishSnapshot();
+}
+
+void UFlyingCoreSimComponent::SetAircraftFailure(FName FailureId, bool bFailed)
+{
+  EnsureBridge();
+  Bridge->SetFailure(ToStdString(FailureId), bFailed);
+  PublishSnapshot();
 }
 
 bool UFlyingCoreSimComponent::StartTelemetryRecording(
@@ -922,6 +1237,15 @@ bool UFlyingCoreSimComponent::PlayLoadedTelemetryReplay(bool bWarnOnIncompatible
   return bPlayed;
 }
 
+bool UFlyingCoreSimComponent::ScrubTelemetryReplayNormalized(double PositionNorm)
+{
+  EnsureBridge();
+  const bool bScrubbed = Bridge->ScrubReplay(PositionNorm);
+  PublishSnapshot();
+  PublishTelemetryStatus();
+  return bScrubbed;
+}
+
 bool UFlyingCoreSimComponent::ExportTelemetryCsv(const FString& OutputPath)
 {
   EnsureBridge();
@@ -949,6 +1273,7 @@ void UFlyingCoreSimComponent::EnsureBridge()
 void UFlyingCoreSimComponent::PublishSnapshot()
 {
   CurrentSnapshot = Bridge ? Bridge->Snapshot() : FFlyingCoreSimStateSnapshot{};
+  CurrentInstrumentSnapshot = Bridge ? Bridge->InstrumentSnapshot() : FFlyingAircraftInstrumentSnapshot{};
 }
 
 void UFlyingCoreSimComponent::PublishTelemetryStatus()
