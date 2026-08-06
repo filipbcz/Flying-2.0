@@ -1,0 +1,334 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flying.local/schemas/detailed-airport-manifest.schema.json",
+  "title": "Flying Detailed Airport Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "manifestVersion",
+    "sourcePolicy",
+    "coverage",
+    "airports"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "flying.detailed-airport-manifest.v1"
+    },
+    "manifestVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourcePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "restrictedSourcePolicy",
+        "defaultGeometryStatus",
+        "reviewStatus"
+      ],
+      "properties": {
+        "restrictedSourcePolicy": {
+          "const": "no_aip_vfr_chart_geometry_without_permission"
+        },
+        "defaultGeometryStatus": {
+          "enum": [
+            "derived_with_review_approval",
+            "approved_source"
+          ]
+        },
+        "reviewStatus": {
+          "enum": [
+            "reviewer_approved",
+            "blocked"
+          ]
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "controlledPublicAirportIds",
+        "validationScenarioAirportIds"
+      ],
+      "properties": {
+        "controlledPublicAirportIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          },
+          "uniqueItems": true
+        },
+        "validationScenarioAirportIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "airports": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/detailedAirport"
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "point": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eastM",
+        "northM"
+      ],
+      "properties": {
+        "eastM": {
+          "type": "number"
+        },
+        "northM": {
+          "type": "number"
+        },
+        "heightM": {
+          "type": "number"
+        }
+      }
+    },
+    "sourceReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "geometryStatus",
+        "reviewStatus",
+        "sourceVersion"
+      ],
+      "properties": {
+        "geometryStatus": {
+          "enum": [
+            "derived_with_review_approval",
+            "approved_source"
+          ]
+        },
+        "reviewStatus": {
+          "enum": [
+            "reviewer_approved",
+            "blocked"
+          ]
+        },
+        "sourceVersion": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "detailedAirport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "airportId",
+        "name",
+        "roles",
+        "sourceReview",
+        "scenery",
+        "collisionIntegration"
+      ],
+      "properties": {
+        "airportId": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "name": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "roles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "controlled_public_airport",
+              "validation_scenario_airport"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "sourceReview": {
+          "$ref": "#/$defs/sourceReview"
+        },
+        "scenery": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "taxiways",
+            "aprons",
+            "stands",
+            "runwayTaxiSigns",
+            "buildings",
+            "hangars",
+            "windsocks",
+            "lightingSystems",
+            "markings",
+            "significantObstacles"
+          ],
+          "properties": {
+            "taxiways": {
+              "$ref": "#/$defs/features"
+            },
+            "aprons": {
+              "$ref": "#/$defs/features"
+            },
+            "stands": {
+              "$ref": "#/$defs/features"
+            },
+            "runwayTaxiSigns": {
+              "$ref": "#/$defs/features"
+            },
+            "buildings": {
+              "$ref": "#/$defs/features"
+            },
+            "hangars": {
+              "$ref": "#/$defs/features"
+            },
+            "windsocks": {
+              "$ref": "#/$defs/features"
+            },
+            "lightingSystems": {
+              "$ref": "#/$defs/features"
+            },
+            "markings": {
+              "$ref": "#/$defs/features"
+            },
+            "significantObstacles": {
+              "$ref": "#/$defs/features"
+            }
+          }
+        },
+        "collisionIntegration": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "wheelContactZones",
+            "terrainTransitions"
+          ],
+          "properties": {
+            "wheelContactZones": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/wheelContactZone"
+              }
+            },
+            "terrainTransitions": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/terrainTransition"
+              }
+            }
+          }
+        }
+      }
+    },
+    "features": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "id",
+          "sourceReview"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/nonEmptyString"
+          },
+          "sourceReview": {
+            "$ref": "#/$defs/sourceReview"
+          },
+          "centerline": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "$ref": "#/$defs/point"
+            }
+          },
+          "footprint": {
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "$ref": "#/$defs/point"
+            }
+          },
+          "position": {
+            "$ref": "#/$defs/point"
+          }
+        }
+      }
+    },
+    "wheelContactZone": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "surfaceId",
+        "maxVisualCollisionDeltaM",
+        "maxTerrainHeightDiscontinuityM",
+        "collisionSource"
+      ],
+      "properties": {
+        "surfaceId": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "maxVisualCollisionDeltaM": {
+          "type": "number",
+          "maximum": 0.05
+        },
+        "maxTerrainHeightDiscontinuityM": {
+          "type": "number",
+          "maximum": 0.05
+        },
+        "collisionSource": {
+          "const": "detailed_airport_collision_mesh"
+        }
+      }
+    },
+    "terrainTransition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "surfaceId",
+        "maxStepM",
+        "blendWidthM",
+        "status"
+      ],
+      "properties": {
+        "surfaceId": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "maxStepM": {
+          "type": "number",
+          "maximum": 0.05
+        },
+        "blendWidthM": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "status": {
+          "const": "passed"
+        }
+      }
+    }
+  }
+}

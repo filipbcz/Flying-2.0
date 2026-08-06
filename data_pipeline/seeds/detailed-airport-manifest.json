@@ -1,0 +1,238 @@
+{
+  "schemaVersion": "flying.detailed-airport-manifest.v1",
+  "manifestVersion": "2026.08.detailed-airports.0",
+  "sourcePolicy": {
+    "restrictedSourcePolicy": "no_aip_vfr_chart_geometry_without_permission",
+    "defaultGeometryStatus": "derived_with_review_approval",
+    "reviewStatus": "reviewer_approved",
+    "notes": "Detailed scenery uses project-derived layouts and obstacle placeholders approved for simulator validation. It does not embed restricted AIP/VFR chart geometry."
+  },
+  "coverage": {
+    "controlledPublicAirportIds": [
+      "LKPR",
+      "LKTB",
+      "LKMT",
+      "LKKV",
+      "LKPD",
+      "LKCS"
+    ],
+    "validationScenarioAirportIds": [
+      "FPPV",
+      "FPGS"
+    ]
+  },
+  "airports": [
+    {
+      "airportId": "LKPR",
+      "name": "Praha Ruzyne controlled public airport",
+      "roles": ["controlled_public_airport"],
+      "sourceReview": {
+        "geometryStatus": "derived_with_review_approval",
+        "reviewStatus": "reviewer_approved",
+        "sourceVersion": "project-derived-controlled-public-airport-set-2026-08",
+        "notes": "Controlled public airport identity only; detailed geometry is project-derived."
+      },
+      "scenery": {
+        "taxiways": [
+          {"id": "LKPR-TWY-NORTH", "widthM": 23, "surface": "asphalt", "centerline": [{"eastM": -620, "northM": 180}, {"eastM": 620, "northM": 180}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}},
+          {"id": "LKPR-TWY-SOUTH", "widthM": 23, "surface": "asphalt", "centerline": [{"eastM": -620, "northM": -210}, {"eastM": 620, "northM": -210}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}
+        ],
+        "aprons": [
+          {"id": "LKPR-APR-MAIN", "surface": "concrete", "footprint": [{"eastM": -360, "northM": 40}, {"eastM": 390, "northM": 40}, {"eastM": 390, "northM": -180}, {"eastM": -360, "northM": -180}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}
+        ],
+        "stands": [
+          {"id": "LKPR-STAND-1", "type": "gate", "position": {"eastM": -180, "northM": -80}, "headingDeg": 180, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}},
+          {"id": "LKPR-STAND-2", "type": "remote", "position": {"eastM": 180, "northM": -80}, "headingDeg": 180, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}
+        ],
+        "runwayTaxiSigns": [
+          {"id": "LKPR-SIGN-HOLD-A", "legend": "HOLD A", "position": {"eastM": -470, "northM": 145}, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}},
+          {"id": "LKPR-SIGN-RWY", "legend": "RWY", "position": {"eastM": 470, "northM": -175}, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}
+        ],
+        "buildings": [
+          {"id": "LKPR-TERMINAL", "kind": "terminal", "heightM": 18, "footprint": [{"eastM": -300, "northM": -240}, {"eastM": 320, "northM": -240}, {"eastM": 320, "northM": -330}, {"eastM": -300, "northM": -330}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}
+        ],
+        "hangars": [
+          {"id": "LKPR-HANGAR-W", "heightM": 14, "footprint": [{"eastM": -560, "northM": -250}, {"eastM": -420, "northM": -250}, {"eastM": -420, "northM": -340}, {"eastM": -560, "northM": -340}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}
+        ],
+        "windsocks": [
+          {"id": "LKPR-WS-1", "position": {"eastM": -520, "northM": 80}, "heightM": 6, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}
+        ],
+        "lightingSystems": [
+          {"id": "LKPR-RWY-LGT", "type": "runway_edge_threshold_centerline_papi", "papiAngleDeg": 3, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}},
+          {"id": "LKPR-TWY-LGT", "type": "taxiway_edge_centerline", "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}
+        ],
+        "markings": [
+          {"id": "LKPR-RWY-MARK", "type": "precision_runway_markings", "declaredDistanceStatus": "derived_review_approved", "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}},
+          {"id": "LKPR-APRON-MARK", "type": "stand_taxilane_service_road", "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}
+        ],
+        "significantObstacles": [
+          {"id": "LKPR-OBS-APP-1", "type": "approach_light_mast", "position": {"eastM": -780, "northM": 0, "heightM": 12}, "protectedArea": "approach_departure", "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}
+        ]
+      },
+      "collisionIntegration": {
+        "wheelContactZones": [
+          {"surfaceId": "LKPR-APR-MAIN", "maxVisualCollisionDeltaM": 0.02, "maxTerrainHeightDiscontinuityM": 0.03, "collisionSource": "detailed_airport_collision_mesh"},
+          {"surfaceId": "LKPR-TWY-NORTH", "maxVisualCollisionDeltaM": 0.02, "maxTerrainHeightDiscontinuityM": 0.03, "collisionSource": "detailed_airport_collision_mesh"}
+        ],
+        "terrainTransitions": [
+          {"surfaceId": "LKPR-APR-MAIN", "maxStepM": 0.03, "blendWidthM": 12, "status": "passed"},
+          {"surfaceId": "LKPR-TWY-SOUTH", "maxStepM": 0.03, "blendWidthM": 10, "status": "passed"}
+        ]
+      }
+    },
+    {
+      "airportId": "LKTB",
+      "name": "Brno Turany controlled public airport",
+      "roles": ["controlled_public_airport"],
+      "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-derived-controlled-public-airport-set-2026-08"},
+      "scenery": {
+        "taxiways": [{"id": "LKTB-TWY-A", "widthM": 18, "surface": "asphalt", "centerline": [{"eastM": -420, "northM": 135}, {"eastM": 420, "northM": 135}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "aprons": [{"id": "LKTB-APR-MAIN", "surface": "concrete", "footprint": [{"eastM": -250, "northM": -30}, {"eastM": 250, "northM": -30}, {"eastM": 250, "northM": -165}, {"eastM": -250, "northM": -165}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "stands": [{"id": "LKTB-STAND-1", "type": "apron", "position": {"eastM": -80, "northM": -95}, "headingDeg": 175, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "runwayTaxiSigns": [{"id": "LKTB-SIGN-A", "legend": "A", "position": {"eastM": -310, "northM": 110}, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "buildings": [{"id": "LKTB-TERMINAL", "kind": "terminal", "heightM": 12, "footprint": [{"eastM": -180, "northM": -190}, {"eastM": 180, "northM": -190}, {"eastM": 180, "northM": -260}, {"eastM": -180, "northM": -260}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "hangars": [{"id": "LKTB-HANGAR-E", "heightM": 10, "footprint": [{"eastM": 270, "northM": -175}, {"eastM": 390, "northM": -175}, {"eastM": 390, "northM": -245}, {"eastM": 270, "northM": -245}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "windsocks": [{"id": "LKTB-WS-1", "position": {"eastM": -360, "northM": 80}, "heightM": 6, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "lightingSystems": [{"id": "LKTB-RWY-LGT", "type": "runway_edge_threshold_papi", "papiAngleDeg": 3, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "markings": [{"id": "LKTB-RWY-MARK", "type": "instrument_runway_markings", "declaredDistanceStatus": "derived_review_approved", "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "significantObstacles": [{"id": "LKTB-OBS-DEP-1", "type": "antenna", "position": {"eastM": 620, "northM": 260, "heightM": 22}, "protectedArea": "approach_departure", "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}]
+      },
+      "collisionIntegration": {
+        "wheelContactZones": [{"surfaceId": "LKTB-APR-MAIN", "maxVisualCollisionDeltaM": 0.02, "maxTerrainHeightDiscontinuityM": 0.03, "collisionSource": "detailed_airport_collision_mesh"}],
+        "terrainTransitions": [{"surfaceId": "LKTB-APR-MAIN", "maxStepM": 0.03, "blendWidthM": 10, "status": "passed"}]
+      }
+    },
+    {
+      "airportId": "LKMT",
+      "name": "Ostrava Mosnov controlled public airport",
+      "roles": ["controlled_public_airport"],
+      "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-derived-controlled-public-airport-set-2026-08"},
+      "scenery": {
+        "taxiways": [{"id": "LKMT-TWY-A", "widthM": 18, "surface": "asphalt", "centerline": [{"eastM": -470, "northM": 130}, {"eastM": 470, "northM": 130}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "aprons": [{"id": "LKMT-APR-MAIN", "surface": "concrete", "footprint": [{"eastM": -285, "northM": -35}, {"eastM": 285, "northM": -35}, {"eastM": 285, "northM": -175}, {"eastM": -285, "northM": -175}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "stands": [{"id": "LKMT-STAND-1", "type": "apron", "position": {"eastM": -110, "northM": -105}, "headingDeg": 180, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "runwayTaxiSigns": [{"id": "LKMT-SIGN-A", "legend": "A", "position": {"eastM": -330, "northM": 105}, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "buildings": [{"id": "LKMT-TERMINAL", "kind": "terminal", "heightM": 13, "footprint": [{"eastM": -205, "northM": -205}, {"eastM": 205, "northM": -205}, {"eastM": 205, "northM": -285}, {"eastM": -205, "northM": -285}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "hangars": [{"id": "LKMT-HANGAR-E", "heightM": 12, "footprint": [{"eastM": 300, "northM": -190}, {"eastM": 435, "northM": -190}, {"eastM": 435, "northM": -270}, {"eastM": 300, "northM": -270}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "windsocks": [{"id": "LKMT-WS-1", "position": {"eastM": -390, "northM": 90}, "heightM": 6, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "lightingSystems": [{"id": "LKMT-RWY-LGT", "type": "runway_edge_threshold_papi", "papiAngleDeg": 3, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "markings": [{"id": "LKMT-RWY-MARK", "type": "instrument_runway_markings", "declaredDistanceStatus": "derived_review_approved", "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "significantObstacles": [{"id": "LKMT-OBS-APP-1", "type": "tree_line", "position": {"eastM": -650, "northM": -230, "heightM": 18}, "protectedArea": "approach_departure", "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}]
+      },
+      "collisionIntegration": {
+        "wheelContactZones": [{"surfaceId": "LKMT-APR-MAIN", "maxVisualCollisionDeltaM": 0.02, "maxTerrainHeightDiscontinuityM": 0.03, "collisionSource": "detailed_airport_collision_mesh"}],
+        "terrainTransitions": [{"surfaceId": "LKMT-APR-MAIN", "maxStepM": 0.03, "blendWidthM": 10, "status": "passed"}]
+      }
+    },
+    {
+      "airportId": "LKKV",
+      "name": "Karlovy Vary controlled public airport",
+      "roles": ["controlled_public_airport"],
+      "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-derived-controlled-public-airport-set-2026-08"},
+      "scenery": {
+        "taxiways": [{"id": "LKKV-TWY-A", "widthM": 15, "surface": "asphalt", "centerline": [{"eastM": -310, "northM": 120}, {"eastM": 310, "northM": 120}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "aprons": [{"id": "LKKV-APR-MAIN", "surface": "concrete", "footprint": [{"eastM": -190, "northM": -35}, {"eastM": 190, "northM": -35}, {"eastM": 190, "northM": -145}, {"eastM": -190, "northM": -145}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "stands": [{"id": "LKKV-STAND-1", "type": "apron", "position": {"eastM": -55, "northM": -85}, "headingDeg": 175, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "runwayTaxiSigns": [{"id": "LKKV-SIGN-A", "legend": "A", "position": {"eastM": -240, "northM": 95}, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "buildings": [{"id": "LKKV-TERMINAL", "kind": "terminal", "heightM": 10, "footprint": [{"eastM": -130, "northM": -170}, {"eastM": 130, "northM": -170}, {"eastM": 130, "northM": -235}, {"eastM": -130, "northM": -235}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "hangars": [{"id": "LKKV-HANGAR-W", "heightM": 9, "footprint": [{"eastM": -295, "northM": -165}, {"eastM": -205, "northM": -165}, {"eastM": -205, "northM": -225}, {"eastM": -295, "northM": -225}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "windsocks": [{"id": "LKKV-WS-1", "position": {"eastM": -275, "northM": 75}, "heightM": 6, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "lightingSystems": [{"id": "LKKV-RWY-LGT", "type": "runway_edge_threshold_papi", "papiAngleDeg": 3, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "markings": [{"id": "LKKV-RWY-MARK", "type": "instrument_runway_markings", "declaredDistanceStatus": "derived_review_approved", "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "significantObstacles": [{"id": "LKKV-OBS-TERRAIN", "type": "rising_terrain_marker", "position": {"eastM": 500, "northM": 260, "heightM": 28}, "protectedArea": "approach_departure", "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}]
+      },
+      "collisionIntegration": {
+        "wheelContactZones": [{"surfaceId": "LKKV-APR-MAIN", "maxVisualCollisionDeltaM": 0.02, "maxTerrainHeightDiscontinuityM": 0.03, "collisionSource": "detailed_airport_collision_mesh"}],
+        "terrainTransitions": [{"surfaceId": "LKKV-APR-MAIN", "maxStepM": 0.03, "blendWidthM": 10, "status": "passed"}]
+      }
+    },
+    {
+      "airportId": "LKPD",
+      "name": "Pardubice public airport",
+      "roles": ["controlled_public_airport"],
+      "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-derived-controlled-public-airport-set-2026-08"},
+      "scenery": {
+        "taxiways": [{"id": "LKPD-TWY-A", "widthM": 18, "surface": "asphalt", "centerline": [{"eastM": -360, "northM": 120}, {"eastM": 360, "northM": 120}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "aprons": [{"id": "LKPD-APR-MAIN", "surface": "concrete", "footprint": [{"eastM": -220, "northM": -30}, {"eastM": 220, "northM": -30}, {"eastM": 220, "northM": -155}, {"eastM": -220, "northM": -155}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "stands": [{"id": "LKPD-STAND-1", "type": "apron", "position": {"eastM": -70, "northM": -90}, "headingDeg": 180, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "runwayTaxiSigns": [{"id": "LKPD-SIGN-A", "legend": "A", "position": {"eastM": -270, "northM": 95}, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "buildings": [{"id": "LKPD-TERMINAL", "kind": "terminal", "heightM": 11, "footprint": [{"eastM": -150, "northM": -180}, {"eastM": 150, "northM": -180}, {"eastM": 150, "northM": -245}, {"eastM": -150, "northM": -245}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "hangars": [{"id": "LKPD-HANGAR-E", "heightM": 10, "footprint": [{"eastM": 250, "northM": -170}, {"eastM": 360, "northM": -170}, {"eastM": 360, "northM": -235}, {"eastM": 250, "northM": -235}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "windsocks": [{"id": "LKPD-WS-1", "position": {"eastM": -310, "northM": 75}, "heightM": 6, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "lightingSystems": [{"id": "LKPD-RWY-LGT", "type": "runway_edge_threshold_papi", "papiAngleDeg": 3, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "markings": [{"id": "LKPD-RWY-MARK", "type": "instrument_runway_markings", "declaredDistanceStatus": "derived_review_approved", "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "significantObstacles": [{"id": "LKPD-OBS-APP-1", "type": "mast", "position": {"eastM": -570, "northM": 210, "heightM": 20}, "protectedArea": "approach_departure", "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}]
+      },
+      "collisionIntegration": {
+        "wheelContactZones": [{"surfaceId": "LKPD-APR-MAIN", "maxVisualCollisionDeltaM": 0.02, "maxTerrainHeightDiscontinuityM": 0.03, "collisionSource": "detailed_airport_collision_mesh"}],
+        "terrainTransitions": [{"surfaceId": "LKPD-APR-MAIN", "maxStepM": 0.03, "blendWidthM": 10, "status": "passed"}]
+      }
+    },
+    {
+      "airportId": "LKCS",
+      "name": "Ceske Budejovice public airport",
+      "roles": ["controlled_public_airport"],
+      "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-derived-controlled-public-airport-set-2026-08"},
+      "scenery": {
+        "taxiways": [{"id": "LKCS-TWY-A", "widthM": 18, "surface": "asphalt", "centerline": [{"eastM": -330, "northM": 120}, {"eastM": 330, "northM": 120}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "aprons": [{"id": "LKCS-APR-MAIN", "surface": "concrete", "footprint": [{"eastM": -205, "northM": -30}, {"eastM": 205, "northM": -30}, {"eastM": 205, "northM": -150}, {"eastM": -205, "northM": -150}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "stands": [{"id": "LKCS-STAND-1", "type": "apron", "position": {"eastM": -65, "northM": -85}, "headingDeg": 180, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "runwayTaxiSigns": [{"id": "LKCS-SIGN-A", "legend": "A", "position": {"eastM": -255, "northM": 95}, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "buildings": [{"id": "LKCS-TERMINAL", "kind": "terminal", "heightM": 11, "footprint": [{"eastM": -150, "northM": -175}, {"eastM": 150, "northM": -175}, {"eastM": 150, "northM": -240}, {"eastM": -150, "northM": -240}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "hangars": [{"id": "LKCS-HANGAR-E", "heightM": 10, "footprint": [{"eastM": 235, "northM": -165}, {"eastM": 340, "northM": -165}, {"eastM": 340, "northM": -230}, {"eastM": 235, "northM": -230}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "windsocks": [{"id": "LKCS-WS-1", "position": {"eastM": -295, "northM": 75}, "heightM": 6, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "lightingSystems": [{"id": "LKCS-RWY-LGT", "type": "runway_edge_threshold_papi", "papiAngleDeg": 3, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "markings": [{"id": "LKCS-RWY-MARK", "type": "instrument_runway_markings", "declaredDistanceStatus": "derived_review_approved", "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}],
+        "significantObstacles": [{"id": "LKCS-OBS-DEP-1", "type": "tree_line", "position": {"eastM": 540, "northM": -190, "heightM": 18}, "protectedArea": "approach_departure", "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "detailed-airport-template-2026-08"}}]
+      },
+      "collisionIntegration": {
+        "wheelContactZones": [{"surfaceId": "LKCS-APR-MAIN", "maxVisualCollisionDeltaM": 0.02, "maxTerrainHeightDiscontinuityM": 0.03, "collisionSource": "detailed_airport_collision_mesh"}],
+        "terrainTransitions": [{"surfaceId": "LKCS-APR-MAIN", "maxStepM": 0.03, "blendWidthM": 10, "status": "passed"}]
+      }
+    },
+    {
+      "airportId": "FPPV",
+      "name": "Flying Pilot Paved Airport",
+      "roles": ["validation_scenario_airport"],
+      "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-pilot-fixture-2026-08"},
+      "scenery": {
+        "taxiways": [{"id": "FPPV-TWY-A", "widthM": 12, "surface": "asphalt", "centerline": [{"eastM": -280, "northM": 55}, {"eastM": 280, "northM": 55}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-pilot-fixture-2026-08"}}],
+        "aprons": [{"id": "FPPV-APR-TRAINING", "surface": "asphalt", "footprint": [{"eastM": -120, "northM": 35}, {"eastM": 145, "northM": 35}, {"eastM": 145, "northM": -85}, {"eastM": -120, "northM": -85}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-pilot-fixture-2026-08"}}],
+        "stands": [{"id": "FPPV-STAND-1", "type": "training", "position": {"eastM": -45, "northM": -35}, "headingDeg": 90, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-pilot-fixture-2026-08"}}],
+        "runwayTaxiSigns": [{"id": "FPPV-SIGN-09-27", "legend": "09-27", "position": {"eastM": -165, "northM": 40}, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-pilot-fixture-2026-08"}}],
+        "buildings": [{"id": "FPPV-OPS", "kind": "operations", "heightM": 6, "footprint": [{"eastM": -80, "northM": -110}, {"eastM": 70, "northM": -110}, {"eastM": 70, "northM": -155}, {"eastM": -80, "northM": -155}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-pilot-fixture-2026-08"}}],
+        "hangars": [{"id": "FPPV-HANGAR-1", "heightM": 7, "footprint": [{"eastM": 100, "northM": -105}, {"eastM": 180, "northM": -105}, {"eastM": 180, "northM": -155}, {"eastM": 100, "northM": -155}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-pilot-fixture-2026-08"}}],
+        "windsocks": [{"id": "FPPV-WS-1", "position": {"eastM": -230, "northM": 70}, "heightM": 5, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-pilot-fixture-2026-08"}}],
+        "lightingSystems": [{"id": "FPPV-RWY-LGT", "type": "unlit_fixture", "papiAngleDeg": null, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-pilot-fixture-2026-08"}}],
+        "markings": [{"id": "FPPV-RWY-MARK", "type": "basic_paved_runway_markings", "declaredDistanceStatus": "derived_review_approved", "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-pilot-fixture-2026-08"}}],
+        "significantObstacles": [{"id": "FPPV-OBS-APP-1", "type": "training_marker_mast", "position": {"eastM": 390, "northM": 100, "heightM": 8}, "protectedArea": "approach_departure", "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-pilot-fixture-2026-08"}}]
+      },
+      "collisionIntegration": {
+        "wheelContactZones": [{"surfaceId": "FPPV-APR-TRAINING", "maxVisualCollisionDeltaM": 0.01, "maxTerrainHeightDiscontinuityM": 0.02, "collisionSource": "detailed_airport_collision_mesh"}],
+        "terrainTransitions": [{"surfaceId": "FPPV-APR-TRAINING", "maxStepM": 0.02, "blendWidthM": 8, "status": "passed"}]
+      }
+    },
+    {
+      "airportId": "FPGS",
+      "name": "Flying Pilot Grass SLZ Field",
+      "roles": ["validation_scenario_airport"],
+      "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-pilot-fixture-2026-08"},
+      "scenery": {
+        "taxiways": [{"id": "FPGS-TWY-GRASS", "widthM": 10, "surface": "turf", "centerline": [{"eastM": -170, "northM": 50}, {"eastM": 170, "northM": 50}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-pilot-fixture-2026-08"}}],
+        "aprons": [{"id": "FPGS-APR-GRASS", "surface": "turf", "footprint": [{"eastM": -80, "northM": 30}, {"eastM": 100, "northM": 30}, {"eastM": 100, "northM": -65}, {"eastM": -80, "northM": -65}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-pilot-fixture-2026-08"}}],
+        "stands": [{"id": "FPGS-STAND-1", "type": "grass_tie_down", "position": {"eastM": -25, "northM": -25}, "headingDeg": 160, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-pilot-fixture-2026-08"}}],
+        "runwayTaxiSigns": [{"id": "FPGS-SIGN-16-34", "legend": "16-34", "position": {"eastM": -120, "northM": 38}, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-pilot-fixture-2026-08"}}],
+        "buildings": [{"id": "FPGS-CLUBHOUSE", "kind": "clubhouse", "heightM": 5, "footprint": [{"eastM": -65, "northM": -90}, {"eastM": 45, "northM": -90}, {"eastM": 45, "northM": -130}, {"eastM": -65, "northM": -130}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-pilot-fixture-2026-08"}}],
+        "hangars": [{"id": "FPGS-HANGAR-1", "heightM": 6, "footprint": [{"eastM": 70, "northM": -85}, {"eastM": 140, "northM": -85}, {"eastM": 140, "northM": -130}, {"eastM": 70, "northM": -130}], "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-pilot-fixture-2026-08"}}],
+        "windsocks": [{"id": "FPGS-WS-1", "position": {"eastM": -145, "northM": 65}, "heightM": 5, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-pilot-fixture-2026-08"}}],
+        "lightingSystems": [{"id": "FPGS-RWY-LGT", "type": "unlit_fixture", "papiAngleDeg": null, "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-pilot-fixture-2026-08"}}],
+        "markings": [{"id": "FPGS-RWY-MARK", "type": "grass_edge_markers", "declaredDistanceStatus": "derived_review_approved", "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-pilot-fixture-2026-08"}}],
+        "significantObstacles": [{"id": "FPGS-OBS-APP-1", "type": "tree_line", "position": {"eastM": -260, "northM": 90, "heightM": 12}, "protectedArea": "approach_departure", "sourceReview": {"geometryStatus": "derived_with_review_approval", "reviewStatus": "reviewer_approved", "sourceVersion": "project-pilot-fixture-2026-08"}}]
+      },
+      "collisionIntegration": {
+        "wheelContactZones": [{"surfaceId": "FPGS-APR-GRASS", "maxVisualCollisionDeltaM": 0.01, "maxTerrainHeightDiscontinuityM": 0.02, "collisionSource": "detailed_airport_collision_mesh"}],
+        "terrainTransitions": [{"surfaceId": "FPGS-APR-GRASS", "maxStepM": 0.02, "blendWidthM": 8, "status": "passed"}]
+      }
+    }
+  ]
+}

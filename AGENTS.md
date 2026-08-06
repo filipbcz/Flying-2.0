@@ -6,31 +6,32 @@
 - default branch: main
 
 ## Task
-- title: Flying: 22. Complete Airport And SLZ Coverage
+- title: Flying: 23. Implement Detailed Airport Set
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-22. Complete Airport And SLZ Coverage
+23. Implement Detailed Airport Set
 
 Step description and scope:
-Populate and validate the full approved master list of active Czech airports, active runways, AIP/VFR airports, and VFR-published SLZ fields using permitted sources and manual verification where required.
+Create the detailed airport content manifest and implement enhanced scenery for controlled public airports and validation-scenario airports: taxiways, aprons, stands, lighting, signs, buildings, hangars, windsocks, markings, and significant obstacles.
 
 In scope:
-- Full airport database population
-- SLZ field records
-- Runway geometry verification
-- Coverage report
-- Manual verification workflow
-- AIRAC/source diff reports
-- Start-location eligibility rules
+- Detailed airport manifest
+- Controlled public airport details
+- Validation airport details
+- Lighting systems
+- Signs and markings
+- Buildings and hangars
+- Significant obstacles
+- Collision integration
 
 Out of scope:
-- Restricted AIP/VFR redistribution without permission
-- Detailed art pass for every airport
-- Multiplayer ATC
-- Historical airport mode implementation
+- Photogrammetric city reconstruction
+- Full handcrafted detail for every SLZ field
+- ATC systems
+- Ground traffic AI
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -60,9 +61,9 @@ Already completed roadmap steps (existing repository context):
 - 19. Implement Weather And Atmosphere Coupling
 - 20. Build Aircraft Validation Suite
 - 21. Scale Terrain Pipeline To Full Czech Republic
+- 22. Complete Airport And SLZ Coverage
 
 Future roadmap steps (explicitly out of scope):
-- 23. Implement Detailed Airport Set
 - 24. Implement Offline 2D Navigation Map
 - 25. Implement World Objects, Vegetation, Water, Obstacles, And Audio
 - 26. Implement Save, Scenario Editor, Diagnostics, And Failure Workflows
@@ -72,10 +73,10 @@ Future roadmap steps (explicitly out of scope):
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- Coverage report compares the generated airport database against the approved master list and reports zero missing active validated runways for release scope.
-- Each production-validated runway has verified threshold coordinates, heading, length, width, surface, declared distances where available, provenance, AIRAC/source effective date, confidence, and manual verification state.
-- Closed or temporarily unavailable aerodromes are not offered as default start locations unless explicitly marked for a separate historical mode.
-- Importer prevents automatic overwrite of manually verified runway geometry without review.
+- Detailed-airport manifest names all controlled public airports and all airports used by validation scenarios.
+- Each detailed airport includes taxiways, stands, aprons, runway/taxi signage, relevant buildings, windsock placement, lighting systems where applicable, and significant approach/departure obstacles.
+- Runway lighting, PAPI/VASI geometry, markings, and declared-distance data match the effective approved source version or are flagged as derived with review approval.
+- Detailed airport collision and terrain transition tests pass without runway/terrain height discontinuities in aircraft wheel-contact areas.
 
 ## Agent Configuration
 - no project config provided, using defaults
