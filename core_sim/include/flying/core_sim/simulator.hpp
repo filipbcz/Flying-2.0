@@ -25,12 +25,14 @@ public:
       const noexcept;
   [[nodiscard]] const AircraftControlInputSample& initial_aircraft_controls() const noexcept;
   [[nodiscard]] const RigidBodyParameters& parameters() const noexcept;
+  [[nodiscard]] const AircraftMassBalanceState& aircraft_mass_balance() const noexcept;
   [[nodiscard]] double fixed_step_s() const noexcept;
 
   void reset(AuthoritativeState state = {}) noexcept;
   void reset(AuthoritativeState state,
              const FlightDynamicsInitialCondition& flight_dynamics_initial_condition,
              const AircraftControlInputSample& initial_aircraft_controls);
+  void set_aircraft_mass_balance(const AircraftMassBalanceState& mass_balance);
   AdvanceReport advance(double caller_delta_s, const ControlInputSample& input);
   void integrate_fixed_step(const ControlInputSample& input);
 

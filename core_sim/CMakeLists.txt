@@ -1,4 +1,5 @@
 add_library(flying_core_sim STATIC
+  src/aircraft_config.cpp
   src/determinism.cpp
   src/flight_dynamics.cpp
   src/fixed_step.cpp
@@ -26,6 +27,7 @@ target_link_libraries(flying_core_sim
 target_compile_definitions(flying_core_sim
   PUBLIC
     FLYING_CORE_SIM_VERSION="${PROJECT_VERSION}"
+    FLYING_CORE_SIM_AIRCRAFT_CONFIG_DIR="${CMAKE_CURRENT_SOURCE_DIR}/aircraft"
 )
 
 option(FLYING_CORE_SIM_ENABLE_JSBSIM "Enable the JSBSim CoreSim adapter when JSBSim is available." ON)

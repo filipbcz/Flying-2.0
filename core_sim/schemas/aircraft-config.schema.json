@@ -1,0 +1,533 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flying.local/schemas/aircraft-config.schema.json",
+  "title": "Flying CoreSim Aircraft Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "aircraft",
+    "license",
+    "provenance",
+    "sourceReferences",
+    "geometry",
+    "massBalance",
+    "aerodynamics",
+    "engine",
+    "propeller",
+    "actuators",
+    "landingGear",
+    "brakes"
+  ],
+  "properties": {
+    "schemaVersion": {"const": "flying.aircraft-config.v1"},
+    "aircraft": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "backend",
+        "modelName",
+        "modelVersion",
+        "dataRoot",
+        "sourceLicense",
+        "displayName",
+        "validation"
+      ],
+      "properties": {
+        "backend": {"type": "string", "minLength": 1},
+        "modelName": {"type": "string", "minLength": 1},
+        "modelVersion": {"type": "string", "minLength": 1},
+        "dataRoot": {"type": "string", "minLength": 1},
+        "sourceLicense": {"type": "string", "minLength": 1},
+        "displayName": {"type": "string", "minLength": 1},
+        "validation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "requiredSuite", "suiteStatus", "notes"],
+          "properties": {
+            "status": {"const": "unvalidated"},
+            "requiredSuite": {"type": "string", "minLength": 1},
+            "suiteStatus": {"const": "not_run"},
+            "notes": {"type": "string", "minLength": 1}
+          }
+        }
+      }
+    },
+    "license": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["spdxId", "notice", "redistribution"],
+      "properties": {
+        "spdxId": {"type": "string", "minLength": 1},
+        "notice": {"type": "string", "minLength": 1},
+        "redistribution": {"type": "string", "minLength": 1}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "createdBy", "createdDate", "schemaDocument"],
+      "properties": {
+        "summary": {"type": "string", "minLength": 1},
+        "createdBy": {"type": "string", "minLength": 1},
+        "createdDate": {"type": "string", "minLength": 1},
+        "schemaDocument": {"type": "string", "minLength": 1}
+      }
+    },
+    "sourceReferences": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/sourceReference"}
+    },
+    "geometry": {"$ref": "#/$defs/geometry"},
+    "massBalance": {"$ref": "#/$defs/massBalance"},
+    "aerodynamics": {"$ref": "#/$defs/aerodynamics"},
+    "engine": {"$ref": "#/$defs/engine"},
+    "propeller": {"$ref": "#/$defs/propeller"},
+    "actuators": {
+      "type": "array",
+      "minItems": 4,
+      "items": {"$ref": "#/$defs/actuator"}
+    },
+    "landingGear": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contacts"],
+      "properties": {
+        "contacts": {
+          "type": "array",
+          "minItems": 3,
+          "items": {"$ref": "#/$defs/landingGearContact"}
+        }
+      }
+    },
+    "brakes": {
+      "type": "array",
+      "minItems": 2,
+      "items": {"$ref": "#/$defs/brake"}
+    }
+  },
+  "$defs": {
+    "confidence": {"enum": ["low", "medium", "high"]},
+    "sourceReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "document",
+        "license",
+        "permittedUse",
+        "provenance",
+        "confidence",
+        "usedFor"
+      ],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "title": {"type": "string", "minLength": 1},
+        "document": {"type": "string", "minLength": 1},
+        "license": {"type": "string", "minLength": 1},
+        "permittedUse": {"type": "string", "minLength": 1},
+        "provenance": {"type": "string", "minLength": 1},
+        "confidence": {"$ref": "#/$defs/confidence"},
+        "usedFor": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "sourceRefs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "vector3": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "z"],
+      "properties": {
+        "x": {"type": "number"},
+        "y": {"type": "number"},
+        "z": {"type": "number"}
+      }
+    },
+    "inertiaTensor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ixx", "iyy", "izz", "ixy", "ixz", "iyz"],
+      "properties": {
+        "ixx": {"type": "number"},
+        "iyy": {"type": "number"},
+        "izz": {"type": "number"},
+        "ixy": {"type": "number"},
+        "ixz": {"type": "number"},
+        "iyz": {"type": "number"}
+      }
+    },
+    "scalar": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit", "sourceRefs", "confidence", "validity"],
+      "properties": {
+        "value": {"type": "number"},
+        "unit": {"type": "string", "minLength": 1},
+        "sourceRefs": {"$ref": "#/$defs/sourceRefs"},
+        "confidence": {"$ref": "#/$defs/confidence"},
+        "validity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["min", "max", "unit"],
+          "properties": {
+            "min": {"type": "number"},
+            "max": {"type": "number"},
+            "unit": {"type": "string", "minLength": 1}
+          }
+        }
+      }
+    },
+    "vectorValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit", "sourceRefs", "confidence", "validity"],
+      "properties": {
+        "value": {"$ref": "#/$defs/vector3"},
+        "unit": {"type": "string", "minLength": 1},
+        "sourceRefs": {"$ref": "#/$defs/sourceRefs"},
+        "confidence": {"$ref": "#/$defs/confidence"},
+        "validity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["min", "max", "unit"],
+          "properties": {
+            "min": {"$ref": "#/$defs/vector3"},
+            "max": {"$ref": "#/$defs/vector3"},
+            "unit": {"type": "string", "minLength": 1}
+          }
+        }
+      }
+    },
+    "inertiaTensorValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit", "sourceRefs", "confidence", "validity"],
+      "properties": {
+        "value": {"$ref": "#/$defs/inertiaTensor"},
+        "unit": {"const": "kilogram_meter_squared"},
+        "sourceRefs": {"$ref": "#/$defs/sourceRefs"},
+        "confidence": {"$ref": "#/$defs/confidence"},
+        "validity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["min", "max", "unit"],
+          "properties": {
+            "min": {"$ref": "#/$defs/inertiaTensor"},
+            "max": {"$ref": "#/$defs/inertiaTensor"},
+            "unit": {"const": "kilogram_meter_squared"}
+          }
+        }
+      }
+    },
+    "geometry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "coordinateFrame",
+        "wingAreaM2",
+        "wingspanM",
+        "meanAerodynamicChordM",
+        "fuselageLengthM",
+        "horizontalTailAreaM2",
+        "horizontalTailArmM",
+        "verticalTailAreaM2",
+        "verticalTailArmM",
+        "propellerGroundClearanceM",
+        "aerodynamicReferencePointBodyM",
+        "visualReferencePointBodyM"
+      ],
+      "properties": {
+        "coordinateFrame": {"const": "body-x-forward-y-right-z-down-si"},
+        "wingAreaM2": {"$ref": "#/$defs/scalar"},
+        "wingspanM": {"$ref": "#/$defs/scalar"},
+        "meanAerodynamicChordM": {"$ref": "#/$defs/scalar"},
+        "fuselageLengthM": {"$ref": "#/$defs/scalar"},
+        "horizontalTailAreaM2": {"$ref": "#/$defs/scalar"},
+        "horizontalTailArmM": {"$ref": "#/$defs/scalar"},
+        "verticalTailAreaM2": {"$ref": "#/$defs/scalar"},
+        "verticalTailArmM": {"$ref": "#/$defs/scalar"},
+        "propellerGroundClearanceM": {"$ref": "#/$defs/scalar"},
+        "aerodynamicReferencePointBodyM": {"$ref": "#/$defs/vectorValue"},
+        "visualReferencePointBodyM": {"$ref": "#/$defs/vectorValue"}
+      }
+    },
+    "massBalance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inertiaReference",
+        "emptyMassKg",
+        "maxTakeoffMassKg",
+        "emptyCgBodyM",
+        "emptyInertiaKgM2",
+        "cgEnvelope",
+        "fuelStations",
+        "payloadStations"
+      ],
+      "properties": {
+        "inertiaReference": {"type": "string", "minLength": 1},
+        "emptyMassKg": {"$ref": "#/$defs/scalar"},
+        "maxTakeoffMassKg": {"$ref": "#/$defs/scalar"},
+        "emptyCgBodyM": {"$ref": "#/$defs/vectorValue"},
+        "emptyInertiaKgM2": {"$ref": "#/$defs/inertiaTensorValue"},
+        "cgEnvelope": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"$ref": "#/$defs/cgEnvelopePoint"}
+        },
+        "fuelStations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/fuelStation"}
+        },
+        "payloadStations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/payloadStation"}
+        }
+      }
+    },
+    "cgEnvelopePoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["massKg", "forwardLimitBodyM", "aftLimitBodyM"],
+      "properties": {
+        "massKg": {"$ref": "#/$defs/scalar"},
+        "forwardLimitBodyM": {"$ref": "#/$defs/vectorValue"},
+        "aftLimitBodyM": {"$ref": "#/$defs/vectorValue"}
+      }
+    },
+    "fuelStation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "displayName",
+        "capacityKg",
+        "unusableKg",
+        "defaultQuantityKg",
+        "positionBodyM"
+      ],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "displayName": {"type": "string", "minLength": 1},
+        "capacityKg": {"$ref": "#/$defs/scalar"},
+        "unusableKg": {"$ref": "#/$defs/scalar"},
+        "defaultQuantityKg": {"$ref": "#/$defs/scalar"},
+        "positionBodyM": {"$ref": "#/$defs/vectorValue"}
+      }
+    },
+    "payloadStation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "displayName", "maxMassKg", "defaultMassKg", "positionBodyM"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "displayName": {"type": "string", "minLength": 1},
+        "maxMassKg": {"$ref": "#/$defs/scalar"},
+        "defaultMassKg": {"$ref": "#/$defs/scalar"},
+        "positionBodyM": {"$ref": "#/$defs/vectorValue"}
+      }
+    },
+    "aerodynamics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["coefficientFrame", "alphaMinRad", "alphaMaxRad", "betaMaxAbsRad", "tables"],
+      "properties": {
+        "coefficientFrame": {"const": "body-stability-coefficients"},
+        "alphaMinRad": {"$ref": "#/$defs/scalar"},
+        "alphaMaxRad": {"$ref": "#/$defs/scalar"},
+        "betaMaxAbsRad": {"$ref": "#/$defs/scalar"},
+        "tables": {
+          "type": "array",
+          "minItems": 12,
+          "items": {"$ref": "#/$defs/table1d"}
+        }
+      }
+    },
+    "engine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "ratedPowerW",
+        "idleRpm",
+        "maxRpm",
+        "displacementM3",
+        "fuelDensityKgPerL",
+        "tables"
+      ],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "type": {"type": "string", "minLength": 1},
+        "ratedPowerW": {"$ref": "#/$defs/scalar"},
+        "idleRpm": {"$ref": "#/$defs/scalar"},
+        "maxRpm": {"$ref": "#/$defs/scalar"},
+        "displacementM3": {"$ref": "#/$defs/scalar"},
+        "fuelDensityKgPerL": {"$ref": "#/$defs/scalar"},
+        "tables": {
+          "type": "array",
+          "minItems": 3,
+          "items": {"$ref": "#/$defs/table1d"}
+        }
+      }
+    },
+    "propeller": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "bladeCount",
+        "diameterM",
+        "inertiaKgM2",
+        "minPitchRad",
+        "maxPitchRad",
+        "tables"
+      ],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "type": {"type": "string", "minLength": 1},
+        "bladeCount": {"type": "integer", "minimum": 1},
+        "diameterM": {"$ref": "#/$defs/scalar"},
+        "inertiaKgM2": {"$ref": "#/$defs/scalar"},
+        "minPitchRad": {"$ref": "#/$defs/scalar"},
+        "maxPitchRad": {"$ref": "#/$defs/scalar"},
+        "tables": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"$ref": "#/$defs/table1d"}
+        }
+      }
+    },
+    "table1d": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "input",
+        "inputUnit",
+        "output",
+        "outputUnit",
+        "confidence",
+        "validityRange",
+        "sourceRefs",
+        "points"
+      ],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "input": {"type": "string", "minLength": 1},
+        "inputUnit": {"type": "string", "minLength": 1},
+        "output": {"type": "string", "minLength": 1},
+        "outputUnit": {"type": "string", "minLength": 1},
+        "confidence": {"$ref": "#/$defs/confidence"},
+        "validityRange": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["min", "max", "unit"],
+          "properties": {
+            "min": {"type": "number"},
+            "max": {"type": "number"},
+            "unit": {"type": "string", "minLength": 1}
+          }
+        },
+        "sourceRefs": {"$ref": "#/$defs/sourceRefs"},
+        "points": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["x", "y"],
+            "properties": {
+              "x": {"type": "number"},
+              "y": {"type": "number"}
+            }
+          }
+        }
+      }
+    },
+    "actuator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "surface",
+        "command",
+        "minDeflectionRad",
+        "maxDeflectionRad",
+        "slewRateRadps",
+        "timeConstantS"
+      ],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "surface": {"type": "string", "minLength": 1},
+        "command": {"type": "string", "minLength": 1},
+        "minDeflectionRad": {"$ref": "#/$defs/scalar"},
+        "maxDeflectionRad": {"$ref": "#/$defs/scalar"},
+        "slewRateRadps": {"$ref": "#/$defs/scalar"},
+        "timeConstantS": {"$ref": "#/$defs/scalar"}
+      }
+    },
+    "landingGearContact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "brakeGroup",
+        "retractable",
+        "positionBodyM",
+        "staticFriction",
+        "dynamicFriction",
+        "rollingFriction",
+        "springCoefficientNPerM",
+        "dampingCoefficientNSPerM",
+        "maxSteerRad"
+      ],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "type": {"type": "string", "minLength": 1},
+        "brakeGroup": {"type": "string", "minLength": 1},
+        "retractable": {"type": "boolean"},
+        "positionBodyM": {"$ref": "#/$defs/vectorValue"},
+        "staticFriction": {"$ref": "#/$defs/scalar"},
+        "dynamicFriction": {"$ref": "#/$defs/scalar"},
+        "rollingFriction": {"$ref": "#/$defs/scalar"},
+        "springCoefficientNPerM": {"$ref": "#/$defs/scalar"},
+        "dampingCoefficientNSPerM": {"$ref": "#/$defs/scalar"},
+        "maxSteerRad": {"$ref": "#/$defs/scalar"}
+      }
+    },
+    "brake": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "wheel",
+        "brakeGroup",
+        "maxTorqueNm",
+        "responseTimeS",
+        "parkingBrakeHoldNorm"
+      ],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "wheel": {"type": "string", "minLength": 1},
+        "brakeGroup": {"type": "string", "minLength": 1},
+        "maxTorqueNm": {"$ref": "#/$defs/scalar"},
+        "responseTimeS": {"$ref": "#/$defs/scalar"},
+        "parkingBrakeHoldNorm": {"$ref": "#/$defs/scalar"}
+      }
+    }
+  }
+}

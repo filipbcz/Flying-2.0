@@ -9,7 +9,7 @@ namespace {
 
 constexpr std::uint64_t kFnvOffset = 14'695'981'039'346'656'037ull;
 constexpr std::uint64_t kFnvPrime = 1'099'511'628'211ull;
-constexpr std::uint64_t kHashSchemaVersion = 1;
+constexpr std::uint64_t kHashSchemaVersion = 2;
 
 [[nodiscard]] std::uint64_t append_u64(std::uint64_t hash, std::uint64_t value) noexcept {
   for (int byte_index = 0; byte_index < 8; ++byte_index) {
@@ -47,6 +47,16 @@ constexpr std::uint64_t kHashSchemaVersion = 1;
   return append_double(hash, value.z);
 }
 
+[[nodiscard]] std::uint64_t append_inertia_tensor(std::uint64_t hash,
+                                                  AircraftInertiaTensor value) noexcept {
+  hash = append_double(hash, value.ixx);
+  hash = append_double(hash, value.iyy);
+  hash = append_double(hash, value.izz);
+  hash = append_double(hash, value.ixy);
+  hash = append_double(hash, value.ixz);
+  return append_double(hash, value.iyz);
+}
+
 } // namespace
 
 std::uint64_t hash_state(const AuthoritativeState& state) noexcept {
@@ -58,7 +68,13 @@ std::uint64_t hash_state(const AuthoritativeState& state) noexcept {
   hash = append_quaternion(hash, state.body_to_ecef);
   hash = append_vector(hash, state.angular_velocity_body_radps);
   hash = append_vector(hash, state.accumulated_force_body_n);
-  return append_vector(hash, state.accumulated_moment_body_nm);
+  hash = append_vector(hash, state.accumulated_moment_body_nm);
+  hash = append_double(hash, state.aircraft_mass_balance.total_mass_kg);
+  hash = append_double(hash, state.aircraft_mass_balance.fuel_mass_kg);
+  hash = append_double(hash, state.aircraft_mass_balance.payload_mass_kg);
+  hash = append_vector(hash, state.aircraft_mass_balance.center_of_gravity_body_m);
+  hash = append_inertia_tensor(hash, state.aircraft_mass_balance.inertia_tensor_kg_m2);
+  return append_u64(hash, state.aircraft_mass_balance.cg_within_envelope ? 1u : 0u);
 }
 
 } // namespace flying::core_sim

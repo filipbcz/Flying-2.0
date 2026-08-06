@@ -1,0 +1,1277 @@
+{
+  "schemaVersion": "flying.aircraft-config.v1",
+  "aircraft": {
+    "backend": "CoreSimAircraftConfig",
+    "modelName": "flying_trainer_one",
+    "modelVersion": "2026.08.unvalidated-step16",
+    "dataRoot": "core_sim/aircraft/flying_trainer_one",
+    "sourceLicense": "CC0-1.0 project-authored data package; no manufacturer endorsement or type-fidelity claim",
+    "displayName": "Flying Trainer One",
+    "validation": {
+      "status": "unvalidated",
+      "requiredSuite": "flying.aircraft_validation_suite.v1",
+      "suiteStatus": "not_run",
+      "notes": "Production data ingestion package only; do not mark validated until the aircraft validation suite passes."
+    }
+  },
+  "license": {
+    "spdxId": "CC0-1.0",
+    "notice": "Project-authored unbranded single-engine piston trainer data for Flying. No POH, AFM, manufacturer marks, cockpit trade dress, or proprietary aerodynamic data are redistributed.",
+    "redistribution": "Permitted for Flying source and binary distributions with this provenance record preserved."
+  },
+  "provenance": {
+    "summary": "Unbranded piston-trainer data model authored for CoreSim configuration ingestion. Values are SI-native engineering parameters with confidence and validity bounds; aircraft fidelity remains unvalidated.",
+    "createdBy": "Flying project",
+    "createdDate": "2026-08-03",
+    "schemaDocument": "core_sim/schemas/aircraft-config.schema.json"
+  },
+  "sourceReferences": [
+    {
+      "id": "flying-step16-owned-model",
+      "title": "Flying Step 16 Unbranded Piston Trainer Aircraft Data Workbook",
+      "document": "internal:flying/step16/aircraft-data-workbook",
+      "license": "CC0-1.0 project-owned data",
+      "permittedUse": "Redistribution and simulator integration by the Flying project.",
+      "provenance": "Project-authored engineering data entered in SI units for CoreSim config ingestion; no restricted manual excerpts or manufacturer identity assets.",
+      "confidence": "medium",
+      "usedFor": [
+        "geometry",
+        "massBalance",
+        "aerodynamics",
+        "engine",
+        "propeller",
+        "actuators",
+        "landingGear",
+        "brakes"
+      ]
+    },
+    {
+      "id": "jsbsim-reference-format",
+      "title": "JSBSim reference manual and open model format",
+      "document": "https://jsbsim-team.github.io/jsbsim-reference-manual/",
+      "license": "LGPL-2.1-or-later for JSBSim library materials as applicable",
+      "permittedUse": "Reference for flight-model table organization and simulator integration concepts; no named-aircraft data copied into this JSON package.",
+      "provenance": "Referenced as an open flight-dynamics schema and methodology source.",
+      "confidence": "high",
+      "usedFor": [
+        "aerodynamics",
+        "engine",
+        "propeller",
+        "landingGear"
+      ]
+    },
+    {
+      "id": "core-sim-si-units",
+      "title": "Flying CoreSim SI Unit Policy",
+      "document": "core_sim/include/flying/core_sim/units.hpp",
+      "license": "Flying repository",
+      "permittedUse": "Internal unit contract for all numeric aircraft data.",
+      "provenance": "Repository-authored SI-only CoreSim policy.",
+      "confidence": "high",
+      "usedFor": [
+        "geometry",
+        "massBalance",
+        "aerodynamics",
+        "engine",
+        "propeller",
+        "actuators",
+        "landingGear",
+        "brakes"
+      ]
+    }
+  ],
+  "geometry": {
+    "coordinateFrame": "body-x-forward-y-right-z-down-si",
+    "wingAreaM2": {
+      "value": 16.2,
+      "unit": "square_meter",
+      "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {"min": 14.0, "max": 18.5, "unit": "square_meter"}
+    },
+    "wingspanM": {
+      "value": 10.92,
+      "unit": "meter",
+      "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {"min": 9.8, "max": 11.8, "unit": "meter"}
+    },
+    "meanAerodynamicChordM": {
+      "value": 1.49,
+      "unit": "meter",
+      "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {"min": 1.2, "max": 1.8, "unit": "meter"}
+    },
+    "fuselageLengthM": {
+      "value": 8.28,
+      "unit": "meter",
+      "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {"min": 7.0, "max": 9.5, "unit": "meter"}
+    },
+    "horizontalTailAreaM2": {
+      "value": 2.03,
+      "unit": "square_meter",
+      "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {"min": 1.5, "max": 2.8, "unit": "square_meter"}
+    },
+    "horizontalTailArmM": {
+      "value": 4.78,
+      "unit": "meter",
+      "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {"min": 3.8, "max": 5.4, "unit": "meter"}
+    },
+    "verticalTailAreaM2": {
+      "value": 1.53,
+      "unit": "square_meter",
+      "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {"min": 1.0, "max": 2.2, "unit": "square_meter"}
+    },
+    "verticalTailArmM": {
+      "value": 4.45,
+      "unit": "meter",
+      "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {"min": 3.6, "max": 5.4, "unit": "meter"}
+    },
+    "propellerGroundClearanceM": {
+      "value": 0.29,
+      "unit": "meter",
+      "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {"min": 0.15, "max": 0.55, "unit": "meter"}
+    },
+    "aerodynamicReferencePointBodyM": {
+      "value": {"x": 0.0, "y": 0.0, "z": 0.0},
+      "unit": "meter",
+      "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {
+        "min": {"x": -1.0, "y": -0.5, "z": -0.5},
+        "max": {"x": 1.0, "y": 0.5, "z": 0.5},
+        "unit": "meter"
+      }
+    },
+    "visualReferencePointBodyM": {
+      "value": {"x": -0.35, "y": 0.0, "z": -0.82},
+      "unit": "meter",
+      "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {
+        "min": {"x": -1.5, "y": -0.5, "z": -1.4},
+        "max": {"x": 0.5, "y": 0.5, "z": 0.2},
+        "unit": "meter"
+      }
+    }
+  },
+  "massBalance": {
+    "inertiaReference": "empty aircraft inertia tensor about empty CG, body-x-forward-y-right-z-down axes",
+    "emptyMassKg": {
+      "value": 680.4,
+      "unit": "kilogram",
+      "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {"min": 600.0, "max": 760.0, "unit": "kilogram"}
+    },
+    "maxTakeoffMassKg": {
+      "value": 1111.0,
+      "unit": "kilogram",
+      "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {"min": 1000.0, "max": 1200.0, "unit": "kilogram"}
+    },
+    "emptyCgBodyM": {
+      "value": {"x": 0.0, "y": 0.0, "z": 0.0},
+      "unit": "meter",
+      "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {
+        "min": {"x": -0.3, "y": -0.1, "z": -0.1},
+        "max": {"x": 0.3, "y": 0.1, "z": 0.1},
+        "unit": "meter"
+      }
+    },
+    "emptyInertiaKgM2": {
+      "value": {"ixx": 1285.0, "iyy": 1825.0, "izz": 2668.0, "ixy": 0.0, "ixz": 0.0, "iyz": 0.0},
+      "unit": "kilogram_meter_squared",
+      "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {
+        "min": {"ixx": 900.0, "iyy": 1200.0, "izz": 1800.0, "ixy": -250.0, "ixz": -250.0, "iyz": -250.0},
+        "max": {"ixx": 1700.0, "iyy": 2400.0, "izz": 3400.0, "ixy": 250.0, "ixz": 250.0, "iyz": 250.0},
+        "unit": "kilogram_meter_squared"
+      }
+    },
+    "cgEnvelope": [
+      {
+        "massKg": {
+          "value": 760.0,
+          "unit": "kilogram",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 700.0, "max": 820.0, "unit": "kilogram"}
+        },
+        "forwardLimitBodyM": {
+          "value": {"x": 0.12, "y": 0.0, "z": 0.0},
+          "unit": "meter",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {
+            "min": {"x": -0.6, "y": -0.05, "z": -0.05},
+            "max": {"x": 0.3, "y": 0.05, "z": 0.05},
+            "unit": "meter"
+          }
+        },
+        "aftLimitBodyM": {
+          "value": {"x": -0.3, "y": 0.0, "z": 0.0},
+          "unit": "meter",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {
+            "min": {"x": -0.6, "y": -0.05, "z": -0.05},
+            "max": {"x": 0.3, "y": 0.05, "z": 0.05},
+            "unit": "meter"
+          }
+        }
+      },
+      {
+        "massKg": {
+          "value": 950.0,
+          "unit": "kilogram",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 900.0, "max": 980.0, "unit": "kilogram"}
+        },
+        "forwardLimitBodyM": {
+          "value": {"x": 0.02, "y": 0.0, "z": 0.0},
+          "unit": "meter",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {
+            "min": {"x": -0.6, "y": -0.05, "z": -0.05},
+            "max": {"x": 0.3, "y": 0.05, "z": 0.05},
+            "unit": "meter"
+          }
+        },
+        "aftLimitBodyM": {
+          "value": {"x": -0.32, "y": 0.0, "z": 0.0},
+          "unit": "meter",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {
+            "min": {"x": -0.6, "y": -0.05, "z": -0.05},
+            "max": {"x": 0.3, "y": 0.05, "z": 0.05},
+            "unit": "meter"
+          }
+        }
+      },
+      {
+        "massKg": {
+          "value": 1111.0,
+          "unit": "kilogram",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 1050.0, "max": 1120.0, "unit": "kilogram"}
+        },
+        "forwardLimitBodyM": {
+          "value": {"x": -0.03, "y": 0.0, "z": 0.0},
+          "unit": "meter",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {
+            "min": {"x": -0.6, "y": -0.05, "z": -0.05},
+            "max": {"x": 0.3, "y": 0.05, "z": 0.05},
+            "unit": "meter"
+          }
+        },
+        "aftLimitBodyM": {
+          "value": {"x": -0.24, "y": 0.0, "z": 0.0},
+          "unit": "meter",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {
+            "min": {"x": -0.6, "y": -0.05, "z": -0.05},
+            "max": {"x": 0.3, "y": 0.05, "z": 0.05},
+            "unit": "meter"
+          }
+        }
+      }
+    ],
+    "fuelStations": [
+      {
+        "id": "left_wing",
+        "displayName": "Left wing tank",
+        "capacityKg": {
+          "value": 84.0,
+          "unit": "kilogram",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 50.0, "max": 100.0, "unit": "kilogram"}
+        },
+        "unusableKg": {
+          "value": 2.5,
+          "unit": "kilogram",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 0.0, "max": 6.0, "unit": "kilogram"}
+        },
+        "defaultQuantityKg": {
+          "value": 40.0,
+          "unit": "kilogram",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 0.0, "max": 84.0, "unit": "kilogram"}
+        },
+        "positionBodyM": {
+          "value": {"x": 0.05, "y": -1.8, "z": -0.15},
+          "unit": "meter",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {
+            "min": {"x": -0.5, "y": -2.5, "z": -0.6},
+            "max": {"x": 0.5, "y": -1.2, "z": 0.2},
+            "unit": "meter"
+          }
+        }
+      },
+      {
+        "id": "right_wing",
+        "displayName": "Right wing tank",
+        "capacityKg": {
+          "value": 84.0,
+          "unit": "kilogram",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 50.0, "max": 100.0, "unit": "kilogram"}
+        },
+        "unusableKg": {
+          "value": 2.5,
+          "unit": "kilogram",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 0.0, "max": 6.0, "unit": "kilogram"}
+        },
+        "defaultQuantityKg": {
+          "value": 40.0,
+          "unit": "kilogram",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 0.0, "max": 84.0, "unit": "kilogram"}
+        },
+        "positionBodyM": {
+          "value": {"x": 0.05, "y": 1.8, "z": -0.15},
+          "unit": "meter",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {
+            "min": {"x": -0.5, "y": 1.2, "z": -0.6},
+            "max": {"x": 0.5, "y": 2.5, "z": 0.2},
+            "unit": "meter"
+          }
+        }
+      }
+    ],
+    "payloadStations": [
+      {
+        "id": "pilot",
+        "displayName": "Pilot seat",
+        "maxMassKg": {
+          "value": 110.0,
+          "unit": "kilogram",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 80.0, "max": 130.0, "unit": "kilogram"}
+        },
+        "defaultMassKg": {
+          "value": 82.0,
+          "unit": "kilogram",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 0.0, "max": 110.0, "unit": "kilogram"}
+        },
+        "positionBodyM": {
+          "value": {"x": -0.2, "y": -0.35, "z": 0.0},
+          "unit": "meter",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {
+            "min": {"x": -0.6, "y": -0.6, "z": -0.3},
+            "max": {"x": 0.1, "y": -0.1, "z": 0.3},
+            "unit": "meter"
+          }
+        }
+      },
+      {
+        "id": "copilot",
+        "displayName": "Copilot seat",
+        "maxMassKg": {
+          "value": 110.0,
+          "unit": "kilogram",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 80.0, "max": 130.0, "unit": "kilogram"}
+        },
+        "defaultMassKg": {
+          "value": 0.0,
+          "unit": "kilogram",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 0.0, "max": 110.0, "unit": "kilogram"}
+        },
+        "positionBodyM": {
+          "value": {"x": -0.2, "y": 0.35, "z": 0.0},
+          "unit": "meter",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {
+            "min": {"x": -0.6, "y": 0.1, "z": -0.3},
+            "max": {"x": 0.1, "y": 0.6, "z": 0.3},
+            "unit": "meter"
+          }
+        }
+      },
+      {
+        "id": "rear_left",
+        "displayName": "Rear left passenger",
+        "maxMassKg": {
+          "value": 140.0,
+          "unit": "kilogram",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 80.0, "max": 160.0, "unit": "kilogram"}
+        },
+        "defaultMassKg": {
+          "value": 0.0,
+          "unit": "kilogram",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 0.0, "max": 140.0, "unit": "kilogram"}
+        },
+        "positionBodyM": {
+          "value": {"x": -0.95, "y": -0.35, "z": 0.0},
+          "unit": "meter",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {
+            "min": {"x": -1.3, "y": -0.6, "z": -0.3},
+            "max": {"x": -0.6, "y": -0.1, "z": 0.3},
+            "unit": "meter"
+          }
+        }
+      },
+      {
+        "id": "rear_right",
+        "displayName": "Rear right passenger",
+        "maxMassKg": {
+          "value": 140.0,
+          "unit": "kilogram",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 80.0, "max": 160.0, "unit": "kilogram"}
+        },
+        "defaultMassKg": {
+          "value": 0.0,
+          "unit": "kilogram",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 0.0, "max": 140.0, "unit": "kilogram"}
+        },
+        "positionBodyM": {
+          "value": {"x": -0.95, "y": 0.35, "z": 0.0},
+          "unit": "meter",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {
+            "min": {"x": -1.3, "y": 0.1, "z": -0.3},
+            "max": {"x": -0.6, "y": 0.6, "z": 0.3},
+            "unit": "meter"
+          }
+        }
+      },
+      {
+        "id": "baggage",
+        "displayName": "Baggage station",
+        "maxMassKg": {
+          "value": 50.0,
+          "unit": "kilogram",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 20.0, "max": 80.0, "unit": "kilogram"}
+        },
+        "defaultMassKg": {
+          "value": 0.0,
+          "unit": "kilogram",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 0.0, "max": 50.0, "unit": "kilogram"}
+        },
+        "positionBodyM": {
+          "value": {"x": -1.65, "y": 0.0, "z": 0.05},
+          "unit": "meter",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {
+            "min": {"x": -2.0, "y": -0.5, "z": -0.3},
+            "max": {"x": -1.2, "y": 0.5, "z": 0.4},
+            "unit": "meter"
+          }
+        }
+      }
+    ]
+  },
+  "aerodynamics": {
+    "coefficientFrame": "body-stability-coefficients",
+    "alphaMinRad": {
+      "value": -0.17,
+      "unit": "radian",
+      "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {"min": -0.35, "max": 0.0, "unit": "radian"}
+    },
+    "alphaMaxRad": {
+      "value": 0.35,
+      "unit": "radian",
+      "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {"min": 0.1, "max": 0.45, "unit": "radian"}
+    },
+    "betaMaxAbsRad": {
+      "value": 0.26,
+      "unit": "radian",
+      "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {"min": 0.1, "max": 0.4, "unit": "radian"}
+    },
+    "tables": [
+      {
+        "id": "cl_alpha",
+        "input": "angle_of_attack_rad",
+        "inputUnit": "radian",
+        "output": "CL",
+        "outputUnit": "coefficient",
+        "confidence": "medium",
+        "validityRange": {"min": -0.17, "max": 0.35, "unit": "radian"},
+        "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+        "points": [
+          {"x": -0.17, "y": -0.55},
+          {"x": -0.08, "y": -0.08},
+          {"x": 0.0, "y": 0.32},
+          {"x": 0.12, "y": 0.96},
+          {"x": 0.22, "y": 1.34},
+          {"x": 0.35, "y": 1.05}
+        ]
+      },
+      {
+        "id": "cd_alpha",
+        "input": "angle_of_attack_rad",
+        "inputUnit": "radian",
+        "output": "CD",
+        "outputUnit": "coefficient",
+        "confidence": "medium",
+        "validityRange": {"min": -0.17, "max": 0.35, "unit": "radian"},
+        "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+        "points": [
+          {"x": -0.17, "y": 0.095},
+          {"x": -0.08, "y": 0.045},
+          {"x": 0.0, "y": 0.032},
+          {"x": 0.12, "y": 0.052},
+          {"x": 0.22, "y": 0.115},
+          {"x": 0.35, "y": 0.22}
+        ]
+      },
+      {
+        "id": "cm_alpha",
+        "input": "angle_of_attack_rad",
+        "inputUnit": "radian",
+        "output": "Cm",
+        "outputUnit": "coefficient",
+        "confidence": "medium",
+        "validityRange": {"min": -0.17, "max": 0.35, "unit": "radian"},
+        "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+        "points": [
+          {"x": -0.17, "y": 0.06},
+          {"x": -0.08, "y": 0.025},
+          {"x": 0.0, "y": -0.02},
+          {"x": 0.12, "y": -0.075},
+          {"x": 0.22, "y": -0.11},
+          {"x": 0.35, "y": -0.09}
+        ]
+      },
+      {
+        "id": "cy_beta",
+        "input": "sideslip_rad",
+        "inputUnit": "radian",
+        "output": "CY",
+        "outputUnit": "coefficient",
+        "confidence": "medium",
+        "validityRange": {"min": -0.26, "max": 0.26, "unit": "radian"},
+        "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+        "points": [
+          {"x": -0.26, "y": 0.22},
+          {"x": 0.0, "y": 0.0},
+          {"x": 0.26, "y": -0.22}
+        ]
+      },
+      {
+        "id": "cl_beta",
+        "input": "sideslip_rad",
+        "inputUnit": "radian",
+        "output": "Cl",
+        "outputUnit": "coefficient",
+        "confidence": "medium",
+        "validityRange": {"min": -0.26, "max": 0.26, "unit": "radian"},
+        "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+        "points": [
+          {"x": -0.26, "y": -0.035},
+          {"x": 0.0, "y": 0.0},
+          {"x": 0.26, "y": 0.035}
+        ]
+      },
+      {
+        "id": "cn_beta",
+        "input": "sideslip_rad",
+        "inputUnit": "radian",
+        "output": "Cn",
+        "outputUnit": "coefficient",
+        "confidence": "medium",
+        "validityRange": {"min": -0.26, "max": 0.26, "unit": "radian"},
+        "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+        "points": [
+          {"x": -0.26, "y": -0.028},
+          {"x": 0.0, "y": 0.0},
+          {"x": 0.26, "y": 0.028}
+        ]
+      },
+      {
+        "id": "cl_aileron",
+        "input": "aileron_norm",
+        "inputUnit": "normalized",
+        "output": "Cl",
+        "outputUnit": "coefficient",
+        "confidence": "medium",
+        "validityRange": {"min": -1.0, "max": 1.0, "unit": "normalized"},
+        "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+        "points": [
+          {"x": -1.0, "y": -0.055},
+          {"x": 0.0, "y": 0.0},
+          {"x": 1.0, "y": 0.055}
+        ]
+      },
+      {
+        "id": "cm_elevator",
+        "input": "elevator_norm",
+        "inputUnit": "normalized",
+        "output": "Cm",
+        "outputUnit": "coefficient",
+        "confidence": "medium",
+        "validityRange": {"min": -1.0, "max": 1.0, "unit": "normalized"},
+        "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+        "points": [
+          {"x": -1.0, "y": 0.42},
+          {"x": 0.0, "y": 0.0},
+          {"x": 1.0, "y": -0.38}
+        ]
+      },
+      {
+        "id": "cn_rudder",
+        "input": "rudder_norm",
+        "inputUnit": "normalized",
+        "output": "Cn",
+        "outputUnit": "coefficient",
+        "confidence": "medium",
+        "validityRange": {"min": -1.0, "max": 1.0, "unit": "normalized"},
+        "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+        "points": [
+          {"x": -1.0, "y": -0.075},
+          {"x": 0.0, "y": 0.0},
+          {"x": 1.0, "y": 0.075}
+        ]
+      },
+      {
+        "id": "cl_flaps",
+        "input": "flaps_norm",
+        "inputUnit": "normalized",
+        "output": "CL",
+        "outputUnit": "coefficient",
+        "confidence": "medium",
+        "validityRange": {"min": 0.0, "max": 1.0, "unit": "normalized"},
+        "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+        "points": [
+          {"x": 0.0, "y": 0.0},
+          {"x": 0.33, "y": 0.18},
+          {"x": 0.66, "y": 0.38},
+          {"x": 1.0, "y": 0.52}
+        ]
+      },
+      {
+        "id": "cd_flaps",
+        "input": "flaps_norm",
+        "inputUnit": "normalized",
+        "output": "CD",
+        "outputUnit": "coefficient",
+        "confidence": "medium",
+        "validityRange": {"min": 0.0, "max": 1.0, "unit": "normalized"},
+        "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+        "points": [
+          {"x": 0.0, "y": 0.0},
+          {"x": 0.33, "y": 0.018},
+          {"x": 0.66, "y": 0.05},
+          {"x": 1.0, "y": 0.095}
+        ]
+      },
+      {
+        "id": "cm_flaps",
+        "input": "flaps_norm",
+        "inputUnit": "normalized",
+        "output": "Cm",
+        "outputUnit": "coefficient",
+        "confidence": "medium",
+        "validityRange": {"min": 0.0, "max": 1.0, "unit": "normalized"},
+        "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+        "points": [
+          {"x": 0.0, "y": 0.0},
+          {"x": 0.33, "y": -0.035},
+          {"x": 0.66, "y": -0.075},
+          {"x": 1.0, "y": -0.115}
+        ]
+      }
+    ]
+  },
+  "engine": {
+    "id": "trainer_o320_class",
+    "type": "single_air_cooled_piston",
+    "ratedPowerW": {
+      "value": 119300.0,
+      "unit": "watt",
+      "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {"min": 90000.0, "max": 135000.0, "unit": "watt"}
+    },
+    "idleRpm": {
+      "value": 650.0,
+      "unit": "revolution_per_minute",
+      "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {"min": 500.0, "max": 900.0, "unit": "revolution_per_minute"}
+    },
+    "maxRpm": {
+      "value": 2700.0,
+      "unit": "revolution_per_minute",
+      "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {"min": 2400.0, "max": 3000.0, "unit": "revolution_per_minute"}
+    },
+    "displacementM3": {
+      "value": 0.00524,
+      "unit": "cubic_meter",
+      "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {"min": 0.0035, "max": 0.0065, "unit": "cubic_meter"}
+    },
+    "fuelDensityKgPerL": {
+      "value": 0.72,
+      "unit": "kilogram_per_liter",
+      "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {"min": 0.68, "max": 0.76, "unit": "kilogram_per_liter"}
+    },
+    "tables": [
+      {
+        "id": "power_fraction_throttle",
+        "input": "throttle_norm",
+        "inputUnit": "normalized",
+        "output": "power_fraction",
+        "outputUnit": "normalized",
+        "confidence": "medium",
+        "validityRange": {"min": 0.0, "max": 1.0, "unit": "normalized"},
+        "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+        "points": [
+          {"x": 0.0, "y": 0.0},
+          {"x": 0.15, "y": 0.08},
+          {"x": 0.35, "y": 0.24},
+          {"x": 0.6, "y": 0.55},
+          {"x": 0.85, "y": 0.86},
+          {"x": 1.0, "y": 1.0}
+        ]
+      },
+      {
+        "id": "power_fraction_rpm",
+        "input": "rpm",
+        "inputUnit": "revolution_per_minute",
+        "output": "power_fraction",
+        "outputUnit": "normalized",
+        "confidence": "medium",
+        "validityRange": {"min": 650.0, "max": 2700.0, "unit": "revolution_per_minute"},
+        "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+        "points": [
+          {"x": 650.0, "y": 0.0},
+          {"x": 1200.0, "y": 0.18},
+          {"x": 1800.0, "y": 0.48},
+          {"x": 2400.0, "y": 0.86},
+          {"x": 2700.0, "y": 1.0}
+        ]
+      },
+      {
+        "id": "fuel_flow_lph_power_fraction",
+        "input": "power_fraction",
+        "inputUnit": "normalized",
+        "output": "fuel_flow_lph",
+        "outputUnit": "liter_per_hour",
+        "confidence": "medium",
+        "validityRange": {"min": 0.0, "max": 1.0, "unit": "normalized"},
+        "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+        "points": [
+          {"x": 0.0, "y": 0.0},
+          {"x": 0.25, "y": 12.0},
+          {"x": 0.5, "y": 22.0},
+          {"x": 0.75, "y": 33.0},
+          {"x": 1.0, "y": 45.0}
+        ]
+      }
+    ]
+  },
+  "propeller": {
+    "id": "fixed_pitch_1p9m_two_blade",
+    "type": "fixed_pitch",
+    "bladeCount": 2,
+    "diameterM": {
+      "value": 1.9,
+      "unit": "meter",
+      "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {"min": 1.65, "max": 2.1, "unit": "meter"}
+    },
+    "inertiaKgM2": {
+      "value": 2.25,
+      "unit": "kilogram_meter_squared",
+      "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {"min": 1.0, "max": 4.0, "unit": "kilogram_meter_squared"}
+    },
+    "minPitchRad": {
+      "value": 0.38,
+      "unit": "radian",
+      "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {"min": 0.2, "max": 0.6, "unit": "radian"}
+    },
+    "maxPitchRad": {
+      "value": 0.38,
+      "unit": "radian",
+      "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+      "confidence": "medium",
+      "validity": {"min": 0.2, "max": 0.6, "unit": "radian"}
+    },
+    "tables": [
+      {
+        "id": "thrust_coefficient_advance_ratio",
+        "input": "advance_ratio",
+        "inputUnit": "ratio",
+        "output": "ct",
+        "outputUnit": "coefficient",
+        "confidence": "medium",
+        "validityRange": {"min": 0.0, "max": 2.2, "unit": "ratio"},
+        "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+        "points": [
+          {"x": 0.0, "y": 0.075},
+          {"x": 0.4, "y": 0.068},
+          {"x": 0.8, "y": 0.046},
+          {"x": 1.2, "y": 0.0},
+          {"x": 1.6, "y": -0.038},
+          {"x": 2.2, "y": -0.07}
+        ]
+      },
+      {
+        "id": "power_coefficient_advance_ratio",
+        "input": "advance_ratio",
+        "inputUnit": "ratio",
+        "output": "cp",
+        "outputUnit": "coefficient",
+        "confidence": "medium",
+        "validityRange": {"min": 0.0, "max": 2.2, "unit": "ratio"},
+        "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+        "points": [
+          {"x": 0.0, "y": 0.065},
+          {"x": 0.4, "y": 0.058},
+          {"x": 0.8, "y": 0.041},
+          {"x": 1.2, "y": 0.016},
+          {"x": 1.6, "y": 0.039},
+          {"x": 2.2, "y": 0.052}
+        ]
+      }
+    ]
+  },
+  "actuators": [
+    {
+      "id": "elevator",
+      "surface": "elevator",
+      "command": "elevator_norm",
+      "minDeflectionRad": {
+        "value": -0.49,
+        "unit": "radian",
+        "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+        "confidence": "medium",
+        "validity": {"min": -0.7, "max": 0.0, "unit": "radian"}
+      },
+      "maxDeflectionRad": {
+        "value": 0.4,
+        "unit": "radian",
+        "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+        "confidence": "medium",
+        "validity": {"min": 0.0, "max": 0.7, "unit": "radian"}
+      },
+      "slewRateRadps": {
+        "value": 1.8,
+        "unit": "radian_per_second",
+        "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+        "confidence": "medium",
+        "validity": {"min": 0.5, "max": 4.0, "unit": "radian_per_second"}
+      },
+      "timeConstantS": {
+        "value": 0.06,
+        "unit": "second",
+        "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+        "confidence": "medium",
+        "validity": {"min": 0.0, "max": 0.3, "unit": "second"}
+      }
+    },
+    {
+      "id": "aileron",
+      "surface": "aileron",
+      "command": "aileron_norm",
+      "minDeflectionRad": {
+        "value": -0.35,
+        "unit": "radian",
+        "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+        "confidence": "medium",
+        "validity": {"min": -0.6, "max": 0.0, "unit": "radian"}
+      },
+      "maxDeflectionRad": {
+        "value": 0.26,
+        "unit": "radian",
+        "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+        "confidence": "medium",
+        "validity": {"min": 0.0, "max": 0.6, "unit": "radian"}
+      },
+      "slewRateRadps": {
+        "value": 2.2,
+        "unit": "radian_per_second",
+        "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+        "confidence": "medium",
+        "validity": {"min": 0.5, "max": 5.0, "unit": "radian_per_second"}
+      },
+      "timeConstantS": {
+        "value": 0.05,
+        "unit": "second",
+        "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+        "confidence": "medium",
+        "validity": {"min": 0.0, "max": 0.3, "unit": "second"}
+      }
+    },
+    {
+      "id": "rudder",
+      "surface": "rudder",
+      "command": "rudder_norm",
+      "minDeflectionRad": {
+        "value": -0.28,
+        "unit": "radian",
+        "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+        "confidence": "medium",
+        "validity": {"min": -0.6, "max": 0.0, "unit": "radian"}
+      },
+      "maxDeflectionRad": {
+        "value": 0.28,
+        "unit": "radian",
+        "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+        "confidence": "medium",
+        "validity": {"min": 0.0, "max": 0.6, "unit": "radian"}
+      },
+      "slewRateRadps": {
+        "value": 1.9,
+        "unit": "radian_per_second",
+        "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+        "confidence": "medium",
+        "validity": {"min": 0.5, "max": 4.0, "unit": "radian_per_second"}
+      },
+      "timeConstantS": {
+        "value": 0.06,
+        "unit": "second",
+        "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+        "confidence": "medium",
+        "validity": {"min": 0.0, "max": 0.3, "unit": "second"}
+      }
+    },
+    {
+      "id": "flaps",
+      "surface": "flaps",
+      "command": "flaps_norm",
+      "minDeflectionRad": {
+        "value": 0.0,
+        "unit": "radian",
+        "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+        "confidence": "medium",
+        "validity": {"min": 0.0, "max": 0.1, "unit": "radian"}
+      },
+      "maxDeflectionRad": {
+        "value": 0.52,
+        "unit": "radian",
+        "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+        "confidence": "medium",
+        "validity": {"min": 0.3, "max": 0.8, "unit": "radian"}
+      },
+      "slewRateRadps": {
+        "value": 0.25,
+        "unit": "radian_per_second",
+        "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+        "confidence": "medium",
+        "validity": {"min": 0.05, "max": 0.8, "unit": "radian_per_second"}
+      },
+      "timeConstantS": {
+        "value": 0.15,
+        "unit": "second",
+        "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+        "confidence": "medium",
+        "validity": {"min": 0.0, "max": 0.8, "unit": "second"}
+      }
+    }
+  ],
+  "landingGear": {
+    "contacts": [
+      {
+        "id": "nose",
+        "type": "bogey",
+        "brakeGroup": "none",
+        "retractable": false,
+        "positionBodyM": {
+          "value": {"x": 1.45, "y": 0.0, "z": 0.58},
+          "unit": "meter",
+          "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {
+            "min": {"x": 0.8, "y": -0.4, "z": 0.3},
+            "max": {"x": 2.0, "y": 0.4, "z": 0.9},
+            "unit": "meter"
+          }
+        },
+        "staticFriction": {
+          "value": 0.8,
+          "unit": "coefficient",
+          "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format"],
+          "confidence": "medium",
+          "validity": {"min": 0.1, "max": 1.2, "unit": "coefficient"}
+        },
+        "dynamicFriction": {
+          "value": 0.5,
+          "unit": "coefficient",
+          "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format"],
+          "confidence": "medium",
+          "validity": {"min": 0.1, "max": 1.0, "unit": "coefficient"}
+        },
+        "rollingFriction": {
+          "value": 0.02,
+          "unit": "coefficient",
+          "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format"],
+          "confidence": "medium",
+          "validity": {"min": 0.0, "max": 0.08, "unit": "coefficient"}
+        },
+        "springCoefficientNPerM": {
+          "value": 260000.0,
+          "unit": "newton_per_meter",
+          "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 100000.0, "max": 600000.0, "unit": "newton_per_meter"}
+        },
+        "dampingCoefficientNSPerM": {
+          "value": 12000.0,
+          "unit": "newton_second_per_meter",
+          "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 4000.0, "max": 40000.0, "unit": "newton_second_per_meter"}
+        },
+        "maxSteerRad": {
+          "value": 0.35,
+          "unit": "radian",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 0.0, "max": 0.8, "unit": "radian"}
+        }
+      },
+      {
+        "id": "left_main",
+        "type": "bogey",
+        "brakeGroup": "left",
+        "retractable": false,
+        "positionBodyM": {
+          "value": {"x": -0.45, "y": -1.05, "z": 0.62},
+          "unit": "meter",
+          "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {
+            "min": {"x": -1.2, "y": -1.5, "z": 0.3},
+            "max": {"x": 0.2, "y": -0.6, "z": 0.9},
+            "unit": "meter"
+          }
+        },
+        "staticFriction": {
+          "value": 0.82,
+          "unit": "coefficient",
+          "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format"],
+          "confidence": "medium",
+          "validity": {"min": 0.1, "max": 1.2, "unit": "coefficient"}
+        },
+        "dynamicFriction": {
+          "value": 0.52,
+          "unit": "coefficient",
+          "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format"],
+          "confidence": "medium",
+          "validity": {"min": 0.1, "max": 1.0, "unit": "coefficient"}
+        },
+        "rollingFriction": {
+          "value": 0.022,
+          "unit": "coefficient",
+          "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format"],
+          "confidence": "medium",
+          "validity": {"min": 0.0, "max": 0.08, "unit": "coefficient"}
+        },
+        "springCoefficientNPerM": {
+          "value": 780000.0,
+          "unit": "newton_per_meter",
+          "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 200000.0, "max": 1200000.0, "unit": "newton_per_meter"}
+        },
+        "dampingCoefficientNSPerM": {
+          "value": 32000.0,
+          "unit": "newton_second_per_meter",
+          "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 8000.0, "max": 80000.0, "unit": "newton_second_per_meter"}
+        },
+        "maxSteerRad": {
+          "value": 0.0,
+          "unit": "radian",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 0.0, "max": 0.2, "unit": "radian"}
+        }
+      },
+      {
+        "id": "right_main",
+        "type": "bogey",
+        "brakeGroup": "right",
+        "retractable": false,
+        "positionBodyM": {
+          "value": {"x": -0.45, "y": 1.05, "z": 0.62},
+          "unit": "meter",
+          "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {
+            "min": {"x": -1.2, "y": 0.6, "z": 0.3},
+            "max": {"x": 0.2, "y": 1.5, "z": 0.9},
+            "unit": "meter"
+          }
+        },
+        "staticFriction": {
+          "value": 0.82,
+          "unit": "coefficient",
+          "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format"],
+          "confidence": "medium",
+          "validity": {"min": 0.1, "max": 1.2, "unit": "coefficient"}
+        },
+        "dynamicFriction": {
+          "value": 0.52,
+          "unit": "coefficient",
+          "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format"],
+          "confidence": "medium",
+          "validity": {"min": 0.1, "max": 1.0, "unit": "coefficient"}
+        },
+        "rollingFriction": {
+          "value": 0.022,
+          "unit": "coefficient",
+          "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format"],
+          "confidence": "medium",
+          "validity": {"min": 0.0, "max": 0.08, "unit": "coefficient"}
+        },
+        "springCoefficientNPerM": {
+          "value": 780000.0,
+          "unit": "newton_per_meter",
+          "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 200000.0, "max": 1200000.0, "unit": "newton_per_meter"}
+        },
+        "dampingCoefficientNSPerM": {
+          "value": 32000.0,
+          "unit": "newton_second_per_meter",
+          "sourceRefs": ["flying-step16-owned-model", "jsbsim-reference-format", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 8000.0, "max": 80000.0, "unit": "newton_second_per_meter"}
+        },
+        "maxSteerRad": {
+          "value": 0.0,
+          "unit": "radian",
+          "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+          "confidence": "medium",
+          "validity": {"min": 0.0, "max": 0.2, "unit": "radian"}
+        }
+      }
+    ]
+  },
+  "brakes": [
+    {
+      "id": "left_wheel_brake",
+      "wheel": "left_main",
+      "brakeGroup": "left",
+      "maxTorqueNm": {
+        "value": 1800.0,
+        "unit": "newton_meter",
+        "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+        "confidence": "medium",
+        "validity": {"min": 800.0, "max": 3000.0, "unit": "newton_meter"}
+      },
+      "responseTimeS": {
+        "value": 0.08,
+        "unit": "second",
+        "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+        "confidence": "medium",
+        "validity": {"min": 0.02, "max": 0.5, "unit": "second"}
+      },
+      "parkingBrakeHoldNorm": {
+        "value": 0.85,
+        "unit": "normalized",
+        "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+        "confidence": "medium",
+        "validity": {"min": 0.0, "max": 1.0, "unit": "normalized"}
+      }
+    },
+    {
+      "id": "right_wheel_brake",
+      "wheel": "right_main",
+      "brakeGroup": "right",
+      "maxTorqueNm": {
+        "value": 1800.0,
+        "unit": "newton_meter",
+        "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+        "confidence": "medium",
+        "validity": {"min": 800.0, "max": 3000.0, "unit": "newton_meter"}
+      },
+      "responseTimeS": {
+        "value": 0.08,
+        "unit": "second",
+        "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+        "confidence": "medium",
+        "validity": {"min": 0.02, "max": 0.5, "unit": "second"}
+      },
+      "parkingBrakeHoldNorm": {
+        "value": 0.85,
+        "unit": "normalized",
+        "sourceRefs": ["flying-step16-owned-model", "core-sim-si-units"],
+        "confidence": "medium",
+        "validity": {"min": 0.0, "max": 1.0, "unit": "normalized"}
+      }
+    }
+  ]
+}

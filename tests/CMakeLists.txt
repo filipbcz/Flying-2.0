@@ -111,6 +111,23 @@ target_link_libraries(flying_core_sim_flight_dynamics_api_tests
 
 add_test(NAME flying.core_sim.flight_dynamics_api COMMAND flying_core_sim_flight_dynamics_api_tests)
 
+add_executable(flying_core_sim_aircraft_config_tests
+  core_sim/aircraft_config_test.cpp
+)
+
+target_link_libraries(flying_core_sim_aircraft_config_tests
+  PRIVATE
+    Flying::CoreSim
+    Flying::CompilerOptions
+)
+
+target_compile_definitions(flying_core_sim_aircraft_config_tests
+  PRIVATE
+    FLYING_REPO_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+)
+
+add_test(NAME flying.core_sim.aircraft_config COMMAND flying_core_sim_aircraft_config_tests)
+
 add_executable(flying_core_sim_input_mapping_tests
   core_sim/input_mapping_test.cpp
 )

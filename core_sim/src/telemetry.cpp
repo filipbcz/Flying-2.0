@@ -207,6 +207,25 @@ void append_rigid_body_parameters(std::ostream& output, const RigidBodyParameter
   append_vector(output, parameters.inertia_diagonal_kg_m2);
 }
 
+void append_inertia_tensor(std::ostream& output, const AircraftInertiaTensor& inertia) {
+  append_field(output, inertia.ixx);
+  append_field(output, inertia.iyy);
+  append_field(output, inertia.izz);
+  append_field(output, inertia.ixy);
+  append_field(output, inertia.ixz);
+  append_field(output, inertia.iyz);
+}
+
+void append_aircraft_mass_balance(std::ostream& output,
+                                  const AircraftMassBalanceState& mass_balance) {
+  append_field(output, mass_balance.total_mass_kg);
+  append_field(output, mass_balance.fuel_mass_kg);
+  append_field(output, mass_balance.payload_mass_kg);
+  append_vector(output, mass_balance.center_of_gravity_body_m);
+  append_inertia_tensor(output, mass_balance.inertia_tensor_kg_m2);
+  append_field(output, mass_balance.cg_within_envelope);
+}
+
 void append_engine(std::ostream& output, const EngineStateSample& engine) {
   append_field(output, engine.engine_running);
   append_field(output, engine.throttle_norm);
@@ -223,6 +242,7 @@ void append_state(std::ostream& output, const AuthoritativeState& state) {
   append_vector(output, state.angular_velocity_body_radps);
   append_vector(output, state.accumulated_force_body_n);
   append_vector(output, state.accumulated_moment_body_nm);
+  append_aircraft_mass_balance(output, state.aircraft_mass_balance);
 }
 
 void append_flight_dynamics_initial_condition(
@@ -332,6 +352,28 @@ void append_flight_dynamics_initial_condition(
          read_vector(fields, index, parameters.inertia_diagonal_kg_m2);
 }
 
+[[nodiscard]] bool read_inertia_tensor(const std::vector<std::string_view>& fields,
+                                       std::size_t& index,
+                                       AircraftInertiaTensor& inertia) noexcept {
+  return read_double(fields, index, inertia.ixx) &&
+         read_double(fields, index, inertia.iyy) &&
+         read_double(fields, index, inertia.izz) &&
+         read_double(fields, index, inertia.ixy) &&
+         read_double(fields, index, inertia.ixz) &&
+         read_double(fields, index, inertia.iyz);
+}
+
+[[nodiscard]] bool read_aircraft_mass_balance(const std::vector<std::string_view>& fields,
+                                              std::size_t& index,
+                                              AircraftMassBalanceState& mass_balance) noexcept {
+  return read_double(fields, index, mass_balance.total_mass_kg) &&
+         read_double(fields, index, mass_balance.fuel_mass_kg) &&
+         read_double(fields, index, mass_balance.payload_mass_kg) &&
+         read_vector(fields, index, mass_balance.center_of_gravity_body_m) &&
+         read_inertia_tensor(fields, index, mass_balance.inertia_tensor_kg_m2) &&
+         read_bool(fields, index, mass_balance.cg_within_envelope);
+}
+
 [[nodiscard]] bool read_engine(const std::vector<std::string_view>& fields,
                                std::size_t& index,
                                EngineStateSample& engine) noexcept {
@@ -351,7 +393,8 @@ void append_flight_dynamics_initial_condition(
          read_quaternion(fields, index, state.body_to_ecef) &&
          read_vector(fields, index, state.angular_velocity_body_radps) &&
          read_vector(fields, index, state.accumulated_force_body_n) &&
-         read_vector(fields, index, state.accumulated_moment_body_nm);
+         read_vector(fields, index, state.accumulated_moment_body_nm) &&
+         read_aircraft_mass_balance(fields, index, state.aircraft_mass_balance);
 }
 
 [[nodiscard]] bool read_flight_dynamics_initial_condition(
@@ -370,13 +413,30 @@ void append_flight_dynamics_initial_condition(
 }
 
 [[nodiscard]] bool valid_state(const AuthoritativeState& state) noexcept {
+  const AircraftInertiaTensor& inertia = state.aircraft_mass_balance.inertia_tensor_kg_m2;
   return std::isfinite(state.simulation_time_s) &&
          is_finite(state.ecef_position_m) &&
          is_finite(state.ecef_velocity_mps) &&
          is_finite(state.body_to_ecef) &&
          is_finite(state.angular_velocity_body_radps) &&
          is_finite(state.accumulated_force_body_n) &&
-         is_finite(state.accumulated_moment_body_nm);
+         is_finite(state.accumulated_moment_body_nm) &&
+         state.aircraft_mass_balance.total_mass_kg > 0.0 &&
+         std::isfinite(state.aircraft_mass_balance.total_mass_kg) &&
+         state.aircraft_mass_balance.fuel_mass_kg >= 0.0 &&
+         std::isfinite(state.aircraft_mass_balance.fuel_mass_kg) &&
+         state.aircraft_mass_balance.payload_mass_kg >= 0.0 &&
+         std::isfinite(state.aircraft_mass_balance.payload_mass_kg) &&
+         is_finite(state.aircraft_mass_balance.center_of_gravity_body_m) &&
+         inertia.ixx > 0.0 &&
+         inertia.iyy > 0.0 &&
+         inertia.izz > 0.0 &&
+         std::isfinite(inertia.ixx) &&
+         std::isfinite(inertia.iyy) &&
+         std::isfinite(inertia.izz) &&
+         std::isfinite(inertia.ixy) &&
+         std::isfinite(inertia.ixz) &&
+         std::isfinite(inertia.iyz);
 }
 
 [[nodiscard]] bool valid_core_input(const ControlInputSample& input) noexcept {
@@ -522,6 +582,28 @@ void append_json_quaternion(std::ostream& output, Quaterniond value) {
          << ",\"z\":" << double_to_string(value.z) << '}';
 }
 
+void append_json_inertia_tensor(std::ostream& output, const AircraftInertiaTensor& inertia) {
+  output << "{\"ixx\":" << double_to_string(inertia.ixx)
+         << ",\"iyy\":" << double_to_string(inertia.iyy)
+         << ",\"izz\":" << double_to_string(inertia.izz)
+         << ",\"ixy\":" << double_to_string(inertia.ixy)
+         << ",\"ixz\":" << double_to_string(inertia.ixz)
+         << ",\"iyz\":" << double_to_string(inertia.iyz) << '}';
+}
+
+void append_json_aircraft_mass_balance(std::ostream& output,
+                                       const AircraftMassBalanceState& mass_balance) {
+  output << "{\"total_mass_kg\":" << double_to_string(mass_balance.total_mass_kg)
+         << ",\"fuel_mass_kg\":" << double_to_string(mass_balance.fuel_mass_kg)
+         << ",\"payload_mass_kg\":" << double_to_string(mass_balance.payload_mass_kg)
+         << ",\"center_of_gravity_body_m\":";
+  append_json_vector(output, mass_balance.center_of_gravity_body_m);
+  output << ",\"inertia_tensor_kg_m2\":";
+  append_json_inertia_tensor(output, mass_balance.inertia_tensor_kg_m2);
+  output << ",\"cg_within_envelope\":"
+         << (mass_balance.cg_within_envelope ? "true" : "false") << '}';
+}
+
 void append_json_aircraft_controls(std::ostream& output,
                                    const AircraftControlInputSample& controls) {
   output << "{\"aileron_norm\":" << double_to_string(controls.aileron_norm)
@@ -568,6 +650,8 @@ void append_json_state(std::ostream& output, const AuthoritativeState& state) {
   append_json_vector(output, state.accumulated_force_body_n);
   output << ",\"accumulated_moment_body_nm\":";
   append_json_vector(output, state.accumulated_moment_body_nm);
+  output << ",\"aircraft_mass_balance\":";
+  append_json_aircraft_mass_balance(output, state.aircraft_mass_balance);
   output << '}';
 }
 
@@ -824,6 +908,60 @@ void remove_temp_file(const std::filesystem::path& temp) noexcept {
       actual.accumulated_moment_body_nm,
       tolerance.moment_nm,
       max_error) && within_tolerance;
+  within_tolerance = compare_component(
+      expected.aircraft_mass_balance.total_mass_kg,
+      actual.aircraft_mass_balance.total_mass_kg,
+      0.0,
+      max_error) && within_tolerance;
+  within_tolerance = compare_component(
+      expected.aircraft_mass_balance.fuel_mass_kg,
+      actual.aircraft_mass_balance.fuel_mass_kg,
+      0.0,
+      max_error) && within_tolerance;
+  within_tolerance = compare_component(
+      expected.aircraft_mass_balance.payload_mass_kg,
+      actual.aircraft_mass_balance.payload_mass_kg,
+      0.0,
+      max_error) && within_tolerance;
+  within_tolerance = compare_vector(
+      expected.aircraft_mass_balance.center_of_gravity_body_m,
+      actual.aircraft_mass_balance.center_of_gravity_body_m,
+      0.0,
+      max_error) && within_tolerance;
+  within_tolerance = compare_component(
+      expected.aircraft_mass_balance.inertia_tensor_kg_m2.ixx,
+      actual.aircraft_mass_balance.inertia_tensor_kg_m2.ixx,
+      0.0,
+      max_error) && within_tolerance;
+  within_tolerance = compare_component(
+      expected.aircraft_mass_balance.inertia_tensor_kg_m2.iyy,
+      actual.aircraft_mass_balance.inertia_tensor_kg_m2.iyy,
+      0.0,
+      max_error) && within_tolerance;
+  within_tolerance = compare_component(
+      expected.aircraft_mass_balance.inertia_tensor_kg_m2.izz,
+      actual.aircraft_mass_balance.inertia_tensor_kg_m2.izz,
+      0.0,
+      max_error) && within_tolerance;
+  within_tolerance = compare_component(
+      expected.aircraft_mass_balance.inertia_tensor_kg_m2.ixy,
+      actual.aircraft_mass_balance.inertia_tensor_kg_m2.ixy,
+      0.0,
+      max_error) && within_tolerance;
+  within_tolerance = compare_component(
+      expected.aircraft_mass_balance.inertia_tensor_kg_m2.ixz,
+      actual.aircraft_mass_balance.inertia_tensor_kg_m2.ixz,
+      0.0,
+      max_error) && within_tolerance;
+  within_tolerance = compare_component(
+      expected.aircraft_mass_balance.inertia_tensor_kg_m2.iyz,
+      actual.aircraft_mass_balance.inertia_tensor_kg_m2.iyz,
+      0.0,
+      max_error) && within_tolerance;
+  within_tolerance =
+      expected.aircraft_mass_balance.cg_within_envelope ==
+          actual.aircraft_mass_balance.cg_within_envelope &&
+      within_tolerance;
   return within_tolerance;
 }
 
@@ -1302,7 +1440,7 @@ TelemetryLoadResult load_telemetry_file(const std::filesystem::path& path) {
         }
         saw_rigid_body_parameters = true;
       } else if (fields[0] == "initial_state") {
-        if (fields.size() != 23) {
+        if (fields.size() != 35) {
           result.errors.push_back("line " + std::to_string(line_number) +
                                   " initial_state record is malformed");
           continue;
@@ -1353,7 +1491,7 @@ TelemetryLoadResult load_telemetry_file(const std::filesystem::path& path) {
         }
         saw_initial_aircraft_controls = true;
       } else if (fields[0] == "frame") {
-        if (fields.size() != 53) {
+        if (fields.size() != 65) {
           result.errors.push_back("line " + std::to_string(line_number) +
                                   " frame record is malformed");
           continue;
@@ -1461,7 +1599,10 @@ TelemetryExportResult export_telemetry_csv(const std::filesystem::path& path,
          << "state_hash,ecef_x_m,ecef_y_m,ecef_z_m,ecef_vx_mps,ecef_vy_mps,ecef_vz_mps,"
          << "quat_w,quat_x,quat_y,quat_z,angular_velocity_x_radps,angular_velocity_y_radps,"
          << "angular_velocity_z_radps,force_x_n,force_y_n,force_z_n,moment_x_nm,"
-         << "moment_y_nm,moment_z_nm,input_force_x_n,input_force_y_n,input_force_z_n,"
+         << "moment_y_nm,moment_z_nm,total_mass_kg,fuel_mass_kg,payload_mass_kg,"
+         << "cg_x_m,cg_y_m,cg_z_m,inertia_ixx_kg_m2,inertia_iyy_kg_m2,"
+         << "inertia_izz_kg_m2,inertia_ixy_kg_m2,inertia_ixz_kg_m2,"
+         << "inertia_iyz_kg_m2,cg_within_envelope,input_force_x_n,input_force_y_n,input_force_z_n,"
          << "input_moment_x_nm,input_moment_y_nm,input_moment_z_nm,aileron_norm,"
          << "elevator_norm,rudder_norm,throttle_norm,flaps_norm,brake_left_norm,"
          << "brake_right_norm,mixture_norm,propeller_norm,elevator_trim_norm,"
@@ -1499,6 +1640,19 @@ TelemetryExportResult export_telemetry_csv(const std::filesystem::path& path,
            << state.accumulated_moment_body_nm.x << ','
            << state.accumulated_moment_body_nm.y << ','
            << state.accumulated_moment_body_nm.z << ','
+           << state.aircraft_mass_balance.total_mass_kg << ','
+           << state.aircraft_mass_balance.fuel_mass_kg << ','
+           << state.aircraft_mass_balance.payload_mass_kg << ','
+           << state.aircraft_mass_balance.center_of_gravity_body_m.x << ','
+           << state.aircraft_mass_balance.center_of_gravity_body_m.y << ','
+           << state.aircraft_mass_balance.center_of_gravity_body_m.z << ','
+           << state.aircraft_mass_balance.inertia_tensor_kg_m2.ixx << ','
+           << state.aircraft_mass_balance.inertia_tensor_kg_m2.iyy << ','
+           << state.aircraft_mass_balance.inertia_tensor_kg_m2.izz << ','
+           << state.aircraft_mass_balance.inertia_tensor_kg_m2.ixy << ','
+           << state.aircraft_mass_balance.inertia_tensor_kg_m2.ixz << ','
+           << state.aircraft_mass_balance.inertia_tensor_kg_m2.iyz << ','
+           << (state.aircraft_mass_balance.cg_within_envelope ? 1 : 0) << ','
            << frame.core_input.force_body_n.x << ','
            << frame.core_input.force_body_n.y << ','
            << frame.core_input.force_body_n.z << ','

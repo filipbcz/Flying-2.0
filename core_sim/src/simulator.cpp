@@ -22,6 +22,62 @@ void validate_parameters(const RigidBodyParameters& parameters) {
   }
 }
 
+void validate_mass_balance(const AircraftMassBalanceState& mass_balance) {
+  if (mass_balance.total_mass_kg <= 0.0 || !std::isfinite(mass_balance.total_mass_kg)) {
+    throw std::invalid_argument("aircraft mass balance total_mass_kg must be a positive finite SI mass");
+  }
+  if (mass_balance.fuel_mass_kg < 0.0 ||
+      mass_balance.payload_mass_kg < 0.0 ||
+      !std::isfinite(mass_balance.fuel_mass_kg) ||
+      !std::isfinite(mass_balance.payload_mass_kg)) {
+    throw std::invalid_argument("aircraft fuel and payload masses must be non-negative finite SI values");
+  }
+  if (!is_finite(mass_balance.center_of_gravity_body_m)) {
+    throw std::invalid_argument("aircraft center_of_gravity_body_m must contain finite SI values");
+  }
+  const AircraftInertiaTensor& inertia = mass_balance.inertia_tensor_kg_m2;
+  if (inertia.ixx <= 0.0 ||
+      inertia.iyy <= 0.0 ||
+      inertia.izz <= 0.0 ||
+      !std::isfinite(inertia.ixx) ||
+      !std::isfinite(inertia.iyy) ||
+      !std::isfinite(inertia.izz) ||
+      !std::isfinite(inertia.ixy) ||
+      !std::isfinite(inertia.ixz) ||
+      !std::isfinite(inertia.iyz)) {
+    throw std::invalid_argument("aircraft inertia_tensor_kg_m2 must contain finite values and positive diagonal moments");
+  }
+  if (!mass_balance.cg_within_envelope) {
+    throw std::invalid_argument("aircraft center of gravity is outside the configured envelope");
+  }
+}
+
+[[nodiscard]] AircraftMassBalanceState mass_balance_from_parameters(
+    const RigidBodyParameters& parameters) noexcept {
+  AircraftMassBalanceState mass_balance{};
+  mass_balance.total_mass_kg = parameters.mass_kg;
+  mass_balance.inertia_tensor_kg_m2 = {
+    parameters.inertia_diagonal_kg_m2.x,
+    parameters.inertia_diagonal_kg_m2.y,
+    parameters.inertia_diagonal_kg_m2.z,
+    0.0,
+    0.0,
+    0.0,
+  };
+  mass_balance.cg_within_envelope = true;
+  return mass_balance;
+}
+
+void apply_mass_balance_to_parameters(AircraftMassBalanceState mass_balance,
+                                      RigidBodyParameters& parameters) noexcept {
+  parameters.mass_kg = mass_balance.total_mass_kg;
+  parameters.inertia_diagonal_kg_m2 = {
+    mass_balance.inertia_tensor_kg_m2.ixx,
+    mass_balance.inertia_tensor_kg_m2.iyy,
+    mass_balance.inertia_tensor_kg_m2.izz,
+  };
+}
+
 void validate_input(const ControlInputSample& input) {
   if (!is_finite(input.force_body_n) || !is_finite(input.moment_body_nm)) {
     throw std::invalid_argument("CoreSim force and moment inputs must be finite SI values");
@@ -72,6 +128,10 @@ const RigidBodyParameters& CoreSimulator::parameters() const noexcept {
   return parameters_;
 }
 
+const AircraftMassBalanceState& CoreSimulator::aircraft_mass_balance() const noexcept {
+  return state_.aircraft_mass_balance;
+}
+
 double CoreSimulator::fixed_step_s() const noexcept {
   return accumulator_.fixed_step_s();
 }
@@ -79,6 +139,7 @@ double CoreSimulator::fixed_step_s() const noexcept {
 void CoreSimulator::reset(AuthoritativeState state) noexcept {
   state_ = state;
   state_.body_to_ecef = state_.body_to_ecef.normalized();
+  state_.aircraft_mass_balance = mass_balance_from_parameters(parameters_);
   flight_dynamics_initial_condition_ = {};
   initial_aircraft_controls_ = {};
   accumulator_.reset();
@@ -91,9 +152,16 @@ void CoreSimulator::reset(AuthoritativeState state,
   validate_aircraft_controls(initial_aircraft_controls);
   state_ = state;
   state_.body_to_ecef = state_.body_to_ecef.normalized();
+  state_.aircraft_mass_balance = mass_balance_from_parameters(parameters_);
   flight_dynamics_initial_condition_ = flight_dynamics_initial_condition;
   initial_aircraft_controls_ = initial_aircraft_controls;
   accumulator_.reset();
+}
+
+void CoreSimulator::set_aircraft_mass_balance(const AircraftMassBalanceState& mass_balance) {
+  validate_mass_balance(mass_balance);
+  state_.aircraft_mass_balance = mass_balance;
+  apply_mass_balance_to_parameters(mass_balance, parameters_);
 }
 
 AdvanceReport CoreSimulator::advance(double caller_delta_s, const ControlInputSample& input) {

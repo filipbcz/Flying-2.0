@@ -6,29 +6,31 @@
 - default branch: main
 
 ## Task
-- title: Flying: 15. Build Vertical Slice Flight And Performance Tests
+- title: Flying: 16. Complete Production Aircraft Data Model
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-15. Build Vertical Slice Flight And Performance Tests
+16. Complete Production Aircraft Data Model
 
 Step description and scope:
-Create automated and manual validation for the M1 vertical slice: pilot-region loading, takeoff, circuit, landing, replay, terrain continuity, CoreSim timing, and basic performance budgets.
+Replace infrastructure placeholder data with the selected aircraft's licensed data model: geometry, mass properties, CG envelope, inertia tensor, aerodynamic tables, engine, propeller, actuators, landing gear, brakes, and configuration schema.
 
 In scope:
-- M1 automated test suite
-- Scripted takeoff-circuit-landing scenario
-- Pilot-region performance capture
-- M1 validation report
-- Known limitations document
+- Aircraft config schema
+- Production aircraft data ingestion
+- Mass and balance model
+- Aerodynamic table integration
+- Engine and propeller maps
+- Landing gear and brake parameters
+- Data provenance
 
 Out of scope:
-- Whole-country performance certification
-- Final aircraft validation
-- Installer signing
-- Full airport coverage
+- Cockpit visuals
+- Sensor/instrument errors
+- Final validation sign-off
+- Multiple aircraft
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -51,9 +53,9 @@ Already completed roadmap steps (existing repository context):
 - 12. Create Unreal UE 5.8 Project And Cesium Runtime Integration
 - 13. Implement Input Device Mapping And Scenario Start Flow
 - 14. Implement Telemetry, Replay, And Export V1
+- 15. Build Vertical Slice Flight And Performance Tests
 
 Future roadmap steps (explicitly out of scope):
-- 16. Complete Production Aircraft Data Model
 - 17. Implement Aircraft Systems And Sensor Models
 - 18. Implement Cockpit And Aircraft Presentation
 - 19. Implement Weather And Atmosphere Coupling
@@ -70,10 +72,10 @@ Future roadmap steps (explicitly out of scope):
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- Automated test suite runs CoreSim unit tests, geodesy tests, terrain service tests, runway importer tests, replay hash tests, and pilot package validation.
-- A scripted pilot-region flight can taxi, take off, fly a circuit, land, stop, and produce telemetry without loading screens.
-- Performance capture for the reference-class PC reports FPS, 1% low, CoreSim step misses, input latency, hitch count, RAM, and VRAM for the vertical slice.
-- M1 report documents pass/fail status and known limitations without marking unvalidated aircraft fidelity as complete.
+- Aircraft configuration schema validates all required geometry, mass, CG, inertia, aerodynamic, engine, propeller, actuator, landing-gear, and brake fields.
+- Production aircraft data files include source references, confidence levels, units, validity ranges, and license/provenance metadata.
+- Mass, fuel, payload, and CG changes update CoreSim state through validated configuration APIs.
+- Model remains clearly marked as unvalidated until the aircraft validation suite passes.
 
 ## Agent Configuration
 - no project config provided, using defaults
