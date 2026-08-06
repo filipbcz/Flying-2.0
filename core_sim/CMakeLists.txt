@@ -10,6 +10,7 @@ add_library(flying_core_sim STATIC
   src/simulator.cpp
   src/telemetry.cpp
   src/terrain_contact.cpp
+  src/weather.cpp
 )
 
 add_library(Flying::CoreSim ALIAS flying_core_sim)

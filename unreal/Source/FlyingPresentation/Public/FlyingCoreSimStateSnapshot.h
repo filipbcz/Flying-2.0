@@ -5,6 +5,102 @@
 #include "FlyingCoreSimStateSnapshot.generated.h"
 
 USTRUCT(BlueprintType)
+struct FLYINGPRESENTATION_API FFlyingWeatherSnapshot
+{
+  GENERATED_BODY()
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Weather")
+  double StaticPressurePascal = 101325.0;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Weather")
+  double TemperatureKelvin = 288.15;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Weather")
+  double DensityKgPerCubicMeter = 1.225;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Weather")
+  double RelativeHumidityNorm = 0.5;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Weather")
+  FVector WindNedMetersPerSecond = FVector::ZeroVector;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Weather")
+  FVector TurbulenceNedMetersPerSecond = FVector::ZeroVector;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Weather")
+  double VisibilityMeters = 30000.0;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Weather")
+  double CloudCoverageNorm = 0.0;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Weather")
+  double PrecipitationRateMmPerHour = 0.0;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Weather")
+  double SurfaceWetnessNorm = 0.0;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Weather")
+  double IcingSeverityNorm = 0.0;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Weather")
+  double RunwayFrictionScale = 1.0;
+};
+
+USTRUCT(BlueprintType)
+struct FLYINGPRESENTATION_API FFlyingManualWeatherScenario
+{
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Weather")
+  double QnhPascal = 101325.0;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Weather")
+  double SeaLevelTemperatureKelvin = 288.15;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Weather")
+  double RelativeHumidityNorm = 0.5;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Weather")
+  double VisibilityMeters = 30000.0;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Weather")
+  FVector SurfaceWindNedMetersPerSecond = FVector::ZeroVector;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Weather")
+  FVector WindAloftNedMetersPerSecond = FVector::ZeroVector;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Weather")
+  double WindAloftAltitudeMeters = 1000.0;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Weather")
+  double TurbulenceIntensityMetersPerSecond = 0.0;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Weather")
+  int32 TurbulenceSeed = 1;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Weather")
+  double CloudBaseMeters = 1200.0;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Weather")
+  double CloudTopMeters = 2000.0;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Weather")
+  double CloudCoverageNorm = 0.0;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Weather")
+  double RainRateMmPerHour = 0.0;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Weather")
+  double SnowRateMmPerHour = 0.0;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Weather")
+  double SurfaceWetnessNorm = 0.0;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Weather")
+  double IcingSeverityNorm = 0.0;
+};
+
+USTRUCT(BlueprintType)
 struct FLYINGPRESENTATION_API FFlyingElectricalInstrumentSnapshot
 {
   GENERATED_BODY()
@@ -149,6 +245,15 @@ struct FLYINGPRESENTATION_API FFlyingCoreSimStateSnapshot
 
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|CoreSim")
   FVector4 BodyToEcefQuaternionXyzw = FVector4(0.0, 0.0, 0.0, 1.0);
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Weather")
+  FFlyingWeatherSnapshot Weather;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Weather")
+  FVector RelativeAirVelocityBodyMetersPerSecond = FVector::ZeroVector;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Weather")
+  double WeatherDynamicPressurePascal = 0.0;
 
   FQuat BodyToEcef = FQuat::Identity;
 };

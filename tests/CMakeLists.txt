@@ -188,6 +188,18 @@ target_link_libraries(flying_core_sim_terrain_contact_tests
 
 add_test(NAME flying.core_sim.terrain_contact COMMAND flying_core_sim_terrain_contact_tests)
 
+add_executable(flying_core_sim_weather_tests
+  core_sim/weather_test.cpp
+)
+
+target_link_libraries(flying_core_sim_weather_tests
+  PRIVATE
+    Flying::CoreSim
+    Flying::CompilerOptions
+)
+
+add_test(NAME flying.core_sim.weather COMMAND flying_core_sim_weather_tests)
+
 if(TARGET Flying::CoreSimJsbsim)
   add_executable(flying_core_sim_jsbsim_adapter_tests
     core_sim/jsbsim_adapter_test.cpp

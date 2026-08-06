@@ -10,6 +10,7 @@
 #include "flying/core_sim/scenario.hpp"
 #include "flying/core_sim/simulator.hpp"
 #include "flying/core_sim/telemetry.hpp"
+#include "flying/core_sim/weather.hpp"
 #include "flying/geo_terrain/geodesy.hpp"
 
 #include <algorithm>
@@ -34,6 +35,8 @@ using flying::core_sim::DataPackageVersion;
 using flying::core_sim::Quaterniond;
 using flying::core_sim::ReplayEnvironment;
 using flying::core_sim::Vector3d;
+using flying::core_sim::WeatherSample;
+using flying::core_sim::WeatherScenario;
 using flying::geo_terrain::EcefPosition;
 using flying::geo_terrain::EnuVector;
 using flying::geo_terrain::GeodeticCoordinates;
@@ -197,6 +200,53 @@ FFlyingAircraftInstrumentSnapshot ToUnreal(
   Result.Fuel.FuelPressureKpa = Instruments.fuel.fuel_pressure_kpa;
   Result.Fuel.FuelFlowKgPerSecond = Instruments.engine.fuel_flow_kgps;
   Result.Fuel.bEngineFuelStarved = Instruments.fuel.engine_fuel_starved;
+  return Result;
+}
+
+FFlyingWeatherSnapshot ToUnreal(const WeatherSample& Value)
+{
+  FFlyingWeatherSnapshot Result;
+  Result.StaticPressurePascal = Value.atmosphere.static_pressure_pa;
+  Result.TemperatureKelvin = Value.atmosphere.temperature_k;
+  Result.DensityKgPerCubicMeter = Value.atmosphere.density_kgpm3;
+  Result.RelativeHumidityNorm = Value.atmosphere.relative_humidity_norm;
+  Result.WindNedMetersPerSecond = ToUnrealVector(Value.wind_ned_mps);
+  Result.TurbulenceNedMetersPerSecond = ToUnrealVector(Value.turbulence_ned_mps);
+  Result.VisibilityMeters = Value.visibility_m;
+  Result.CloudCoverageNorm = Value.cloud_coverage_norm;
+  Result.PrecipitationRateMmPerHour = Value.precipitation_rate_mmph;
+  Result.SurfaceWetnessNorm = Value.surface_wetness_norm;
+  Result.IcingSeverityNorm = Value.icing_severity_norm;
+  Result.RunwayFrictionScale = Value.runway_friction_scale;
+  return Result;
+}
+
+WeatherScenario ToCore(const FFlyingManualWeatherScenario& Value)
+{
+  WeatherScenario Result;
+  Result.scenario_id = "unreal.manual";
+  Result.qnh_pa = Value.QnhPascal;
+  Result.sea_level_temperature_k = Value.SeaLevelTemperatureKelvin;
+  Result.relative_humidity_norm = FMath::Clamp(Value.RelativeHumidityNorm, 0.0, 1.0);
+  Result.visibility_m = FMath::Max(0.0, Value.VisibilityMeters);
+  Result.surface_wind.wind_ned_mps = {
+    Value.SurfaceWindNedMetersPerSecond.X,
+    Value.SurfaceWindNedMetersPerSecond.Y,
+    Value.SurfaceWindNedMetersPerSecond.Z};
+  Result.wind_aloft.altitude_m = Value.WindAloftAltitudeMeters;
+  Result.wind_aloft.wind_ned_mps = {
+    Value.WindAloftNedMetersPerSecond.X,
+    Value.WindAloftNedMetersPerSecond.Y,
+    Value.WindAloftNedMetersPerSecond.Z};
+  Result.turbulence.intensity_mps = FMath::Max(0.0, Value.TurbulenceIntensityMetersPerSecond);
+  Result.turbulence.seed = static_cast<uint32>(FMath::Max(1, Value.TurbulenceSeed));
+  Result.cloud.base_altitude_m = Value.CloudBaseMeters;
+  Result.cloud.top_altitude_m = Value.CloudTopMeters;
+  Result.cloud.coverage_norm = FMath::Clamp(Value.CloudCoverageNorm, 0.0, 1.0);
+  Result.precipitation.rain_rate_mmph = FMath::Max(0.0, Value.RainRateMmPerHour);
+  Result.precipitation.snow_rate_mmph = FMath::Max(0.0, Value.SnowRateMmPerHour);
+  Result.precipitation.surface_wetness_norm = FMath::Clamp(Value.SurfaceWetnessNorm, 0.0, 1.0);
+  Result.icing_severity_norm = FMath::Clamp(Value.IcingSeverityNorm, 0.0, 1.0);
   return Result;
 }
 
@@ -829,6 +879,10 @@ struct FFlyingCoreSimBridgeImpl
       Snapshot.BodyToEcef.Y,
       Snapshot.BodyToEcef.Z,
       Snapshot.BodyToEcef.W);
+    Snapshot.Weather = ToUnreal(State.weather);
+    Snapshot.RelativeAirVelocityBodyMetersPerSecond =
+      ToUnrealVector(State.relative_air_velocity_body_mps);
+    Snapshot.WeatherDynamicPressurePascal = State.weather_dynamic_pressure_pa;
     return Snapshot;
   }
 
@@ -926,6 +980,12 @@ struct FFlyingCoreSimBridgeImpl
     StepSystems(0.0, LastAircraftControls, bLastEngineRunning);
   }
 
+  void SetManualWeather(WeatherScenario Scenario)
+  {
+    Simulator.set_manual_weather_scenario(std::move(Scenario));
+    StepSystems(0.0, LastAircraftControls, bLastEngineRunning);
+  }
+
   void StepSystems(double DeltaSeconds,
                    const AircraftControlInputSample& AircraftControls,
                    bool bEngineRunning)
@@ -934,7 +994,9 @@ struct FFlyingCoreSimBridgeImpl
     Input.truth = MakeSystemsTruth(Simulator.state());
     Input.controls = AircraftControls;
     Input.engine_rpm = EstimateEngineRpm(AircraftControls, bEngineRunning);
-    Input.outside_air_temperature_k = 288.15;
+    Input.weather = Simulator.weather();
+    Input.weather_valid = true;
+    Input.outside_air_temperature_k = Input.weather.atmosphere.temperature_k;
     Systems.step(std::max(0.0, DeltaSeconds), Input);
   }
 
@@ -1147,6 +1209,26 @@ const FFlyingCoreSimStateSnapshot& UFlyingCoreSimComponent::GetCurrentSnapshot()
 const FFlyingAircraftInstrumentSnapshot& UFlyingCoreSimComponent::GetCurrentInstrumentSnapshot() const
 {
   return CurrentInstrumentSnapshot;
+}
+
+void UFlyingCoreSimComponent::SetManualWeatherScenario(
+  const FFlyingManualWeatherScenario& WeatherScenario)
+{
+  EnsureBridge();
+  try
+  {
+    Bridge->SetManualWeather(ToCore(WeatherScenario));
+    PublishSnapshot();
+  }
+  catch (const std::exception& Error)
+  {
+    UE_LOG(LogTemp, Error, TEXT("CoreSim weather update failed: %s"), ANSI_TO_TCHAR(Error.what()));
+    if (Bridge)
+    {
+      Bridge->LastStatus = Error.what();
+    }
+    PublishTelemetryStatus();
+  }
 }
 
 void UFlyingCoreSimComponent::SetAircraftSystemSwitch(FName SwitchId, bool bEnabled)

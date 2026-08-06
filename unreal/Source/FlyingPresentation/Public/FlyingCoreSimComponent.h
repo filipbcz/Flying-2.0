@@ -94,6 +94,9 @@ public:
   UFUNCTION(BlueprintPure, Category="Flying|Instruments")
   const FFlyingAircraftInstrumentSnapshot& GetCurrentInstrumentSnapshot() const;
 
+  UFUNCTION(BlueprintCallable, Category="Flying|Weather")
+  void SetManualWeatherScenario(const FFlyingManualWeatherScenario& WeatherScenario);
+
   UFUNCTION(BlueprintCallable, Category="Flying|Aircraft Systems")
   void SetAircraftSystemSwitch(FName SwitchId, bool bEnabled);
 

@@ -6,31 +6,31 @@
 - default branch: main
 
 ## Task
-- title: Flying: 18. Implement Cockpit And Aircraft Presentation
+- title: Flying: 19. Implement Weather And Atmosphere Coupling
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-18. Implement Cockpit And Aircraft Presentation
+19. Implement Weather And Atmosphere Coupling
 
 Step description and scope:
-Build the interactive 3D cockpit and aircraft presentation in Unreal, including required controls, readable instruments, lighting, materials, night illumination, cameras, and sound driven by engine and airflow state.
+Implement the numerical atmosphere and weather model shared by CoreSim, visual effects, vegetation, particles, and sound, including wind profiles, gusts, turbulence, pressure, temperature, humidity, clouds, precipitation, visibility, icing, and wet surfaces.
 
 In scope:
-- 3D cockpit controls
-- Instrument rendering
-- Cockpit interactions
-- Day/night cockpit lighting
-- Camera modes
-- Aircraft exterior presentation
-- State-driven audio
+- Atmosphere model
+- Wind field
+- Gust and turbulence model
+- Manual weather UI/data
+- Optional live weather adapter interface
+- Weather-to-physics coupling
+- Weather visuals integration
 
 Out of scope:
-- Full avionics suite coverage for unrelated manufacturers
-- VR
-- Force feedback
-- Additional aircraft
+- Mandatory online weather
+- Multiplayer weather synchronization
+- Unverified aquaplaning model
+- Global weather outside Czech coverage
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -56,9 +56,9 @@ Already completed roadmap steps (existing repository context):
 - 15. Build Vertical Slice Flight And Performance Tests
 - 16. Complete Production Aircraft Data Model
 - 17. Implement Aircraft Systems And Sensor Models
+- 18. Implement Cockpit And Aircraft Presentation
 
 Future roadmap steps (explicitly out of scope):
-- 19. Implement Weather And Atmosphere Coupling
 - 20. Build Aircraft Validation Suite
 - 21. Scale Terrain Pipeline To Full Czech Republic
 - 22. Complete Airport And SLZ Coverage
@@ -72,10 +72,10 @@ Future roadmap steps (explicitly out of scope):
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- Cockpit contains all controls required for normal cold-and-dark startup, taxi, takeoff, cruise, landing, shutdown, emergency handling, and replay inspection for the selected aircraft.
-- All flight, engine, electrical, fuel, vacuum, and navigation displays consume the sensor/instrument API rather than raw simulation truth values.
-- Cockpit labels and instruments remain readable in day and night lighting at supported desktop resolutions.
-- Engine, propeller, cabin, airflow, and damage audio respond to modeled RPM, load, mixture, airspeed, and failure state.
+- CoreSim receives numerical wind, turbulence, pressure, temperature, density, and humidity data independent of weather visuals.
+- Weather model supports manual scenarios and a clearly optional METAR/GRIB adapter path that is disabled or unavailable without explicit user action.
+- Gust and turbulence tests validate deterministic Dryden or von Karman model behavior for fixed seeds and scenario inputs.
+- Enabled clouds, precipitation, icing, and wet surfaces have corresponding physical effects on aircraft, sensors, runway friction, visibility, or engine behavior.
 
 ## Agent Configuration
 - no project config provided, using defaults

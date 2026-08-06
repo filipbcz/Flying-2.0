@@ -1,6 +1,7 @@
 #pragma once
 
 #include "flying/core_sim/math.hpp"
+#include "flying/core_sim/weather.hpp"
 
 #include <cstdint>
 
@@ -41,6 +42,9 @@ struct AuthoritativeState {
   Vector3d accumulated_force_body_n{};
   Vector3d accumulated_moment_body_nm{};
   AircraftMassBalanceState aircraft_mass_balance{};
+  WeatherSample weather{};
+  Vector3d relative_air_velocity_body_mps{};
+  double weather_dynamic_pressure_pa{};
 };
 
 } // namespace flying::core_sim

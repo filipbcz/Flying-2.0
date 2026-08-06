@@ -4,6 +4,7 @@
 #include "flying/core_sim/fixed_step.hpp"
 #include "flying/core_sim/input.hpp"
 #include "flying/core_sim/state.hpp"
+#include "flying/core_sim/weather.hpp"
 
 namespace flying::core_sim {
 
@@ -26,6 +27,8 @@ public:
   [[nodiscard]] const AircraftControlInputSample& initial_aircraft_controls() const noexcept;
   [[nodiscard]] const RigidBodyParameters& parameters() const noexcept;
   [[nodiscard]] const AircraftMassBalanceState& aircraft_mass_balance() const noexcept;
+  [[nodiscard]] const WeatherSample& weather() const noexcept;
+  [[nodiscard]] const WeatherScenario& weather_scenario() const noexcept;
   [[nodiscard]] double fixed_step_s() const noexcept;
 
   void reset(AuthoritativeState state = {}) noexcept;
@@ -33,6 +36,7 @@ public:
              const FlightDynamicsInitialCondition& flight_dynamics_initial_condition,
              const AircraftControlInputSample& initial_aircraft_controls);
   void set_aircraft_mass_balance(const AircraftMassBalanceState& mass_balance);
+  void set_manual_weather_scenario(WeatherScenario scenario);
   AdvanceReport advance(double caller_delta_s, const ControlInputSample& input);
   void integrate_fixed_step(const ControlInputSample& input);
 
@@ -42,6 +46,7 @@ private:
   AuthoritativeState state_;
   FlightDynamicsInitialCondition flight_dynamics_initial_condition_{};
   AircraftControlInputSample initial_aircraft_controls_{};
+  WeatherModel weather_model_{};
 };
 
 } // namespace flying::core_sim

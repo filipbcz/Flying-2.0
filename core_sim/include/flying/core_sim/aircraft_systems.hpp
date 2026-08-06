@@ -2,6 +2,7 @@
 
 #include "flying/core_sim/flight_dynamics.hpp"
 #include "flying/core_sim/math.hpp"
+#include "flying/core_sim/weather.hpp"
 
 #include <cstdint>
 #include <string>
@@ -16,13 +17,6 @@ struct SensorLag {
 
   [[nodiscard]] double update(double target, double dt_s) noexcept;
   void reset(double target = 0.0) noexcept;
-};
-
-struct AtmosphereSample {
-  double static_pressure_pa{101'325.0};
-  double temperature_k{288.15};
-  double density_kgpm3{1.225};
-  double speed_of_sound_mps{340.294};
 };
 
 struct FailureStateModel {
@@ -181,7 +175,7 @@ public:
   void set_settings(PitotStaticSettings settings) noexcept;
   void step(double dt_s,
             const FlightDynamicsState& truth,
-            double outside_air_temperature_k,
+            AtmosphereSample atmosphere,
             double icing_severity_norm,
             bool pitot_heat_powered,
             const FailureStateModel& failures);
@@ -297,6 +291,8 @@ struct AircraftSystemsInput {
   FlightDynamicsState truth{};
   AircraftControlInputSample controls{};
   double outside_air_temperature_k{288.15};
+  WeatherSample weather{};
+  bool weather_valid{};
   double icing_severity_norm{};
   double magnetic_variation_rad{};
   double engine_rpm{};
@@ -316,6 +312,7 @@ struct InstrumentData {
   FuelSystemSnapshot fuel{};
   VacuumSystemSnapshot vacuum{};
   PitotStaticSnapshot pitot_static{};
+  WeatherSample weather{};
   std::uint64_t sequence{};
 };
 
@@ -351,8 +348,5 @@ private:
 [[nodiscard]] AtmosphereSample sample_standard_atmosphere(double altitude_m,
                                                          double qnh_pa,
                                                          double temperature_k);
-[[nodiscard]] double pressure_altitude_from_static_pressure(double static_pressure_pa,
-                                                           double altimeter_setting_pa);
-[[nodiscard]] double qfe_pressure_for_field(double field_elevation_m, double qnh_pa);
 
 } // namespace flying::core_sim

@@ -9,7 +9,7 @@ namespace {
 
 constexpr std::uint64_t kFnvOffset = 14'695'981'039'346'656'037ull;
 constexpr std::uint64_t kFnvPrime = 1'099'511'628'211ull;
-constexpr std::uint64_t kHashSchemaVersion = 2;
+constexpr std::uint64_t kHashSchemaVersion = 3;
 
 [[nodiscard]] std::uint64_t append_u64(std::uint64_t hash, std::uint64_t value) noexcept {
   for (int byte_index = 0; byte_index < 8; ++byte_index) {
@@ -57,6 +57,30 @@ constexpr std::uint64_t kHashSchemaVersion = 2;
   return append_double(hash, value.iyz);
 }
 
+[[nodiscard]] std::uint64_t append_atmosphere(std::uint64_t hash,
+                                              AtmosphereSample value) noexcept {
+  hash = append_double(hash, value.static_pressure_pa);
+  hash = append_double(hash, value.temperature_k);
+  hash = append_double(hash, value.density_kgpm3);
+  hash = append_double(hash, value.speed_of_sound_mps);
+  return append_double(hash, value.relative_humidity_norm);
+}
+
+[[nodiscard]] std::uint64_t append_weather(std::uint64_t hash, WeatherSample value) noexcept {
+  hash = append_u64(hash, static_cast<std::uint64_t>(value.source));
+  hash = append_atmosphere(hash, value.atmosphere);
+  hash = append_vector(hash, value.steady_wind_ned_mps);
+  hash = append_vector(hash, value.gust_ned_mps);
+  hash = append_vector(hash, value.turbulence_ned_mps);
+  hash = append_vector(hash, value.wind_ned_mps);
+  hash = append_double(hash, value.visibility_m);
+  hash = append_double(hash, value.cloud_coverage_norm);
+  hash = append_double(hash, value.precipitation_rate_mmph);
+  hash = append_double(hash, value.surface_wetness_norm);
+  hash = append_double(hash, value.icing_severity_norm);
+  return append_double(hash, value.runway_friction_scale);
+}
+
 } // namespace
 
 std::uint64_t hash_state(const AuthoritativeState& state) noexcept {
@@ -74,7 +98,10 @@ std::uint64_t hash_state(const AuthoritativeState& state) noexcept {
   hash = append_double(hash, state.aircraft_mass_balance.payload_mass_kg);
   hash = append_vector(hash, state.aircraft_mass_balance.center_of_gravity_body_m);
   hash = append_inertia_tensor(hash, state.aircraft_mass_balance.inertia_tensor_kg_m2);
-  return append_u64(hash, state.aircraft_mass_balance.cg_within_envelope ? 1u : 0u);
+  hash = append_u64(hash, state.aircraft_mass_balance.cg_within_envelope ? 1u : 0u);
+  hash = append_weather(hash, state.weather);
+  hash = append_vector(hash, state.relative_air_velocity_body_mps);
+  return append_double(hash, state.weather_dynamic_pressure_pa);
 }
 
 } // namespace flying::core_sim

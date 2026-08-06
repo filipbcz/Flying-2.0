@@ -10,11 +10,6 @@ namespace {
 
 constexpr double kSeaLevelPressurePa = 101'325.0;
 constexpr double kSeaLevelTemperatureK = 288.15;
-constexpr double kLapseRateKpm = 0.0065;
-constexpr double kGravityMps2 = 9.80665;
-constexpr double kGasConstantAir = 287.05287;
-constexpr double kGammaAir = 1.4;
-constexpr double kPressureExponent = 5.2558797;
 constexpr double kMinPressurePa = 1'000.0;
 constexpr double kTwoPi = 6.2831853071795864769;
 
@@ -92,33 +87,12 @@ void SensorLag::reset(double target) noexcept {
 AtmosphereSample sample_standard_atmosphere(double altitude_m,
                                            double qnh_pa,
                                            double temperature_k) {
-  altitude_m = finite_or(altitude_m, 0.0);
-  qnh_pa = std::max(kMinPressurePa, finite_or(qnh_pa, kSeaLevelPressurePa));
-  temperature_k = std::max(150.0, finite_or(temperature_k, kSeaLevelTemperatureK));
-
-  const double standard_temperature_at_altitude =
-      std::max(150.0, kSeaLevelTemperatureK - kLapseRateKpm * altitude_m);
-  const double pressure_ratio =
-      std::pow(standard_temperature_at_altitude / kSeaLevelTemperatureK, kPressureExponent);
-  const double pressure = std::max(kMinPressurePa, qnh_pa * pressure_ratio);
-  const double density = pressure / (kGasConstantAir * temperature_k);
-  const double speed_of_sound = std::sqrt(kGammaAir * kGasConstantAir * temperature_k);
-  return {pressure, temperature_k, density, speed_of_sound};
-}
-
-double pressure_altitude_from_static_pressure(double static_pressure_pa,
-                                             double altimeter_setting_pa) {
-  static_pressure_pa = std::max(kMinPressurePa, finite_or(static_pressure_pa, kSeaLevelPressurePa));
-  altimeter_setting_pa =
-      std::max(kMinPressurePa, finite_or(altimeter_setting_pa, kSeaLevelPressurePa));
-  const double ratio = static_pressure_pa / altimeter_setting_pa;
-  return (kSeaLevelTemperatureK / kLapseRateKpm) *
-         (1.0 - std::pow(ratio, 1.0 / kPressureExponent));
-}
-
-double qfe_pressure_for_field(double field_elevation_m, double qnh_pa) {
-  return sample_standard_atmosphere(field_elevation_m, qnh_pa, kSeaLevelTemperatureK)
-      .static_pressure_pa;
+  const double finite_altitude_m = finite_or(altitude_m, 0.0);
+  return sample_weather_atmosphere(
+      finite_altitude_m,
+      qnh_pa,
+      temperature_k + 0.0065 * finite_altitude_m,
+      0.50);
 }
 
 void ElectricalSystem::set_consumers(std::vector<ElectricalConsumerState> consumers) {
@@ -326,7 +300,7 @@ void PitotStaticSystem::set_settings(PitotStaticSettings settings) noexcept {
 
 void PitotStaticSystem::step(double dt_s,
                              const FlightDynamicsState& truth,
-                             double outside_air_temperature_k,
+                             AtmosphereSample atmosphere,
                              double icing_severity_norm,
                              bool pitot_heat_powered,
                              const FailureStateModel& failures) {
@@ -336,8 +310,13 @@ void PitotStaticSystem::step(double dt_s,
   snapshot_.pitot_blocked = failures.pitot_blocked || snapshot_.icing_present;
   snapshot_.static_blocked = failures.static_port_blocked;
 
-  snapshot_.atmosphere =
-      sample_standard_atmosphere(truth.altitude_m, settings_.qnh_pa, outside_air_temperature_k);
+  if (atmosphere.static_pressure_pa <= 0.0 || !std::isfinite(atmosphere.static_pressure_pa)) {
+    atmosphere = sample_standard_atmosphere(
+        truth.altitude_m,
+        settings_.qnh_pa,
+        atmosphere.temperature_k > 0.0 ? atmosphere.temperature_k : kSeaLevelTemperatureK);
+  }
+  snapshot_.atmosphere = atmosphere;
   const double speed_mps = std::sqrt(std::max(0.0, dot(truth.body_velocity_mps, truth.body_velocity_mps)));
   const double true_static = snapshot_.atmosphere.static_pressure_pa;
   const double true_pitot =
@@ -544,8 +523,22 @@ void AircraftSystemsModel::reset() {
 
 InstrumentData AircraftSystemsModel::step(double dt_s, const AircraftSystemsInput& input) {
   require_valid_dt(dt_s);
+  const WeatherSample weather =
+      input.weather_valid
+          ? input.weather
+          : WeatherSample{
+                WeatherSource::Manual,
+                sample_weather_atmosphere(input.truth.altitude_m,
+                                          kSeaLevelPressurePa,
+                                          input.outside_air_temperature_k,
+                                          0.50)};
+  const double weather_power_factor =
+      clamp(1.0 - weather.icing_severity_norm * 0.08 - weather.precipitation_rate_mmph * 0.002,
+            0.80,
+            1.0);
   const double engine_rpm =
-      input.engine_rpm > 0.0 ? input.engine_rpm : 650.0 + input.controls.throttle_norm * 2'050.0;
+      (input.engine_rpm > 0.0 ? input.engine_rpm : 650.0 + input.controls.throttle_norm * 2'050.0) *
+      weather_power_factor;
 
   electrical_.step(dt_s, engine_rpm, switches_, failures_);
   const bool fuel_pump_powered = electrical_.consumer_powered("fuel_pump");
@@ -564,8 +557,8 @@ InstrumentData AircraftSystemsModel::step(double dt_s, const AircraftSystemsInpu
   vacuum_.step(dt_s, engine_rpm, standby_vacuum_powered, switches_, failures_);
   pitot_static_.step(dt_s,
                      input.truth,
-                     input.outside_air_temperature_k,
-                     input.icing_severity_norm,
+                     weather.atmosphere,
+                     std::max(input.icing_severity_norm, weather.icing_severity_norm),
                      pitot_heat_powered,
                      failures_);
   compass_.step(dt_s, input.truth.euler_rad.z, input.magnetic_variation_rad);
@@ -595,6 +588,7 @@ InstrumentData AircraftSystemsModel::step(double dt_s, const AircraftSystemsInpu
   instruments_.fuel = fuel_.snapshot();
   instruments_.vacuum = vacuum_.snapshot();
   instruments_.pitot_static = pitot_static_.snapshot();
+  instruments_.weather = weather;
   ++instruments_.sequence;
   return instruments_;
 }

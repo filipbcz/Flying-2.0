@@ -1,7 +1,10 @@
 #include "flying/core_sim/simulator.hpp"
 
+#include "flying/geo_terrain/geodesy.hpp"
+
 #include <cmath>
 #include <stdexcept>
+#include <utility>
 
 namespace flying::core_sim {
 namespace {
@@ -84,6 +87,42 @@ void validate_input(const ControlInputSample& input) {
   }
 }
 
+[[nodiscard]] geo_terrain::GeodeticCoordinates geodetic_from_state(
+    const AuthoritativeState& state) noexcept {
+  if (!is_finite(state.ecef_position_m) || dot(state.ecef_position_m, state.ecef_position_m) <= 0.0) {
+    return geo_terrain::make_geodetic_degrees(
+        49.2,
+        16.6,
+        geo_terrain::EllipsoidalHeight{0.0});
+  }
+  return geo_terrain::ecef_to_geodetic(
+      geo_terrain::EcefPosition{{state.ecef_position_m.x, state.ecef_position_m.y, state.ecef_position_m.z}});
+}
+
+[[nodiscard]] Vector3d ecef_from_ned(const geo_terrain::LocalTangentFrame& frame,
+                                     Vector3d ned_mps) noexcept {
+  const geo_terrain::EcefVector ecef = geo_terrain::ecef_vector_from_ned(
+      frame,
+      geo_terrain::NedVector{ned_mps.x, ned_mps.y, ned_mps.z});
+  return {ecef.meters.x, ecef.meters.y, ecef.meters.z};
+}
+
+void update_weather_state(AuthoritativeState& state, const WeatherModel& weather_model) noexcept {
+  const geo_terrain::GeodeticCoordinates geodetic = geodetic_from_state(state);
+  state.weather = weather_model.sample(geodetic.latitude_degrees(),
+                                       geodetic.longitude_degrees(),
+                                       geodetic.ellipsoidal_height.meters,
+                                       state.simulation_time_s);
+  const geo_terrain::LocalTangentFrame frame = geo_terrain::make_local_tangent_frame(geodetic);
+  const Vector3d wind_ecef_mps = ecef_from_ned(frame, state.weather.wind_ned_mps);
+  const Vector3d relative_air_ecef_mps = state.ecef_velocity_mps - wind_ecef_mps;
+  state.relative_air_velocity_body_mps =
+      state.body_to_ecef.conjugated().rotate(relative_air_ecef_mps);
+  state.weather_dynamic_pressure_pa =
+      0.5 * std::max(0.0, state.weather.atmosphere.density_kgpm3) *
+      dot(state.relative_air_velocity_body_mps, state.relative_air_velocity_body_mps);
+}
+
 [[nodiscard]] Quaterniond integrate_orientation(
     Quaterniond body_to_ecef,
     Vector3d angular_velocity_body_radps,
@@ -132,6 +171,14 @@ const AircraftMassBalanceState& CoreSimulator::aircraft_mass_balance() const noe
   return state_.aircraft_mass_balance;
 }
 
+const WeatherSample& CoreSimulator::weather() const noexcept {
+  return state_.weather;
+}
+
+const WeatherScenario& CoreSimulator::weather_scenario() const noexcept {
+  return weather_model_.scenario();
+}
+
 double CoreSimulator::fixed_step_s() const noexcept {
   return accumulator_.fixed_step_s();
 }
@@ -140,6 +187,7 @@ void CoreSimulator::reset(AuthoritativeState state) noexcept {
   state_ = state;
   state_.body_to_ecef = state_.body_to_ecef.normalized();
   state_.aircraft_mass_balance = mass_balance_from_parameters(parameters_);
+  update_weather_state(state_, weather_model_);
   flight_dynamics_initial_condition_ = {};
   initial_aircraft_controls_ = {};
   accumulator_.reset();
@@ -153,6 +201,7 @@ void CoreSimulator::reset(AuthoritativeState state,
   state_ = state;
   state_.body_to_ecef = state_.body_to_ecef.normalized();
   state_.aircraft_mass_balance = mass_balance_from_parameters(parameters_);
+  update_weather_state(state_, weather_model_);
   flight_dynamics_initial_condition_ = flight_dynamics_initial_condition;
   initial_aircraft_controls_ = initial_aircraft_controls;
   accumulator_.reset();
@@ -162,6 +211,11 @@ void CoreSimulator::set_aircraft_mass_balance(const AircraftMassBalanceState& ma
   validate_mass_balance(mass_balance);
   state_.aircraft_mass_balance = mass_balance;
   apply_mass_balance_to_parameters(mass_balance, parameters_);
+}
+
+void CoreSimulator::set_manual_weather_scenario(WeatherScenario scenario) {
+  weather_model_.set_manual_scenario(std::move(scenario));
+  update_weather_state(state_, weather_model_);
 }
 
 AdvanceReport CoreSimulator::advance(double caller_delta_s, const ControlInputSample& input) {
@@ -207,6 +261,7 @@ void CoreSimulator::integrate_fixed_step(const ControlInputSample& input) {
   state_.accumulated_moment_body_nm = input.moment_body_nm;
   state_.simulation_time_s += fixed_step_s;
   ++state_.step_index;
+  update_weather_state(state_, weather_model_);
 }
 
 } // namespace flying::core_sim

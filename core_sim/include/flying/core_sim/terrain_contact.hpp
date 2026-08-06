@@ -2,6 +2,7 @@
 
 #include "flying/core_sim/flight_dynamics.hpp"
 #include "flying/core_sim/math.hpp"
+#include "flying/core_sim/weather.hpp"
 #include "flying/geo_terrain/terrain_service.hpp"
 
 #include <string>
@@ -31,6 +32,7 @@ struct TerrainContactData {
   geo_terrain::TerrainSourceAuthority source_authority{geo_terrain::TerrainSourceAuthority::kUnavailable};
   int runway_override_priority{geo_terrain::kNoRunwayOverridePriority};
   bool runway_override_active{};
+  double weather_friction_scale{1.0};
 };
 
 [[nodiscard]] TerrainContactData query_terrain_contact(
@@ -40,5 +42,8 @@ struct TerrainContactData {
 [[nodiscard]] TerrainContactData query_terrain_contact(
     const geo_terrain::ITerrainHeightService& terrain_service,
     const FlightDynamicsState& state);
+[[nodiscard]] TerrainContactData apply_weather_to_terrain_contact(
+    TerrainContactData contact,
+    const WeatherSample& weather) noexcept;
 
 } // namespace flying::core_sim
