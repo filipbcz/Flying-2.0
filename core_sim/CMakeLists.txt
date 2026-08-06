@@ -1,4 +1,5 @@
 add_library(flying_core_sim STATIC
+  src/aircraft_systems.cpp
   src/aircraft_config.cpp
   src/determinism.cpp
   src/flight_dynamics.cpp

@@ -128,6 +128,18 @@ target_compile_definitions(flying_core_sim_aircraft_config_tests
 
 add_test(NAME flying.core_sim.aircraft_config COMMAND flying_core_sim_aircraft_config_tests)
 
+add_executable(flying_core_sim_aircraft_systems_tests
+  core_sim/aircraft_systems_test.cpp
+)
+
+target_link_libraries(flying_core_sim_aircraft_systems_tests
+  PRIVATE
+    Flying::CoreSim
+    Flying::CompilerOptions
+)
+
+add_test(NAME flying.core_sim.aircraft_systems COMMAND flying_core_sim_aircraft_systems_tests)
+
 add_executable(flying_core_sim_input_mapping_tests
   core_sim/input_mapping_test.cpp
 )

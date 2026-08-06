@@ -6,31 +6,31 @@
 - default branch: main
 
 ## Task
-- title: Flying: 16. Complete Production Aircraft Data Model
+- title: Flying: 17. Implement Aircraft Systems And Sensor Models
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-16. Complete Production Aircraft Data Model
+17. Implement Aircraft Systems And Sensor Models
 
 Step description and scope:
-Replace infrastructure placeholder data with the selected aircraft's licensed data model: geometry, mass properties, CG envelope, inertia tensor, aerodynamic tables, engine, propeller, actuators, landing gear, brakes, and configuration schema.
+Implement electrical, fuel, vacuum, pitot-static, compass, gyro, GPS, engine-instrument, icing/blockage, and failure-state models so cockpit instruments consume sensor outputs rather than raw truth state.
 
 In scope:
-- Aircraft config schema
-- Production aircraft data ingestion
-- Mass and balance model
-- Aerodynamic table integration
-- Engine and propeller maps
-- Landing gear and brake parameters
-- Data provenance
+- Sensor models
+- Electrical system
+- Fuel system
+- Vacuum system
+- Failure state model
+- Instrument data API
+- System tests
 
 Out of scope:
-- Cockpit visuals
-- Sensor/instrument errors
-- Final validation sign-off
-- Multiple aircraft
+- Visual cockpit mesh and textures
+- Advanced avionics from every manufacturer
+- Random health-point damage system
+- Certification-grade instrumentation
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -54,9 +54,9 @@ Already completed roadmap steps (existing repository context):
 - 13. Implement Input Device Mapping And Scenario Start Flow
 - 14. Implement Telemetry, Replay, And Export V1
 - 15. Build Vertical Slice Flight And Performance Tests
+- 16. Complete Production Aircraft Data Model
 
 Future roadmap steps (explicitly out of scope):
-- 17. Implement Aircraft Systems And Sensor Models
 - 18. Implement Cockpit And Aircraft Presentation
 - 19. Implement Weather And Atmosphere Coupling
 - 20. Build Aircraft Validation Suite
@@ -72,10 +72,10 @@ Future roadmap steps (explicitly out of scope):
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- Aircraft configuration schema validates all required geometry, mass, CG, inertia, aerodynamic, engine, propeller, actuator, landing-gear, and brake fields.
-- Production aircraft data files include source references, confidence levels, units, validity ranges, and license/provenance metadata.
-- Mass, fuel, payload, and CG changes update CoreSim state through validated configuration APIs.
-- Model remains clearly marked as unvalidated until the aircraft validation suite passes.
+- Pitot-static instruments respond to pressure, temperature, density, blockage, icing, QNH/QFE, and sensor dynamics rather than directly reading true airspeed or altitude.
+- Electrical, fuel, and vacuum systems are modeled as stateful networks with sources, consumers, switches, failures, and dependencies.
+- Engine instruments display sensor-modeled RPM, manifold pressure, temperatures, fuel flow, and failure effects.
+- Unit and integration tests verify representative sensor lag, failure, and dependency cases.
 
 ## Agent Configuration
 - no project config provided, using defaults
