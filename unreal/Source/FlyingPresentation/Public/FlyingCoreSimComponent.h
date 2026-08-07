@@ -4,6 +4,7 @@
 #include "Components/ActorComponent.h"
 #include "FlyingCoreSimStateSnapshot.h"
 #include "FlyingInputMappingTypes.h"
+#include "FlyingPostFlightTypes.h"
 #include "FlyingScenarioTypes.h"
 #include "Templates/UniquePtr.h"
 
@@ -66,6 +67,14 @@ public:
   UFUNCTION(BlueprintCallable, Category="Flying|Scenario")
   bool StartScenario(const FFlyingScenarioSelection& Selection);
 
+  UFUNCTION(BlueprintCallable, Category="Flying|Scenario")
+  bool StartScenarioAtPosition(
+    double LatitudeDegrees,
+    double LongitudeDegrees,
+    double AltitudeMeters,
+    double TrueHeadingDegrees,
+    EFlyingScenarioStartMode StartMode);
+
   UFUNCTION(BlueprintPure, Category="Flying|Scenario")
   TArray<FFlyingScenarioLocation> GetPilotScenarioLocations() const;
 
@@ -106,6 +115,24 @@ public:
   UFUNCTION(BlueprintCallable, Category="Flying|Aircraft Systems")
   void SetAircraftFailure(FName FailureId, bool bFailed);
 
+  UFUNCTION(BlueprintCallable, Category="Flying|Aircraft")
+  void SetAircraftId(const FString& AircraftId);
+
+  UFUNCTION(BlueprintPure, Category="Flying|Aircraft")
+  FString GetAircraftId() const;
+
+  UFUNCTION(BlueprintCallable, Category="Flying|Aircraft Systems")
+  void SetAircraftFuelWeight(double TotalFuelWeightKg);
+
+  UFUNCTION(BlueprintCallable, Category="Flying|Aircraft Systems")
+  void SetAircraftLoadedWeight(double PilotAndPayloadWeightKg);
+
+  UFUNCTION(BlueprintPure, Category="Flying|Aircraft Systems")
+  double GetAircraftLoadedWeightKg() const;
+
+  UFUNCTION(BlueprintPure, Category="Flying|Input")
+  const FFlyingMappedInputState& GetLastMappedInputState() const;
+
   UFUNCTION(BlueprintCallable, Category="Flying|Replay")
   bool StartTelemetryRecording(const FString& OutputPath, const FString& SessionId);
 
@@ -130,6 +157,12 @@ public:
   UFUNCTION(BlueprintCallable, Category="Flying|Replay")
   bool ExportTelemetryJson(const FString& OutputPath);
 
+  UFUNCTION(BlueprintPure, Category="Flying|Post Flight")
+  TArray<FFlyingTelemetryRoutePoint> GetTelemetryRoutePoints() const;
+
+  UFUNCTION(BlueprintPure, Category="Flying|Post Flight")
+  TArray<FFlyingTelemetryGraphSeries> GetTelemetryGraphSeries() const;
+
 private:
   void EnsureBridge();
   void PublishSnapshot();
@@ -145,4 +178,13 @@ private:
 
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Scenario", meta=(AllowPrivateAccess="true"))
   FFlyingScenarioRuntimeState CurrentScenarioState;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Aircraft", meta=(AllowPrivateAccess="true"))
+  FString CurrentAircraftId = TEXT("flying_trainer_one");
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Aircraft Systems", meta=(AllowPrivateAccess="true"))
+  double AircraftLoadedWeightKg = 180.0;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Input", meta=(AllowPrivateAccess="true"))
+  FFlyingMappedInputState LastMappedInputState;
 };

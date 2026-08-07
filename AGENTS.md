@@ -6,31 +6,31 @@
 - default branch: main
 
 ## Task
-- title: Flying: 25. Implement World Objects, Vegetation, Water, Obstacles, And Audio
+- title: Flying: 26. Implement Save, Scenario Editor, Diagnostics, And Failure Workflows
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-25. Implement World Objects, Vegetation, Water, Obstacles, And Audio
+26. Implement Save, Scenario Editor, Diagnostics, And Failure Workflows
 
 Step description and scope:
-Generate and stream procedural buildings, vegetation, water surfaces, obstacles, power lines, windsocks, and environment audio from approved vector and terrain data with collision limited to active safety zones.
+Add complete user workflow support for scenario creation, save/load, failure setup, diagnostics overlay, post-flight route map, telemetry graph viewing, and robust save-data handling.
 
 In scope:
-- Procedural placement rules
-- Building and vegetation generation
-- Water rendering/collision metadata
-- Flight-critical obstacles
-- Active-zone collision management
-- Environment audio hooks
-- Graphics-density scaling
+- Scenario editor
+- Save/load system
+- Failure setup UI
+- Diagnostics overlay
+- Post-flight route map
+- Telemetry graph UI
+- Atomic save handling
 
 Out of scope:
-- Nationwide photogrammetric 3D cities
-- Random object placement from imagery only
-- Full collision for every distant object
-- Wildlife or non-flight decorative systems
+- Cloud saves
+- Multiplayer scenarios
+- Training certification workflows
+- New aircraft types
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -63,19 +63,19 @@ Already completed roadmap steps (existing repository context):
 - 22. Complete Airport And SLZ Coverage
 - 23. Implement Detailed Airport Set
 - 24. Implement Offline 2D Navigation Map
+- 25. Implement World Objects, Vegetation, Water, Obstacles, And Audio
 
 Future roadmap steps (explicitly out of scope):
-- 26. Implement Save, Scenario Editor, Diagnostics, And Failure Workflows
 - 27. Optimize Performance And Long-Run Stability
 - 28. Implement Packaging, Installer, Signing, Updates, And Crash Diagnostics
 - 29. Produce Licensing, SBOM, Documentation, And Release Evidence
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- Buildings and vegetation are placed from approved vector data and DMP-derived height estimates, not from ortho color inference alone.
-- Flight-critical obstacles, masts, power lines, windsocks, runway objects, and water bodies are represented with appropriate visibility and active-zone collision behavior.
-- Vegetation and object density scales through graphics profiles without breaking collision rules for flight-critical objects.
-- Distant terrain and object streaming avoid visible horizon instability or disruptive popping in approved test routes.
+- User can configure aircraft, airport or position, date, time, weather, weight, fuel, and failures before flight.
+- Save and settings files are written atomically and corrupted files are detected with recovery behavior that avoids application crashes.
+- Diagnostics display authoritative position, altitude variants, CoreSim timing, terrain source tile, weather values, input state, and build/data versions.
+- Post-flight screen provides replay access, route map, telemetry graphs, and CSV/JSON export entry points.
 
 ## Agent Configuration
 - no project config provided, using defaults
