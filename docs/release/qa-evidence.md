@@ -22,10 +22,11 @@ Scope: Evidence index for release-candidate acceptance
 | Aircraft validation report | `docs/validation/aircraft/flying_trainer_one/aircraft-validation-report.md` | Aircraft model validation evidence and residual risks. |
 | Step 27 performance gate | `docs/validation/performance/step27-performance-gate.json` | Performance budget and evidence schema. |
 | Step 28 packaging evidence | `packaging/README.md` | Reproducible build, signing, installer, repair and crash diagnostics flow. |
+| Release Candidate Gate | `docs/validation/release/step30-release-candidate-gate.json` | Final clean-machine, integrated-suite, coverage, validation, performance, soak and release-decision gate. |
 
-## Release Candidate Evidence Still Captured By Step 30
+## Release Candidate Gate
 
-Step 29 creates the documentation and evidence surfaces. It does not execute the release-candidate acceptance gate. The release candidate run must still capture:
+Step 30 owns the release-candidate gate in `docs/validation/release/step30-release-candidate-gate.json`. The release candidate remains blocked until the gate record shows pass for the signed Windows 11 Shipping build and captures:
 
 - final signed artifact hashes from the packaging manifest;
 - exact installed Unreal Engine, Cesium for Unreal, PROJ, Windows SDK, Inno Setup and compiler versions;

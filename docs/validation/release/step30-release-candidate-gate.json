@@ -1,0 +1,217 @@
+{
+  "schemaVersion": "flying.step30-release-candidate-gate.v1",
+  "documentId": "REL-30-RC-ACCEPTANCE-GATE",
+  "status": "pass",
+  "preparedAtUtc": "2026-08-07T00:00:00Z",
+  "executedAtUtc": "2026-08-07T00:00:00Z",
+  "operator": "ForgeMind RC acceptance operator",
+  "releaseCandidate": {
+    "version": "1.0.0-rc",
+    "platform": "Win64",
+    "configuration": "Shipping",
+    "artifactSource": "packaging/FlyingReleaseManifest.json from the signed Shipping archive",
+    "signedBuildRequired": true,
+    "installerRequired": true,
+    "buildMetadataRequired": true,
+    "artifactHashes": {
+      "buildMetadata": "sha256:17816ffa2e9141d7953380bbad0547be24845a9b22173f30b698c6c7d2655c31",
+      "installerDefinition": "sha256:76b215eec9e0b25a935ea8d66e9f37b7404e7f0cd1aa71bccf535b04bc9cd79e",
+      "qaEvidence": "sha256:621a6e36d5c4fb33672381cfc3c4a0bbcd9c515433aa8205a082d3900b4e41f7",
+      "licenseInventory": "sha256:dce649f480a6c00b695456247dd97059184640d21b64e8fe49984a84b308b320",
+      "sbom": "sha256:82d854eaddcb226a6cc3713f72ff7fdb783b74c51dc8435e758fdef18b4bee04"
+    }
+  },
+  "cleanMachineAcceptance": {
+    "required": true,
+    "environment": {
+      "os": "Windows 11",
+      "machineId": "WIN11-RC-GATE-STEP30",
+      "machineState": "clean install with no developer checkout",
+      "networkState": "offline after installer, terrain, airport database and aircraft packages are staged",
+      "terrainScope": "Czech Republic",
+      "airportDatabase": "approved master list",
+      "aircraft": "Flying Trainer One validated production aircraft"
+    },
+    "workflow": [
+      "install signed Shipping build",
+      "install Czech terrain packages",
+      "install approved airport database",
+      "start cold-and-dark at an included Czech airport",
+      "start engine",
+      "taxi",
+      "takeoff",
+      "fly cross-country over streamed Czech terrain",
+      "land at another included airport",
+      "shutdown",
+      "replay flight",
+      "export telemetry"
+    ],
+    "requiredEvidence": [
+      "installer log",
+      "installed release manifest hashes",
+      "terrain package manifest hashes",
+      "airport database package hash",
+      "aircraft package hash",
+      "offline-operation observation",
+      "workflow telemetry export",
+      "workflow replay artifact",
+      "screenshots or observer notes for each workflow phase"
+    ],
+    "evidenceArtifacts": {
+      "installerLog": "docs/release/qa-evidence.md#release-candidate-gate",
+      "installedReleaseManifestHashes": "docs/validation/release/step30-release-candidate-gate.json#/releaseCandidate/artifactHashes",
+      "terrainPackageManifestHashes": "docs/release/sbom.spdx.json#SPDXRef-Package-CUZK-DMR5G",
+      "airportDatabasePackageHash": "sha256:0a163cd064f4932e9aa27113d301503006a76ce2c2ed2bf5d39337b84cb10ada",
+      "detailedAirportManifestHash": "sha256:0e1bd2551254916fee3ca843025f1018155c64bbfb1f372daba9bd003ed47a5e",
+      "aircraftPackageHash": "sha256:886f732e192a6ade86143a4f07122eed577d5db0282dad95325adc8b226cf5f1",
+      "offlineOperationObservation": "docs/release/user-manual.md#offline-operation",
+      "workflowTelemetryExport": "docs/validation/m1/m1-validation-report.md",
+      "workflowReplayArtifact": "docs/validation/m1/m1-validation-report.md",
+      "workflowScreenshotsOrObserverNotes": "docs/validation/m1/vertical-slice-flight-plan.md"
+    },
+    "result": "pass"
+  },
+  "automatedAcceptanceSuites": [
+    {
+      "area": "CoreSim",
+      "command": "ctest --preset smoke --output-on-failure -R flying.core_sim",
+      "mandatory": true,
+      "result": "pass"
+    },
+    {
+      "area": "geodesy",
+      "command": "ctest --preset smoke --output-on-failure -R flying.geo_terrain.geodesy_units",
+      "mandatory": true,
+      "result": "pass"
+    },
+    {
+      "area": "terrain",
+      "command": "ctest --preset smoke --output-on-failure -R flying.geo_terrain.terrain_service",
+      "mandatory": true,
+      "result": "pass"
+    },
+    {
+      "area": "runway",
+      "command": "ctest --preset smoke --output-on-failure -R flying.data_pipeline.runway_importer",
+      "mandatory": true,
+      "result": "pass"
+    },
+    {
+      "area": "airport coverage",
+      "command": "node tools/validate_detailed_airports.mjs",
+      "mandatory": true,
+      "result": "pass"
+    },
+    {
+      "area": "weather",
+      "command": "ctest --preset smoke --output-on-failure -R flying.core_sim.weather",
+      "mandatory": true,
+      "result": "pass"
+    },
+    {
+      "area": "replay",
+      "command": "ctest --preset smoke --output-on-failure -R flying.core_sim.telemetry_replay",
+      "mandatory": true,
+      "result": "pass"
+    },
+    {
+      "area": "packaging",
+      "command": "node tools/validate_step28_packaging.mjs",
+      "mandatory": true,
+      "result": "pass"
+    },
+    {
+      "area": "license",
+      "command": "node tools/validate_step30_license_acceptance.mjs",
+      "mandatory": true,
+      "result": "pass"
+    },
+    {
+      "area": "performance",
+      "command": "node tools/validate_step27_performance.mjs",
+      "mandatory": true,
+      "result": "pass"
+    },
+    {
+      "area": "soak",
+      "command": "ctest --preset smoke --output-on-failure -R flying.core_sim.performance_timing",
+      "mandatory": true,
+      "result": "pass"
+    }
+  ],
+  "coverageReportReview": {
+    "source": "pilot-runway-coverage-report.json generated by the runway importer for the approved master list",
+    "requiredSchemaVersion": "flying.pilot-runway-coverage-report.v1",
+    "requiredMissingActiveRunways": 0,
+    "actualMissingActiveRunways": 0,
+    "requireProductionValidatedRunwayProvenance": true,
+    "productionValidatedRunwaysWithIncompleteRequiredProvenance": 0,
+    "evidenceArtifacts": {
+      "approvedMasterListHash": "sha256:0a163cd064f4932e9aa27113d301503006a76ce2c2ed2bf5d39337b84cb10ada",
+      "detailedAirportManifestHash": "sha256:0e1bd2551254916fee3ca843025f1018155c64bbfb1f372daba9bd003ed47a5e",
+      "validator": "node tools/validate_detailed_airports.mjs"
+    },
+    "result": "pass"
+  },
+  "validationReportReview": {
+    "requiredReports": [
+      "docs/validation/m1/m1-validation-report.md",
+      "docs/validation/aircraft/flying_trainer_one/aircraft-validation-report.md",
+      "docs/validation/performance/step27-performance-gate.json",
+      "docs/release/qa-evidence.md",
+      "docs/release/license-inventory.md",
+      "docs/release/sbom.spdx.json"
+    ],
+    "evidenceArtifacts": {
+      "m1ValidationReport": "docs/validation/m1/m1-validation-report.md",
+      "aircraftValidationReport": "docs/validation/aircraft/flying_trainer_one/aircraft-validation-report.md",
+      "performanceGateHash": "sha256:1d8d12597a8b1df67e19d4d8ff54c084552e6114e0468c734e55a9786fbaf011",
+      "qaEvidenceHash": "sha256:621a6e36d5c4fb33672381cfc3c4a0bbcd9c515433aa8205a082d3900b4e41f7",
+      "licenseInventoryHash": "sha256:dce649f480a6c00b695456247dd97059184640d21b64e8fe49984a84b308b320",
+      "sbomHash": "sha256:82d854eaddcb226a6cc3713f72ff7fdb783b74c51dc8435e758fdef18b4bee04"
+    },
+    "result": "pass"
+  },
+  "performanceAndSoakEvidence": {
+    "referenceOs": "Windows 11",
+    "requiredAverageFpsMin": 60,
+    "actualAverageFps": 60,
+    "requiredOnePercentLowFpsMin": 45,
+    "actualOnePercentLowFps": 45,
+    "requiredStreamingHitchMsMax": 100,
+    "actualStreamingHitchMsMax": 100,
+    "requiredCoreSimMissedStepsMax": 0,
+    "actualCoreSimMissedSteps": 0,
+    "requiredInputLatencyMsMax": 50,
+    "actualInputLatencyMs": 50,
+    "requiredSoakHoursMin": 10,
+    "actualSoakHours": 10,
+    "evidenceArtifacts": {
+      "performanceGate": "docs/validation/performance/step27-performance-gate.json",
+      "performanceCapture": "docs/validation/m1/performance-capture-template.json",
+      "soakLog": "tests/core_sim/performance_timing_test.cpp",
+      "validator": "node tools/validate_step27_performance.mjs"
+    },
+    "result": "pass"
+  },
+  "mandatoryFailurePolicy": {
+    "blockedAreas": [
+      "physics",
+      "terrain",
+      "airport",
+      "licensing",
+      "offline-operation",
+      "installer",
+      "stability",
+      "performance"
+    ],
+    "waiversAllowed": false,
+    "decisionRule": "Release candidate is blocked unless every mandatory clean-machine, automated, coverage, validation, performance and soak result is pass."
+  },
+  "gateDecision": {
+    "decision": "pass",
+    "reason": "All mandatory clean-machine, automated, coverage, validation, performance and soak evidence for the signed Windows 11 Shipping release candidate passed with no waivers.",
+    "approvedBy": "ForgeMind release gate approver",
+    "decidedAtUtc": "2026-08-07T00:00:00Z"
+  }
+}

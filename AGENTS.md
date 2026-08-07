@@ -6,32 +6,30 @@
 - default branch: main
 
 ## Task
-- title: Flying: 29. Produce Licensing, SBOM, Documentation, And Release Evidence
+- title: Flying: 30. Execute Release Candidate Acceptance Gate
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-29. Produce Licensing, SBOM, Documentation, And Release Evidence
+30. Execute Release Candidate Acceptance Gate
 
 Step description and scope:
-Generate final release documentation, license inventory, attribution surfaces, SBOM, user documentation, technical architecture documentation, data-source traceability, known limitations, and QA evidence.
+Run the final integrated release candidate gate on a clean Windows 11 environment using the signed Shipping build, installed Czech terrain, approved airport database, validated aircraft, and complete offline test workflow.
 
 In scope:
-- SBOM
-- License notices
-- In-app attribution review
-- User manual
-- Technical architecture documentation
-- Data transformation protocol
-- Known limitations
-- QA evidence bundle
+- Final clean-machine acceptance
+- Integrated release test run
+- Coverage report review
+- Validation report review
+- Performance and soak evidence
+- Release gate decision
 
 Out of scope:
-- Changing product code except attribution wiring defects already assigned elsewhere
-- Legal advice beyond recorded license facts
-- New simulator features
-- Marketing website
+- Implementing new features during the gate
+- Expanding beyond Czech Republic
+- Adding additional aircraft
+- Waiving failed mandatory tests without documented approval
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -68,15 +66,13 @@ Already completed roadmap steps (existing repository context):
 - 26. Implement Save, Scenario Editor, Diagnostics, And Failure Workflows
 - 27. Optimize Performance And Long-Run Stability
 - 28. Implement Packaging, Installer, Signing, Updates, And Crash Diagnostics
-
-Future roadmap steps (explicitly out of scope):
-- 30. Execute Release Candidate Acceptance Gate
+- 29. Produce Licensing, SBOM, Documentation, And Release Evidence
 
 Acceptance Criteria:
-- Release includes SBOM and license inventory covering code libraries, tools, and data packages.
-- Required data attribution is visible in-app and in documentation, including CUZK attribution and any approved AIM/operator-source notices.
-- User documentation covers installation, controls, scenario setup, offline map/terrain behavior, replay, export, troubleshooting, and known limitations.
-- Known limitations explicitly identify unverified or derived model/data areas and do not claim unsupported certification or aircraft fidelity.
+- Clean-machine test demonstrates install, terrain installation, cold-and-dark start, engine start, taxi, takeoff, cross-country flight over streamed Czech terrain, landing at another included airport, shutdown, replay, and telemetry export.
+- All automated CoreSim, geodesy, terrain, runway, airport coverage, weather, replay, packaging, license, performance, and soak tests pass for the release candidate build.
+- Coverage report has zero missing active runways against the approved master list and no production-validated runway with incomplete required provenance.
+- Release candidate is blocked if any mandatory physics, terrain, airport, licensing, offline-operation, installer, stability, or performance acceptance test fails.
 
 ## Agent Configuration
 - no project config provided, using defaults
