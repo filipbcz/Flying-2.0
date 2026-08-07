@@ -17,6 +17,17 @@ public:
   UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Runtime")
   bool bSpawnDefaultSceneOnBeginPlay = true;
 
+  UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Diagnostics")
+  bool bCrashTelemetryOptIn = false;
+
+  UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Diagnostics")
+  FString StructuredLogPath =
+    TEXT("Saved/Flying/Diagnostics/structured-log.jsonl");
+
+  UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Diagnostics")
+  FString CrashDiagnosticsDirectory =
+    TEXT("Saved/Flying/Diagnostics/Crashes");
+
   UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Offline Packages")
   FString TerrainPackageManifestPath =
     TEXT("Saved/Flying/PilotRegion/Terrain/terrain-package.json");

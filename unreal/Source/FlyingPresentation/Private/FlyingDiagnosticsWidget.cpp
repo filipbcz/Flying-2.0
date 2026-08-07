@@ -1,5 +1,6 @@
 #include "FlyingDiagnosticsWidget.h"
 
+#include "FlyingBuildMetadata.h"
 #include "FlyingCoreSimComponent.h"
 #include "FlyingPresentationSettings.h"
 #include "Misc/App.h"
@@ -109,6 +110,8 @@ bool UFlyingDiagnosticsWidget::RefreshDiagnostics(UFlyingCoreSimComponent* CoreS
   Diagnostics.RamBudgetGiB = Settings->MaximumSoakRamGiB;
   Diagnostics.VramBudgetGiB = Settings->MaximumSoakVramGiB;
   Diagnostics.BuildVersion = FApp::GetBuildVersion();
+  Diagnostics.BuildId = UFlyingBuildMetadata::GetBuildId();
+  Diagnostics.AboutBuildSummary = UFlyingBuildMetadata::GetAboutBuildSummary();
   const std::string CoreSimVersion{flying::core_sim::core_sim_version()};
   Diagnostics.CoreSimVersion = FString(UTF8_TO_TCHAR(CoreSimVersion.c_str()));
   Diagnostics.DataVersions = FString::Printf(

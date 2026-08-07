@@ -6,32 +6,32 @@
 - default branch: main
 
 ## Task
-- title: Flying: 27. Optimize Performance And Long-Run Stability
+- title: Flying: 28. Implement Packaging, Installer, Signing, Updates, And Crash Diagnostics
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-27. Optimize Performance And Long-Run Stability
+28. Implement Packaging, Installer, Signing, Updates, And Crash Diagnostics
 
 Step description and scope:
-Profile and optimize rendering, terrain streaming, object density, CoreSim timing, input latency, memory use, hitching, and long-duration stability on the reference Windows 11 hardware class.
+Create the reproducible Win64 Shipping build pipeline, installer, terrain package installation, code signing, update and data-repair flow, minidump capture, structured logging, and unique build ID reporting.
 
 In scope:
-- Profiling
-- Rendering optimization
-- Terrain streaming optimization
-- Object density scaling
-- CoreSim timing validation
-- Input latency measurement
-- Memory/VRAM budget enforcement
-- Ten-hour soak
+- Shipping build automation
+- Installer
+- Code signing integration
+- Terrain package installation
+- Update/data repair mechanism
+- Minidumps
+- Structured logging
+- Build ID
 
 Out of scope:
-- Supporting below-minimum hardware
-- VR performance
-- Force feedback performance
-- Non-Windows platforms
+- Steam or store publishing
+- Mandatory online updater
+- Cloud telemetry by default
+- macOS/Linux builds
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -66,17 +66,17 @@ Already completed roadmap steps (existing repository context):
 - 24. Implement Offline 2D Navigation Map
 - 25. Implement World Objects, Vegetation, Water, Obstacles, And Audio
 - 26. Implement Save, Scenario Editor, Diagnostics, And Failure Workflows
+- 27. Optimize Performance And Long-Run Stability
 
 Future roadmap steps (explicitly out of scope):
-- 28. Implement Packaging, Installer, Signing, Updates, And Crash Diagnostics
 - 29. Produce Licensing, SBOM, Documentation, And Release Evidence
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- High graphics profile reaches at least 60 FPS at 2560 x 1440 over ordinary Czech terrain on the reference hardware class.
-- Measured 1% low FPS is at least 45, input latency is below 50 ms at 60 FPS, and no normal-streaming hitch exceeds 100 ms in approved test routes.
-- CoreSim records no missed 240 Hz physics steps during approved performance scenarios.
-- Ten-hour automated flight soak test completes without crash and within 24 GB RAM and 10 GB VRAM limits.
+- Win64 Shipping build is reproducible from documented commands and includes simulator binaries, required runtime content, and version metadata.
+- Installer installs the simulator and selected Czech terrain packages on a clean supported Windows 11 machine without requiring network access for normal flight.
+- Application binaries and installer are signed, and build ID is visible in logs, diagnostics, crash reports, and about screen.
+- Crash diagnostics produce minidumps and structured logs with no personal telemetry unless user opt-in is explicitly recorded.
 
 ## Agent Configuration
 - no project config provided, using defaults

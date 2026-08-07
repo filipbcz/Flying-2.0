@@ -1,0 +1,10 @@
+{
+  "schema": "flying.build-metadata.v1",
+  "buildId": "flying-1.0.0+20260807.1",
+  "version": "1.0.0",
+  "channel": "shipping",
+  "commit": "0000000000000000000000000000000000000000",
+  "builtAtUtc": "2026-08-07T00:00:00Z",
+  "platform": "Win64",
+  "configuration": "Shipping"
+}

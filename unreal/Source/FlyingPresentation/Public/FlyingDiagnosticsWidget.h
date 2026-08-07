@@ -81,6 +81,12 @@ struct FLYINGPRESENTATION_API FFlyingDiagnosticsSnapshot
   FString BuildVersion;
 
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Diagnostics")
+  FString BuildId;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Diagnostics")
+  FString AboutBuildSummary;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Diagnostics")
   FString CoreSimVersion;
 
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Diagnostics")
