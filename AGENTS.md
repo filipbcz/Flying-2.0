@@ -6,32 +6,30 @@
 - default branch: main
 
 ## Task
-- title: Flying: 23. Implement Detailed Airport Set
+- title: Flying: 24. Implement Offline 2D Navigation Map
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-23. Implement Detailed Airport Set
+24. Implement Offline 2D Navigation Map
 
 Step description and scope:
-Create the detailed airport content manifest and implement enhanced scenery for controlled public airports and validation-scenario airports: taxiways, aprons, stands, lighting, signs, buildings, hangars, windsocks, markings, and significant obstacles.
+Build the runtime 2D map using local vector tiles from ZABAGED, Geonames, airports, runways, obstacles, and permitted airspace data, with local style definitions and no runtime dependency on external APIs.
 
 In scope:
-- Detailed airport manifest
-- Controlled public airport details
-- Validation airport details
-- Lighting systems
-- Signs and markings
-- Buildings and hangars
-- Significant obstacles
-- Collision integration
+- Local vector tile generation integration
+- Runtime map renderer
+- Layer toggles
+- Aircraft and replay overlays
+- Offline attribution display
+- Map style
 
 Out of scope:
-- Photogrammetric city reconstruction
-- Full handcrafted detail for every SLZ field
-- ATC systems
-- Ground traffic AI
+- External public tile servers
+- Online route planning
+- Paid API integrations
+- Global map coverage
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -62,9 +60,9 @@ Already completed roadmap steps (existing repository context):
 - 20. Build Aircraft Validation Suite
 - 21. Scale Terrain Pipeline To Full Czech Republic
 - 22. Complete Airport And SLZ Coverage
+- 23. Implement Detailed Airport Set
 
 Future roadmap steps (explicitly out of scope):
-- 24. Implement Offline 2D Navigation Map
 - 25. Implement World Objects, Vegetation, Water, Obstacles, And Audio
 - 26. Implement Save, Scenario Editor, Diagnostics, And Failure Workflows
 - 27. Optimize Performance And Long-Run Stability
@@ -73,10 +71,10 @@ Future roadmap steps (explicitly out of scope):
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- Detailed-airport manifest names all controlled public airports and all airports used by validation scenarios.
-- Each detailed airport includes taxiways, stands, aprons, runway/taxi signage, relevant buildings, windsock placement, lighting systems where applicable, and significant approach/departure obstacles.
-- Runway lighting, PAPI/VASI geometry, markings, and declared-distance data match the effective approved source version or are flagged as derived with review approval.
-- Detailed airport collision and terrain transition tests pass without runway/terrain height discontinuities in aircraft wheel-contact areas.
+- 2D map loads all required base and aviation layers from local MBTiles or PMTiles packages.
+- Map can toggle airports, runways, obstacles, airspaces, labels, aircraft position, flight path, and replay track.
+- Runtime map initialization succeeds with network disabled and without API keys.
+- Map attribution is visible in the application and matches source-license documentation.
 
 ## Agent Configuration
 - no project config provided, using defaults

@@ -25,6 +25,14 @@ public:
   FString PilotRegionPackageManifestPath =
     TEXT("Saved/Flying/PilotRegion/GIS/pilot-region-package.json");
 
+  UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Offline Packages")
+  FString NavigationMapManifestPath =
+    TEXT("Saved/Flying/PilotRegion/Navigation/navigation-map.json");
+
+  UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Offline Packages")
+  FString NavigationMapStylePath =
+    TEXT("Config/FlyingOfflineNavigationMapStyle.json");
+
   UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Input")
   FString InputSettingsPath =
     TEXT("Saved/Flying/Input/input-settings.txt");

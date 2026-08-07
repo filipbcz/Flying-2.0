@@ -478,6 +478,23 @@ void write_text_file(const std::filesystem::path& path, std::string_view text) {
   }
 }
 
+void write_binary_file(const std::filesystem::path& path,
+                       const std::vector<std::uint8_t>& bytes) {
+  const std::filesystem::path parent = path.parent_path();
+  if (!parent.empty()) {
+    std::filesystem::create_directories(parent);
+  }
+  std::ofstream output(path, std::ios::binary);
+  if (!output) {
+    throw std::runtime_error("failed to open " + path.string());
+  }
+  output.write(reinterpret_cast<const char*>(bytes.data()),
+               static_cast<std::streamsize>(bytes.size()));
+  if (!output) {
+    throw std::runtime_error("failed to write " + path.string());
+  }
+}
+
 class Sha256 {
  public:
   void update(const unsigned char* data, std::size_t size) {
@@ -2551,6 +2568,13 @@ struct MaskOutputs {
   int cols = 0;
 };
 
+struct NavigationMapOutput {
+  FileMetadata tile_archive;
+  FileMetadata style_manifest;
+};
+
+std::set<std::string> collect_used_source_ids(const PilotPackageConfig& config);
+
 MaskOutputs process_masks(const PilotRegionPackageOptions& options,
                           const PilotPackageConfig& config,
                           const std::vector<VectorLayerOutput>& vector_layers) {
@@ -2727,6 +2751,287 @@ std::string render_masks_metadata(const MaskOutputs& masks, std::string_view ind
   return output.str();
 }
 
+void append_uint64_le(std::vector<std::uint8_t>& bytes, std::uint64_t value) {
+  for (int shift = 0; shift < 64; shift += 8) {
+    bytes.push_back(static_cast<std::uint8_t>((value >> shift) & 0xffU));
+  }
+}
+
+void append_uint32_le(std::vector<std::uint8_t>& bytes, std::uint32_t value) {
+  for (int shift = 0; shift < 32; shift += 8) {
+    bytes.push_back(static_cast<std::uint8_t>((value >> shift) & 0xffU));
+  }
+}
+
+void append_varint(std::vector<std::uint8_t>& bytes, std::uint64_t value) {
+  while (value >= 0x80U) {
+    bytes.push_back(static_cast<std::uint8_t>((value & 0x7fU) | 0x80U));
+    value >>= 7U;
+  }
+  bytes.push_back(static_cast<std::uint8_t>(value));
+}
+
+bool is_aviation_navigation_category(std::string_view category) {
+  return category == "airport" || category == "runway" ||
+         category == "significantObstacle" || category == "obstacle" ||
+         category == "airspace";
+}
+
+void render_navigation_feature_array(std::ostringstream& output,
+                                     const std::vector<VectorFeature>& features) {
+  output << "[";
+  bool first_feature = true;
+  for (const VectorFeature& feature : features) {
+    if (!first_feature) {
+      output << ",";
+    }
+    first_feature = false;
+    output << "{\"id\":" << json_quote(feature.id)
+           << ",\"name\":" << json_quote(feature.name)
+           << ",\"category\":" << json_quote(feature.category)
+           << ",\"geometry\":" << render_geometry(feature.geometry, "") << "}";
+  }
+  output << "]";
+}
+
+std::string render_navigation_map_tile_payload(
+  const std::vector<VectorLayerOutput>& vector_layers,
+  const LabelOutput& labels) {
+  std::ostringstream output;
+  output << "{\n";
+  output << "  \"schemaVersion\": \"flying.navigation-vector-tile.v1\",\n";
+  output << "  \"coordinateFrame\": \"project-local-ENU\",\n";
+  output << "  \"layers\": {\n";
+
+  const auto render_layer = [&output](std::string_view layer_id,
+                                      const std::vector<VectorFeature>& features,
+                                      bool trailing_comma) {
+    output << "    " << json_quote(layer_id) << ": {\"features\": ";
+    render_navigation_feature_array(output, features);
+    output << "}";
+    if (trailing_comma) {
+      output << ",";
+    }
+    output << "\n";
+  };
+
+  std::vector<VectorFeature> base_features;
+  std::vector<VectorFeature> airport_features;
+  std::vector<VectorFeature> runway_features;
+  std::vector<VectorFeature> obstacle_features;
+  std::vector<VectorFeature> airspace_features;
+  for (const VectorLayerOutput& layer : vector_layers) {
+    if (!is_aviation_navigation_category(layer.category)) {
+      base_features.insert(base_features.end(), layer.features.begin(), layer.features.end());
+    } else if (layer.category == "airport") {
+      airport_features.insert(
+        airport_features.end(), layer.features.begin(), layer.features.end());
+    } else if (layer.category == "runway") {
+      runway_features.insert(runway_features.end(), layer.features.begin(), layer.features.end());
+    } else if (layer.category == "significantObstacle" || layer.category == "obstacle") {
+      obstacle_features.insert(
+        obstacle_features.end(), layer.features.begin(), layer.features.end());
+    } else if (layer.category == "airspace") {
+      airspace_features.insert(
+        airspace_features.end(), layer.features.begin(), layer.features.end());
+    }
+  }
+
+  render_layer("zabaged-base", base_features, true);
+  output << "    \"geonames-labels\": {\"labels\": [";
+  for (std::size_t i = 0; i < labels.labels.size(); ++i) {
+    const LabelFeature& label = labels.labels[i];
+    output << "{\"id\":" << json_quote(label.id)
+           << ",\"name\":" << json_quote(label.name)
+           << ",\"featureClass\":" << json_quote(label.feature_class)
+           << ",\"position\":" << render_point(label.position) << "}";
+    if (i + 1U != labels.labels.size()) {
+      output << ",";
+    }
+  }
+  output << "]},\n";
+  render_layer("airports", airport_features, true);
+  render_layer("runways", runway_features, true);
+  render_layer("obstacles", obstacle_features, true);
+  render_layer("airspaces", airspace_features, false);
+  output << "  }\n";
+  output << "}\n";
+  return output.str();
+}
+
+std::string render_navigation_map_tile_metadata(
+  const SourceManifest& source_manifest,
+  const PilotPackageConfig& config,
+  const std::vector<VectorLayerOutput>& vector_layers,
+  const LabelOutput& labels,
+  std::string_view package_version) {
+  std::ostringstream output;
+  output << "{\n";
+  output << "  \"schemaVersion\": \"flying.navigation-vector-tiles.v1\",\n";
+  output << "  \"format\": \"pmtiles\",\n";
+  output << "  \"tilePayloadFormat\": \"flying.navigation-vector-tile+json\",\n";
+  output << "  \"packageVersion\": " << json_quote(package_version) << ",\n";
+  output << "  \"coordinateFrame\": \"project-local-ENU\",\n";
+  output << "  \"tileAddressing\": \"project-local-ENU-zxy\",\n";
+  output << "  \"coverageScope\": " << json_quote(config.coverage_scope) << ",\n";
+  output << "  \"runtimeNetworkRequired\": false,\n";
+  output << "  \"externalMapApis\": [],\n";
+  output << "  \"remoteTileServerUrls\": [],\n";
+  output << "  \"sourceLineage\": "
+         << render_source_lineage(source_manifest, collect_used_source_ids(config), "  ")
+         << ",\n";
+  output << "  \"layers\": [\n";
+  output << "    {\"id\":\"zabaged-base\",\"source\":\"vectorPackages\","
+            "\"categories\":[";
+  for (std::size_t i = 0; i < vector_layers.size(); ++i) {
+    if (i != 0U) {
+      output << ",";
+    }
+    output << json_quote(vector_layers[i].category);
+  }
+  output << "]},\n";
+  output << "    {\"id\":\"geonames-labels\",\"source\":\"vectorPackages\","
+            "\"categories\":[\"labels\"],\"labelCount\":"
+         << labels.labels.size() << "},\n";
+  output << "    {\"id\":\"airports\",\"source\":\"airport-database\","
+            "\"categories\":[\"airport\"]},\n";
+  output << "    {\"id\":\"runways\",\"source\":\"runway-surfaces\","
+            "\"categories\":[\"runway\"]},\n";
+  output << "    {\"id\":\"obstacles\",\"source\":\"detailed-airport-set\","
+            "\"categories\":[\"significantObstacle\"]},\n";
+  output << "    {\"id\":\"airspaces\",\"source\":\"permitted-airspace\","
+            "\"categories\":[\"airspace\"]}\n";
+  output << "  ]\n";
+  output << "}\n";
+  return output.str();
+}
+
+std::vector<std::uint8_t> render_navigation_map_tile_archive(
+  const SourceManifest& source_manifest,
+  const PilotPackageConfig& config,
+  const std::vector<VectorLayerOutput>& vector_layers,
+  const LabelOutput& labels,
+  std::string_view package_version) {
+  const std::string metadata = render_navigation_map_tile_metadata(
+    source_manifest, config, vector_layers, labels, package_version);
+  const std::string tile_payload = render_navigation_map_tile_payload(vector_layers, labels);
+
+  std::vector<std::uint8_t> root_directory;
+  append_varint(root_directory, 1U);                     // entry count
+  append_varint(root_directory, 0U);                     // tile id delta
+  append_varint(root_directory, 1U);                     // run length
+  append_varint(root_directory, tile_payload.size());    // tile data length
+  append_varint(root_directory, 0U);                     // offset from tile data section
+
+  std::vector<std::uint8_t> archive;
+  archive.reserve(127U + root_directory.size() + metadata.size() + tile_payload.size());
+  const std::array<std::uint8_t, 8U> magic = {
+    'P', 'M', 'T', 'i', 'l', 'e', 's', static_cast<std::uint8_t>(3)};
+  archive.insert(archive.end(), magic.begin(), magic.end());
+
+  constexpr std::uint64_t kHeaderLength = 127U;
+  constexpr std::uint64_t kNoSection = 0U;
+  const std::uint64_t root_directory_offset = kHeaderLength;
+  const std::uint64_t metadata_offset = root_directory_offset + root_directory.size();
+  const std::uint64_t tile_data_offset = metadata_offset + metadata.size();
+  append_uint64_le(archive, root_directory_offset);      // root directory offset
+  append_uint64_le(archive, root_directory.size());      // root directory length
+  append_uint64_le(archive, metadata_offset);            // JSON metadata offset
+  append_uint64_le(archive, metadata.size());            // JSON metadata length
+  append_uint64_le(archive, kNoSection);                 // leaf directories offset
+  append_uint64_le(archive, kNoSection);                 // leaf directories length
+  append_uint64_le(archive, tile_data_offset);           // tile data offset
+  append_uint64_le(archive, tile_payload.size());        // tile data length
+  append_uint64_le(archive, 1U);                         // addressed tile count
+  append_uint64_le(archive, 1U);                         // tile entry count
+  append_uint64_le(archive, 1U);                         // tile content count
+  archive.push_back(1U);                                 // clustered
+  archive.push_back(0U);                                 // internal compression: none
+  archive.push_back(0U);                                 // tile compression: none
+  archive.push_back(0U);                                 // tile type: custom JSON vector payload
+  archive.push_back(0U);                                 // min zoom
+  archive.push_back(14U);                                // max zoom
+  for (int i = 0; i < 6; ++i) {
+    append_uint32_le(archive, 0U);                       // bounds and center placeholders
+  }
+  while (archive.size() < kHeaderLength) {
+    archive.push_back(0U);
+  }
+  archive.insert(archive.end(), root_directory.begin(), root_directory.end());
+  archive.insert(archive.end(), metadata.begin(), metadata.end());
+  archive.insert(archive.end(), tile_payload.begin(), tile_payload.end());
+  return archive;
+}
+
+std::string render_navigation_map_style_manifest(const FileMetadata& tile_archive) {
+  std::ostringstream output;
+  output << "{\n";
+  output << "  \"schemaVersion\": \"flying.offline-navigation-map.v1\",\n";
+  output << "  \"runtimeDependencies\": {\n";
+  output << "    \"runtimeNetworkRequired\": false,\n";
+  output << "    \"externalMapApis\": [],\n";
+  output << "    \"remoteTileServerUrls\": []\n";
+  output << "  },\n";
+  output << "  \"tilePackages\": [\n";
+  const std::array<std::string_view, 6U> layer_ids = {
+    "zabaged-base",
+    "geonames-labels",
+    "airports",
+    "runways",
+    "obstacles",
+    "airspaces",
+  };
+  const std::array<std::string_view, 6U> attributions = {
+    "Contains CUZK ZABAGED source data.",
+    "Contains Geonames source data.",
+    "Contains project airport database source data.",
+    "Contains project runway surface source data.",
+    "Contains project-derived obstacle source data.",
+    "Contains permitted airspace source data.",
+  };
+  for (std::size_t i = 0; i < layer_ids.size(); ++i) {
+    output << "    {\"layerId\":" << json_quote(layer_ids[i])
+           << ",\"format\":\"pmtiles\",\"path\":" << json_quote(tile_archive.path)
+           << ",\"file\":" << render_file_metadata(tile_archive)
+           << ",\"attribution\":" << json_quote(attributions[i]) << "}";
+    if (i + 1U != layer_ids.size()) {
+      output << ",";
+    }
+    output << "\n";
+  }
+  output << "  ],\n";
+  output << "  \"attribution\": {\n";
+  output << "    \"visible\": true,\n";
+  output << "    \"text\": \"Contains CUZK ZABAGED, Geonames, project airport, runway, obstacle and permitted airspace data.\"\n";
+  output << "  },\n";
+  output << "  \"style\": \"Config/FlyingOfflineNavigationMapStyle.json\"\n";
+  output << "}\n";
+  return output.str();
+}
+
+NavigationMapOutput process_navigation_map_package(
+  const PilotRegionPackageOptions& options,
+  const SourceManifest& source_manifest,
+  const PilotPackageConfig& config,
+  const std::vector<VectorLayerOutput>& vector_layers,
+  const LabelOutput& labels) {
+  const std::filesystem::path tile_path =
+    options.output_directory / "Navigation" / "offline-navigation-map.pmtiles";
+  write_binary_file(tile_path,
+                    render_navigation_map_tile_archive(
+                      source_manifest, config, vector_layers, labels, options.package_version));
+  NavigationMapOutput output;
+  output.tile_archive =
+    metadata_for_written_file(options.output_directory, tile_path, "offline-navigation-map");
+
+  const std::filesystem::path manifest_path =
+    options.output_directory / "Navigation" / "navigation-map.json";
+  write_text_file(manifest_path, render_navigation_map_style_manifest(output.tile_archive));
+  output.style_manifest =
+    metadata_for_written_file(options.output_directory, manifest_path, "navigation-map");
+  return output;
+}
+
 std::set<std::string> collect_used_source_ids(const PilotPackageConfig& config) {
   std::set<std::string> source_ids;
   for (const OrthoSourceConfig& source : config.ortho.sources) {
@@ -2793,7 +3098,8 @@ std::string package_identity_input(const PilotRegionPackageOptions& options,
                                    const ImageryPackageMetadata& imagery,
                                    const std::vector<VectorLayerOutput>& vector_layers,
                                    const LabelOutput& labels,
-                                   const MaskOutputs& masks) {
+                                   const MaskOutputs& masks,
+                                   const NavigationMapOutput& navigation_map) {
   std::ostringstream input;
   input << "{\"packageName\":" << json_quote(options.package_name)
         << ",\"packageVersion\":" << json_quote(options.package_version)
@@ -2819,7 +3125,10 @@ std::string package_identity_input(const PilotRegionPackageOptions& options,
   }
   input << "],\"labels\":" << render_file_metadata(labels.file)
         << ",\"waterMask\":" << render_file_metadata(masks.water_mask)
-        << ",\"materialMask\":" << render_file_metadata(masks.material_mask) << "}";
+        << ",\"materialMask\":" << render_file_metadata(masks.material_mask)
+        << ",\"navigationMap\":" << render_file_metadata(navigation_map.tile_archive)
+        << ",\"navigationManifest\":"
+        << render_file_metadata(navigation_map.style_manifest) << "}";
   return input.str();
 }
 
@@ -2858,6 +3167,10 @@ std::size_t mask_byte_count(const MaskOutputs& masks) {
   return masks.water_mask.size_bytes + masks.material_mask.size_bytes;
 }
 
+std::size_t navigation_map_byte_count(const NavigationMapOutput& navigation_map) {
+  return navigation_map.tile_archive.size_bytes + navigation_map.style_manifest.size_bytes;
+}
+
 std::string render_package_manifest(const PilotRegionPackageOptions& options,
                                     const SourceManifest& source_manifest,
                                     const PilotPackageConfig& config,
@@ -2865,6 +3178,7 @@ std::string render_package_manifest(const PilotRegionPackageOptions& options,
                                     const std::vector<VectorLayerOutput>& vector_layers,
                                     const LabelOutput& labels,
                                     const MaskOutputs& masks,
+                                    const NavigationMapOutput& navigation_map,
                                     std::string_view package_id,
                                     std::string_view content_hash) {
   const std::set<std::string> used_source_ids = collect_used_source_ids(config);
@@ -2901,6 +3215,18 @@ std::string render_package_manifest(const PilotRegionPackageOptions& options,
   output << "  \"imagery\": " << render_imagery_metadata(imagery, "  ") << ",\n";
   output << "  \"vectorPackages\": "
          << render_vector_package_metadata(vector_layers, labels, "  ") << ",\n";
+  output << "  \"navigationMap\": {\n";
+  output << "    \"renderer\": \"FlyingOfflineNavigationMapWidget\",\n";
+  output << "    \"style\": \"Config/FlyingOfflineNavigationMapStyle.json\",\n";
+  output << "    \"archiveFormat\": \"pmtiles\",\n";
+  output << "    \"tileArchive\": " << render_file_metadata(navigation_map.tile_archive)
+         << ",\n";
+  output << "    \"manifest\": " << render_file_metadata(navigation_map.style_manifest)
+         << ",\n";
+  output << "    \"requiredLayers\": [\"zabaged-base\", \"geonames-labels\", \"airports\", \"runways\", \"obstacles\", \"airspaces\"],\n";
+  output << "    \"overlayLayers\": [\"aircraft-position\", \"flight-path\", \"replay-track\"],\n";
+  output << "    \"attributionVisible\": true\n";
+  output << "  },\n";
   output << "  \"masks\": " << render_masks_metadata(masks, "  ") << ",\n";
   output << "  \"streaming\": {\n";
   output << "    \"runtimeNetworkRequired\": false,\n";
@@ -2920,10 +3246,12 @@ std::string render_package_manifest(const PilotRegionPackageOptions& options,
   output << "    \"materialMaskAvailable\": true,\n";
   output << "    \"imageryBytes\": " << imagery_byte_count(imagery) << ",\n";
   output << "    \"vectorBytes\": " << vector_byte_count(vector_layers, labels) << ",\n";
+  output << "    \"navigationMapBytes\": "
+         << navigation_map_byte_count(navigation_map) << ",\n";
   output << "    \"maskBytes\": " << mask_byte_count(masks) << ",\n";
   output << "    \"totalBytes\": "
          << (imagery_byte_count(imagery) + vector_byte_count(vector_layers, labels) +
-             mask_byte_count(masks)) << "\n";
+             navigation_map_byte_count(navigation_map) + mask_byte_count(masks)) << "\n";
   output << "  },\n";
   output << "  \"validation\": {\n";
   output << "    \"offlineRuntime\": {\n";
@@ -3212,9 +3540,18 @@ PilotRegionPackageResult process_pilot_region_packages(
     const LabelOutput labels =
       process_geonames_labels(options, *config, *source_validation.manifest);
     const MaskOutputs masks = process_masks(options, *config, vector_layers);
+    const NavigationMapOutput navigation_map = process_navigation_map_package(
+      options, *source_validation.manifest, *config, vector_layers, labels);
 
     const std::string identity_input = package_identity_input(
-      options, *source_validation.manifest, *config, imagery, vector_layers, labels, masks);
+      options,
+      *source_validation.manifest,
+      *config,
+      imagery,
+      vector_layers,
+      labels,
+      masks,
+      navigation_map);
     const std::string content_hash = sha256_text(identity_input);
     const std::string package_id = make_package_id(options, *config, content_hash);
     result.report.package_id = package_id;
@@ -3226,6 +3563,7 @@ PilotRegionPackageResult process_pilot_region_packages(
                                                               vector_layers,
                                                               labels,
                                                               masks,
+                                                              navigation_map,
                                                               package_id,
                                                               content_hash);
     if (const std::optional<std::string> unsafe_runtime_package =

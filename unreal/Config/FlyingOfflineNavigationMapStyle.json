@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "flying.offline-navigation-map-style.v1",
+  "runtimeNetworkRequired": false,
+  "externalMapApis": [],
+  "remoteTileServerUrls": [],
+  "background": {"color": "#111821"},
+  "layers": {
+    "zabaged-base": {"lineColor": "#7f8f9a", "fillColor": "#203029", "lineWidthPx": 1},
+    "geonames-labels": {"textColor": "#d8dde2", "fontSizePx": 11},
+    "airports": {"symbolColor": "#f3f7fb", "symbolSizePx": 8},
+    "runways": {"lineColor": "#ffffff", "lineWidthPx": 3},
+    "obstacles": {"symbolColor": "#ff5a45", "symbolSizePx": 7},
+    "airspaces": {"lineColor": "#4fb7ff", "fillColor": "#14394f66", "lineWidthPx": 1},
+    "aircraft-position": {"symbolColor": "#ffffff", "symbolSizePx": 16},
+    "flight-path": {"lineColor": "#0d8ee8", "lineWidthPx": 2},
+    "replay-track": {"lineColor": "#f0a22e", "lineWidthPx": 2}
+  }
+}

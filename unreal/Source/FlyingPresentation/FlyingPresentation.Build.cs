@@ -24,7 +24,8 @@ public class FlyingPresentation : ModuleRules
         {
             "Json",
             "JsonUtilities",
-            "Projects"
+            "Projects",
+            "SQLiteCore"
         });
 
         string RepositoryRoot = Path.GetFullPath(Path.Combine(ModuleDirectory, "..", "..", ".."));

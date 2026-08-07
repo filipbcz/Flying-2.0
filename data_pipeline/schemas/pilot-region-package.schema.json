@@ -115,6 +115,50 @@
         }
       }
     },
+    "navigationMap": {
+      "type": "object",
+      "required": [
+        "renderer",
+        "style",
+        "archiveFormat",
+        "tileArchive",
+        "manifest",
+        "requiredLayers",
+        "overlayLayers",
+        "attributionVisible"
+      ],
+      "properties": {
+        "renderer": {"const": "FlyingOfflineNavigationMapWidget"},
+        "style": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!.*://).+$"
+        },
+        "archiveFormat": {"enum": ["pmtiles", "mbtiles"]},
+        "tileArchive": {"$ref": "#/$defs/fileMetadata"},
+        "manifest": {"$ref": "#/$defs/fileMetadata"},
+        "requiredLayers": {
+          "type": "array",
+          "contains": {"const": "zabaged-base"},
+          "allOf": [
+            {"contains": {"const": "geonames-labels"}},
+            {"contains": {"const": "airports"}},
+            {"contains": {"const": "runways"}},
+            {"contains": {"const": "obstacles"}},
+            {"contains": {"const": "airspaces"}}
+          ]
+        },
+        "overlayLayers": {
+          "type": "array",
+          "contains": {"const": "aircraft-position"},
+          "allOf": [
+            {"contains": {"const": "flight-path"}},
+            {"contains": {"const": "replay-track"}}
+          ]
+        },
+        "attributionVisible": {"const": true}
+      }
+    },
     "masks": {
       "type": "object",
       "required": ["grid", "waterMask", "materialMask"],
