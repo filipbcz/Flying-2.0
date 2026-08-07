@@ -80,6 +80,8 @@ std::string source_manifest() {
     << source_entry("cuzk-zabaged-settlements-fixture", "CUZK ZABAGED Settlements Fixture", "zabaged/settlements.geojson", "Contains CUZK ZABAGED pilot settlements.") << ",\n"
     << source_entry("cuzk-zabaged-vegetation-fixture", "CUZK ZABAGED Vegetation Fixture", "zabaged/vegetation.geojson", "Contains CUZK ZABAGED pilot vegetation.") << ",\n"
     << source_entry("cuzk-zabaged-notable-fixture", "CUZK ZABAGED Notable Objects Fixture", "zabaged/notable.geojson", "Contains CUZK ZABAGED pilot notable objects.") << ",\n"
+    << source_entry("project-airport-fixture", "Project Airport Fixture", "airports/airport-objects.geojson", "Contains project-derived approved airport objects.") << ",\n"
+    << source_entry("project-runway-fixture", "Project Runway Fixture", "runways/runway-objects.geojson", "Contains project-derived approved runway objects.") << ",\n"
     << source_entry("geonames-pilot-fixture", "Geonames Pilot Fixture", "geonames/labels.csv", "Contains Geonames pilot labels.") << "\n"
     << "  ]\n"
     << "}\n";
@@ -125,7 +127,9 @@ std::string package_config() {
     {"category": "water", "path": "zabaged/water.geojson", "format": "geojson"},
     {"category": "settlements", "path": "zabaged/settlements.geojson", "format": "geojson"},
     {"category": "vegetationAreas", "path": "zabaged/vegetation.geojson", "format": "geojson"},
-    {"category": "notableObjects", "path": "zabaged/notable.geojson", "format": "geojson"}
+    {"category": "notableObjects", "path": "zabaged/notable.geojson", "format": "geojson"},
+    {"category": "airport", "path": "airports/airport-objects.geojson", "format": "geojson"},
+    {"category": "runway", "path": "runways/runway-objects.geojson", "format": "geojson"}
   ],
   "geonamesLabels": {
     "path": "geonames/labels.csv",
@@ -142,6 +146,23 @@ std::string package_config() {
       {"category": "settlements", "material": "settlement"},
       {"category": "vegetationAreas", "material": "vegetation"},
       {"category": "water", "material": "water"}
+    ]
+  },
+  "worldObjects": {
+    "enabled": true,
+    "activeCollisionRadiusM": 1500,
+    "streamInDistanceM": 8000,
+    "streamOutDistanceM": 10000,
+    "dmpHeightEstimates": {
+      "defaultBuildingHeightM": 9,
+      "defaultVegetationHeightM": 16,
+      "defaultObstacleHeightM": 32,
+      "defaultPowerLineHeightM": 21
+    },
+    "graphicsProfiles": [
+      {"id": "low", "vegetationDensityScale": 0.25, "objectDensityScale": 0.5},
+      {"id": "medium", "vegetationDensityScale": 0.65, "objectDensityScale": 0.75},
+      {"id": "high", "vegetationDensityScale": 1, "objectDensityScale": 1}
     ]
   }
 }
@@ -211,7 +232,47 @@ void write_fixture_inputs(const std::filesystem::path& root) {
                                 "Polygon",
                                 "[[[0,2],[2,2],[2,4],[0,4],[0,2]]]"));
   write_file(root / "zabaged" / "notable.geojson",
-             feature_collection("notable-1", "Pilot mast", "Point", "[3,3]"));
+             "{\n"
+             "  \"type\": \"FeatureCollection\",\n"
+             "  \"features\": [\n"
+             "    {\n"
+             "      \"type\": \"Feature\",\n"
+             "      \"id\": \"notable-1\",\n"
+             "      \"properties\": {\"name\": \"Pilot mast\", \"kind\": \"mast\", \"heightM\": 34},\n"
+             "      \"geometry\": {\"type\": \"Point\", \"coordinates\": [3,3]}\n"
+             "    },\n"
+             "    {\n"
+             "      \"type\": \"Feature\",\n"
+             "      \"id\": \"power-line-1\",\n"
+             "      \"properties\": {\"name\": \"Pilot power line\", \"kind\": \"power_line\"},\n"
+             "      \"geometry\": {\"type\": \"LineString\", \"coordinates\": [[1,3.5],[4,3.5]]}\n"
+             "    }\n"
+             "  ]\n"
+             "}\n");
+  write_file(root / "airports" / "airport-objects.geojson",
+             "{\n"
+             "  \"type\": \"FeatureCollection\",\n"
+             "  \"features\": [\n"
+             "    {\n"
+             "      \"type\": \"Feature\",\n"
+             "      \"id\": \"windsock-1\",\n"
+             "      \"properties\": {\"name\": \"Pilot windsock\", \"kind\": \"windsock\", \"heightM\": 5},\n"
+             "      \"geometry\": {\"type\": \"Point\", \"coordinates\": [1.5,2.5]}\n"
+             "    }\n"
+             "  ]\n"
+             "}\n");
+  write_file(root / "runways" / "runway-objects.geojson",
+             "{\n"
+             "  \"type\": \"FeatureCollection\",\n"
+             "  \"features\": [\n"
+             "    {\n"
+             "      \"type\": \"Feature\",\n"
+             "      \"id\": \"runway-sign-1\",\n"
+             "      \"properties\": {\"name\": \"Pilot runway sign\", \"kind\": \"runway_sign\", \"heightM\": 1.2},\n"
+             "      \"geometry\": {\"type\": \"Point\", \"coordinates\": [2.5,2.5]}\n"
+             "    }\n"
+             "  ]\n"
+             "}\n");
   write_file(root / "geonames" / "labels.csv",
              "id,name,eastM,northM,featureClass\n"
              "gn-1,Pilot Village,3,1,P\n"
@@ -254,9 +315,12 @@ int main() {
   assert(std::filesystem::exists(root / "out" / "vectors" / "settlements.json"));
   assert(std::filesystem::exists(root / "out" / "vectors" / "vegetationAreas.json"));
   assert(std::filesystem::exists(root / "out" / "vectors" / "notableObjects.json"));
+  assert(std::filesystem::exists(root / "out" / "vectors" / "airport.json"));
+  assert(std::filesystem::exists(root / "out" / "vectors" / "runway.json"));
   assert(std::filesystem::exists(root / "out" / "vectors" / "labels.json"));
   assert(std::filesystem::exists(root / "out" / "masks" / "water-mask.csv"));
   assert(std::filesystem::exists(root / "out" / "masks" / "material-mask.csv"));
+  assert(std::filesystem::exists(root / "out" / "world" / "world-objects.json"));
 
   const std::string package_manifest = read_file(root / "out" / "pilot-region-package.json");
   assert(package_manifest.find("\"schemaVersion\": \"flying.pilot-region-package.v1\"") !=
@@ -266,6 +330,14 @@ int main() {
   assert(package_manifest.find("\"runtimeNetworkRequired\": false") != std::string::npos);
   assert(package_manifest.find("\"streaming\"") != std::string::npos);
   assert(package_manifest.find("\"packagingLayout\"") != std::string::npos);
+  assert(package_manifest.find("\"worldObjects\"") != std::string::npos);
+  assert(package_manifest.find("\"approvedVectorDataOnly\": true") != std::string::npos);
+  assert(package_manifest.find("\"orthoColorInferenceAllowed\": false") != std::string::npos);
+  assert(package_manifest.find("\"activeZoneCollisionOnly\": true") != std::string::npos);
+  assert(package_manifest.find("\"densityScalesPreserveFlightCriticalObjects\": true") !=
+         std::string::npos);
+  assert(package_manifest.find("\"criticalObjectTypes\": [\"mast\", \"power_line\", \"obstacle\", \"water_surface\", \"windsock\", \"runway_object\"]") !=
+         std::string::npos);
   assert(package_manifest.find("\"waterMaskAvailable\": true") != std::string::npos);
   assert(package_manifest.find("\"materialMaskAvailable\": true") != std::string::npos);
   assert(package_manifest.find("\"externalMapApiKeys\": 0") != std::string::npos);
@@ -286,10 +358,35 @@ int main() {
   assert(material_mask.find(",vegetation\n") != std::string::npos);
   assert(material_mask.find(",water\n") != std::string::npos);
 
+  const std::string world_objects = read_file(root / "out" / "world" / "world-objects.json");
+  assert(world_objects.find("\"schemaVersion\": \"flying.world-objects.v1\"") !=
+         std::string::npos);
+  assert(world_objects.find("\"placementSource\": \"approved_vector_with_dmp_height_estimate\"") !=
+         std::string::npos);
+  assert(world_objects.find("\"orthoColorInferenceAllowed\": false") != std::string::npos);
+  assert(world_objects.find("\"kind\": \"building\"") != std::string::npos);
+  assert(world_objects.find("\"heightM\": 9") != std::string::npos);
+  assert(world_objects.find("\"kind\": \"vegetation\"") != std::string::npos);
+  assert(world_objects.find("\"kind\": \"water_surface\"") != std::string::npos);
+  assert(world_objects.find("\"collisionPolicy\": \"water_surface_active_zone\"") !=
+         std::string::npos);
+  assert(world_objects.find("\"kind\": \"mast\"") != std::string::npos);
+  assert(world_objects.find("\"heightM\": 34") != std::string::npos);
+  assert(world_objects.find("\"kind\": \"power_line\"") != std::string::npos);
+  assert(world_objects.find("\"kind\": \"windsock\"") != std::string::npos);
+  assert(world_objects.find("\"audioHook\": \"airport_windsock_wind\"") !=
+         std::string::npos);
+  assert(world_objects.find("\"kind\": \"runway_object\"") != std::string::npos);
+  assert(world_objects.find("\"flightCriticalDensityScale\":1") != std::string::npos);
+  assert(world_objects.find("\"hysteresisPreventsHorizonPopping\": true") !=
+         std::string::npos);
+  assert(world_objects.find("\"environmentAudioHooks\": [\"water_ambience\", \"vegetation_wind\", \"airport_windsock_wind\"]") !=
+         std::string::npos);
+
   const std::string report = read_file(options.report_path);
   assert(report.find("\"passed\": true") != std::string::npos);
   assert(report.find("\"orthoTileCount\": 5") != std::string::npos);
-  assert(report.find("\"vectorLayerCount\": 6") != std::string::npos);
+  assert(report.find("\"vectorLayerCount\": 8") != std::string::npos);
   assert(report.find("\"labelCount\": 1") != std::string::npos);
 
   std::filesystem::remove_all(root);
@@ -415,6 +512,47 @@ int main() {
     const std::string vector_report = read_file(vector_options.report_path);
     assert(vector_report.find("\"passed\": true") != std::string::npos);
     std::filesystem::remove_all(vector_root);
+  }
+
+  {
+    const std::filesystem::path disabled_world_root = make_temp_root();
+    write_fixture_inputs(disabled_world_root);
+    write_file(disabled_world_root / "pilot-config.json",
+               replace_once(package_config(), "\"enabled\": true", "\"enabled\": false"));
+    pipeline::PilotRegionPackageOptions disabled_world_options =
+      make_options(disabled_world_root);
+    const pipeline::PilotRegionPackageResult disabled_world_result =
+      pipeline::process_pilot_region_packages(disabled_world_options);
+    assert(disabled_world_result.created());
+    assert(std::filesystem::exists(disabled_world_root / "out" / "world" /
+                                   "world-objects.json"));
+    const std::string disabled_world_manifest =
+      read_file(disabled_world_root / "out" / "pilot-region-package.json");
+    assert(disabled_world_manifest.find("\"path\":\"world/world-objects.json\"") !=
+           std::string::npos);
+    const std::string disabled_world_objects =
+      read_file(disabled_world_root / "out" / "world" / "world-objects.json");
+    assert(disabled_world_objects.find("\"objects\": [\n  ]") != std::string::npos);
+    std::filesystem::remove_all(disabled_world_root);
+  }
+
+  {
+    const std::filesystem::path density_root = make_temp_root();
+    write_fixture_inputs(density_root);
+    write_file(density_root / "pilot-config.json",
+               replace_once(package_config(),
+                            "\"vegetationDensityScale\": 0.25",
+                            "\"vegetationDensityScale\": -0.25"));
+    pipeline::PilotRegionPackageOptions density_options = make_options(density_root);
+    const pipeline::PilotRegionPackageResult density_result =
+      pipeline::process_pilot_region_packages(density_options);
+    assert(!density_result.created());
+    assert(!std::filesystem::exists(density_root / "out" / "pilot-region-package.json"));
+    const std::string density_report = read_file(density_options.report_path);
+    assert(density_report.find(
+             "\"code\": \"pilot.config.worldObjects.graphicsProfiles.densityScale.invalid\"") !=
+           std::string::npos);
+    std::filesystem::remove_all(density_root);
   }
 
   {

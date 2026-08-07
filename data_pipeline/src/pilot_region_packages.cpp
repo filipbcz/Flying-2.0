@@ -1042,6 +1042,24 @@ struct MaskConfig {
   std::vector<MaterialLayerConfig> material_layers;
 };
 
+struct GraphicsDensityProfileConfig {
+  std::string id;
+  double vegetation_density_scale = 1.0;
+  double object_density_scale = 1.0;
+};
+
+struct WorldObjectsConfig {
+  bool enabled = true;
+  double active_collision_radius_m = 2000.0;
+  double stream_in_distance_m = 12000.0;
+  double stream_out_distance_m = 14500.0;
+  double default_building_height_m = 8.0;
+  double default_vegetation_height_m = 14.0;
+  double default_obstacle_height_m = 30.0;
+  double default_power_line_height_m = 18.0;
+  std::vector<GraphicsDensityProfileConfig> graphics_profiles;
+};
+
 struct PilotPackageConfig {
   std::string schema_version;
   std::string package_id_hint;
@@ -1053,6 +1071,7 @@ struct PilotPackageConfig {
   std::vector<VectorLayerConfig> vector_layers;
   GeoNamesConfig geonames;
   MaskConfig masks;
+  WorldObjectsConfig world_objects;
 };
 
 std::optional<Bounds> parse_bounds(const JsonValue::Object& object,
@@ -1535,6 +1554,116 @@ std::optional<PilotPackageConfig> parse_package_config(const JsonValue& root,
     }
   }
 
+  config.world_objects.graphics_profiles = {
+    {"low", 0.35, 0.50},
+    {"medium", 0.65, 0.75},
+    {"high", 1.00, 1.00},
+  };
+  if (const JsonValue* world_objects_value = find_member(object, "worldObjects");
+      world_objects_value != nullptr) {
+    if (world_objects_value->type != JsonValue::Type::object_value) {
+      add_issue(report,
+                "error",
+                "pilot.config.worldObjects.invalid_type",
+                "World object configuration must be an object when present.");
+    } else {
+      const JsonValue::Object& world_objects = world_objects_value->object;
+      if (const JsonValue* enabled = find_member(world_objects, "enabled");
+          enabled != nullptr && enabled->type == JsonValue::Type::bool_value) {
+        config.world_objects.enabled = enabled->boolean;
+      }
+      if (const JsonValue* value = find_member(world_objects, "activeCollisionRadiusM");
+          value != nullptr && value->type == JsonValue::Type::number_value) {
+        config.world_objects.active_collision_radius_m = value->number;
+      }
+      if (const JsonValue* value = find_member(world_objects, "streamInDistanceM");
+          value != nullptr && value->type == JsonValue::Type::number_value) {
+        config.world_objects.stream_in_distance_m = value->number;
+      }
+      if (const JsonValue* value = find_member(world_objects, "streamOutDistanceM");
+          value != nullptr && value->type == JsonValue::Type::number_value) {
+        config.world_objects.stream_out_distance_m = value->number;
+      }
+      if (const JsonValue* heights_value = find_member(world_objects, "dmpHeightEstimates");
+          heights_value != nullptr && heights_value->type == JsonValue::Type::object_value) {
+        const JsonValue::Object& heights = heights_value->object;
+        if (const JsonValue* value = find_member(heights, "defaultBuildingHeightM");
+            value != nullptr && value->type == JsonValue::Type::number_value) {
+          config.world_objects.default_building_height_m = value->number;
+        }
+        if (const JsonValue* value = find_member(heights, "defaultVegetationHeightM");
+            value != nullptr && value->type == JsonValue::Type::number_value) {
+          config.world_objects.default_vegetation_height_m = value->number;
+        }
+        if (const JsonValue* value = find_member(heights, "defaultObstacleHeightM");
+            value != nullptr && value->type == JsonValue::Type::number_value) {
+          config.world_objects.default_obstacle_height_m = value->number;
+        }
+        if (const JsonValue* value = find_member(heights, "defaultPowerLineHeightM");
+            value != nullptr && value->type == JsonValue::Type::number_value) {
+          config.world_objects.default_power_line_height_m = value->number;
+        }
+      }
+      if (const JsonValue* profiles_value = find_member(world_objects, "graphicsProfiles");
+          profiles_value != nullptr && profiles_value->type == JsonValue::Type::array_value &&
+          !profiles_value->array.empty()) {
+        config.world_objects.graphics_profiles.clear();
+        for (const JsonValue& profile_value : profiles_value->array) {
+          if (profile_value.type != JsonValue::Type::object_value) {
+            add_issue(report,
+                      "error",
+                      "pilot.config.worldObjects.graphicsProfiles.invalid_type",
+                      "World object graphics profiles must be objects.");
+            continue;
+          }
+          GraphicsDensityProfileConfig profile;
+          if (const JsonValue* id = find_member(profile_value.object, "id");
+              id != nullptr && id->type == JsonValue::Type::string_value) {
+            profile.id = id->string;
+          }
+          if (const JsonValue* value = find_member(profile_value.object, "vegetationDensityScale");
+              value != nullptr && value->type == JsonValue::Type::number_value) {
+            profile.vegetation_density_scale = value->number;
+          }
+          if (const JsonValue* value = find_member(profile_value.object, "objectDensityScale");
+              value != nullptr && value->type == JsonValue::Type::number_value) {
+            profile.object_density_scale = value->number;
+          }
+          if (profile.vegetation_density_scale < 0.0 ||
+              profile.vegetation_density_scale > 1.0 ||
+              profile.object_density_scale < 0.0 ||
+              profile.object_density_scale > 1.0) {
+            add_issue(report,
+                      "error",
+                      "pilot.config.worldObjects.graphicsProfiles.densityScale.invalid",
+                      "World object graphics profile density scales must be between 0 and 1.");
+          }
+          if (!profile.id.empty()) {
+            config.world_objects.graphics_profiles.push_back(std::move(profile));
+          }
+        }
+      }
+      if (config.world_objects.active_collision_radius_m <= 0.0 ||
+          config.world_objects.stream_in_distance_m <= 0.0 ||
+          config.world_objects.stream_out_distance_m <=
+            config.world_objects.stream_in_distance_m) {
+        add_issue(report,
+                  "error",
+                  "pilot.config.worldObjects.streaming.invalid",
+                  "World object streaming distances and active collision radius must be positive with streamOutDistanceM greater than streamInDistanceM.");
+      }
+      if (config.world_objects.default_building_height_m <= 0.0 ||
+          config.world_objects.default_vegetation_height_m <= 0.0 ||
+          config.world_objects.default_obstacle_height_m <= 0.0 ||
+          config.world_objects.default_power_line_height_m <= 0.0) {
+        add_issue(report,
+                  "error",
+                  "pilot.config.worldObjects.dmpHeightEstimates.invalid",
+                  "DMP-derived world object height estimates must be positive.");
+      }
+    }
+  }
+
   if (has_errors(report)) {
     return std::nullopt;
   }
@@ -2000,6 +2129,30 @@ struct LabelOutput {
   std::string source_manifest_id;
 };
 
+struct WorldObjectInstance {
+  std::string id;
+  std::string kind;
+  std::string source_category;
+  std::string source_feature_id;
+  std::string source_manifest_id;
+  Point2 position;
+  LocalGeometry geometry;
+  double height_m = 0.0;
+  bool density_scalable = false;
+  bool flight_critical = false;
+  std::string collision_policy;
+  std::string audio_hook;
+  double visible_distance_m = 0.0;
+};
+
+struct WorldObjectsOutput {
+  FileMetadata file;
+  std::vector<WorldObjectInstance> objects;
+};
+
+std::string render_bounds(const Bounds& bounds);
+std::set<std::string> collect_used_source_ids(const PilotPackageConfig& config);
+
 std::optional<double> numeric_array_value(const JsonValue::Array& array,
                                           std::size_t index,
                                           std::string_view subject) {
@@ -2185,6 +2338,28 @@ std::string optional_property_string(const JsonValue::Object& properties,
   return value->string;
 }
 
+std::optional<double> optional_property_number(const std::string& properties_json,
+                                               std::string_view key) {
+  JsonValue properties = JsonParser{properties_json}.parse();
+  if (properties.type != JsonValue::Type::object_value) {
+    return std::nullopt;
+  }
+  const JsonValue* value = find_member(properties.object, key);
+  if (value == nullptr || value->type != JsonValue::Type::number_value) {
+    return std::nullopt;
+  }
+  return value->number;
+}
+
+std::string optional_property_string_from_json(const std::string& properties_json,
+                                               std::string_view key) {
+  JsonValue properties = JsonParser{properties_json}.parse();
+  if (properties.type != JsonValue::Type::object_value) {
+    return {};
+  }
+  return optional_property_string(properties.object, key);
+}
+
 std::optional<JsonValue> sanitize_runtime_json_value(const JsonValue& value) {
   if (value.type == JsonValue::Type::string_value) {
     if (looks_like_remote_tile_reference(value.string) ||
@@ -2344,6 +2519,306 @@ VectorLayerOutput process_vector_layer(const PilotRegionPackageOptions& options,
     options.output_directory / "vectors" / (layer_config.category + ".json");
   write_text_file(path, render_vector_package_json(source_manifest, output));
   output.file = metadata_for_written_file(options.output_directory, path, layer_config.category);
+  return output;
+}
+
+Bounds geometry_bounds(const LocalGeometry& geometry) {
+  Bounds bounds;
+  bounds.min_east_m = std::numeric_limits<double>::infinity();
+  bounds.min_north_m = std::numeric_limits<double>::infinity();
+  bounds.max_east_m = -std::numeric_limits<double>::infinity();
+  bounds.max_north_m = -std::numeric_limits<double>::infinity();
+  bool has_point = false;
+  for (const std::vector<Point2>& part : geometry.parts) {
+    for (const Point2 point : part) {
+      has_point = true;
+      bounds.min_east_m = std::min(bounds.min_east_m, point.east_m);
+      bounds.max_east_m = std::max(bounds.max_east_m, point.east_m);
+      bounds.min_north_m = std::min(bounds.min_north_m, point.north_m);
+      bounds.max_north_m = std::max(bounds.max_north_m, point.north_m);
+    }
+  }
+  if (!has_point) {
+    return {};
+  }
+  return bounds;
+}
+
+Point2 geometry_anchor(const LocalGeometry& geometry) {
+  double east_sum = 0.0;
+  double north_sum = 0.0;
+  std::size_t point_count = 0U;
+  for (const std::vector<Point2>& part : geometry.parts) {
+    for (const Point2 point : part) {
+      east_sum += point.east_m;
+      north_sum += point.north_m;
+      ++point_count;
+    }
+  }
+  if (point_count == 0U) {
+    return {};
+  }
+  return {east_sum / static_cast<double>(point_count),
+          north_sum / static_cast<double>(point_count)};
+}
+
+std::string lower_properties_kind(const VectorFeature& feature) {
+  const std::string kind = optional_property_string_from_json(feature.properties_json, "kind");
+  if (!kind.empty()) {
+    return lowercase_ascii(kind);
+  }
+  return lowercase_ascii(optional_property_string_from_json(feature.properties_json, "type"));
+}
+
+std::string lower_feature_classification(const VectorFeature& feature) {
+  std::string classification = lower_properties_kind(feature);
+  if (!feature.name.empty()) {
+    if (!classification.empty()) {
+      classification.push_back(' ');
+    }
+    classification += lowercase_ascii(feature.name);
+  }
+  return classification;
+}
+
+double dmp_height_for_feature(const VectorFeature& feature,
+                              const PilotPackageConfig& config,
+                              double fallback_height_m) {
+  if (const std::optional<double> height = optional_property_number(feature.properties_json, "heightM")) {
+    return std::max(0.5, *height);
+  }
+  if (const std::optional<double> height = optional_property_number(feature.properties_json, "dmpHeightM")) {
+    return std::max(0.5, *height);
+  }
+  (void)config;
+  return fallback_height_m;
+}
+
+void append_world_object(WorldObjectsOutput& output,
+                         const VectorFeature& feature,
+                         std::string kind,
+                         double height_m,
+                         bool density_scalable,
+                         bool flight_critical,
+                         std::string collision_policy,
+                         std::string audio_hook,
+                         double visible_distance_m) {
+  WorldObjectInstance object;
+  object.id = feature.id + "-" + kind;
+  object.kind = std::move(kind);
+  object.source_category = feature.category;
+  object.source_feature_id = feature.id;
+  object.source_manifest_id = feature.source_manifest_id;
+  object.position = geometry_anchor(feature.geometry);
+  object.geometry = feature.geometry;
+  object.height_m = height_m;
+  object.density_scalable = density_scalable;
+  object.flight_critical = flight_critical;
+  object.collision_policy = std::move(collision_policy);
+  object.audio_hook = std::move(audio_hook);
+  object.visible_distance_m = visible_distance_m;
+  output.objects.push_back(std::move(object));
+}
+
+std::string render_world_object_instance(const WorldObjectInstance& object,
+                                         std::string_view indent) {
+  std::ostringstream output;
+  output << indent << "{\n";
+  output << indent << "  \"id\": " << json_quote(object.id) << ",\n";
+  output << indent << "  \"kind\": " << json_quote(object.kind) << ",\n";
+  output << indent << "  \"sourceCategory\": " << json_quote(object.source_category) << ",\n";
+  output << indent << "  \"sourceFeatureId\": " << json_quote(object.source_feature_id) << ",\n";
+  output << indent << "  \"sourceId\": " << json_quote(object.source_manifest_id) << ",\n";
+  output << indent << "  \"placementSource\": \"approved_vector_with_dmp_height_estimate\",\n";
+  output << indent << "  \"position\": " << render_point(object.position) << ",\n";
+  output << indent << "  \"heightM\": " << render_number(object.height_m) << ",\n";
+  output << indent << "  \"bounds\": " << render_bounds(geometry_bounds(object.geometry)) << ",\n";
+  output << indent << "  \"geometry\": " << render_geometry(object.geometry, std::string{indent} + "  ") << ",\n";
+  output << indent << "  \"densityScalable\": " << (object.density_scalable ? "true" : "false") << ",\n";
+  output << indent << "  \"flightCritical\": " << (object.flight_critical ? "true" : "false") << ",\n";
+  output << indent << "  \"collisionPolicy\": " << json_quote(object.collision_policy) << ",\n";
+  output << indent << "  \"visibleDistanceM\": " << render_number(object.visible_distance_m) << ",\n";
+  output << indent << "  \"audioHook\": " << json_quote(object.audio_hook) << "\n";
+  output << indent << "}";
+  return output.str();
+}
+
+std::string render_world_objects_json(const SourceManifest& source_manifest,
+                                      const PilotPackageConfig& config,
+                                      const WorldObjectsOutput& world_objects) {
+  std::ostringstream output;
+  output << "{\n";
+  output << "  \"schemaVersion\": \"flying.world-objects.v1\",\n";
+  output << "  \"coordinateFrame\": \"project-local-ENU\",\n";
+  output << "  \"placementPolicy\": {\n";
+  output << "    \"approvedVectorDataOnly\": true,\n";
+  output << "    \"orthoColorInferenceAllowed\": false,\n";
+  output << "    \"heightSource\": \"dmp-derived-estimate-with-vector-property-override\"\n";
+  output << "  },\n";
+  output << "  \"streaming\": {\n";
+  output << "    \"addressing\": \"project-local-ENU-tile-bounds\",\n";
+  output << "    \"streamInDistanceM\": " << render_number(config.world_objects.stream_in_distance_m) << ",\n";
+  output << "    \"streamOutDistanceM\": " << render_number(config.world_objects.stream_out_distance_m) << ",\n";
+  output << "    \"hysteresisPreventsHorizonPopping\": true\n";
+  output << "  },\n";
+  output << "  \"collision\": {\n";
+  output << "    \"activeSafetyZoneRadiusM\": " << render_number(config.world_objects.active_collision_radius_m) << ",\n";
+  output << "    \"distantObjectsCollision\": false,\n";
+  output << "    \"flightCriticalObjectsIgnoreDensityScale\": true\n";
+  output << "  },\n";
+  output << "  \"graphicsProfiles\": [\n";
+  for (std::size_t i = 0; i < config.world_objects.graphics_profiles.size(); ++i) {
+    const GraphicsDensityProfileConfig& profile = config.world_objects.graphics_profiles[i];
+    output << "    {\"id\":" << json_quote(profile.id)
+           << ",\"vegetationDensityScale\":" << render_number(profile.vegetation_density_scale)
+           << ",\"objectDensityScale\":" << render_number(profile.object_density_scale)
+           << ",\"flightCriticalDensityScale\":1}";
+    if (i + 1U != config.world_objects.graphics_profiles.size()) {
+      output << ",";
+    }
+    output << "\n";
+  }
+  output << "  ],\n";
+  output << "  \"environmentAudioHooks\": [\"water_ambience\", \"vegetation_wind\", \"airport_windsock_wind\"],\n";
+  output << "  \"airportObjectSources\": [\"detailed-airport-manifest:windsocks\", \"runway-surfaces:runwayObjects\"],\n";
+  output << "  \"sourceLineage\": "
+         << render_source_lineage(source_manifest, collect_used_source_ids(config), "  ") << ",\n";
+  output << "  \"objects\": [\n";
+  for (std::size_t i = 0; i < world_objects.objects.size(); ++i) {
+    output << render_world_object_instance(world_objects.objects[i], "    ");
+    if (i + 1U != world_objects.objects.size()) {
+      output << ",";
+    }
+    output << "\n";
+  }
+  output << "  ]\n";
+  output << "}\n";
+  return output.str();
+}
+
+WorldObjectsOutput process_world_objects(const PilotRegionPackageOptions& options,
+                                         const SourceManifest& source_manifest,
+                                         const PilotPackageConfig& config,
+                                         const std::vector<VectorLayerOutput>& vector_layers) {
+  WorldObjectsOutput output;
+  if (!config.world_objects.enabled) {
+    const std::filesystem::path path = options.output_directory / "world" / "world-objects.json";
+    write_text_file(path, render_world_objects_json(source_manifest, config, output));
+    output.file = metadata_for_written_file(options.output_directory, path, "world-objects");
+    return output;
+  }
+
+  for (const VectorLayerOutput& layer : vector_layers) {
+    for (const VectorFeature& feature : layer.features) {
+      if (layer.category == "settlements") {
+        append_world_object(output,
+                            feature,
+                            "building",
+                            dmp_height_for_feature(
+                              feature, config, config.world_objects.default_building_height_m),
+                            true,
+                            false,
+                            "active_safety_zone",
+                            "settlement_ambience",
+                            config.world_objects.stream_in_distance_m);
+      } else if (layer.category == "vegetationAreas") {
+        append_world_object(output,
+                            feature,
+                            "vegetation",
+                            dmp_height_for_feature(
+                              feature, config, config.world_objects.default_vegetation_height_m),
+                            true,
+                            false,
+                            "visual_only",
+                            "vegetation_wind",
+                            config.world_objects.stream_in_distance_m * 0.75);
+      } else if (layer.category == "water") {
+        append_world_object(output,
+                            feature,
+                            "water_surface",
+                            0.0,
+                            false,
+                            true,
+                            "water_surface_active_zone",
+                            "water_ambience",
+                            config.world_objects.stream_out_distance_m);
+      } else if (layer.category == "notableObjects") {
+        std::string kind = lower_feature_classification(feature);
+        if (kind.find("power") != std::string::npos || kind.find("line") != std::string::npos) {
+          kind = "power_line";
+        } else if (kind.find("windsock") != std::string::npos ||
+                   kind.find("wind sock") != std::string::npos) {
+          kind = "windsock";
+        } else if (kind.find("mast") != std::string::npos || kind.find("tower") != std::string::npos) {
+          kind = "mast";
+        } else {
+          kind = "obstacle";
+        }
+        const double fallback_height =
+          kind == "power_line" ? config.world_objects.default_power_line_height_m
+                               : config.world_objects.default_obstacle_height_m;
+        append_world_object(output,
+                            feature,
+                            kind,
+                            dmp_height_for_feature(feature, config, fallback_height),
+                            false,
+                            true,
+                            "active_safety_zone",
+                            kind == "windsock" ? "airport_windsock_wind"
+                                               : "obstacle_warning_context",
+                            config.world_objects.stream_out_distance_m);
+      } else if (layer.category == "significantObstacle" || layer.category == "obstacle") {
+        std::string kind = lower_feature_classification(feature);
+        if (kind.find("power") != std::string::npos || kind.find("line") != std::string::npos) {
+          kind = "power_line";
+        } else if (kind.find("mast") != std::string::npos || kind.find("tower") != std::string::npos) {
+          kind = "mast";
+        } else {
+          kind = "obstacle";
+        }
+        const double fallback_height =
+          kind == "power_line" ? config.world_objects.default_power_line_height_m
+                               : config.world_objects.default_obstacle_height_m;
+        append_world_object(output,
+                            feature,
+                            kind,
+                            dmp_height_for_feature(feature, config, fallback_height),
+                            false,
+                            true,
+                            "active_safety_zone",
+                            "obstacle_warning_context",
+                            config.world_objects.stream_out_distance_m);
+      } else if (layer.category == "airport") {
+        const std::string classification = lower_feature_classification(feature);
+        const bool is_windsock = classification.find("windsock") != std::string::npos ||
+                                 classification.find("wind sock") != std::string::npos;
+        append_world_object(output,
+                            feature,
+                            is_windsock ? "windsock" : "runway_object",
+                            dmp_height_for_feature(
+                              feature, config, config.world_objects.default_obstacle_height_m),
+                            false,
+                            true,
+                            "active_safety_zone",
+                            is_windsock ? "airport_windsock_wind" : "airport_surface_context",
+                            config.world_objects.stream_out_distance_m);
+      } else if (layer.category == "runway") {
+        append_world_object(output,
+                            feature,
+                            "runway_object",
+                            dmp_height_for_feature(feature, config, 0.5),
+                            false,
+                            true,
+                            "active_safety_zone",
+                            "airport_surface_context",
+                            config.world_objects.stream_out_distance_m);
+      }
+    }
+  }
+
+  const std::filesystem::path path = options.output_directory / "world" / "world-objects.json";
+  write_text_file(path, render_world_objects_json(source_manifest, config, output));
+  output.file = metadata_for_written_file(options.output_directory, path, "world-objects");
   return output;
 }
 
@@ -3075,7 +3550,8 @@ std::optional<std::string> find_disallowed_generated_runtime_reference(
   const PilotRegionPackageOptions& options,
   std::string_view package_manifest_json,
   const std::vector<VectorLayerOutput>& vector_layers,
-  const LabelOutput& labels) {
+  const LabelOutput& labels,
+  const WorldObjectsOutput& world_objects) {
   if (has_disallowed_runtime_reference(package_manifest_json)) {
     return "pilot-region-package.json";
   }
@@ -3089,6 +3565,10 @@ std::optional<std::string> find_disallowed_generated_runtime_reference(
   if (has_disallowed_runtime_reference(read_text_file(labels_path))) {
     return labels.file.path;
   }
+  const std::filesystem::path world_objects_path = options.output_directory / world_objects.file.path;
+  if (has_disallowed_runtime_reference(read_text_file(world_objects_path))) {
+    return world_objects.file.path;
+  }
   return std::nullopt;
 }
 
@@ -3099,7 +3579,8 @@ std::string package_identity_input(const PilotRegionPackageOptions& options,
                                    const std::vector<VectorLayerOutput>& vector_layers,
                                    const LabelOutput& labels,
                                    const MaskOutputs& masks,
-                                   const NavigationMapOutput& navigation_map) {
+                                   const NavigationMapOutput& navigation_map,
+                                   const WorldObjectsOutput& world_objects) {
   std::ostringstream input;
   input << "{\"packageName\":" << json_quote(options.package_name)
         << ",\"packageVersion\":" << json_quote(options.package_version)
@@ -3128,7 +3609,8 @@ std::string package_identity_input(const PilotRegionPackageOptions& options,
         << ",\"materialMask\":" << render_file_metadata(masks.material_mask)
         << ",\"navigationMap\":" << render_file_metadata(navigation_map.tile_archive)
         << ",\"navigationManifest\":"
-        << render_file_metadata(navigation_map.style_manifest) << "}";
+        << render_file_metadata(navigation_map.style_manifest)
+        << ",\"worldObjects\":" << render_file_metadata(world_objects.file) << "}";
   return input.str();
 }
 
@@ -3171,6 +3653,10 @@ std::size_t navigation_map_byte_count(const NavigationMapOutput& navigation_map)
   return navigation_map.tile_archive.size_bytes + navigation_map.style_manifest.size_bytes;
 }
 
+std::size_t world_object_byte_count(const WorldObjectsOutput& world_objects) {
+  return world_objects.file.size_bytes;
+}
+
 std::string render_package_manifest(const PilotRegionPackageOptions& options,
                                     const SourceManifest& source_manifest,
                                     const PilotPackageConfig& config,
@@ -3179,6 +3665,7 @@ std::string render_package_manifest(const PilotRegionPackageOptions& options,
                                     const LabelOutput& labels,
                                     const MaskOutputs& masks,
                                     const NavigationMapOutput& navigation_map,
+                                    const WorldObjectsOutput& world_objects,
                                     std::string_view package_id,
                                     std::string_view content_hash) {
   const std::set<std::string> used_source_ids = collect_used_source_ids(config);
@@ -3228,6 +3715,21 @@ std::string render_package_manifest(const PilotRegionPackageOptions& options,
   output << "    \"attributionVisible\": true\n";
   output << "  },\n";
   output << "  \"masks\": " << render_masks_metadata(masks, "  ") << ",\n";
+  output << "  \"worldObjects\": {\n";
+  output << "    \"renderer\": \"FlyingOfflinePilotTerrainActor\",\n";
+  output << "    \"schemaVersion\": \"flying.world-objects.v1\",\n";
+  output << "    \"objectCount\": " << world_objects.objects.size() << ",\n";
+  output << "    \"file\": " << render_file_metadata(world_objects.file) << ",\n";
+  output << "    \"placementPolicy\": {\n";
+  output << "      \"approvedVectorDataOnly\": true,\n";
+  output << "      \"orthoColorInferenceAllowed\": false,\n";
+  output << "      \"heightSource\": \"dmp-derived-estimate-with-vector-property-override\"\n";
+  output << "    },\n";
+  output << "    \"criticalObjectTypes\": [\"mast\", \"power_line\", \"obstacle\", \"water_surface\", \"windsock\", \"runway_object\"],\n";
+  output << "    \"environmentAudioHooks\": [\"water_ambience\", \"vegetation_wind\", \"airport_windsock_wind\"],\n";
+  output << "    \"activeZoneCollisionOnly\": true,\n";
+  output << "    \"densityScalesPreserveFlightCriticalObjects\": true\n";
+  output << "  },\n";
   output << "  \"streaming\": {\n";
   output << "    \"runtimeNetworkRequired\": false,\n";
   output << "    \"externalMapApis\": [],\n";
@@ -3248,10 +3750,12 @@ std::string render_package_manifest(const PilotRegionPackageOptions& options,
   output << "    \"vectorBytes\": " << vector_byte_count(vector_layers, labels) << ",\n";
   output << "    \"navigationMapBytes\": "
          << navigation_map_byte_count(navigation_map) << ",\n";
+  output << "    \"worldObjectBytes\": " << world_object_byte_count(world_objects) << ",\n";
   output << "    \"maskBytes\": " << mask_byte_count(masks) << ",\n";
   output << "    \"totalBytes\": "
          << (imagery_byte_count(imagery) + vector_byte_count(vector_layers, labels) +
-             navigation_map_byte_count(navigation_map) + mask_byte_count(masks)) << "\n";
+             navigation_map_byte_count(navigation_map) + world_object_byte_count(world_objects) +
+             mask_byte_count(masks)) << "\n";
   output << "  },\n";
   output << "  \"validation\": {\n";
   output << "    \"offlineRuntime\": {\n";
@@ -3542,6 +4046,8 @@ PilotRegionPackageResult process_pilot_region_packages(
     const MaskOutputs masks = process_masks(options, *config, vector_layers);
     const NavigationMapOutput navigation_map = process_navigation_map_package(
       options, *source_validation.manifest, *config, vector_layers, labels);
+    const WorldObjectsOutput world_objects =
+      process_world_objects(options, *source_validation.manifest, *config, vector_layers);
 
     const std::string identity_input = package_identity_input(
       options,
@@ -3551,7 +4057,8 @@ PilotRegionPackageResult process_pilot_region_packages(
       vector_layers,
       labels,
       masks,
-      navigation_map);
+      navigation_map,
+      world_objects);
     const std::string content_hash = sha256_text(identity_input);
     const std::string package_id = make_package_id(options, *config, content_hash);
     result.report.package_id = package_id;
@@ -3564,11 +4071,12 @@ PilotRegionPackageResult process_pilot_region_packages(
                                                               labels,
                                                               masks,
                                                               navigation_map,
+                                                              world_objects,
                                                               package_id,
                                                               content_hash);
     if (const std::optional<std::string> unsafe_runtime_package =
           find_disallowed_generated_runtime_reference(
-            options, manifest_json, vector_layers, labels)) {
+            options, manifest_json, vector_layers, labels, world_objects)) {
       add_issue(result.report,
                 "error",
                 "pilot.offline_manifest.disallowed_runtime_reference",

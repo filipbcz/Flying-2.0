@@ -6,30 +6,31 @@
 - default branch: main
 
 ## Task
-- title: Flying: 24. Implement Offline 2D Navigation Map
+- title: Flying: 25. Implement World Objects, Vegetation, Water, Obstacles, And Audio
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-24. Implement Offline 2D Navigation Map
+25. Implement World Objects, Vegetation, Water, Obstacles, And Audio
 
 Step description and scope:
-Build the runtime 2D map using local vector tiles from ZABAGED, Geonames, airports, runways, obstacles, and permitted airspace data, with local style definitions and no runtime dependency on external APIs.
+Generate and stream procedural buildings, vegetation, water surfaces, obstacles, power lines, windsocks, and environment audio from approved vector and terrain data with collision limited to active safety zones.
 
 In scope:
-- Local vector tile generation integration
-- Runtime map renderer
-- Layer toggles
-- Aircraft and replay overlays
-- Offline attribution display
-- Map style
+- Procedural placement rules
+- Building and vegetation generation
+- Water rendering/collision metadata
+- Flight-critical obstacles
+- Active-zone collision management
+- Environment audio hooks
+- Graphics-density scaling
 
 Out of scope:
-- External public tile servers
-- Online route planning
-- Paid API integrations
-- Global map coverage
+- Nationwide photogrammetric 3D cities
+- Random object placement from imagery only
+- Full collision for every distant object
+- Wildlife or non-flight decorative systems
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -61,9 +62,9 @@ Already completed roadmap steps (existing repository context):
 - 21. Scale Terrain Pipeline To Full Czech Republic
 - 22. Complete Airport And SLZ Coverage
 - 23. Implement Detailed Airport Set
+- 24. Implement Offline 2D Navigation Map
 
 Future roadmap steps (explicitly out of scope):
-- 25. Implement World Objects, Vegetation, Water, Obstacles, And Audio
 - 26. Implement Save, Scenario Editor, Diagnostics, And Failure Workflows
 - 27. Optimize Performance And Long-Run Stability
 - 28. Implement Packaging, Installer, Signing, Updates, And Crash Diagnostics
@@ -71,10 +72,10 @@ Future roadmap steps (explicitly out of scope):
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- 2D map loads all required base and aviation layers from local MBTiles or PMTiles packages.
-- Map can toggle airports, runways, obstacles, airspaces, labels, aircraft position, flight path, and replay track.
-- Runtime map initialization succeeds with network disabled and without API keys.
-- Map attribution is visible in the application and matches source-license documentation.
+- Buildings and vegetation are placed from approved vector data and DMP-derived height estimates, not from ortho color inference alone.
+- Flight-critical obstacles, masts, power lines, windsocks, runway objects, and water bodies are represented with appropriate visibility and active-zone collision behavior.
+- Vegetation and object density scales through graphics profiles without breaking collision rules for flight-critical objects.
+- Distant terrain and object streaming avoid visible horizon instability or disruptive popping in approved test routes.
 
 ## Agent Configuration
 - no project config provided, using defaults

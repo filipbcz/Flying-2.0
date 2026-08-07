@@ -17,6 +17,7 @@
     "runtimeDependencies",
     "imagery",
     "vectorPackages",
+    "worldObjects",
     "masks",
     "streaming",
     "packagingLayout",
@@ -168,6 +169,60 @@
         "materialMask": {"$ref": "#/$defs/fileMetadata"}
       }
     },
+    "worldObjects": {
+      "type": "object",
+      "required": [
+        "renderer",
+        "schemaVersion",
+        "objectCount",
+        "file",
+        "placementPolicy",
+        "criticalObjectTypes",
+        "environmentAudioHooks",
+        "activeZoneCollisionOnly",
+        "densityScalesPreserveFlightCriticalObjects"
+      ],
+      "properties": {
+        "renderer": {"const": "FlyingOfflinePilotTerrainActor"},
+        "schemaVersion": {"const": "flying.world-objects.v1"},
+        "objectCount": {"type": "integer", "minimum": 0},
+        "file": {"$ref": "#/$defs/fileMetadata"},
+        "placementPolicy": {
+          "type": "object",
+          "required": [
+            "approvedVectorDataOnly",
+            "orthoColorInferenceAllowed",
+            "heightSource"
+          ],
+          "properties": {
+            "approvedVectorDataOnly": {"const": true},
+            "orthoColorInferenceAllowed": {"const": false},
+            "heightSource": {"const": "dmp-derived-estimate-with-vector-property-override"}
+          }
+        },
+        "criticalObjectTypes": {
+          "type": "array",
+          "contains": {"const": "mast"},
+          "allOf": [
+            {"contains": {"const": "power_line"}},
+            {"contains": {"const": "obstacle"}},
+            {"contains": {"const": "water_surface"}},
+            {"contains": {"const": "windsock"}},
+            {"contains": {"const": "runway_object"}}
+          ]
+        },
+        "environmentAudioHooks": {
+          "type": "array",
+          "contains": {"const": "water_ambience"},
+          "allOf": [
+            {"contains": {"const": "vegetation_wind"}},
+            {"contains": {"const": "airport_windsock_wind"}}
+          ]
+        },
+        "activeZoneCollisionOnly": {"const": true},
+        "densityScalesPreserveFlightCriticalObjects": {"const": true}
+      }
+    },
     "streaming": {
       "type": "object",
       "required": [
@@ -199,6 +254,7 @@
         "materialMaskAvailable",
         "imageryBytes",
         "vectorBytes",
+        "worldObjectBytes",
         "maskBytes",
         "totalBytes"
       ],
@@ -212,6 +268,7 @@
         "materialMaskAvailable": {"const": true},
         "imageryBytes": {"type": "integer", "minimum": 1},
         "vectorBytes": {"type": "integer", "minimum": 1},
+        "worldObjectBytes": {"type": "integer", "minimum": 1},
         "maskBytes": {"type": "integer", "minimum": 1},
         "totalBytes": {"type": "integer", "minimum": 1}
       }
