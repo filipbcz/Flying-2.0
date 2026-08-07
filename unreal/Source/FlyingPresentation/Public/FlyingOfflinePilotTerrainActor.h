@@ -29,7 +29,16 @@ public:
   FString PilotRegionPackageManifestPath;
 
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Offline Packages")
-  int32 RenderLodLevel = 0;
+  int32 RenderLodLevel = -1;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Performance")
+  int32 MaxTerrainSectionsPerLoad = 0;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Performance")
+  int32 MaxTerrainVerticesPerSection = 0;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Performance")
+  FVector2D TerrainStreamingFocusLocalMeters = FVector2D::ZeroVector;
 
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Offline Packages")
   TObjectPtr<UMaterialInterface> VertexColorMaterial;

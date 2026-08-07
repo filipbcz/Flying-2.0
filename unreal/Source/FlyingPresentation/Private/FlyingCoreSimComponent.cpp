@@ -1,6 +1,7 @@
 #include "FlyingCoreSimComponent.h"
 
 #include "FlyingPresentationSettings.h"
+#include "HAL/PlatformTime.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Serialization/JsonReader.h"
@@ -32,6 +33,7 @@ using flying::core_sim::AircraftSystemsModel;
 using flying::core_sim::ControlInputSample;
 using flying::core_sim::CoreSimulator;
 using flying::core_sim::DataPackageVersion;
+using flying::core_sim::AdvanceReport;
 using flying::core_sim::Quaterniond;
 using flying::core_sim::ReplayEnvironment;
 using flying::core_sim::Vector3d;
@@ -747,19 +749,19 @@ struct FFlyingCoreSimBridgeImpl
                  "; active telemetry recording stopped";
   }
 
-  void Advance(double DeltaSeconds)
+  AdvanceReport Advance(double DeltaSeconds)
   {
-    Advance(
+    return Advance(
       DeltaSeconds,
       ControlInputSample{},
       Simulator.initial_aircraft_controls(),
       Simulator.initial_aircraft_controls().mixture_norm > 0.0);
   }
 
-  void Advance(double DeltaSeconds,
-               const ControlInputSample& Input,
-               const AircraftControlInputSample& AircraftControls,
-               bool bEngineRunning)
+  AdvanceReport Advance(double DeltaSeconds,
+                        const ControlInputSample& Input,
+                        const AircraftControlInputSample& AircraftControls,
+                        bool bEngineRunning)
   {
     const auto Report = Simulator.advance(DeltaSeconds, Input);
     LastAircraftControls = AircraftControls;
@@ -778,6 +780,7 @@ struct FFlyingCoreSimBridgeImpl
         Simulator.state(),
         flying::core_sim::current_unix_time_ms());
     }
+    return Report;
   }
 
   void ApplyAircraftControls(const AircraftControlInputSample& AircraftControls,
@@ -1381,6 +1384,7 @@ void UFlyingCoreSimComponent::TickComponent(
 
   if (bAutoAdvance)
   {
+    UpdatePerformanceCounters(static_cast<double>(DeltaTime));
     AdvanceCoreSim(static_cast<double>(DeltaTime));
   }
 }
@@ -1501,7 +1505,18 @@ void UFlyingCoreSimComponent::AdvanceCoreSim(double DeltaSeconds)
 
   try
   {
-    Bridge->Advance(ClampedDeltaSeconds);
+    const AdvanceReport Report = Bridge->Advance(ClampedDeltaSeconds);
+    // This counter validates executed 240 Hz steps for the interval CoreSim was
+    // asked to advance; the max-advance clamp is a separate hitch protection.
+    const int32 ExpectedSteps =
+      FMath::Max(0, FMath::RoundToInt(ClampedDeltaSeconds / Report.fixed_step_s));
+    MaxCoreSimStepsPerFrame =
+      FMath::Max(MaxCoreSimStepsPerFrame, static_cast<int32>(Report.steps_executed));
+    if (Report.steps_executed < static_cast<uint32>(ExpectedSteps))
+    {
+      CoreSimMissedStepCount +=
+        static_cast<int64>(ExpectedSteps - static_cast<int32>(Report.steps_executed));
+    }
     PublishSnapshot();
     PublishTelemetryStatus();
   }
@@ -1519,18 +1534,32 @@ void UFlyingCoreSimComponent::AdvanceCoreSimWithInputs(
   bool bEngineRunning)
 {
   LastMappedInputState = MappedInputState;
+  LastInputSampleSeconds = FPlatformTime::Seconds();
   EnsureBridge();
   const double ClampedDeltaSeconds =
     MaxAdvanceDeltaSeconds > 0.0 ? std::min(DeltaSeconds, MaxAdvanceDeltaSeconds) : DeltaSeconds;
 
   try
   {
-    Bridge->Advance(
+    const AdvanceReport Report = Bridge->Advance(
       ClampedDeltaSeconds,
       ToCoreInput(ForceBodyNewtons, MomentBodyNewtonMeters),
       ToCoreAircraftControls(MappedInputState),
       bEngineRunning);
+    // This counter validates executed 240 Hz steps for the interval CoreSim was
+    // asked to advance; the max-advance clamp is a separate hitch protection.
+    const int32 ExpectedSteps =
+      FMath::Max(0, FMath::RoundToInt(ClampedDeltaSeconds / Report.fixed_step_s));
+    MaxCoreSimStepsPerFrame =
+      FMath::Max(MaxCoreSimStepsPerFrame, static_cast<int32>(Report.steps_executed));
+    if (Report.steps_executed < static_cast<uint32>(ExpectedSteps))
+    {
+      CoreSimMissedStepCount +=
+        static_cast<int64>(ExpectedSteps - static_cast<int32>(Report.steps_executed));
+    }
     PublishSnapshot();
+    LastCoreSimInputProcessingMilliseconds =
+      (FPlatformTime::Seconds() - LastInputSampleSeconds) * 1000.0;
     PublishTelemetryStatus();
   }
   catch (const std::exception& Error)
@@ -1549,11 +1578,14 @@ void UFlyingCoreSimComponent::ApplyMappedAircraftControls(
   bool bEngineRunning)
 {
   LastMappedInputState = MappedInputState;
+  LastInputSampleSeconds = FPlatformTime::Seconds();
   EnsureBridge();
   try
   {
     Bridge->ApplyAircraftControls(ToCoreAircraftControls(MappedInputState), bEngineRunning);
     PublishSnapshot();
+    LastCoreSimInputProcessingMilliseconds =
+      (FPlatformTime::Seconds() - LastInputSampleSeconds) * 1000.0;
   }
   catch (const std::exception& Error)
   {
@@ -1653,6 +1685,36 @@ double UFlyingCoreSimComponent::GetAircraftLoadedWeightKg() const
 const FFlyingMappedInputState& UFlyingCoreSimComponent::GetLastMappedInputState() const
 {
   return LastMappedInputState;
+}
+
+int64 UFlyingCoreSimComponent::GetCoreSimMissedStepCount() const
+{
+  return CoreSimMissedStepCount;
+}
+
+int32 UFlyingCoreSimComponent::GetMaxCoreSimStepsPerFrame() const
+{
+  return MaxCoreSimStepsPerFrame;
+}
+
+double UFlyingCoreSimComponent::GetAverageFrameRate() const
+{
+  return AverageFrameRate;
+}
+
+double UFlyingCoreSimComponent::GetOnePercentLowFrameRate() const
+{
+  return OnePercentLowFrameRate;
+}
+
+double UFlyingCoreSimComponent::GetMaxObservedHitchMilliseconds() const
+{
+  return MaxObservedHitchMilliseconds;
+}
+
+double UFlyingCoreSimComponent::GetLastCoreSimInputProcessingMilliseconds() const
+{
+  return LastCoreSimInputProcessingMilliseconds;
 }
 
 bool UFlyingCoreSimComponent::StartTelemetryRecording(
@@ -1847,6 +1909,63 @@ void UFlyingCoreSimComponent::PublishSnapshot()
 {
   CurrentSnapshot = Bridge ? Bridge->Snapshot() : FFlyingCoreSimStateSnapshot{};
   CurrentInstrumentSnapshot = Bridge ? Bridge->InstrumentSnapshot() : FFlyingAircraftInstrumentSnapshot{};
+}
+
+void UFlyingCoreSimComponent::UpdatePerformanceCounters(double DeltaSeconds)
+{
+  if (DeltaSeconds <= 0.0)
+  {
+    return;
+  }
+
+  const UFlyingPresentationSettings* Settings = GetDefault<UFlyingPresentationSettings>();
+  const double HitchMilliseconds = DeltaSeconds * 1000.0;
+  MaxObservedHitchMilliseconds =
+    FMath::Max(MaxObservedHitchMilliseconds, HitchMilliseconds);
+
+  constexpr int32 kFrameWindowCapacity = 3600;
+  if (FrameTimeWindowSeconds.Num() < kFrameWindowCapacity)
+  {
+    FrameTimeWindowSeconds.Add(DeltaSeconds);
+    FrameTimeWindowTotalSeconds += DeltaSeconds;
+  }
+  else
+  {
+    FrameTimeWindowTotalSeconds -= FrameTimeWindowSeconds[FrameTimeWindowWriteIndex];
+    FrameTimeWindowSeconds[FrameTimeWindowWriteIndex] = DeltaSeconds;
+    FrameTimeWindowTotalSeconds += DeltaSeconds;
+    FrameTimeWindowWriteIndex =
+      (FrameTimeWindowWriteIndex + 1) % kFrameWindowCapacity;
+  }
+
+  if (FrameTimeWindowTotalSeconds > 0.0)
+  {
+    AverageFrameRate =
+      static_cast<double>(FrameTimeWindowSeconds.Num()) / FrameTimeWindowTotalSeconds;
+  }
+
+  ++PerformanceCounterFrameIndex;
+  if (PerformanceCounterFrameIndex % 15 != 0 &&
+      OnePercentLowFrameRate > 0.0 &&
+      HitchMilliseconds <= Settings->MaximumStreamingHitchMilliseconds)
+  {
+    return;
+  }
+
+  TArray<double> SortedFrameTimes = FrameTimeWindowSeconds;
+  SortedFrameTimes.Sort();
+  const int32 SlowFrameCount = FMath::Max(1, FMath::CeilToInt(
+    static_cast<double>(SortedFrameTimes.Num()) * 0.01));
+  double SlowFrameTotalSeconds = 0.0;
+  for (int32 Index = 0; Index < SlowFrameCount; ++Index)
+  {
+    SlowFrameTotalSeconds += SortedFrameTimes[SortedFrameTimes.Num() - 1 - Index];
+  }
+  if (SlowFrameTotalSeconds > 0.0)
+  {
+    OnePercentLowFrameRate =
+      static_cast<double>(SlowFrameCount) / SlowFrameTotalSeconds;
+  }
 }
 
 void UFlyingCoreSimComponent::PublishTelemetryStatus()

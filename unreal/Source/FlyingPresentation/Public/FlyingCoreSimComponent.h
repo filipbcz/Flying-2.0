@@ -133,6 +133,24 @@ public:
   UFUNCTION(BlueprintPure, Category="Flying|Input")
   const FFlyingMappedInputState& GetLastMappedInputState() const;
 
+  UFUNCTION(BlueprintPure, Category="Flying|Performance")
+  int64 GetCoreSimMissedStepCount() const;
+
+  UFUNCTION(BlueprintPure, Category="Flying|Performance")
+  int32 GetMaxCoreSimStepsPerFrame() const;
+
+  UFUNCTION(BlueprintPure, Category="Flying|Performance")
+  double GetAverageFrameRate() const;
+
+  UFUNCTION(BlueprintPure, Category="Flying|Performance")
+  double GetOnePercentLowFrameRate() const;
+
+  UFUNCTION(BlueprintPure, Category="Flying|Performance")
+  double GetMaxObservedHitchMilliseconds() const;
+
+  UFUNCTION(BlueprintPure, Category="Flying|Performance")
+  double GetLastCoreSimInputProcessingMilliseconds() const;
+
   UFUNCTION(BlueprintCallable, Category="Flying|Replay")
   bool StartTelemetryRecording(const FString& OutputPath, const FString& SessionId);
 
@@ -167,6 +185,7 @@ private:
   void EnsureBridge();
   void PublishSnapshot();
   void PublishTelemetryStatus();
+  void UpdatePerformanceCounters(double DeltaSeconds);
 
   TUniquePtr<FFlyingCoreSimBridgeImpl> Bridge;
 
@@ -187,4 +206,28 @@ private:
 
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Input", meta=(AllowPrivateAccess="true"))
   FFlyingMappedInputState LastMappedInputState;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Performance", meta=(AllowPrivateAccess="true"))
+  int64 CoreSimMissedStepCount = 0;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Performance", meta=(AllowPrivateAccess="true"))
+  int32 MaxCoreSimStepsPerFrame = 0;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Performance", meta=(AllowPrivateAccess="true"))
+  double AverageFrameRate = 0.0;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Performance", meta=(AllowPrivateAccess="true"))
+  double OnePercentLowFrameRate = 0.0;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Performance", meta=(AllowPrivateAccess="true"))
+  double MaxObservedHitchMilliseconds = 0.0;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Performance", meta=(AllowPrivateAccess="true"))
+  double LastCoreSimInputProcessingMilliseconds = 0.0;
+
+  double LastInputSampleSeconds = 0.0;
+  double FrameTimeWindowTotalSeconds = 0.0;
+  int32 FrameTimeWindowWriteIndex = 0;
+  int32 PerformanceCounterFrameIndex = 0;
+  TArray<double> FrameTimeWindowSeconds;
 };

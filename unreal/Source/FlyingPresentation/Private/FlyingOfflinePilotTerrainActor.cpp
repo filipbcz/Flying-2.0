@@ -25,6 +25,7 @@ struct FLocalTerrainTile
 {
   FString TileId;
   FString Path;
+  FBox2D Bounds;
   int32 Rows = 0;
   int32 Cols = 0;
   TArray<FLocalTerrainSample> Samples;
@@ -170,6 +171,34 @@ bool IsTerrainTileSampleCountWithinBounds(int32 Rows, int32 Cols)
          SampleCount <= kMaxTerrainTileSamples;
 }
 
+bool TryReadBoundsFromJson(const TSharedPtr<FJsonObject>& BoundsObject, FBox2D& OutBounds)
+{
+  if (!BoundsObject.IsValid())
+  {
+    return false;
+  }
+
+  double MinEast = 0.0;
+  double MaxEast = 0.0;
+  double MinNorth = 0.0;
+  double MaxNorth = 0.0;
+  if (!BoundsObject->TryGetNumberField(TEXT("minEastM"), MinEast) ||
+      !BoundsObject->TryGetNumberField(TEXT("maxEastM"), MaxEast) ||
+      !BoundsObject->TryGetNumberField(TEXT("minNorthM"), MinNorth) ||
+      !BoundsObject->TryGetNumberField(TEXT("maxNorthM"), MaxNorth))
+  {
+    return false;
+  }
+
+  if (MinEast >= MaxEast || MinNorth >= MaxNorth)
+  {
+    return false;
+  }
+
+  OutBounds = FBox2D(FVector2D(MinEast, MinNorth), FVector2D(MaxEast, MaxNorth));
+  return true;
+}
+
 bool IsPpmPixelCountWithinBounds(int32 Width, int32 Height)
 {
   const int64 PixelCount = static_cast<int64>(Width) * static_cast<int64>(Height);
@@ -303,10 +332,15 @@ bool ParseTerrainTileMetadata(const TSharedPtr<FJsonObject>& TileObject, FLocalT
     return false;
   }
 
+  const TSharedPtr<FJsonObject>* BoundsObject = nullptr;
   if (!TileObject->TryGetStringField(TEXT("tileId"), OutTile.TileId) ||
       !TileObject->TryGetStringField(TEXT("path"), OutTile.Path) ||
       !TryReadBoundedJsonInt(TileObject, TEXT("rows"), 2, kMaxTerrainTileRows, OutTile.Rows) ||
       !TryReadBoundedJsonInt(TileObject, TEXT("cols"), 2, kMaxTerrainTileCols, OutTile.Cols) ||
+      !TileObject->TryGetObjectField(TEXT("bounds"), BoundsObject) ||
+      !BoundsObject ||
+      !BoundsObject->IsValid() ||
+      !TryReadBoundsFromJson(*BoundsObject, OutTile.Bounds) ||
       !IsTerrainTileSampleCountWithinBounds(OutTile.Rows, OutTile.Cols))
   {
     UE_LOG(LogTemp, Warning, TEXT("Terrain package tile metadata is invalid or exceeds bounds."));
@@ -318,6 +352,9 @@ bool ParseTerrainTileMetadata(const TSharedPtr<FJsonObject>& TileObject, FLocalT
 
 bool LoadTerrainTiles(const FString& TerrainManifestPath,
                       int32 RequestedLod,
+                      int32 MaxTerrainSectionsPerLoad,
+                      int32 MaxTerrainVerticesPerSection,
+                      const FVector2D& TerrainStreamingFocusLocalMeters,
                       TArray<FLocalTerrainTile>& OutTiles)
 {
   TSharedPtr<FJsonObject> TerrainManifest;
@@ -369,12 +406,59 @@ bool LoadTerrainTiles(const FString& TerrainManifestPath,
     return false;
   }
 
-  OutTiles.Reset();
+  TArray<FLocalTerrainTile> CandidateTiles;
   for (const TSharedPtr<FJsonValue>& TileValue : *TileValues)
   {
     FLocalTerrainTile Tile;
-    if (!ParseTerrainTileMetadata(TileValue->AsObject(), Tile) ||
-        !LoadTerrainTileCsv(PackageRoot, Tile))
+    if (!ParseTerrainTileMetadata(TileValue->AsObject(), Tile))
+    {
+      return false;
+    }
+
+    const int64 TileVertexCount =
+      static_cast<int64>(Tile.Rows) * static_cast<int64>(Tile.Cols);
+    if (MaxTerrainVerticesPerSection > 0 &&
+        TileVertexCount > MaxTerrainVerticesPerSection)
+    {
+      UE_LOG(
+        LogTemp,
+        Warning,
+        TEXT("Skipping terrain tile %s because it exceeds the per-section vertex budget."),
+        *Tile.TileId);
+      continue;
+    }
+
+    CandidateTiles.Add(MoveTemp(Tile));
+  }
+
+  CandidateTiles.Sort(
+    [&TerrainStreamingFocusLocalMeters](const FLocalTerrainTile& Left, const FLocalTerrainTile& Right)
+    {
+      const double LeftDistanceSquared =
+        (Left.Bounds.GetCenter() - TerrainStreamingFocusLocalMeters).SizeSquared();
+      const double RightDistanceSquared =
+        (Right.Bounds.GetCenter() - TerrainStreamingFocusLocalMeters).SizeSquared();
+      if (LeftDistanceSquared == RightDistanceSquared)
+      {
+        return Left.TileId < Right.TileId;
+      }
+      return LeftDistanceSquared < RightDistanceSquared;
+    });
+
+  OutTiles.Reset();
+  for (FLocalTerrainTile& Tile : CandidateTiles)
+  {
+    if (MaxTerrainSectionsPerLoad > 0 &&
+        OutTiles.Num() >= MaxTerrainSectionsPerLoad)
+    {
+      UE_LOG(
+        LogTemp,
+        Warning,
+        TEXT("Terrain section budget reached; route-proximity-prioritized tiles beyond the budget stay unloaded for the high-performance profile."));
+      break;
+    }
+
+    if (!LoadTerrainTileCsv(PackageRoot, Tile))
     {
       return false;
     }
@@ -532,34 +616,6 @@ bool LoadPpmP3(const FString& FilePath, int32& OutWidth, int32& OutHeight, TArra
   return OutPixels.Num() == PixelCount;
 }
 
-bool TryReadBoundsFromJson(const TSharedPtr<FJsonObject>& BoundsObject, FBox2D& OutBounds)
-{
-  if (!BoundsObject.IsValid())
-  {
-    return false;
-  }
-
-  double MinEast = 0.0;
-  double MaxEast = 0.0;
-  double MinNorth = 0.0;
-  double MaxNorth = 0.0;
-  if (!BoundsObject->TryGetNumberField(TEXT("minEastM"), MinEast) ||
-      !BoundsObject->TryGetNumberField(TEXT("maxEastM"), MaxEast) ||
-      !BoundsObject->TryGetNumberField(TEXT("minNorthM"), MinNorth) ||
-      !BoundsObject->TryGetNumberField(TEXT("maxNorthM"), MaxNorth))
-  {
-    return false;
-  }
-
-  if (MinEast >= MaxEast || MinNorth >= MaxNorth)
-  {
-    return false;
-  }
-
-  OutBounds = FBox2D(FVector2D(MinEast, MinNorth), FVector2D(MaxEast, MaxNorth));
-  return true;
-}
-
 bool LoadImageryPackage(const FString& PilotPackageManifestPath, TArray<FOfflineImageryTile>& OutTiles)
 {
   TSharedPtr<FJsonObject> PilotPackage;
@@ -643,7 +699,11 @@ bool LoadImageryPackage(const FString& PilotPackageManifestPath, TArray<FOffline
     }
 
     FOfflineImageryTile Tile;
-    if (!TryReadBoundsFromJson(TileObject->GetObjectField(TEXT("bounds")), Tile.Bounds) ||
+    const TSharedPtr<FJsonObject>* BoundsObject = nullptr;
+    if (!TileObject->TryGetObjectField(TEXT("bounds"), BoundsObject) ||
+        !BoundsObject ||
+        !BoundsObject->IsValid() ||
+        !TryReadBoundsFromJson(*BoundsObject, Tile.Bounds) ||
         !LoadPpmP3(ImagePath, Tile.Width, Tile.Height, Tile.Pixels) ||
         Tile.Width != ExpectedWidth ||
         Tile.Height != ExpectedHeight)
@@ -745,6 +805,18 @@ void AFlyingOfflinePilotTerrainActor::BeginPlay()
   {
     PilotRegionPackageManifestPath = Settings->PilotRegionPackageManifestPath;
   }
+  if (RenderLodLevel < 0)
+  {
+    RenderLodLevel = Settings->HighGraphicsTerrainLodLevel;
+  }
+  if (MaxTerrainSectionsPerLoad <= 0)
+  {
+    MaxTerrainSectionsPerLoad = Settings->MaxTerrainSectionsPerLoad;
+  }
+  if (MaxTerrainVerticesPerSection <= 0)
+  {
+    MaxTerrainVerticesPerSection = Settings->MaxTerrainVerticesPerSection;
+  }
 
   GeoreferenceComponent->ConfigureOriginFromSettings();
 
@@ -756,11 +828,39 @@ void AFlyingOfflinePilotTerrainActor::BeginPlay()
 
 bool AFlyingOfflinePilotTerrainActor::LoadOfflinePackages()
 {
+  const UFlyingPresentationSettings* Settings = GetDefault<UFlyingPresentationSettings>();
+  if (TerrainPackageManifestPath.IsEmpty())
+  {
+    TerrainPackageManifestPath = Settings->TerrainPackageManifestPath;
+  }
+  if (PilotRegionPackageManifestPath.IsEmpty())
+  {
+    PilotRegionPackageManifestPath = Settings->PilotRegionPackageManifestPath;
+  }
+  if (RenderLodLevel < 0)
+  {
+    RenderLodLevel = Settings->HighGraphicsTerrainLodLevel;
+  }
+  if (MaxTerrainSectionsPerLoad <= 0)
+  {
+    MaxTerrainSectionsPerLoad = Settings->MaxTerrainSectionsPerLoad;
+  }
+  if (MaxTerrainVerticesPerSection <= 0)
+  {
+    MaxTerrainVerticesPerSection = Settings->MaxTerrainVerticesPerSection;
+  }
+
   const FString TerrainManifestPath = ResolvePackagePath(TerrainPackageManifestPath);
   const FString PilotManifestPath = ResolvePackagePath(PilotRegionPackageManifestPath);
 
   TArray<FLocalTerrainTile> TerrainTiles;
-  if (!LoadTerrainTiles(TerrainManifestPath, RenderLodLevel, TerrainTiles))
+  if (!LoadTerrainTiles(
+        TerrainManifestPath,
+        RenderLodLevel,
+        MaxTerrainSectionsPerLoad,
+        MaxTerrainVerticesPerSection,
+        TerrainStreamingFocusLocalMeters,
+        TerrainTiles))
   {
     UE_LOG(LogTemp, Warning, TEXT("No local terrain package tiles loaded from %s"), *TerrainManifestPath);
     return false;
@@ -776,7 +876,6 @@ bool AFlyingOfflinePilotTerrainActor::LoadOfflinePackages()
     }
   }
 
-  const UFlyingPresentationSettings* Settings = GetDefault<UFlyingPresentationSettings>();
   const auto Origin = flying::geo_terrain::make_geodetic_degrees(
     Settings->PilotOriginLatitudeDegrees,
     Settings->PilotOriginLongitudeDegrees,

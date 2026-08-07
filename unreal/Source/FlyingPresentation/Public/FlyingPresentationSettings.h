@@ -48,4 +48,37 @@ public:
 
   UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|CoreSim")
   double DefaultAircraftInitialSpeedEastMetersPerSecond = 35.0;
+
+  UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Performance", meta=(ClampMin="1"))
+  int32 HighGraphicsTargetFrameRate = 60;
+
+  UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Performance", meta=(ClampMin="1"))
+  int32 HighGraphicsMinimumOnePercentLowFps = 45;
+
+  UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Performance", meta=(ClampMin="0.0"))
+  double MaximumInputLatencyMilliseconds = 50.0;
+
+  UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Performance", meta=(ClampMin="0.0"))
+  double MaximumStreamingHitchMilliseconds = 100.0;
+
+  UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Performance", meta=(ClampMin="1.0"))
+  double MaximumSoakRamGiB = 24.0;
+
+  UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Performance", meta=(ClampMin="1.0"))
+  double MaximumSoakVramGiB = 10.0;
+
+  UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Performance", meta=(ClampMin="1.0"))
+  double SoakDurationHours = 10.0;
+
+  UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Performance", meta=(ClampMin="0"))
+  int32 HighGraphicsTerrainLodLevel = 1;
+
+  UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Performance", meta=(ClampMin="1"))
+  int32 MaxTerrainSectionsPerLoad = 24;
+
+  UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Performance", meta=(ClampMin="4"))
+  int32 MaxTerrainVerticesPerSection = 262144;
+
+  UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Performance", meta=(ClampMin="0.0", ClampMax="1.0"))
+  double OrdinaryTerrainObjectDensityScale = 0.65;
 };

@@ -6,31 +6,32 @@
 - default branch: main
 
 ## Task
-- title: Flying: 26. Implement Save, Scenario Editor, Diagnostics, And Failure Workflows
+- title: Flying: 27. Optimize Performance And Long-Run Stability
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-26. Implement Save, Scenario Editor, Diagnostics, And Failure Workflows
+27. Optimize Performance And Long-Run Stability
 
 Step description and scope:
-Add complete user workflow support for scenario creation, save/load, failure setup, diagnostics overlay, post-flight route map, telemetry graph viewing, and robust save-data handling.
+Profile and optimize rendering, terrain streaming, object density, CoreSim timing, input latency, memory use, hitching, and long-duration stability on the reference Windows 11 hardware class.
 
 In scope:
-- Scenario editor
-- Save/load system
-- Failure setup UI
-- Diagnostics overlay
-- Post-flight route map
-- Telemetry graph UI
-- Atomic save handling
+- Profiling
+- Rendering optimization
+- Terrain streaming optimization
+- Object density scaling
+- CoreSim timing validation
+- Input latency measurement
+- Memory/VRAM budget enforcement
+- Ten-hour soak
 
 Out of scope:
-- Cloud saves
-- Multiplayer scenarios
-- Training certification workflows
-- New aircraft types
+- Supporting below-minimum hardware
+- VR performance
+- Force feedback performance
+- Non-Windows platforms
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -64,18 +65,18 @@ Already completed roadmap steps (existing repository context):
 - 23. Implement Detailed Airport Set
 - 24. Implement Offline 2D Navigation Map
 - 25. Implement World Objects, Vegetation, Water, Obstacles, And Audio
+- 26. Implement Save, Scenario Editor, Diagnostics, And Failure Workflows
 
 Future roadmap steps (explicitly out of scope):
-- 27. Optimize Performance And Long-Run Stability
 - 28. Implement Packaging, Installer, Signing, Updates, And Crash Diagnostics
 - 29. Produce Licensing, SBOM, Documentation, And Release Evidence
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- User can configure aircraft, airport or position, date, time, weather, weight, fuel, and failures before flight.
-- Save and settings files are written atomically and corrupted files are detected with recovery behavior that avoids application crashes.
-- Diagnostics display authoritative position, altitude variants, CoreSim timing, terrain source tile, weather values, input state, and build/data versions.
-- Post-flight screen provides replay access, route map, telemetry graphs, and CSV/JSON export entry points.
+- High graphics profile reaches at least 60 FPS at 2560 x 1440 over ordinary Czech terrain on the reference hardware class.
+- Measured 1% low FPS is at least 45, input latency is below 50 ms at 60 FPS, and no normal-streaming hitch exceeds 100 ms in approved test routes.
+- CoreSim records no missed 240 Hz physics steps during approved performance scenarios.
+- Ten-hour automated flight soak test completes without crash and within 24 GB RAM and 10 GB VRAM limits.
 
 ## Agent Configuration
 - no project config provided, using defaults

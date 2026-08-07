@@ -98,6 +98,16 @@ bool UFlyingDiagnosticsWidget::RefreshDiagnostics(UFlyingCoreSimComponent* CoreS
   Diagnostics.TerrainSourceTile = ResolveProjectPath(Settings->TerrainPackageManifestPath);
   Diagnostics.Weather = Snapshot.Weather;
   Diagnostics.InputState = CoreSimComponent->GetLastMappedInputState();
+  Diagnostics.AverageFrameRate = CoreSimComponent->GetAverageFrameRate();
+  Diagnostics.OnePercentLowFrameRate = CoreSimComponent->GetOnePercentLowFrameRate();
+  Diagnostics.LastCoreSimInputProcessingMilliseconds =
+    CoreSimComponent->GetLastCoreSimInputProcessingMilliseconds();
+  Diagnostics.MaxObservedHitchMilliseconds =
+    CoreSimComponent->GetMaxObservedHitchMilliseconds();
+  Diagnostics.CoreSimMissedStepCount = CoreSimComponent->GetCoreSimMissedStepCount();
+  Diagnostics.MaxCoreSimStepsPerFrame = CoreSimComponent->GetMaxCoreSimStepsPerFrame();
+  Diagnostics.RamBudgetGiB = Settings->MaximumSoakRamGiB;
+  Diagnostics.VramBudgetGiB = Settings->MaximumSoakVramGiB;
   Diagnostics.BuildVersion = FApp::GetBuildVersion();
   const std::string CoreSimVersion{flying::core_sim::core_sim_version()};
   Diagnostics.CoreSimVersion = FString(UTF8_TO_TCHAR(CoreSimVersion.c_str()));

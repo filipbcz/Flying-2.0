@@ -53,6 +53,30 @@ struct FLYINGPRESENTATION_API FFlyingDiagnosticsSnapshot
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Diagnostics")
   FFlyingMappedInputState InputState;
 
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Performance")
+  double AverageFrameRate = 0.0;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Performance")
+  double OnePercentLowFrameRate = 0.0;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Performance")
+  double LastCoreSimInputProcessingMilliseconds = 0.0;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Performance")
+  double MaxObservedHitchMilliseconds = 0.0;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Performance")
+  int64 CoreSimMissedStepCount = 0;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Performance")
+  int32 MaxCoreSimStepsPerFrame = 0;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Performance")
+  double RamBudgetGiB = 0.0;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Performance")
+  double VramBudgetGiB = 0.0;
+
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Diagnostics")
   FString BuildVersion;
 

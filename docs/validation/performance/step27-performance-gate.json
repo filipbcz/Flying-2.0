@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "flying.step27-performance-gate.v1",
+  "referenceHardwareClass": {
+    "os": "Windows 11",
+    "resolution": {"width": 2560, "height": 1440},
+    "graphicsProfile": "High",
+    "minimumRamGiB": 24,
+    "minimumVramGiB": 10
+  },
+  "approvedRoutes": [
+    {
+      "routeId": "ordinary-czech-terrain-high-profile",
+      "terrain": "ordinary Czech terrain",
+      "scenarioStartMode": "airborne",
+      "durationMinutes": 30
+    },
+    {
+      "routeId": "ten-hour-automated-soak",
+      "terrain": "ordinary Czech terrain",
+      "scenarioStartMode": "airborne",
+      "durationHours": 10
+    }
+  ],
+  "budgets": {
+    "averageFpsMin": 60,
+    "onePercentLowFpsMin": 45,
+    "inputLatencyMsMax": 50,
+    "streamingHitchMsMax": 100,
+    "coreSimMissedStepsMax": 0,
+    "ramGiBMax": 24,
+    "vramGiBMax": 10,
+    "soakDurationHours": 10
+  },
+  "inputLatencyEvidence": {
+    "measurement": "external input-to-photon capture at 60 FPS",
+    "maximumLatencyMilliseconds": 50,
+    "runtimeProxyField": "LastCoreSimInputProcessingMilliseconds"
+  },
+  "runtimeCaptureFields": [
+    "AverageFrameRate",
+    "OnePercentLowFrameRate",
+    "LastCoreSimInputProcessingMilliseconds",
+    "MaxObservedHitchMilliseconds",
+    "CoreSimMissedStepCount",
+    "RamBudgetGiB",
+    "VramBudgetGiB"
+  ]
+}
