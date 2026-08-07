@@ -6,32 +6,32 @@
 - default branch: main
 
 ## Task
-- title: Flying: 28. Implement Packaging, Installer, Signing, Updates, And Crash Diagnostics
+- title: Flying: 29. Produce Licensing, SBOM, Documentation, And Release Evidence
 - mode: full_auto
 - max iterations: 10
 
 ## Current Step Context
 Current implementation step:
-28. Implement Packaging, Installer, Signing, Updates, And Crash Diagnostics
+29. Produce Licensing, SBOM, Documentation, And Release Evidence
 
 Step description and scope:
-Create the reproducible Win64 Shipping build pipeline, installer, terrain package installation, code signing, update and data-repair flow, minidump capture, structured logging, and unique build ID reporting.
+Generate final release documentation, license inventory, attribution surfaces, SBOM, user documentation, technical architecture documentation, data-source traceability, known limitations, and QA evidence.
 
 In scope:
-- Shipping build automation
-- Installer
-- Code signing integration
-- Terrain package installation
-- Update/data repair mechanism
-- Minidumps
-- Structured logging
-- Build ID
+- SBOM
+- License notices
+- In-app attribution review
+- User manual
+- Technical architecture documentation
+- Data transformation protocol
+- Known limitations
+- QA evidence bundle
 
 Out of scope:
-- Steam or store publishing
-- Mandatory online updater
-- Cloud telemetry by default
-- macOS/Linux builds
+- Changing product code except attribution wiring defects already assigned elsewhere
+- Legal advice beyond recorded license facts
+- New simulator features
+- Marketing website
 
 Execution boundary:
 - Implement only the current step and its acceptance criteria.
@@ -67,16 +67,16 @@ Already completed roadmap steps (existing repository context):
 - 25. Implement World Objects, Vegetation, Water, Obstacles, And Audio
 - 26. Implement Save, Scenario Editor, Diagnostics, And Failure Workflows
 - 27. Optimize Performance And Long-Run Stability
+- 28. Implement Packaging, Installer, Signing, Updates, And Crash Diagnostics
 
 Future roadmap steps (explicitly out of scope):
-- 29. Produce Licensing, SBOM, Documentation, And Release Evidence
 - 30. Execute Release Candidate Acceptance Gate
 
 Acceptance Criteria:
-- Win64 Shipping build is reproducible from documented commands and includes simulator binaries, required runtime content, and version metadata.
-- Installer installs the simulator and selected Czech terrain packages on a clean supported Windows 11 machine without requiring network access for normal flight.
-- Application binaries and installer are signed, and build ID is visible in logs, diagnostics, crash reports, and about screen.
-- Crash diagnostics produce minidumps and structured logs with no personal telemetry unless user opt-in is explicitly recorded.
+- Release includes SBOM and license inventory covering code libraries, tools, and data packages.
+- Required data attribution is visible in-app and in documentation, including CUZK attribution and any approved AIM/operator-source notices.
+- User documentation covers installation, controls, scenario setup, offline map/terrain behavior, replay, export, troubleshooting, and known limitations.
+- Known limitations explicitly identify unverified or derived model/data areas and do not claim unsupported certification or aircraft fidelity.
 
 ## Agent Configuration
 - no project config provided, using defaults

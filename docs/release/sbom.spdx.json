@@ -1,0 +1,227 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "spdxVersion": "SPDX-2.3",
+  "creationInfo": {
+    "created": "2026-08-07T00:00:00Z",
+    "creators": [
+      "Organization: Flying project",
+      "Tool: manual-release-evidence-step-29"
+    ],
+    "licenseListVersion": "3.25"
+  },
+  "dataLicense": "CC0-1.0",
+  "name": "Flying 1.0.0 release evidence SBOM",
+  "documentNamespace": "https://example.invalid/flying/spdx/flying-1.0.0-20260807",
+  "documentDescribes": [
+    "SPDXRef-Package-Flying"
+  ],
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Package-Flying",
+      "name": "Flying",
+      "versionInfo": "1.0.0 release family; repository project version 0.1.0",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "supplier": "Organization: Flying project",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:generic/flying@1.0.0"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-UnrealEngine",
+      "name": "Unreal Engine",
+      "versionInfo": "5.8.x",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "LicenseRef-Unreal-Engine-EULA",
+      "licenseDeclared": "LicenseRef-Unreal-Engine-EULA",
+      "copyrightText": "NOASSERTION",
+      "supplier": "Organization: Epic Games",
+      "comment": "Developer-installed engine dependency; not vendored in this repository."
+    },
+    {
+      "SPDXID": "SPDXRef-Package-CesiumForUnreal",
+      "name": "Cesium for Unreal",
+      "versionInfo": ">=2.28.0 <3.0.0",
+      "downloadLocation": "https://github.com/CesiumGS/cesium-unreal",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "supplier": "Organization: Cesium GS, Inc.",
+      "comment": "Enabled Unreal plugin; include installed plugin notices in release bundle."
+    },
+    {
+      "SPDXID": "SPDXRef-Package-JSBSim",
+      "name": "JSBSim",
+      "versionInfo": "1.2.3; tag v1.2.3; commit 570e8115a102df8f877b11e0e59b964ea483e3c0",
+      "downloadLocation": "https://github.com/JSBSim-Team/jsbsim.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "LGPL-2.1-or-later",
+      "licenseDeclared": "LGPL-2.1-or-later",
+      "copyrightText": "NOASSERTION",
+      "supplier": "Organization: JSBSim project",
+      "comment": "Optional CoreSim adapter dependency; not vendored unless explicit CMake fetch is enabled."
+    },
+    {
+      "SPDXID": "SPDXRef-Package-PROJ",
+      "name": "PROJ",
+      "versionInfo": "9.5.x intent",
+      "downloadLocation": "https://proj.org/",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "supplier": "Organization: PROJ contributors",
+      "comment": "Offline CRS transformation dependency intent; exact installed version and grid-data notices must be captured by release packaging if redistributed or required."
+    },
+    {
+      "SPDXID": "SPDXRef-Package-Catch2",
+      "name": "Catch2",
+      "versionInfo": "3.7.x intent",
+      "downloadLocation": "https://github.com/catchorg/Catch2",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSL-1.0",
+      "licenseDeclared": "BSL-1.0",
+      "copyrightText": "NOASSERTION",
+      "supplier": "Organization: Catch2 contributors",
+      "comment": "Test dependency intent; not vendored in this repository."
+    },
+    {
+      "SPDXID": "SPDXRef-Package-CMake",
+      "name": "CMake",
+      "versionInfo": ">=3.25",
+      "downloadLocation": "https://cmake.org/",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "copyrightText": "NOASSERTION",
+      "supplier": "Organization: Kitware",
+      "comment": "Build tool, not redistributed by the installer."
+    },
+    {
+      "SPDXID": "SPDXRef-Package-InnoSetup",
+      "name": "Inno Setup",
+      "versionInfo": "6.x",
+      "downloadLocation": "https://jrsoftware.org/isinfo.php",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "supplier": "Organization: JRSoftware",
+      "comment": "Installer build tool used by packaging/FlyingInstaller.iss."
+    },
+    {
+      "SPDXID": "SPDXRef-Package-CUZK-DMR5G",
+      "name": "CUZK DMR 5G derived terrain package",
+      "versionInfo": "Release package manifest records source update date",
+      "downloadLocation": "https://geoportal.cuzk.cz/",
+      "filesAnalyzed": false,
+      "licenseConcluded": "CC-BY-4.0",
+      "licenseDeclared": "CC-BY-4.0",
+      "copyrightText": "Czech Office for Surveying, Mapping and Cadastre",
+      "supplier": "Organization: CUZK",
+      "comment": "Derived terrain package must include source manifest, checksum and change notice."
+    },
+    {
+      "SPDXID": "SPDXRef-Package-CUZK-DMP1G",
+      "name": "CUZK DMP 1G derived auxiliary package",
+      "versionInfo": "Release package manifest records source update date",
+      "downloadLocation": "https://geoportal.cuzk.cz/",
+      "filesAnalyzed": false,
+      "licenseConcluded": "CC-BY-4.0",
+      "licenseDeclared": "CC-BY-4.0",
+      "copyrightText": "Czech Office for Surveying, Mapping and Cadastre",
+      "supplier": "Organization: CUZK"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-CUZK-Ortofoto",
+      "name": "CUZK Ortofoto Ceske republiky derived imagery package",
+      "versionInfo": "Release package manifest records source update date",
+      "downloadLocation": "https://geoportal.cuzk.cz/",
+      "filesAnalyzed": false,
+      "licenseConcluded": "CC-BY-4.0",
+      "licenseDeclared": "CC-BY-4.0",
+      "copyrightText": "Czech Office for Surveying, Mapping and Cadastre",
+      "supplier": "Organization: CUZK"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-CUZK-ZABAGED",
+      "name": "CUZK ZABAGED derived vector package",
+      "versionInfo": "Release package manifest records source update date",
+      "downloadLocation": "https://geoportal.cuzk.cz/",
+      "filesAnalyzed": false,
+      "licenseConcluded": "CC-BY-4.0",
+      "licenseDeclared": "CC-BY-4.0",
+      "copyrightText": "Czech Office for Surveying, Mapping and Cadastre",
+      "supplier": "Organization: CUZK"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-CUZK-Geonames",
+      "name": "CUZK Geonames derived label package",
+      "versionInfo": "Release package manifest records source update date",
+      "downloadLocation": "https://geoportal.cuzk.cz/",
+      "filesAnalyzed": false,
+      "licenseConcluded": "CC-BY-4.0",
+      "licenseDeclared": "CC-BY-4.0",
+      "copyrightText": "Czech Office for Surveying, Mapping and Cadastre",
+      "supplier": "Organization: CUZK"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-FlyingTrainerOneData",
+      "name": "Flying Trainer One aircraft data",
+      "versionInfo": "repository data package",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "CC0-1.0",
+      "licenseDeclared": "CC0-1.0",
+      "copyrightText": "Flying project",
+      "supplier": "Organization: Flying project",
+      "comment": "Project-authored unbranded trainer data; no manufacturer endorsement or type-fidelity claim."
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-Package-Flying"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-Flying",
+      "relationshipType": "DYNAMIC_LINK",
+      "relatedSpdxElement": "SPDXRef-Package-UnrealEngine"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-Flying",
+      "relationshipType": "OPTIONAL_COMPONENT_OF",
+      "relatedSpdxElement": "SPDXRef-Package-JSBSim"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-Flying",
+      "relationshipType": "GENERATES",
+      "relatedSpdxElement": "SPDXRef-Package-CUZK-DMR5G"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-Flying",
+      "relationshipType": "GENERATES",
+      "relatedSpdxElement": "SPDXRef-Package-CUZK-Ortofoto"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-Flying",
+      "relationshipType": "GENERATES",
+      "relatedSpdxElement": "SPDXRef-Package-CUZK-ZABAGED"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-Flying",
+      "relationshipType": "GENERATES",
+      "relatedSpdxElement": "SPDXRef-Package-CUZK-Geonames"
+    }
+  ]
+}

@@ -764,6 +764,15 @@ void UFlyingOfflineNavigationMapWidget::RenderMapToPaintContext(
       true,
       2.0f);
   }
+
+  if (!AttributionText.IsEmpty())
+  {
+    UWidgetBlueprintLibrary::DrawText(
+      Context,
+      AttributionText,
+      FVector2D(12.0, 456.0),
+      FLinearColor(0.92f, 0.94f, 0.95f, 1.0f));
+  }
 }
 
 void UFlyingOfflineNavigationMapWidget::RenderTilePackageLayer(
