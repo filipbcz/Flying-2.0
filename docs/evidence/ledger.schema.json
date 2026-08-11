@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flying.local/schemas/evidence-ledger.schema.json",
+  "title": "Flying Evidence Ledger",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "contractId",
+    "generatedAtUtc",
+    "requirements"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "flying.evidence-ledger.v1"
+    },
+    "contractId": {
+      "const": "flying-2.0"
+    },
+    "generatedAtUtc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/requirementEvidence"
+      }
+    }
+  },
+  "$defs": {
+    "artifactRef": {
+      "type": "object",
+      "required": [
+        "kind",
+        "path"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "document",
+            "report",
+            "command",
+            "artifact",
+            "external"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "checksum": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "fail",
+            "blocked"
+          ]
+        }
+      }
+    },
+    "requirementEvidence": {
+      "type": "object",
+      "required": [
+        "requirementId",
+        "milestone",
+        "mandatory",
+        "status"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "requirementId": {
+          "type": "string",
+          "pattern": "^REQ-[A-Z0-9]+(?:-[A-Z0-9]+)*$"
+        },
+        "milestone": {
+          "type": "string",
+          "pattern": "^M[0-9]+$"
+        },
+        "mandatory": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "fail",
+            "blocked",
+            "pending"
+          ]
+        },
+        "proofRefs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/artifactRef"
+          }
+        },
+        "blockerRef": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "proofRefs"
+          ]
+        },
+        {
+          "required": [
+            "blockerRef"
+          ]
+        }
+      ]
+    }
+  }
+}
