@@ -23,7 +23,7 @@ jobs:
         run: cmake --preset test
 
       - name: Build native test preset
-        run: cmake --build --preset test
+        run: cmake --build --preset smoke
 
       - name: Run smoke test
         run: ctest --preset smoke --output-on-failure

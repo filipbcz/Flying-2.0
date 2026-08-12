@@ -84,6 +84,7 @@ const smokeJob = nativeWorkflow.jobs?.smoke;
 requireEqual(smokeJob?.["runs-on"], "windows-latest", "native smoke job must use the Windows runner");
 requireEqual(smokeJob?.["timeout-minutes"], 10, "native smoke job must have a 10 minute timeout");
 requireEnv(smokeJob, "native smoke");
+requireStepRun(smokeJob, "cmake --build --preset smoke", "native smoke workflow must build only smoke targets");
 requireStepRun(smokeJob, "ctest --preset smoke --output-on-failure", "native smoke workflow must run the smoke preset");
 
 if (!hasOwn(soakWorkflow.on, "workflow_dispatch")) {
@@ -107,8 +108,15 @@ requireEnv(soakJob, "soak");
 requireStepRun(soakJob, "ctest --preset soak --output-on-failure", "soak workflow must run the soak preset");
 
 const presets = JSON.parse(read("CMakePresets.json"));
+const smokeBuildPreset = presets.buildPresets?.find((preset) => preset.name === "smoke");
 const smokePreset = presets.testPresets?.find((preset) => preset.name === "smoke");
 const soakPreset = presets.testPresets?.find((preset) => preset.name === "soak");
+if (!smokeBuildPreset || !Array.isArray(smokeBuildPreset.targets)) {
+  fail("smoke build preset must explicitly list PR smoke targets");
+}
+if (smokeBuildPreset.targets.includes("flying_core_sim_performance_timing_tests")) {
+  fail("smoke build preset must not build the ten-hour performance timing soak test target");
+}
 if (!smokePreset || smokePreset.filter?.include?.label !== "smoke") {
   fail("smoke preset must explicitly include the smoke label");
 }
