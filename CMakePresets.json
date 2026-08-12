@@ -95,6 +95,25 @@
       "displayName": "Smoke Tests",
       "configurePreset": "test",
       "configuration": "Debug",
+      "filter": {
+        "include": {
+          "label": "smoke"
+        }
+      },
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "soak",
+      "displayName": "Soak Tests",
+      "configurePreset": "test",
+      "configuration": "Debug",
+      "filter": {
+        "include": {
+          "label": "soak"
+        }
+      },
       "output": {
         "outputOnFailure": true
       }

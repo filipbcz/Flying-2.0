@@ -9,6 +9,7 @@
 #include <iterator>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 namespace {
 
@@ -107,6 +108,17 @@ std::string read_text(const std::filesystem::path& path) {
   return {std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>()};
 }
 
+std::string join_errors(const std::vector<std::string>& errors) {
+  std::string message;
+  for (const std::string& error : errors) {
+    if (!message.empty()) {
+      message += "; ";
+    }
+    message += error;
+  }
+  return message;
+}
+
 void remove_temp_file(const std::filesystem::path& path) {
   std::error_code error;
   std::filesystem::remove(path, error);
@@ -125,7 +137,8 @@ void telemetry_file_round_trips_and_replays_deterministically() {
   require(saved.saved, "telemetry file must save");
 
   const auto loaded = flying::core_sim::load_telemetry_file(telemetry_path);
-  require(loaded.loaded, "saved telemetry file must load");
+  require(loaded.loaded,
+          ("saved telemetry file must load: " + join_errors(loaded.errors)).c_str());
   require(loaded.recording.frames.size() == recording.frames.size(),
           "telemetry frames must round-trip");
   require(loaded.recording.metadata.core_sim_version == recording.metadata.core_sim_version,

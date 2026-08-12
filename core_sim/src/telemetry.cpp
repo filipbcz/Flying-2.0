@@ -226,6 +226,29 @@ void append_aircraft_mass_balance(std::ostream& output,
   append_field(output, mass_balance.cg_within_envelope);
 }
 
+void append_atmosphere(std::ostream& output, const AtmosphereSample& atmosphere) {
+  append_field(output, atmosphere.static_pressure_pa);
+  append_field(output, atmosphere.temperature_k);
+  append_field(output, atmosphere.density_kgpm3);
+  append_field(output, atmosphere.speed_of_sound_mps);
+  append_field(output, atmosphere.relative_humidity_norm);
+}
+
+void append_weather(std::ostream& output, const WeatherSample& weather) {
+  append_field(output, static_cast<std::uint64_t>(weather.source));
+  append_atmosphere(output, weather.atmosphere);
+  append_vector(output, weather.steady_wind_ned_mps);
+  append_vector(output, weather.gust_ned_mps);
+  append_vector(output, weather.turbulence_ned_mps);
+  append_vector(output, weather.wind_ned_mps);
+  append_field(output, weather.visibility_m);
+  append_field(output, weather.cloud_coverage_norm);
+  append_field(output, weather.precipitation_rate_mmph);
+  append_field(output, weather.surface_wetness_norm);
+  append_field(output, weather.icing_severity_norm);
+  append_field(output, weather.runway_friction_scale);
+}
+
 void append_engine(std::ostream& output, const EngineStateSample& engine) {
   append_field(output, engine.engine_running);
   append_field(output, engine.throttle_norm);
@@ -243,6 +266,9 @@ void append_state(std::ostream& output, const AuthoritativeState& state) {
   append_vector(output, state.accumulated_force_body_n);
   append_vector(output, state.accumulated_moment_body_nm);
   append_aircraft_mass_balance(output, state.aircraft_mass_balance);
+  append_weather(output, state.weather);
+  append_vector(output, state.relative_air_velocity_body_mps);
+  append_field(output, state.weather_dynamic_pressure_pa);
 }
 
 void append_flight_dynamics_initial_condition(
@@ -374,6 +400,37 @@ void append_flight_dynamics_initial_condition(
          read_bool(fields, index, mass_balance.cg_within_envelope);
 }
 
+[[nodiscard]] bool read_atmosphere(const std::vector<std::string_view>& fields,
+                                   std::size_t& index,
+                                   AtmosphereSample& atmosphere) noexcept {
+  return read_double(fields, index, atmosphere.static_pressure_pa) &&
+         read_double(fields, index, atmosphere.temperature_k) &&
+         read_double(fields, index, atmosphere.density_kgpm3) &&
+         read_double(fields, index, atmosphere.speed_of_sound_mps) &&
+         read_double(fields, index, atmosphere.relative_humidity_norm);
+}
+
+[[nodiscard]] bool read_weather(const std::vector<std::string_view>& fields,
+                                std::size_t& index,
+                                WeatherSample& weather) noexcept {
+  std::uint64_t source = 0;
+  if (!read_u64(fields, index, source) || source > static_cast<std::uint64_t>(WeatherSource::Unavailable)) {
+    return false;
+  }
+  weather.source = static_cast<WeatherSource>(source);
+  return read_atmosphere(fields, index, weather.atmosphere) &&
+         read_vector(fields, index, weather.steady_wind_ned_mps) &&
+         read_vector(fields, index, weather.gust_ned_mps) &&
+         read_vector(fields, index, weather.turbulence_ned_mps) &&
+         read_vector(fields, index, weather.wind_ned_mps) &&
+         read_double(fields, index, weather.visibility_m) &&
+         read_double(fields, index, weather.cloud_coverage_norm) &&
+         read_double(fields, index, weather.precipitation_rate_mmph) &&
+         read_double(fields, index, weather.surface_wetness_norm) &&
+         read_double(fields, index, weather.icing_severity_norm) &&
+         read_double(fields, index, weather.runway_friction_scale);
+}
+
 [[nodiscard]] bool read_engine(const std::vector<std::string_view>& fields,
                                std::size_t& index,
                                EngineStateSample& engine) noexcept {
@@ -394,7 +451,10 @@ void append_flight_dynamics_initial_condition(
          read_vector(fields, index, state.angular_velocity_body_radps) &&
          read_vector(fields, index, state.accumulated_force_body_n) &&
          read_vector(fields, index, state.accumulated_moment_body_nm) &&
-         read_aircraft_mass_balance(fields, index, state.aircraft_mass_balance);
+         read_aircraft_mass_balance(fields, index, state.aircraft_mass_balance) &&
+         read_weather(fields, index, state.weather) &&
+         read_vector(fields, index, state.relative_air_velocity_body_mps) &&
+         read_double(fields, index, state.weather_dynamic_pressure_pa);
 }
 
 [[nodiscard]] bool read_flight_dynamics_initial_condition(
@@ -1440,7 +1500,7 @@ TelemetryLoadResult load_telemetry_file(const std::filesystem::path& path) {
         }
         saw_rigid_body_parameters = true;
       } else if (fields[0] == "initial_state") {
-        if (fields.size() != 35) {
+        if (fields.size() != 64) {
           result.errors.push_back("line " + std::to_string(line_number) +
                                   " initial_state record is malformed");
           continue;
@@ -1491,7 +1551,7 @@ TelemetryLoadResult load_telemetry_file(const std::filesystem::path& path) {
         }
         saw_initial_aircraft_controls = true;
       } else if (fields[0] == "frame") {
-        if (fields.size() != 65) {
+        if (fields.size() != 94) {
           result.errors.push_back("line " + std::to_string(line_number) +
                                   " frame record is malformed");
           continue;

@@ -73,6 +73,17 @@ std::string read_text(const std::filesystem::path& path) {
   return {std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>()};
 }
 
+std::string join_errors(const std::vector<std::string>& errors) {
+  std::string message;
+  for (const std::string& error : errors) {
+    if (!message.empty()) {
+      message += "; ";
+    }
+    message += error;
+  }
+  return message;
+}
+
 void write_text(const std::filesystem::path& path, std::string_view content) {
   std::filesystem::create_directories(path.parent_path());
   std::ofstream output(path, std::ios::binary);
@@ -531,7 +542,8 @@ void scripted_pilot_region_flight_records_and_replays() {
   const auto saved = flying::core_sim::save_telemetry_file_atomic(telemetry_path, recording);
   require(saved.saved, "scripted M1 telemetry must be writable");
   const auto loaded = flying::core_sim::load_telemetry_file(telemetry_path);
-  require(loaded.loaded, "scripted M1 telemetry must be readable");
+  require(loaded.loaded,
+          ("scripted M1 telemetry must be readable: " + join_errors(loaded.errors)).c_str());
   require(loaded.recording.frames.size() == recording.frames.size(),
           "scripted M1 telemetry must round-trip all frames");
 
