@@ -67,6 +67,17 @@ function requireStepRun(job, command, message) {
   }
 }
 
+function ctestCommandTarget(command) {
+  const match = command.match(/\/([^/\\\s"]+)(?:"|\s|$)/);
+  if (!match) {
+    return null;
+  }
+  if (match[1] === "flying-data-pipeline") {
+    return "flying_data_pipeline_cli";
+  }
+  return match[1];
+}
+
 const nativeWorkflow = parseWorkflowYaml(".github/workflows/native-skeleton.yml");
 const soakWorkflow = parseWorkflowYaml(".github/workflows/native-soak.yml");
 
@@ -147,6 +158,22 @@ for (const [name, props] of properties) {
     if (Number(timeout[1]) < 1 || Number(timeout[1]) > 60) {
       fail(`smoke test ${name} has unreasonable CTest TIMEOUT ${timeout[1]}`);
     }
+  }
+}
+
+const smokeBuildTargets = new Set(smokeBuildPreset.targets);
+const testMatches = [...ctestFile.matchAll(/add_test\(\[=\[([^\]]+)]=]\s+"([^"]+)"/g)];
+const testTargets = new Map(testMatches.map((match) => [match[1], ctestCommandTarget(match[2])]));
+for (const [name, props] of properties) {
+  if (!/\bLABELS "([^"]*\bsmoke\b[^"]*)"/.test(props)) {
+    continue;
+  }
+  const target = testTargets.get(name);
+  if (!target) {
+    fail(`smoke test ${name} has no executable target in generated CTest metadata`);
+  }
+  if (!smokeBuildTargets.has(target)) {
+    fail(`smoke test ${name} target ${target} is missing from the smoke build preset`);
   }
 }
 
