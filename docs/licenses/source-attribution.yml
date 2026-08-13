@@ -1,0 +1,45 @@
+schema_version: 1
+document_id: LIC-SOURCE-ATTRIBUTION
+status: active_registry
+effective_date: "2026-08-01"
+records:
+  - source_id: cuzk-open-data
+    source_version: "public metadata checked 2026-08-01; package manifests must pin exact downloaded versions"
+    source_url: "https://geoportal.cuzk.cz/"
+    license: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+    attribution: "Contains information from the Czech Office for Surveying, Mapping and Cadastre (CUZK): DMR 5G, DMP 1G, Ortofoto Ceske republiky, ZABAGED and Geonames, licensed under Creative Commons Attribution 4.0 International (CC BY 4.0), https://creativecommons.org/licenses/by/4.0/. Source: https://geoportal.cuzk.cz/. Data were transformed, tiled, generalized and/or otherwise adapted for the Flying simulator. CUZK does not endorse this product."
+    redistribution_status: allowed_with_attribution_source_metadata_and_change_notice
+    effective_date: "2026-08-01"
+    applies_to:
+      - cuzk-dmr-5g
+      - cuzk-dmp-1g
+      - cuzk-ortofoto-cr
+      - cuzk-zabaged-polohopis
+      - cuzk-geonames
+  - source_id: aim-aip-vfr
+    source_version: "public terms and pages checked 2026-08-01"
+    source_url: "https://aim.rlp.cz/"
+    license: "no redistribution license recorded"
+    attribution: "blocked until permission defines required attribution or fallback data excludes AIM/AIP/VFR content"
+    redistribution_status: blocked_pending_written_permission
+    effective_date: "2026-08-01"
+    applies_to:
+      - aip-airport-data
+      - vfr-manual-slz-content
+      - aim-terrain-datasets
+      - aim-obstacle-datasets
+  - source_id: flying-trainer-one-aircraft-data
+    source_version: "repository-authored placeholder data as of 2026-08-13"
+    source_url: "core_sim/aircraft/flying_trainer_one/aircraft-config.json"
+    license: "CC0-1.0 project-authored data notice"
+    attribution: "Flying Trainer One is an unbranded project-authored trainer data set; no manufacturer endorsement or type-fidelity claim."
+    redistribution_status: allowed_as_unbranded_project_authored_data
+    effective_date: "2026-08-13"
+    applies_to:
+      - infrastructure_aircraft_model
+required_surfaces:
+  - application_credits
+  - user_documentation
+  - release_notices
+  - data_package_manifests
+  - sbom_or_license_inventory
