@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate:native-ci": "node tools/validate_native_ci.mjs"
+  },
+  "devDependencies": {
+    "yaml": "2.9.0"
+  }
+}
