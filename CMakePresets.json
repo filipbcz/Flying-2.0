@@ -77,6 +77,33 @@
       "configuration": "Debug"
     },
     {
+      "name": "smoke",
+      "displayName": "Build Smoke Test Targets",
+      "configurePreset": "test",
+      "configuration": "Debug",
+      "targets": [
+        "flying_skeleton_smoke",
+        "flying_data_pipeline_cli",
+        "flying_data_pipeline_manifest_tests",
+        "flying_data_pipeline_dmr5g_terrain_tests",
+        "flying_data_pipeline_pilot_region_package_tests",
+        "flying_data_pipeline_airport_database_tests",
+        "flying_data_pipeline_runway_importer_tests",
+        "flying_core_sim_kernel_tests",
+        "flying_core_sim_flight_dynamics_api_tests",
+        "flying_core_sim_aircraft_config_tests",
+        "flying_core_sim_aircraft_systems_tests",
+        "flying_core_sim_input_mapping_tests",
+        "flying_core_sim_scenario_start_tests",
+        "flying_core_sim_telemetry_replay_tests",
+        "flying_core_sim_terrain_contact_tests",
+        "flying_core_sim_weather_tests",
+        "flying_geo_terrain_geodesy_units_tests",
+        "flying_geo_terrain_terrain_service_tests",
+        "flying_m1_vertical_slice_tests"
+      ]
+    },
+    {
       "name": "jsbsim-validation",
       "displayName": "Build JSBSim Adapter Validation",
       "configurePreset": "jsbsim-validation",
@@ -95,6 +122,25 @@
       "displayName": "Smoke Tests",
       "configurePreset": "test",
       "configuration": "Debug",
+      "filter": {
+        "include": {
+          "label": "smoke"
+        }
+      },
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "soak",
+      "displayName": "Soak Tests",
+      "configurePreset": "test",
+      "configuration": "Debug",
+      "filter": {
+        "include": {
+          "label": "soak"
+        }
+      },
       "output": {
         "outputOnFailure": true
       }
@@ -139,7 +185,7 @@
         },
         {
           "type": "build",
-          "name": "test"
+          "name": "smoke"
         },
         {
           "type": "test",

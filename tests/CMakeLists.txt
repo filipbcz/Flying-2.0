@@ -213,6 +213,12 @@ target_link_libraries(flying_core_sim_performance_timing_tests
 add_test(NAME flying.core_sim.performance_timing
   COMMAND flying_core_sim_performance_timing_tests)
 
+set_tests_properties(flying.core_sim.performance_timing
+  PROPERTIES
+    LABELS "soak"
+    TIMEOUT 43200
+)
+
 if(TARGET Flying::CoreSimJsbsim)
   add_executable(flying_core_sim_jsbsim_adapter_tests
     core_sim/jsbsim_adapter_test.cpp
@@ -225,6 +231,10 @@ if(TARGET Flying::CoreSimJsbsim)
   )
 
   add_test(NAME flying.core_sim.jsbsim_adapter COMMAND flying_core_sim_jsbsim_adapter_tests)
+  set_tests_properties(flying.core_sim.jsbsim_adapter
+    PROPERTIES
+      TIMEOUT 60
+  )
 endif()
 
 add_executable(flying_geo_terrain_geodesy_units_tests
@@ -270,6 +280,31 @@ target_compile_definitions(flying_m1_vertical_slice_tests
 add_test(NAME flying.m1.vertical_slice COMMAND flying_m1_vertical_slice_tests)
 
 set_tests_properties(
+  flying.skeleton_smoke
+  flying.data_pipeline.manifest
+  flying.data_pipeline.cli_help
+  flying.data_pipeline.dmr5g_terrain
+  flying.data_pipeline.pilot_region_packages
+  flying.data_pipeline.airport_database
+  flying.data_pipeline.runway_importer
+  flying.core_sim.kernel
+  flying.core_sim.flight_dynamics_api
+  flying.core_sim.aircraft_config
+  flying.core_sim.aircraft_systems
+  flying.core_sim.input_mapping
+  flying.core_sim.scenario_start
+  flying.core_sim.telemetry_replay
+  flying.core_sim.terrain_contact
+  flying.core_sim.weather
+  flying.geo_terrain.geodesy_units
+  flying.geo_terrain.terrain_service
+  flying.m1.vertical_slice
+  PROPERTIES
+    LABELS "smoke"
+    TIMEOUT 60
+)
+
+set_tests_properties(
   flying.core_sim.kernel
   flying.core_sim.flight_dynamics_api
   flying.core_sim.input_mapping
@@ -283,5 +318,5 @@ set_tests_properties(
   flying.data_pipeline.pilot_region_packages
   flying.m1.vertical_slice
   PROPERTIES
-    LABELS "m1-vertical-slice"
+    LABELS "smoke;m1-vertical-slice"
 )
