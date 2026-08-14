@@ -196,3 +196,8 @@ target_link_libraries(flying_core_sim_headless
     Flying::CoreSim
     Flying::CompilerOptions
 )
+
+set_target_properties(flying_core_sim_headless PROPERTIES
+  OUTPUT_NAME CoreSimHeadless
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Binaries"
+)

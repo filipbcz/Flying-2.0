@@ -90,6 +90,7 @@
         "flying_data_pipeline_airport_database_tests",
         "flying_data_pipeline_runway_importer_tests",
         "flying_core_sim_kernel_tests",
+        "flying_core_sim_determinism_tests",
         "flying_core_sim_flight_dynamics_api_tests",
         "flying_core_sim_aircraft_config_tests",
         "flying_core_sim_aircraft_systems_tests",
