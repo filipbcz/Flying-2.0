@@ -100,6 +100,7 @@
         "flying_core_sim_terrain_contact_tests",
         "flying_core_sim_weather_tests",
         "flying_geo_terrain_geodesy_units_tests",
+        "flying_geodesy_reference_tests",
         "flying_geo_terrain_terrain_service_tests",
         "flying_m1_vertical_slice_tests"
       ]

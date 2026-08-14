@@ -266,6 +266,24 @@ target_link_libraries(flying_geo_terrain_geodesy_units_tests
 
 add_test(NAME flying.geo_terrain.geodesy_units COMMAND flying_geo_terrain_geodesy_units_tests)
 
+add_executable(flying_geodesy_reference_tests
+  ../Tests/GeodesyReferenceTests.cpp
+)
+
+target_include_directories(flying_geodesy_reference_tests
+  PRIVATE
+    "${CMAKE_SOURCE_DIR}/Source/GeoTerrain/Public"
+    "${CMAKE_SOURCE_DIR}/Source/CoreSim/Public"
+)
+
+target_link_libraries(flying_geodesy_reference_tests
+  PRIVATE
+    Flying::GeoTerrain
+    Flying::CompilerOptions
+)
+
+add_test(NAME flying.geodesy.reference COMMAND flying_geodesy_reference_tests)
+
 add_executable(flying_geo_terrain_terrain_service_tests
   geo_terrain/terrain_service_test.cpp
 )
@@ -314,6 +332,7 @@ set_tests_properties(
   flying.core_sim.telemetry_replay
   flying.core_sim.terrain_contact
   flying.core_sim.weather
+  flying.geodesy.reference
   flying.geo_terrain.geodesy_units
   flying.geo_terrain.terrain_service
   flying.m1.vertical_slice
@@ -330,6 +349,7 @@ set_tests_properties(
   flying.core_sim.scenario_start
   flying.core_sim.telemetry_replay
   flying.core_sim.terrain_contact
+  flying.geodesy.reference
   flying.geo_terrain.geodesy_units
   flying.geo_terrain.terrain_service
   flying.data_pipeline.dmr5g_terrain
