@@ -1,0 +1,102 @@
+{
+  "schemaVersion": "flying.contract.v1",
+  "contractId": "flying-2.0",
+  "status": "immutable",
+  "project": {
+    "name": "Flying",
+    "platform": "Win64 desktop",
+    "runtime": "offline Czech Republic flight simulator",
+    "engine": "Unreal Engine 5.8 C++",
+    "physicsCore": "standalone deterministic CoreSim/JSBSim",
+    "terrainRuntime": "Cesium for Unreal 2.28+ with local Czech packages"
+  },
+  "governance": {
+    "changeProcess": "mandatory requirements may change only by approved versioned contract update",
+    "completionRule": "mandatory release gates must link to proof or an external blocker before completion",
+    "prohibitedSubstitutes": [
+      "external public map API or public tile server for required scenery or map runtime",
+      "runway geometry inferred only from ARP, runway name and length",
+      "ordinary DEM as authoritative runway physical surface",
+      "community or sample JSBSim aircraft model as proof of physical fidelity",
+      "visual clouds or particles as the only weather model",
+      "cockpit instruments reading raw truth state instead of sensor models",
+      "random health points as the basis for failures or damage",
+      "unlicensed AIP/VFR redistribution or unrecorded data provenance",
+      "unsigned development build as release candidate evidence"
+    ]
+  },
+  "milestones": [
+    {
+      "id": "M0",
+      "name": "Contract, Legal And Data Gates",
+      "requiredRequirementIds": [
+        "REQ-CONTRACT-GOVERNANCE",
+        "REQ-EVIDENCE-TRACEABILITY"
+      ],
+      "exitGate": "legal, data provenance and aircraft data blockers are recorded before production claims"
+    },
+    {
+      "id": "M1",
+      "name": "Core Simulation And Vertical Slice",
+      "requiredRequirementIds": [
+        "REQ-EVIDENCE-TRACEABILITY"
+      ],
+      "exitGate": "headless simulation, initial terrain, airport, replay and telemetry evidence is recorded"
+    },
+    {
+      "id": "M2",
+      "name": "Production Content And Systems",
+      "requiredRequirementIds": [
+        "REQ-EVIDENCE-TRACEABILITY"
+      ],
+      "exitGate": "production aircraft, Czech terrain, airport coverage, weather and cockpit evidence is recorded"
+    },
+    {
+      "id": "M3",
+      "name": "Packaging, Licensing And Quality Gates",
+      "requiredRequirementIds": [
+        "REQ-EVIDENCE-TRACEABILITY"
+      ],
+      "exitGate": "performance, stability, installer, signing, SBOM and license evidence is recorded"
+    },
+    {
+      "id": "M4",
+      "name": "Release Candidate Acceptance",
+      "requiredRequirementIds": [
+        "REQ-RELEASE-GATES"
+      ],
+      "exitGate": "release candidate is blocked unless every mandatory clean-machine, automated, coverage, validation, performance and soak result passes"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-CONTRACT-GOVERNANCE",
+      "title": "Immutable Contract Governance",
+      "mandatory": true,
+      "milestone": "M0",
+      "summary": "Maintain a versioned contract, milestone gates, approved change process, prohibited substitutes and explicit blockers for mandatory obligations.",
+      "evidenceGate": "must have linked proof or blocker before milestone completion"
+    },
+    {
+      "id": "REQ-EVIDENCE-TRACEABILITY",
+      "title": "Requirement Evidence Traceability",
+      "mandatory": true,
+      "milestone": "M0",
+      "summary": "Every requirement links to concrete proof or an external blocker, and failed mandatory evidence blocks release.",
+      "evidenceGate": "must have linked proof or blocker before milestone completion"
+    },
+    {
+      "id": "REQ-RELEASE-GATES",
+      "title": "Final Release Gates",
+      "mandatory": true,
+      "milestone": "M4",
+      "summary": "Release completes only when performance, physics, terrain, airport coverage, legal/license, stability, installer, replay, telemetry, privacy and end-to-end workflow gates pass.",
+      "evidenceGate": "must have linked proof and passing mandatory gate results for release"
+    }
+  ],
+  "evidenceLedger": {
+    "schema": "docs/evidence/ledger.schema.json",
+    "missingMandatoryEvidenceBehavior": "block_release",
+    "externalBlockersFile": "docs/blockers/external-inputs.yml"
+  }
+}

@@ -2,6 +2,7 @@
 /build/
 /out/
 /dist/
+/node_modules/
 
 # CMake local state
 CMakeUserPresets.json

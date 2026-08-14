@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <bit>
 #include <chrono>
 #include <cmath>
 #include <cstdint>
@@ -18,6 +19,9 @@
 #include <utility>
 
 #ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <windows.h>
 #else
 #include <unistd.h>
@@ -25,6 +29,92 @@
 
 namespace flying::core_sim {
 namespace {
+
+constexpr std::size_t kCurrentInitialStateFieldCount = 64;
+constexpr std::size_t kLegacyInitialStateFieldCount = 35;
+constexpr std::size_t kCurrentFrameFieldCount = 94;
+constexpr std::size_t kLegacyFrameFieldCount = 65;
+constexpr std::uint64_t kLegacyFnvOffset = 14'695'981'039'346'656'037ull;
+constexpr std::uint64_t kLegacyFnvPrime = 1'099'511'628'211ull;
+constexpr std::uint64_t kLegacyHashSchemaVersion = 2;
+
+[[nodiscard]] bool is_initial_state_field_count_supported(std::size_t field_count) noexcept {
+  return field_count == kCurrentInitialStateFieldCount ||
+         field_count == kLegacyInitialStateFieldCount;
+}
+
+[[nodiscard]] bool is_frame_field_count_supported(std::size_t field_count) noexcept {
+  return field_count == kCurrentFrameFieldCount ||
+         field_count == kLegacyFrameFieldCount;
+}
+
+[[nodiscard]] std::uint64_t append_legacy_u64(std::uint64_t hash,
+                                              std::uint64_t value) noexcept {
+  for (int byte_index = 0; byte_index < 8; ++byte_index) {
+    const auto byte = static_cast<std::uint8_t>((value >> (byte_index * 8)) & 0xffu);
+    hash ^= byte;
+    hash *= kLegacyFnvPrime;
+  }
+  return hash;
+}
+
+[[nodiscard]] std::uint64_t canonical_legacy_double_bits(double value) noexcept {
+  if (value == 0.0) {
+    value = 0.0;
+  }
+  if (std::isnan(value)) {
+    return 0x7ff8'0000'0000'0000ull;
+  }
+  return std::bit_cast<std::uint64_t>(value);
+}
+
+[[nodiscard]] std::uint64_t append_legacy_double(std::uint64_t hash,
+                                                 double value) noexcept {
+  return append_legacy_u64(hash, canonical_legacy_double_bits(value));
+}
+
+[[nodiscard]] std::uint64_t append_legacy_vector(std::uint64_t hash,
+                                                 Vector3d value) noexcept {
+  hash = append_legacy_double(hash, value.x);
+  hash = append_legacy_double(hash, value.y);
+  return append_legacy_double(hash, value.z);
+}
+
+[[nodiscard]] std::uint64_t append_legacy_quaternion(std::uint64_t hash,
+                                                     Quaterniond value) noexcept {
+  hash = append_legacy_double(hash, value.w);
+  hash = append_legacy_double(hash, value.x);
+  hash = append_legacy_double(hash, value.y);
+  return append_legacy_double(hash, value.z);
+}
+
+[[nodiscard]] std::uint64_t append_legacy_inertia_tensor(
+    std::uint64_t hash,
+    AircraftInertiaTensor value) noexcept {
+  hash = append_legacy_double(hash, value.ixx);
+  hash = append_legacy_double(hash, value.iyy);
+  hash = append_legacy_double(hash, value.izz);
+  hash = append_legacy_double(hash, value.ixy);
+  hash = append_legacy_double(hash, value.ixz);
+  return append_legacy_double(hash, value.iyz);
+}
+
+[[nodiscard]] std::uint64_t hash_legacy_state(const AuthoritativeState& state) noexcept {
+  auto hash = append_legacy_u64(kLegacyFnvOffset, kLegacyHashSchemaVersion);
+  hash = append_legacy_double(hash, state.simulation_time_s);
+  hash = append_legacy_u64(hash, state.step_index);
+  hash = append_legacy_vector(hash, state.ecef_position_m);
+  hash = append_legacy_vector(hash, state.ecef_velocity_mps);
+  hash = append_legacy_quaternion(hash, state.body_to_ecef);
+  hash = append_legacy_vector(hash, state.angular_velocity_body_radps);
+  hash = append_legacy_vector(hash, state.accumulated_force_body_n);
+  hash = append_legacy_vector(hash, state.accumulated_moment_body_nm);
+  hash = append_legacy_double(hash, state.aircraft_mass_balance.total_mass_kg);
+  hash = append_legacy_double(hash, state.aircraft_mass_balance.fuel_mass_kg);
+  hash = append_legacy_double(hash, state.aircraft_mass_balance.payload_mass_kg);
+  hash = append_legacy_vector(hash, state.aircraft_mass_balance.center_of_gravity_body_m);
+  return append_legacy_inertia_tensor(hash, state.aircraft_mass_balance.inertia_tensor_kg_m2);
+}
 
 #ifndef FLYING_CORE_SIM_VERSION
 #define FLYING_CORE_SIM_VERSION "0.1.0"
@@ -226,6 +316,29 @@ void append_aircraft_mass_balance(std::ostream& output,
   append_field(output, mass_balance.cg_within_envelope);
 }
 
+void append_atmosphere(std::ostream& output, const AtmosphereSample& atmosphere) {
+  append_field(output, atmosphere.static_pressure_pa);
+  append_field(output, atmosphere.temperature_k);
+  append_field(output, atmosphere.density_kgpm3);
+  append_field(output, atmosphere.speed_of_sound_mps);
+  append_field(output, atmosphere.relative_humidity_norm);
+}
+
+void append_weather(std::ostream& output, const WeatherSample& weather) {
+  append_field(output, static_cast<std::uint64_t>(weather.source));
+  append_atmosphere(output, weather.atmosphere);
+  append_vector(output, weather.steady_wind_ned_mps);
+  append_vector(output, weather.gust_ned_mps);
+  append_vector(output, weather.turbulence_ned_mps);
+  append_vector(output, weather.wind_ned_mps);
+  append_field(output, weather.visibility_m);
+  append_field(output, weather.cloud_coverage_norm);
+  append_field(output, weather.precipitation_rate_mmph);
+  append_field(output, weather.surface_wetness_norm);
+  append_field(output, weather.icing_severity_norm);
+  append_field(output, weather.runway_friction_scale);
+}
+
 void append_engine(std::ostream& output, const EngineStateSample& engine) {
   append_field(output, engine.engine_running);
   append_field(output, engine.throttle_norm);
@@ -243,6 +356,9 @@ void append_state(std::ostream& output, const AuthoritativeState& state) {
   append_vector(output, state.accumulated_force_body_n);
   append_vector(output, state.accumulated_moment_body_nm);
   append_aircraft_mass_balance(output, state.aircraft_mass_balance);
+  append_weather(output, state.weather);
+  append_vector(output, state.relative_air_velocity_body_mps);
+  append_field(output, state.weather_dynamic_pressure_pa);
 }
 
 void append_flight_dynamics_initial_condition(
@@ -374,6 +490,37 @@ void append_flight_dynamics_initial_condition(
          read_bool(fields, index, mass_balance.cg_within_envelope);
 }
 
+[[nodiscard]] bool read_atmosphere(const std::vector<std::string_view>& fields,
+                                   std::size_t& index,
+                                   AtmosphereSample& atmosphere) noexcept {
+  return read_double(fields, index, atmosphere.static_pressure_pa) &&
+         read_double(fields, index, atmosphere.temperature_k) &&
+         read_double(fields, index, atmosphere.density_kgpm3) &&
+         read_double(fields, index, atmosphere.speed_of_sound_mps) &&
+         read_double(fields, index, atmosphere.relative_humidity_norm);
+}
+
+[[nodiscard]] bool read_weather(const std::vector<std::string_view>& fields,
+                                std::size_t& index,
+                                WeatherSample& weather) noexcept {
+  std::uint64_t source = 0;
+  if (!read_u64(fields, index, source) || source > static_cast<std::uint64_t>(WeatherSource::Unavailable)) {
+    return false;
+  }
+  weather.source = static_cast<WeatherSource>(source);
+  return read_atmosphere(fields, index, weather.atmosphere) &&
+         read_vector(fields, index, weather.steady_wind_ned_mps) &&
+         read_vector(fields, index, weather.gust_ned_mps) &&
+         read_vector(fields, index, weather.turbulence_ned_mps) &&
+         read_vector(fields, index, weather.wind_ned_mps) &&
+         read_double(fields, index, weather.visibility_m) &&
+         read_double(fields, index, weather.cloud_coverage_norm) &&
+         read_double(fields, index, weather.precipitation_rate_mmph) &&
+         read_double(fields, index, weather.surface_wetness_norm) &&
+         read_double(fields, index, weather.icing_severity_norm) &&
+         read_double(fields, index, weather.runway_friction_scale);
+}
+
 [[nodiscard]] bool read_engine(const std::vector<std::string_view>& fields,
                                std::size_t& index,
                                EngineStateSample& engine) noexcept {
@@ -394,7 +541,33 @@ void append_flight_dynamics_initial_condition(
          read_vector(fields, index, state.angular_velocity_body_radps) &&
          read_vector(fields, index, state.accumulated_force_body_n) &&
          read_vector(fields, index, state.accumulated_moment_body_nm) &&
-         read_aircraft_mass_balance(fields, index, state.aircraft_mass_balance);
+         read_aircraft_mass_balance(fields, index, state.aircraft_mass_balance) &&
+         read_weather(fields, index, state.weather) &&
+         read_vector(fields, index, state.relative_air_velocity_body_mps) &&
+         read_double(fields, index, state.weather_dynamic_pressure_pa);
+}
+
+[[nodiscard]] bool read_legacy_state(const std::vector<std::string_view>& fields,
+                                     std::size_t& index,
+                                     AuthoritativeState& state) noexcept {
+  state = {};
+  if (!read_double(fields, index, state.simulation_time_s) ||
+      !read_u64(fields, index, state.step_index) ||
+      !read_vector(fields, index, state.ecef_position_m) ||
+      !read_vector(fields, index, state.ecef_velocity_mps) ||
+      !read_quaternion(fields, index, state.body_to_ecef) ||
+      !read_vector(fields, index, state.angular_velocity_body_radps) ||
+      !read_vector(fields, index, state.accumulated_force_body_n) ||
+      !read_vector(fields, index, state.accumulated_moment_body_nm) ||
+      !read_double(fields, index, state.aircraft_mass_balance.total_mass_kg) ||
+      !read_double(fields, index, state.aircraft_mass_balance.fuel_mass_kg) ||
+      !read_double(fields, index, state.aircraft_mass_balance.payload_mass_kg) ||
+      !read_vector(fields, index, state.aircraft_mass_balance.center_of_gravity_body_m) ||
+      !read_inertia_tensor(fields, index, state.aircraft_mass_balance.inertia_tensor_kg_m2)) {
+    return false;
+  }
+  state.aircraft_mass_balance.cg_within_envelope = true;
+  return true;
 }
 
 [[nodiscard]] bool read_flight_dynamics_initial_condition(
@@ -1440,21 +1613,29 @@ TelemetryLoadResult load_telemetry_file(const std::filesystem::path& path) {
         }
         saw_rigid_body_parameters = true;
       } else if (fields[0] == "initial_state") {
-        if (fields.size() != 35) {
+        const bool legacy_state_record = fields.size() == kLegacyInitialStateFieldCount;
+        if (!is_initial_state_field_count_supported(fields.size())) {
           result.errors.push_back("line " + std::to_string(line_number) +
                                   " initial_state record is malformed");
           continue;
         }
         std::size_t index = 1;
         std::uint64_t recorded_hash = 0;
-        if (!read_state(fields, index, recording.initial_state) ||
+        const bool parsed_state =
+            legacy_state_record
+                ? read_legacy_state(fields, index, recording.initial_state)
+                : read_state(fields, index, recording.initial_state);
+        if (!parsed_state ||
             !read_u64(fields, index, recorded_hash) ||
             index != fields.size()) {
           result.errors.push_back("line " + std::to_string(line_number) +
                                   " initial_state record is invalid");
           continue;
         }
-        if (recorded_hash != hash_state(recording.initial_state)) {
+        const std::uint64_t expected_hash =
+            legacy_state_record ? hash_legacy_state(recording.initial_state)
+                                : hash_state(recording.initial_state);
+        if (recorded_hash != expected_hash) {
           result.errors.push_back("line " + std::to_string(line_number) +
                                   " initial_state hash does not match state");
         }
@@ -1491,7 +1672,8 @@ TelemetryLoadResult load_telemetry_file(const std::filesystem::path& path) {
         }
         saw_initial_aircraft_controls = true;
       } else if (fields[0] == "frame") {
-        if (fields.size() != 65) {
+        const bool legacy_frame_record = fields.size() == kLegacyFrameFieldCount;
+        if (!is_frame_field_count_supported(fields.size())) {
           result.errors.push_back("line " + std::to_string(line_number) +
                                   " frame record is malformed");
           continue;
@@ -1509,12 +1691,24 @@ TelemetryLoadResult load_telemetry_file(const std::filesystem::path& path) {
             !read_core_input(fields, index, frame.core_input) ||
             !read_controls(fields, index, frame.aircraft_controls) ||
             !read_engine(fields, index, frame.engine) ||
-            !read_state(fields, index, frame.state) ||
+            !(legacy_frame_record
+                  ? read_legacy_state(fields, index, frame.state)
+                  : read_state(fields, index, frame.state)) ||
             !read_u64(fields, index, frame.state_hash) ||
             index != fields.size()) {
           result.errors.push_back("line " + std::to_string(line_number) +
                                   " frame record is invalid");
           continue;
+        }
+        const std::uint64_t expected_hash =
+            legacy_frame_record ? hash_legacy_state(frame.state) : hash_state(frame.state);
+        if (frame.state_hash != expected_hash) {
+          result.errors.push_back("line " + std::to_string(line_number) +
+                                  " frame state hash does not match state");
+          continue;
+        }
+        if (legacy_frame_record) {
+          frame.state_hash = hash_state(frame.state);
         }
         recording.frames.push_back(frame);
       } else {
