@@ -99,6 +99,23 @@ target_link_libraries(flying_core_sim_kernel_tests
 
 add_test(NAME flying.core_sim.kernel COMMAND flying_core_sim_kernel_tests)
 
+add_executable(flying_core_sim_determinism_tests
+  ../Source/CoreSim/Tests/CoreSimDeterminismTests.cpp
+)
+
+target_include_directories(flying_core_sim_determinism_tests
+  PRIVATE
+    "${CMAKE_SOURCE_DIR}/Source/CoreSim/Public"
+)
+
+target_link_libraries(flying_core_sim_determinism_tests
+  PRIVATE
+    Flying::CoreSim
+    Flying::CompilerOptions
+)
+
+add_test(NAME flying.core_sim.determinism COMMAND flying_core_sim_determinism_tests)
+
 add_executable(flying_core_sim_flight_dynamics_api_tests
   core_sim/flight_dynamics_api_test.cpp
 )
@@ -288,6 +305,7 @@ set_tests_properties(
   flying.data_pipeline.airport_database
   flying.data_pipeline.runway_importer
   flying.core_sim.kernel
+  flying.core_sim.determinism
   flying.core_sim.flight_dynamics_api
   flying.core_sim.aircraft_config
   flying.core_sim.aircraft_systems
@@ -306,6 +324,7 @@ set_tests_properties(
 
 set_tests_properties(
   flying.core_sim.kernel
+  flying.core_sim.determinism
   flying.core_sim.flight_dynamics_api
   flying.core_sim.input_mapping
   flying.core_sim.scenario_start
