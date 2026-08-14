@@ -2,6 +2,7 @@
 #include "flying/core_sim/telemetry.hpp"
 
 #include <array>
+#include <bit>
 #include <cmath>
 #include <cstdint>
 #include <filesystem>
@@ -9,12 +10,14 @@
 #include <iterator>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace {
 
 using flying::core_sim::AdvanceReport;
 using flying::core_sim::AircraftControlInputSample;
+using flying::core_sim::AircraftInertiaTensor;
 using flying::core_sim::AuthoritativeState;
 using flying::core_sim::CallerFrameInput;
 using flying::core_sim::ControlInputSample;
@@ -25,11 +28,80 @@ using flying::core_sim::ReplayEnvironment;
 using flying::core_sim::RigidBodyParameters;
 using flying::core_sim::TelemetryRecording;
 using flying::core_sim::TelemetryRecorder;
+using flying::core_sim::Vector3d;
 
 void require(bool condition, const char* message) {
   if (!condition) {
     throw std::runtime_error(message);
   }
+}
+
+[[nodiscard]] std::uint64_t append_legacy_u64(std::uint64_t hash, std::uint64_t value) noexcept {
+  constexpr std::uint64_t kLegacyFnvPrime = 1'099'511'628'211ull;
+  for (int byte_index = 0; byte_index < 8; ++byte_index) {
+    const auto byte = static_cast<std::uint8_t>((value >> (byte_index * 8)) & 0xffu);
+    hash ^= byte;
+    hash *= kLegacyFnvPrime;
+  }
+  return hash;
+}
+
+[[nodiscard]] std::uint64_t legacy_double_bits(double value) noexcept {
+  if (value == 0.0) {
+    value = 0.0;
+  }
+  if (std::isnan(value)) {
+    return 0x7ff8'0000'0000'0000ull;
+  }
+  return std::bit_cast<std::uint64_t>(value);
+}
+
+[[nodiscard]] std::uint64_t append_legacy_double(std::uint64_t hash, double value) noexcept {
+  return append_legacy_u64(hash, legacy_double_bits(value));
+}
+
+[[nodiscard]] std::uint64_t append_legacy_vector(std::uint64_t hash, Vector3d value) noexcept {
+  hash = append_legacy_double(hash, value.x);
+  hash = append_legacy_double(hash, value.y);
+  return append_legacy_double(hash, value.z);
+}
+
+[[nodiscard]] std::uint64_t append_legacy_quaternion(std::uint64_t hash,
+                                                     flying::core_sim::Quaterniond value) noexcept {
+  hash = append_legacy_double(hash, value.w);
+  hash = append_legacy_double(hash, value.x);
+  hash = append_legacy_double(hash, value.y);
+  return append_legacy_double(hash, value.z);
+}
+
+[[nodiscard]] std::uint64_t append_legacy_inertia_tensor(
+    std::uint64_t hash,
+    AircraftInertiaTensor value) noexcept {
+  hash = append_legacy_double(hash, value.ixx);
+  hash = append_legacy_double(hash, value.iyy);
+  hash = append_legacy_double(hash, value.izz);
+  hash = append_legacy_double(hash, value.ixy);
+  hash = append_legacy_double(hash, value.ixz);
+  return append_legacy_double(hash, value.iyz);
+}
+
+[[nodiscard]] std::uint64_t hash_legacy_state(const AuthoritativeState& state) noexcept {
+  constexpr std::uint64_t kLegacyFnvOffset = 14'695'981'039'346'656'037ull;
+  constexpr std::uint64_t kLegacyHashSchemaVersion = 2;
+  auto hash = append_legacy_u64(kLegacyFnvOffset, kLegacyHashSchemaVersion);
+  hash = append_legacy_double(hash, state.simulation_time_s);
+  hash = append_legacy_u64(hash, state.step_index);
+  hash = append_legacy_vector(hash, state.ecef_position_m);
+  hash = append_legacy_vector(hash, state.ecef_velocity_mps);
+  hash = append_legacy_quaternion(hash, state.body_to_ecef);
+  hash = append_legacy_vector(hash, state.angular_velocity_body_radps);
+  hash = append_legacy_vector(hash, state.accumulated_force_body_n);
+  hash = append_legacy_vector(hash, state.accumulated_moment_body_nm);
+  hash = append_legacy_double(hash, state.aircraft_mass_balance.total_mass_kg);
+  hash = append_legacy_double(hash, state.aircraft_mass_balance.fuel_mass_kg);
+  hash = append_legacy_double(hash, state.aircraft_mass_balance.payload_mass_kg);
+  hash = append_legacy_vector(hash, state.aircraft_mass_balance.center_of_gravity_body_m);
+  return append_legacy_inertia_tensor(hash, state.aircraft_mass_balance.inertia_tensor_kg_m2);
 }
 
 AuthoritativeState initial_state() {
@@ -119,6 +191,32 @@ std::string join_errors(const std::vector<std::string>& errors) {
   return message;
 }
 
+std::vector<std::string> split_fields(std::string_view line) {
+  std::vector<std::string> fields;
+  std::size_t start = 0;
+  while (start <= line.size()) {
+    const std::size_t next = line.find('|', start);
+    if (next == std::string_view::npos) {
+      fields.emplace_back(line.substr(start));
+      break;
+    }
+    fields.emplace_back(line.substr(start, next - start));
+    start = next + 1;
+  }
+  return fields;
+}
+
+std::string join_fields(const std::vector<std::string>& fields) {
+  std::string line;
+  for (const std::string& field : fields) {
+    if (!line.empty()) {
+      line += '|';
+    }
+    line += field;
+  }
+  return line;
+}
+
 void remove_temp_file(const std::filesystem::path& path) {
   std::error_code error;
   std::filesystem::remove(path, error);
@@ -159,6 +257,126 @@ void telemetry_file_round_trips_and_replays_deterministically() {
   require(replay.deterministic, "compatible telemetry replay must reproduce state hashes");
   require(replay.final_state_hash == recording.frames.back().state_hash,
           "final replay state hash must match the recording");
+
+  remove_temp_file(telemetry_path);
+}
+
+void legacy_telemetry_files_still_load() {
+  const std::filesystem::path telemetry_path =
+      std::filesystem::temp_directory_path() / "flying-legacy-telemetry-load-test.flytelem";
+  remove_temp_file(telemetry_path);
+
+  const TelemetryRecording recording = make_recording();
+  const auto saved = flying::core_sim::save_telemetry_file_atomic(telemetry_path, recording);
+  require(saved.saved, "source telemetry file must save");
+
+  std::string current_text = read_text(telemetry_path);
+  std::string legacy_text;
+  std::size_t start = 0;
+  std::size_t legacy_frame_index = 0;
+  while (start <= current_text.size()) {
+    const std::size_t next = current_text.find('\n', start);
+    const std::string_view line =
+        next == std::string::npos
+            ? std::string_view{current_text}.substr(start)
+            : std::string_view{current_text}.substr(start, next - start);
+    std::string legacy_line{line};
+    if (!line.empty()) {
+      std::vector<std::string> fields = split_fields(line);
+      if (fields.front() == "initial_state") {
+        require(fields.size() == 64, "current initial_state field count must match test fixture");
+        std::vector<std::string> legacy_fields(fields.begin(), fields.begin() + 34);
+        legacy_fields.push_back(std::to_string(hash_legacy_state(recording.initial_state)));
+        legacy_line = join_fields(legacy_fields);
+      } else if (fields.front() == "frame") {
+        require(fields.size() == 94, "current frame field count must match test fixture");
+        require(legacy_frame_index < recording.frames.size(),
+                "legacy frame fixture must stay aligned with recording frames");
+        std::vector<std::string> legacy_fields(fields.begin(), fields.begin() + 64);
+        legacy_fields.push_back(
+            std::to_string(hash_legacy_state(recording.frames[legacy_frame_index].state)));
+        ++legacy_frame_index;
+        legacy_line = join_fields(legacy_fields);
+      }
+    }
+    legacy_text += legacy_line;
+    if (next == std::string::npos) {
+      break;
+    }
+    legacy_text += '\n';
+    start = next + 1;
+  }
+
+  {
+    std::ofstream output(telemetry_path, std::ios::trunc);
+    output << legacy_text;
+  }
+
+  const auto loaded = flying::core_sim::load_telemetry_file(telemetry_path);
+  require(loaded.loaded,
+          ("legacy telemetry file must load: " + join_errors(loaded.errors)).c_str());
+  require(loaded.recording.frames.size() == recording.frames.size(),
+          "legacy telemetry frame count must load");
+  require(loaded.recording.frames.front().state.aircraft_mass_balance.cg_within_envelope,
+          "legacy telemetry should default missing CG envelope state");
+  require(loaded.recording.frames.front().state.weather.source ==
+              flying::core_sim::WeatherSource::Manual,
+          "legacy telemetry should default missing weather source");
+  require(loaded.recording.frames.front().state.weather.visibility_m == 30'000.0,
+          "legacy telemetry should default missing visibility");
+  require(loaded.recording.frames.front().state.weather.runway_friction_scale == 1.0,
+          "legacy telemetry should default missing runway friction");
+  require(loaded.recording.frames.front().state.weather.atmosphere.static_pressure_pa == 101'325.0,
+          "legacy telemetry should default missing atmosphere");
+
+  ReplayEnvironment environment = flying::core_sim::make_current_replay_environment();
+  environment.rigid_body_parameters = loaded.recording.rigid_body_parameters;
+  environment.data_packages.push_back({"pilot-region-fixtures", "v1"});
+  CoreSimulator replay_simulator{loaded.recording.rigid_body_parameters};
+  const auto replay = flying::core_sim::replay_recording(
+      loaded.recording,
+      replay_simulator,
+      environment,
+      ReplayCompatibilityPolicy::RefuseOnMismatch);
+  require(replay.played, "legacy telemetry replay must play");
+  require(replay.deterministic,
+          "legacy telemetry replay must remain deterministic with defaulted weather fields");
+  require(replay.replayed_frames == loaded.recording.frames.size(),
+          "legacy telemetry replay must consume every frame");
+
+  std::string tampered_text;
+  bool tampered_frame = false;
+  start = 0;
+  while (start <= legacy_text.size()) {
+    const std::size_t next = legacy_text.find('\n', start);
+    const std::string_view line =
+        next == std::string::npos
+            ? std::string_view{legacy_text}.substr(start)
+            : std::string_view{legacy_text}.substr(start, next - start);
+    std::string tampered_line{line};
+    if (!tampered_frame && !line.empty()) {
+      std::vector<std::string> fields = split_fields(line);
+      if (fields.front() == "frame") {
+        require(fields.size() == 65, "legacy frame field count must match tamper fixture");
+        fields[31] = std::to_string(std::stod(fields[31]) + 1.0);
+        tampered_line = join_fields(fields);
+        tampered_frame = true;
+      }
+    }
+    tampered_text += tampered_line;
+    if (next == std::string::npos) {
+      break;
+    }
+    tampered_text += '\n';
+    start = next + 1;
+  }
+  require(tampered_frame, "legacy telemetry tamper fixture must modify one frame");
+  {
+    std::ofstream output(telemetry_path, std::ios::trunc);
+    output << tampered_text;
+  }
+  const auto tampered = flying::core_sim::load_telemetry_file(telemetry_path);
+  require(!tampered.loaded, "tampered legacy telemetry must not load with a stale state hash");
 
   remove_temp_file(telemetry_path);
 }
@@ -241,6 +459,7 @@ void incompatible_versions_refuse_or_warn_before_replay() {
 
 int main() {
   telemetry_file_round_trips_and_replays_deterministically();
+  legacy_telemetry_files_still_load();
   exports_include_validation_metadata_and_flight_state();
   incompatible_versions_refuse_or_warn_before_replay();
   return 0;

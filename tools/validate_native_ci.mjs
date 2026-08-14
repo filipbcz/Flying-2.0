@@ -67,15 +67,42 @@ function requireStepRun(job, command, message) {
   }
 }
 
-function ctestCommandTarget(command) {
-  const match = command.match(/\/([^/\\\s"]+)(?:"|\s|$)/);
-  if (!match) {
+function unquoteCmakeArgument(argument) {
+  const bracket = argument.match(/^\[(=*)\[([\s\S]*)\]\1\]$/);
+  if (bracket) {
+    return bracket[2];
+  }
+  if (argument.startsWith('"') && argument.endsWith('"')) {
+    return argument.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, "\\");
+  }
+  return argument;
+}
+
+function commandExecutableToken(argumentsText) {
+  const match = argumentsText.match(/^\s*(\[(=*)\[[\s\S]*?\]\2\]|"(?:\\.|[^"\\])*"|[^\s)]+)/);
+  return match ? unquoteCmakeArgument(match[1]) : null;
+}
+
+function ctestCommandTarget(argumentsText) {
+  const executable = commandExecutableToken(argumentsText);
+  if (!executable) {
     return null;
   }
-  if (match[1] === "flying-data-pipeline") {
+  const target = path.basename(executable.replace(/\\/g, "/")).replace(/\.exe$/i, "");
+  if (target === "flying-data-pipeline") {
     return "flying_data_pipeline_cli";
   }
-  return match[1];
+  return target;
+}
+
+const ctestCommandTargetSelfTests = new Map([
+  ['"/tmp/build/tests/flying_core_sim_kernel_tests"', "flying_core_sim_kernel_tests"],
+  ['"C:\\\\agent\\\\_work\\\\build\\\\tests\\\\flying_core_sim_kernel_tests.exe"', "flying_core_sim_kernel_tests"],
+  ["/tmp/build/tests/flying_core_sim_kernel_tests --flag", "flying_core_sim_kernel_tests"],
+  ["[=[/tmp/build/data_pipeline/flying-data-pipeline]=] --help", "flying_data_pipeline_cli"],
+]);
+for (const [input, expected] of ctestCommandTargetSelfTests) {
+  requireEqual(ctestCommandTarget(input), expected, "CTest command target parser self-test failed");
 }
 
 const nativeWorkflow = parseWorkflowYaml(".github/workflows/native-skeleton.yml");
@@ -162,7 +189,7 @@ for (const [name, props] of properties) {
 }
 
 const smokeBuildTargets = new Set(smokeBuildPreset.targets);
-const testMatches = [...ctestFile.matchAll(/add_test\(\[=\[([^\]]+)]=]\s+"([^"]+)"/g)];
+const testMatches = [...ctestFile.matchAll(/add_test\(\[=\[([^\]]+)]=]\s+([^\n]+)\)/g)];
 const testTargets = new Map(testMatches.map((match) => [match[1], ctestCommandTarget(match[2])]));
 for (const [name, props] of properties) {
   if (!/\bLABELS "([^"]*\bsmoke\b[^"]*)"/.test(props)) {
