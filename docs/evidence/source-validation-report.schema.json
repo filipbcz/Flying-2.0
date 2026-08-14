@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flying.local/docs/evidence/source-validation-report.schema.json",
+  "title": "Flying Source Validation Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "manifestPath",
+    "generatedAtUtc",
+    "status",
+    "summary",
+    "findings"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "pass"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "summary": {
+            "properties": {
+              "errorCount": {
+                "const": 0
+              }
+            },
+            "required": [
+              "errorCount"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "summary": {
+            "properties": {
+              "errorCount": {
+                "const": 0
+              }
+            },
+            "required": [
+              "errorCount"
+            ]
+          }
+        },
+        "required": [
+          "summary"
+        ]
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "pass"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "status": {
+            "const": "fail"
+          }
+        }
+      }
+    }
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "flying.source-validation-report.v1"
+    },
+    "manifestPath": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generatedAtUtc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "enum": [
+        "pass",
+        "fail"
+      ]
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requiredSourceGroups",
+        "errorCount",
+        "warningCount"
+      ],
+      "properties": {
+        "requiredSourceGroups": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "dmr",
+              "dmp",
+              "ortofoto",
+              "zabaged",
+              "geonames",
+              "ucl",
+              "aip",
+              "vfr",
+              "operator_inputs"
+            ]
+          },
+          "minItems": 9,
+          "maxItems": 9,
+          "uniqueItems": true
+        },
+        "errorCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "warningCount": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/finding"
+      }
+    }
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "severity",
+        "code",
+        "path",
+        "message"
+      ],
+      "properties": {
+        "severity": {
+          "enum": [
+            "error",
+            "warning"
+          ]
+        },
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}
