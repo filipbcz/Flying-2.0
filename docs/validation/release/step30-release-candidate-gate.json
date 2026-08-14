@@ -1,7 +1,7 @@
 {
   "schemaVersion": "flying.step30-release-candidate-gate.v1",
   "documentId": "REL-30-RC-ACCEPTANCE-GATE",
-  "status": "pass",
+  "status": "blocked",
   "preparedAtUtc": "2026-08-07T00:00:00Z",
   "executedAtUtc": "2026-08-07T00:00:00Z",
   "operator": "ForgeMind RC acceptance operator",
@@ -121,6 +121,14 @@
       "result": "pass"
     },
     {
+      "area": "Unreal Cesium shell",
+      "command": "node tools/validate_unreal_cesium_shell.mjs --require-unreal-build-run",
+      "evidenceArtifact": "docs/validation/release/unreal-cesium-shell-win64-development-run.json",
+      "mandatory": true,
+      "result": "blocked",
+      "blocker": "Missing Windows UE 5.8 execution artifact proving Win64 Development build, launch, and georeferenced startup log marker."
+    },
+    {
       "area": "license",
       "command": "node tools/validate_step30_license_acceptance.mjs",
       "mandatory": true,
@@ -209,9 +217,9 @@
     "decisionRule": "Release candidate is blocked unless every mandatory clean-machine, automated, coverage, validation, performance and soak result is pass."
   },
   "gateDecision": {
-    "decision": "pass",
-    "reason": "All mandatory clean-machine, automated, coverage, validation, performance and soak evidence for the signed Windows 11 Shipping release candidate passed with no waivers.",
-    "approvedBy": "ForgeMind release gate approver",
+    "decision": "blocked",
+    "reason": "Mandatory Unreal Cesium shell Win64 Development build/run evidence is absent; release candidate remains blocked until the Windows UE 5.8 execution artifact is captured.",
+    "approvedBy": null,
     "decidedAtUtc": "2026-08-07T00:00:00Z"
   }
 }
