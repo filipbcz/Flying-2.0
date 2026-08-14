@@ -7,6 +7,7 @@ import argparse
 import json
 import re
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +17,36 @@ CONTRACT_PATH = REPO_ROOT / "docs" / "contract" / "flying-2.0.yml"
 LEDGER_SCHEMA_PATH = REPO_ROOT / "docs" / "evidence" / "ledger.schema.json"
 REQ_ID = re.compile(r"^REQ-[A-Z0-9]+(?:-[A-Z0-9]+)*$")
 MILESTONE_ID = re.compile(r"^M[0-9]+$")
+INCLUDE_RE = re.compile(r'^\s*#\s*include\s+[<"]([^>"]+)[>"]', re.MULTILINE)
+
+MODULE_BOUNDARIES = {
+    "CoreSim": {
+        "paths": [Path("core_sim"), Path("Source/CoreSim")],
+        "forbidden_include_prefixes": (
+            "CoreMinimal.h",
+            "Blueprint/",
+            "Cesium",
+            "FlyingPresentation",
+            "unreal/",
+        ),
+        "forbidden_link_tokens": (
+            "FlyingPresentation",
+            "Cesium",
+            "Unreal",
+            "Blueprint",
+        ),
+    },
+    "GeoTerrain": {
+        "paths": [Path("geo_terrain"), Path("Source/GeoTerrain")],
+        "forbidden_include_prefixes": (
+            "FlyingPresentation/Private",
+            "unreal/Source/FlyingPresentation/Private",
+        ),
+        "forbidden_link_tokens": (
+            "FlyingPresentationPrivate",
+        ),
+    },
+}
 
 
 class ValidationError(Exception):
@@ -129,6 +160,169 @@ def validate_ledger_entries(contract: dict[str, Any], ledger: dict[str, Any]) ->
     require(not missing, f"evidence ledger missing requirements: {sorted(missing)}")
 
 
+def relative(path: Path) -> str:
+    try:
+        return str(path.relative_to(REPO_ROOT))
+    except ValueError:
+        return str(path)
+
+
+def iter_text_files(base: Path):
+    if not base.exists():
+        return
+    for path in base.rglob("*"):
+        if path.is_file() and path.suffix.lower() in {
+            ".build.cs",
+            ".cmake",
+            ".cpp",
+            ".cs",
+            ".cxx",
+            ".h",
+            ".hpp",
+            ".hxx",
+            ".md",
+            ".txt",
+        }:
+            yield path
+
+
+def cmake_target_links(cmake_text: str, target_name: str) -> list[str]:
+    links: list[str] = []
+    pattern = re.compile(r"target_link_libraries\s*\(\s*" + re.escape(target_name) + r"\b([\s\S]*?)\)", re.MULTILINE)
+    for match in pattern.finditer(cmake_text):
+        body = re.sub(r"#.*", "", match.group(1))
+        links.extend(
+            token
+            for token in re.split(r"\s+", body)
+            if token and token not in {"PUBLIC", "PRIVATE", "INTERFACE"}
+        )
+    return links
+
+
+def validate_source_alias_tree() -> None:
+    for module_name, canonical in (("CoreSim", "core_sim"), ("GeoTerrain", "geo_terrain")):
+        path = REPO_ROOT / "Source" / module_name
+        require(path.is_dir(), f"missing compatibility source tree: Source/{module_name}")
+        readme = path / "README.md"
+        require(readme.is_file(), f"Source/{module_name} must document its canonical source boundary")
+        text = readme.read_text(encoding="utf-8")
+        require(canonical in text, f"Source/{module_name} must point to {canonical}")
+
+
+def validate_module_boundaries(root: Path = REPO_ROOT) -> None:
+    for module_name, rule in MODULE_BOUNDARIES.items():
+        existing_paths = [root / path for path in rule["paths"] if (root / path).exists()]
+        require(existing_paths, f"missing module source tree for {module_name}")
+
+        for base in existing_paths:
+            for path in iter_text_files(base):
+                text = path.read_text(encoding="utf-8", errors="ignore")
+                for include in INCLUDE_RE.findall(text):
+                    for prefix in rule["forbidden_include_prefixes"]:
+                        if include.startswith(prefix) or prefix in include:
+                            raise ValidationError(
+                                f"{module_name} forbidden include {include!r} in {relative(path)}"
+                            )
+
+        for path in existing_paths:
+            cmake = path / "CMakeLists.txt"
+            if not cmake.is_file():
+                continue
+            text = cmake.read_text(encoding="utf-8")
+            for target in ("flying_core_sim", "flying_geo_terrain"):
+                for link in cmake_target_links(text, target):
+                    for forbidden in rule["forbidden_link_tokens"]:
+                        if forbidden.lower() in link.lower():
+                            raise ValidationError(
+                                f"{module_name} target {target} has forbidden dependency {link}"
+                            )
+
+
+def validate_ci_entrypoint() -> None:
+    script = REPO_ROOT / "tools" / "ci" / "validate_all.py"
+    require(script.is_file(), "missing CI validation entry point: tools/ci/validate_all.py")
+    text = script.read_text(encoding="utf-8")
+    require("cmake" in text and "--preset" in text, "validate_all.py must drive CMake presets")
+    require("forge_validate.py" in text and "architecture" in text,
+            "validate_all.py must run the architecture validator")
+
+
+def validate_architecture_boundaries() -> None:
+    validate_contract()
+    validate_source_alias_tree()
+    validate_ci_entrypoint()
+    validate_module_boundaries()
+
+
+def run_architecture_boundary_selftest() -> None:
+    cases = [
+        ("CoreSim Unreal include", Path("core_sim/bad.cpp"), '#include "CoreMinimal.h"\n'),
+        ("CoreSim Blueprint include", Path("core_sim/bad.cpp"), '#include "Blueprint/UserWidget.h"\n'),
+        ("CoreSim Cesium include", Path("core_sim/bad.cpp"), '#include "CesiumGeoreference.h"\n'),
+        ("CoreSim Presentation include", Path("core_sim/bad.cpp"), '#include "FlyingPresentation/Public/FlyingPresentation.h"\n'),
+        ("CoreSim Unreal path include", Path("core_sim/bad.cpp"), '#include "unreal/Source/FlyingPresentation/Public/FlyingPresentation.h"\n'),
+        (
+            "CoreSim Presentation link",
+            Path("core_sim/CMakeLists.txt"),
+            "target_link_libraries(flying_core_sim PUBLIC FlyingPresentation)\n",
+        ),
+        (
+            "CoreSim Cesium link",
+            Path("core_sim/CMakeLists.txt"),
+            "target_link_libraries(flying_core_sim PUBLIC CesiumRuntime)\n",
+        ),
+        (
+            "CoreSim Unreal link",
+            Path("core_sim/CMakeLists.txt"),
+            "target_link_libraries(flying_core_sim PUBLIC UnrealEngine)\n",
+        ),
+        (
+            "CoreSim Blueprint link",
+            Path("core_sim/CMakeLists.txt"),
+            "target_link_libraries(flying_core_sim PUBLIC BlueprintAssets)\n",
+        ),
+        (
+            "GeoTerrain Presentation private include",
+            Path("geo_terrain/bad.cpp"),
+            '#include "FlyingPresentation/Private/FlyingCoreSimComponent.h"\n',
+        ),
+        (
+            "GeoTerrain Unreal presentation private include",
+            Path("geo_terrain/bad.cpp"),
+            '#include "unreal/Source/FlyingPresentation/Private/FlyingCoreSimComponent.h"\n',
+        ),
+        (
+            "GeoTerrain Presentation private link",
+            Path("geo_terrain/CMakeLists.txt"),
+            "target_link_libraries(flying_geo_terrain PRIVATE FlyingPresentationPrivate)\n",
+        ),
+    ]
+
+    for name, relative_path, content in cases:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "core_sim").mkdir(parents=True)
+            (root / "geo_terrain").mkdir(parents=True)
+            (root / "core_sim" / "CMakeLists.txt").write_text(
+                "target_link_libraries(flying_core_sim PUBLIC Flying::GeoTerrain)\n",
+                encoding="utf-8",
+            )
+            (root / "geo_terrain" / "CMakeLists.txt").write_text(
+                "target_link_libraries(flying_geo_terrain PUBLIC Flying::CompilerOptions)\n",
+                encoding="utf-8",
+            )
+
+            path = root / relative_path
+            path.write_text(content, encoding="utf-8")
+
+            try:
+                validate_module_boundaries(root)
+            except ValidationError:
+                continue
+
+        raise ValidationError(f"architecture validator accepted forbidden dependency: {name}")
+
+
 def command_contract(_: argparse.Namespace) -> int:
     validate_contract()
     print("forge_validate: contract ok")
@@ -136,8 +330,14 @@ def command_contract(_: argparse.Namespace) -> int:
 
 
 def command_architecture(_: argparse.Namespace) -> int:
-    validate_contract()
+    validate_architecture_boundaries()
     print("forge_validate: architecture ok")
+    return 0
+
+
+def command_architecture_boundary_selftest(_: argparse.Namespace) -> int:
+    run_architecture_boundary_selftest()
+    print("forge_validate: forbidden module dependency rejected")
     return 0
 
 
@@ -196,6 +396,12 @@ def main() -> int:
 
     architectur = subcommands.add_parser("architectur", help="compatibility alias for architecture")
     architectur.set_defaults(func=command_architecture)
+
+    architecture_boundary_selftest = subcommands.add_parser(
+        "architecture-boundary-selftest",
+        help="prove forbidden module dependencies are rejected",
+    )
+    architecture_boundary_selftest.set_defaults(func=command_architecture_boundary_selftest)
 
     release_gate = subcommands.add_parser("release-gate", help="validate an evidence ledger for release")
     release_gate.add_argument("--ledger", default="docs/evidence/ledger.json")
