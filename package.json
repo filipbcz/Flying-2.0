@@ -2,7 +2,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "validate:native-ci": "node tools/validate_native_ci.mjs"
+    "validate:native-ci": "node tools/validate_native_ci.mjs",
+    "validate:contract": "node tools/forge_validate.js contract",
+    "validate:evidence-gate": "node tools/forge_validate.js missing-evidence-selftest"
   },
   "devDependencies": {
     "yaml": "2.9.0"
