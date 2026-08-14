@@ -1,0 +1,23 @@
+{
+  "FileVersion": 3,
+  "EngineAssociation": "5.8",
+  "Category": "Simulation",
+  "Description": "Flying Win64 simulator shell with Cesium georeferencing.",
+  "Modules": [
+    {
+      "Name": "FlyingPresentation",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ],
+  "Plugins": [
+    {
+      "Name": "CesiumForUnreal",
+      "Enabled": true,
+      "MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/cesium-for-unreal"
+    }
+  ],
+  "TargetPlatforms": [
+    "Win64"
+  ]
+}

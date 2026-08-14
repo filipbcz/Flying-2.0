@@ -41,6 +41,13 @@ function resultIsPass(result) {
   return result === "pass";
 }
 
+function requireIsoTimestamp(value, label) {
+  requireCondition(
+    typeof value === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(value),
+    `${label} must be an ISO UTC timestamp`,
+  );
+}
+
 const gatePath = "docs/validation/release/step30-release-candidate-gate.json";
 const gate = readJson(gatePath);
 const qaEvidence = read("docs/release/qa-evidence.md");
@@ -111,6 +118,7 @@ for (const area of [
   "weather",
   "replay",
   "packaging",
+  "Unreal Cesium shell",
   "license",
   "performance",
   "soak",
@@ -125,6 +133,60 @@ requireCondition(
   suites.get("license").command === "node tools/validate_step30_license_acceptance.mjs",
   "license suite must run the standalone Step 30 licensing acceptance validator",
 );
+requireCondition(
+  suites.get("Unreal Cesium shell").command ===
+    "node tools/validate_unreal_cesium_shell.mjs --require-unreal-build-run",
+  "Unreal Cesium shell suite must require the Win64 Development build/run validator",
+);
+const unrealShellSuite = suites.get("Unreal Cesium shell");
+requireCondition(
+  unrealShellSuite.evidenceArtifact ===
+    "docs/validation/release/unreal-cesium-shell-win64-development-run.json",
+  "Unreal Cesium shell suite must reference its Windows execution artifact",
+);
+if (unrealShellSuite.result === "pass") {
+  const shellRun = readJson(unrealShellSuite.evidenceArtifact);
+  requireCondition(
+    shellRun.schemaVersion === "flying.unreal-cesium-shell-run.v1",
+    "Unreal Cesium shell run artifact schema mismatch",
+  );
+  requireCondition(
+    shellRun.command === "node tools/validate_unreal_cesium_shell.mjs --require-unreal-build-run",
+    "Unreal Cesium shell run artifact command mismatch",
+  );
+  requireCondition(shellRun.exitCode === 0, "Unreal Cesium shell run artifact must record exitCode 0");
+  requireIsoTimestamp(shellRun.executedAtUtc, "Unreal Cesium shell run artifact executedAtUtc");
+  requireCondition(shellRun.host?.os === "Windows 11", "Unreal Cesium shell run artifact must target Windows 11");
+  requireCondition(shellRun.host?.processPlatform === "win32", "Unreal Cesium shell run artifact must come from win32");
+  requireCondition(
+    shellRun.unrealEngine?.majorVersion === 5 && shellRun.unrealEngine?.minorVersion === 8,
+    "Unreal Cesium shell run artifact must use UE 5.8",
+  );
+  requireCondition(shellRun.build?.targetPlatform === "Win64", "Unreal Cesium shell build target must be Win64");
+  requireCondition(shellRun.build?.configuration === "Development", "Unreal Cesium shell build must be Development");
+  requireCondition(shellRun.build?.projectPath === "Flying.uproject", "Unreal Cesium shell project path mismatch");
+  requireCondition(
+    typeof shellRun.build?.executablePath === "string" &&
+      /(?:^|[\\/])Binaries[\\/]Win64[\\/].+\.exe$/i.test(shellRun.build.executablePath),
+    "Unreal Cesium shell run artifact must record a Win64 executable path",
+  );
+  requireCondition(
+    typeof shellRun.launch?.logPath === "string" &&
+      shellRun.launch.logPath.includes("FlyingCesiumShellValidation.log"),
+    "Unreal Cesium shell run artifact must record the validation log path",
+  );
+  requireCondition(
+    typeof shellRun.launch?.logExcerpt === "string" &&
+      shellRun.launch.logExcerpt.includes("Flying georeferenced simulator shell initialized"),
+    "Unreal Cesium shell run artifact must include the georeferenced startup log marker",
+  );
+} else {
+  requireCondition(
+    typeof unrealShellSuite.blocker === "string" &&
+      unrealShellSuite.blocker.includes("Windows UE 5.8 execution artifact"),
+    "blocked Unreal Cesium shell suite must document the missing execution artifact",
+  );
+}
 
 const coverage = gate.coverageReportReview;
 requireCondition(
