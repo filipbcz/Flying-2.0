@@ -4,7 +4,8 @@
   "scripts": {
     "validate:native-ci": "node tools/validate_native_ci.mjs",
     "validate:contract": "node tools/forge_validate.js contract",
-    "validate:evidence-gate": "node tools/forge_validate.js missing-evidence-selftest"
+    "validate:evidence-gate": "node tools/forge_validate.js missing-evidence-selftest",
+    "validate:m0-legal-data": "node tools/validate_m0_legal_data_gate.mjs"
   },
   "devDependencies": {
     "yaml": "2.9.0"

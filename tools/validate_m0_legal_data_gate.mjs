@@ -3,6 +3,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { parse } from "yaml";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -19,113 +20,12 @@ function read(relativePath) {
   }
 }
 
-function indentation(line) {
-  return line.match(/^ */)[0].length;
-}
-
-function parseScalar(value) {
-  const trimmed = value.trim();
-  if (trimmed === "true") {
-    return true;
-  }
-  if (trimmed === "false") {
-    return false;
-  }
-  if (/^-?\d+$/.test(trimmed)) {
-    return Number(trimmed);
-  }
-  if (
-    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
-    (trimmed.startsWith("'") && trimmed.endsWith("'"))
-  ) {
-    return trimmed.slice(1, -1);
-  }
-  return trimmed;
-}
-
-function splitKeyValue(source) {
-  const separator = source.indexOf(":");
-  if (separator === -1) {
-    fail(`invalid YAML entry: ${source}`);
-  }
-  return [source.slice(0, separator).trim(), source.slice(separator + 1).trim()];
-}
-
 function parseYaml(relativePath) {
-  const lines = read(relativePath)
-    .split(/\r?\n/)
-    .filter((line) => line.trim() !== "" && !line.trimStart().startsWith("#"));
-
-  function parseBlock(index, indent) {
-    const first = lines[index];
-    const isArray = first !== undefined && indentation(first) === indent && first.trimStart().startsWith("- ");
-    const container = isArray ? [] : {};
-
-    while (index < lines.length) {
-      const line = lines[index];
-      const currentIndent = indentation(line);
-      if (currentIndent < indent) {
-        break;
-      }
-      if (currentIndent > indent) {
-        fail(`${relativePath}: unexpected indentation at line ${index + 1}`);
-      }
-
-      const trimmed = line.trimStart();
-      if (isArray) {
-        if (!trimmed.startsWith("- ")) {
-          break;
-        }
-        const itemText = trimmed.slice(2).trim();
-        index += 1;
-        if (itemText === "") {
-          const [child, nextIndex] = parseBlock(index, indent + 2);
-          container.push(child);
-          index = nextIndex;
-          continue;
-        }
-        if (itemText.includes(":")) {
-          const [key, value] = splitKeyValue(itemText);
-          const item = { [key]: value === "" ? undefined : parseScalar(value) };
-          if (value === "") {
-            const [child, nextIndex] = parseBlock(index, indent + 2);
-            item[key] = child;
-            index = nextIndex;
-          }
-          if (index < lines.length && indentation(lines[index]) === indent + 2) {
-            const [rest, nextIndex] = parseBlock(index, indent + 2);
-            Object.assign(item, rest);
-            index = nextIndex;
-          }
-          container.push(item);
-          continue;
-        }
-        container.push(parseScalar(itemText));
-        continue;
-      }
-
-      if (trimmed.startsWith("- ")) {
-        break;
-      }
-      const [key, value] = splitKeyValue(trimmed);
-      index += 1;
-      if (value === "") {
-        const [child, nextIndex] = parseBlock(index, indent + 2);
-        container[key] = child;
-        index = nextIndex;
-      } else {
-        container[key] = parseScalar(value);
-      }
-    }
-
-    return [container, index];
+  try {
+    return parse(read(relativePath));
+  } catch (error) {
+    fail(`${relativePath}: ${error instanceof Error ? error.message : String(error)}`);
   }
-
-  const [parsed, nextIndex] = parseBlock(0, 0);
-  if (nextIndex !== lines.length) {
-    fail(`${relativePath}: trailing unparsed YAML at line ${nextIndex + 1}`);
-  }
-  return parsed;
 }
 
 function requireCondition(condition, message) {
@@ -151,16 +51,26 @@ function requireRequiredFields(record, fields, label) {
 const evidence = parseYaml("docs/evidence/m0-legal-data-gate.yml");
 const attribution = parseYaml("docs/licenses/source-attribution.yml");
 const blockers = parseYaml("docs/blockers/external-inputs.yml");
+const contract = JSON.parse(read("docs/contract/flying-2.0.yml"));
+const contractRequirementIds = new Set(contract.requirements?.map((requirement) => requirement.id) ?? []);
+
+requireCondition(contractRequirementIds.size > 0, "contract must define requirement ids");
 
 requireArray(evidence.requirement_ids, "M0 evidence requirement_ids");
 for (const requirementId of [
-  "REQ-LEGAL-DATA-GATE",
-  "REQ-SOURCE-AUDITABILITY",
-  "REQ-AIRCRAFT-DATA-RIGHTS"
+  "REQ-CONTRACT-GOVERNANCE",
+  "REQ-EVIDENCE-TRACEABILITY",
+  "REQ-RELEASE-GATES"
 ]) {
   requireCondition(
     evidence.requirement_ids.includes(requirementId),
     `M0 evidence requirement_ids missing ${requirementId}`
+  );
+}
+for (const requirementId of evidence.requirement_ids) {
+  requireCondition(
+    contractRequirementIds.has(requirementId),
+    `M0 evidence references unknown contract requirement ${requirementId}`
   );
 }
 
@@ -216,6 +126,12 @@ for (const blocker of blockers.blockers) {
     `blockers[${blocker.blocker_id ?? "unknown"}]`
   );
   requireArray(blocker.requirement_ids, `blockers[${blocker.blocker_id}].requirement_ids`);
+  for (const requirementId of blocker.requirement_ids) {
+    requireCondition(
+      contractRequirementIds.has(requirementId),
+      `blockers[${blocker.blocker_id}].requirement_ids references unknown contract requirement ${requirementId}`
+    );
+  }
   requireArray(blocker.acceptable_resolution, `blockers[${blocker.blocker_id}].acceptable_resolution`);
 }
 for (const blockerId of [

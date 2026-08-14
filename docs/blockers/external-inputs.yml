@@ -5,8 +5,9 @@ effective_date: "2026-08-01"
 blockers:
   - blocker_id: aim-aip-vfr-permission
     requirement_ids:
-      - REQ-LEGAL-DATA-GATE
-      - REQ-SOURCE-AUDITABILITY
+      - REQ-CONTRACT-GOVERNANCE
+      - REQ-EVIDENCE-TRACEABILITY
+      - REQ-RELEASE-GATES
     external_input: "Written AIM/AIP/VFR permission or approved fallback coverage evidence"
     current_status: blocked
     source_version: "AIM public terms/pages checked 2026-08-01"
@@ -20,8 +21,8 @@ blockers:
       - "Archive approved fallback master list and provenance proving Version 1 airport, runway, SLZ, and obstacle coverage without restricted AIM/AIP/VFR content."
   - blocker_id: aircraft-poh-afm-validation-rights
     requirement_ids:
-      - REQ-AIRCRAFT-DATA-RIGHTS
-      - REQ-SOURCE-AUDITABILITY
+      - REQ-EVIDENCE-TRACEABILITY
+      - REQ-RELEASE-GATES
     external_input: "POH/AFM, branding, geometry, performance, and validation data rights for one single-engine piston trainer"
     current_status: blocked
     source_version: "no selected type; governance checked 2026-08-01"
@@ -35,8 +36,8 @@ blockers:
       - "Archive permitted POH/AFM use, validation data rights, trademark/branding clearance or generic-branding decision, and data provenance by family."
   - blocker_id: production-master-airport-list
     requirement_ids:
-      - REQ-LEGAL-DATA-GATE
-      - REQ-SOURCE-AUDITABILITY
+      - REQ-EVIDENCE-TRACEABILITY
+      - REQ-RELEASE-GATES
     external_input: "Approved production Czech airport, runway, and SLZ master list built from permitted sources"
     current_status: blocked
     source_version: "pilot seed list exists; production national list not frozen"
