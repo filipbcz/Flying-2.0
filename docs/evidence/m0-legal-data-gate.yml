@@ -1,0 +1,86 @@
+schema_version: 1
+document_id: EV-M0-LEGAL-DATA-GATE
+requirement_ids:
+  - REQ-CONTRACT-GOVERNANCE
+  - REQ-EVIDENCE-TRACEABILITY
+  - REQ-RELEASE-GATES
+status: conditional_no_go
+effective_date: "2026-08-01"
+recorded_date: "2026-08-13"
+owner: project_governance
+legal_note: "Engineering release-gate evidence only; not legal advice."
+source_inventory:
+  - source_id: cuzk-dmr-5g
+    name: "CUZK DMR 5G"
+    source_version: "current public metadata checked 2026-08-01; production package version must be recorded at download time"
+    source_url: "https://geoportal.cuzk.cz/Default.aspx?metadataID=CZ-CUZK-DMR5G-V&mode=TextMeta&side=vyskopis"
+    license: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+    attribution: "Contains information from the Czech Office for Surveying, Mapping and Cadastre (CUZK): DMR 5G."
+    redistribution_status: allowed_with_attribution_and_change_notice
+    effective_date: "2026-08-01"
+    production_use_status: allowed_when_official_source_manifest_and_checksums_are_recorded
+  - source_id: cuzk-dmp-1g
+    name: "CUZK DMP 1G"
+    source_version: "current public metadata checked 2026-08-01; production package version must be recorded at download time"
+    source_url: "https://geoportal.cuzk.cz/Default.aspx?metadataID=CZ-CUZK-DMP1G-V&mode=TextMeta&side=vyskopis"
+    license: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+    attribution: "Contains information from the Czech Office for Surveying, Mapping and Cadastre (CUZK): DMP 1G."
+    redistribution_status: allowed_with_attribution_and_change_notice
+    effective_date: "2026-08-01"
+    production_use_status: allowed_as_auxiliary_source_when_manifested
+  - source_id: cuzk-ortofoto-cr
+    name: "CUZK Ortofoto Ceske republiky"
+    source_version: "current public metadata checked 2026-08-01; production package version must be recorded at download time"
+    source_url: "https://geoportal.cuzk.cz/Default.aspx?metadataID=CZ-CUZK-ORTOFOTO-R&mode=TextMeta&side=ortofoto"
+    license: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+    attribution: "Contains information from the Czech Office for Surveying, Mapping and Cadastre (CUZK): Ortofoto Ceske republiky."
+    redistribution_status: allowed_with_attribution_and_change_notice
+    effective_date: "2026-08-01"
+    production_use_status: allowed_when_official_source_manifest_and_checksums_are_recorded
+  - source_id: cuzk-zabaged-polohopis
+    name: "CUZK ZABAGED polohopis"
+    source_version: "current public metadata checked 2026-08-01; production package version must be recorded at download time"
+    source_url: "https://geoportal.cuzk.cz/Default.aspx?metadataID=CZ-CUZK-ZABAGED-VP&mode=TextMeta&side=zabaged"
+    license: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+    attribution: "Contains information from the Czech Office for Surveying, Mapping and Cadastre (CUZK): ZABAGED."
+    redistribution_status: allowed_with_attribution_and_change_notice
+    effective_date: "2026-08-01"
+    production_use_status: allowed_when_official_source_manifest_and_checksums_are_recorded
+  - source_id: cuzk-geonames
+    name: "CUZK Geonames"
+    source_version: "current public metadata checked 2026-08-01; production package version must be recorded at download time"
+    source_url: "https://geoportal.cuzk.cz/Default.aspx?metadataID=CZ-CUZK-GEONAMES-V&mode=TextMeta&side=Geonames"
+    license: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+    attribution: "Contains information from the Czech Office for Surveying, Mapping and Cadastre (CUZK): Geonames."
+    redistribution_status: allowed_with_attribution_and_change_notice
+    effective_date: "2026-08-01"
+    production_use_status: allowed_when_official_source_manifest_and_checksums_are_recorded
+  - source_id: aim-aip-vfr
+    name: "AIM/AIP/VFR CR aeronautical content"
+    source_version: "current public terms and pages checked 2026-08-01"
+    source_url: "https://aim.rlp.cz/"
+    license: "no simulator import or redistribution license recorded"
+    attribution: "not applicable until written permission defines required notice text"
+    redistribution_status: blocked_pending_written_permission
+    effective_date: "2026-08-01"
+    production_use_status: blocked
+aim_aip_vfr_gate:
+  consent_status: not_recorded
+  fallback_status: approved_process_recorded_not_complete
+  evidence_or_blocker: "docs/blockers/external-inputs.yml#aim-aip-vfr-permission"
+  release_gate_effect: "No-Go for importing or redistributing AIM/AIP/VFR content until written permission is archived or fallback coverage is approved."
+aircraft_data_rights_gate:
+  reference_aircraft_status: not_selected
+  poh_afm_rights_status: not_recorded
+  validation_data_rights_status: not_recorded
+  faithful_type_claims_allowed: false
+  evidence_or_blocker: "docs/blockers/external-inputs.yml#aircraft-poh-afm-validation-rights"
+master_airport_list_gate:
+  status: not_frozen_for_production
+  current_record: "data_pipeline/seeds/pilot-airport-master-list.json"
+  production_constraint: "Pilot seed data is not a production Czech master list and cannot satisfy national coverage."
+linked_records:
+  governance_legal_gate: "docs/governance/m0-legal-data-gate.md"
+  governance_aircraft_gate: "docs/governance/m0-aircraft-data-gate.md"
+  attribution_registry: "docs/licenses/source-attribution.yml"
+  external_blockers: "docs/blockers/external-inputs.yml"

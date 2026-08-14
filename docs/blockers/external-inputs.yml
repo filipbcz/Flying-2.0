@@ -1,0 +1,50 @@
+schema_version: 1
+document_id: BLK-EXTERNAL-INPUTS
+status: active_blockers
+effective_date: "2026-08-01"
+blockers:
+  - blocker_id: aim-aip-vfr-permission
+    requirement_ids:
+      - REQ-CONTRACT-GOVERNANCE
+      - REQ-EVIDENCE-TRACEABILITY
+      - REQ-RELEASE-GATES
+    external_input: "Written AIM/AIP/VFR permission or approved fallback coverage evidence"
+    current_status: blocked
+    source_version: "AIM public terms/pages checked 2026-08-01"
+    license: "no simulator import or redistribution license recorded"
+    attribution: "not recorded; permission must specify required attribution if granted"
+    redistribution_status: blocked_pending_written_permission
+    effective_date: "2026-08-01"
+    release_gate_effect: "Blocks importing, embedding, redistributing, or treating AIM/AIP/VFR content as production evidence."
+    acceptable_resolution:
+      - "Archive written permission covering automated access, extraction, transformation, QA storage, offline product packaging, redistribution, update cadence, attribution, and commercial restrictions."
+      - "Archive approved fallback master list and provenance proving Version 1 airport, runway, SLZ, and obstacle coverage without restricted AIM/AIP/VFR content."
+  - blocker_id: aircraft-poh-afm-validation-rights
+    requirement_ids:
+      - REQ-EVIDENCE-TRACEABILITY
+      - REQ-RELEASE-GATES
+    external_input: "POH/AFM, branding, geometry, performance, and validation data rights for one single-engine piston trainer"
+    current_status: blocked
+    source_version: "no selected type; governance checked 2026-08-01"
+    license: "not recorded"
+    attribution: "not recorded"
+    redistribution_status: blocked_for_faithful_type_claims
+    effective_date: "2026-08-01"
+    release_gate_effect: "Blocks faithful-type aircraft claims and production validation against a named aircraft."
+    acceptable_resolution:
+      - "Select the reference aircraft in a new governance record."
+      - "Archive permitted POH/AFM use, validation data rights, trademark/branding clearance or generic-branding decision, and data provenance by family."
+  - blocker_id: production-master-airport-list
+    requirement_ids:
+      - REQ-EVIDENCE-TRACEABILITY
+      - REQ-RELEASE-GATES
+    external_input: "Approved production Czech airport, runway, and SLZ master list built from permitted sources"
+    current_status: blocked
+    source_version: "pilot seed list exists; production national list not frozen"
+    license: "depends on selected permitted source records"
+    attribution: "depends on selected permitted source records"
+    redistribution_status: blocked_until_source_rights_and_provenance_are_recorded
+    effective_date: "2026-08-13"
+    release_gate_effect: "Blocks national airport completeness claims and downstream production airport import."
+    acceptable_resolution:
+      - "Freeze the production master list with source, reviewer, uncertainty, license, redistribution status, attribution, and effective-date metadata for every active airport/runway/SLZ record."
