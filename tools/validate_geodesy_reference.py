@@ -7,6 +7,7 @@ import pathlib
 import shutil
 import subprocess
 import sys
+import json
 
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -54,6 +55,8 @@ def validate_static_contract() -> None:
     misplaced_paths = [
         REPO_ROOT / "tests/GeodesyReferenceTests.cpp",
         REPO_ROOT / "tests/geodesyreferencetests.cpp",
+        REPO_ROOT / "source/coresim/public/units.h",
+        REPO_ROOT / "source/geoterrain/public/geodesy.h",
         REPO_ROOT / "source/GeoTerrain/Public/Geodesy.h",
         REPO_ROOT / "source/CoreSim/Public/Units.h",
     ]
@@ -76,6 +79,18 @@ def validate_static_contract() -> None:
 
     require('#include "Units.h"' in core_sim_public, "CoreSim.h must expose Source/CoreSim/Public/Units.h")
     require('#include "Units.h"' in reference_test, "reference test must verify CoreSim/Public/Units.h")
+
+    presets = json.loads((REPO_ROOT / "CMakePresets.json").read_text())
+    smoke_build = next(
+        (preset for preset in presets["buildPresets"] if preset.get("name") == "smoke"),
+        None,
+    )
+    require(smoke_build is not None, "CMakePresets.json missing smoke build preset")
+    smoke_targets = smoke_build.get("targets", [])
+    require(
+        "flying_geodesy_reference_tests" in smoke_targets,
+        "smoke build preset must build flying_geodesy_reference_tests before ctest --preset smoke",
+    )
 
 
 def validate_registered_and_executed() -> None:
