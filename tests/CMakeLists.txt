@@ -38,6 +38,22 @@ target_link_libraries(flying_data_pipeline_dmr5g_terrain_tests
 
 add_test(NAME flying.data_pipeline.dmr5g_terrain COMMAND flying_data_pipeline_dmr5g_terrain_tests)
 
+add_executable(flying_terrain_slice_tests
+  ../Tests/TerrainSliceTests.cpp
+)
+
+target_link_libraries(flying_terrain_slice_tests
+  PRIVATE
+    Flying::CompilerOptions
+)
+
+target_compile_definitions(flying_terrain_slice_tests
+  PRIVATE
+    FLYING_REPO_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+)
+
+add_test(NAME flying.terrain_slice COMMAND flying_terrain_slice_tests)
+
 add_executable(flying_data_pipeline_pilot_region_package_tests
   data_pipeline/pilot_region_packages_test.cpp
 )

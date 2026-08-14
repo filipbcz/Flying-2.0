@@ -1,0 +1,416 @@
+{
+  "schemaVersion": "flying.terrain-slice.v1",
+  "packageName": "flying-dmr5g-initial-terrain-slice",
+  "packageVersion": "2026.08-approved-slice",
+  "packageId": "dmr5g-cz-initial-50km-slice",
+  "coverage": {
+    "scope": "initial-terrain-slice",
+    "countryCode": "CZ",
+    "bounds": {
+      "minEastM": 0,
+      "minNorthM": 0,
+      "widthM": 50000,
+      "heightM": 50000
+    },
+    "offlineRuntime": true
+  },
+  "provenance": {
+    "sourceDataset": "DMR 5G",
+    "publisher": "CUZK",
+    "sourceVersion": "2026.08-approved-slice",
+    "sourceEffectiveDate": "2026-08-01",
+    "sourceManifest": "source-manifest.json",
+    "license": "CUZK DMR 5G redistribution approval recorded in docs/licenses/source-attribution.yml",
+    "licenseEvidence": "docs/licenses/source-attribution.yml",
+    "inputPath": "Data/Terrain/Dmr5gSliceInput.json",
+    "generatedBy": "tools/data_pipeline/build_terrain.py",
+    "generatedAtUtc": "2026-08-14T00:00:00Z"
+  },
+  "sourceTiles": [
+    {
+      "id": "dmr5g-slice-west-25km",
+      "path": "dmr5g/dmr5g-slice-west-25km.xyz.csv",
+      "format": "dmr5g-epsg5514-bpv-csv",
+      "bounds": {
+        "minEastM": 0,
+        "maxEastM": 25000,
+        "minNorthM": 0,
+        "maxNorthM": 50000
+      },
+      "sourceBounds": {
+        "minSourceX": -750000,
+        "maxSourceX": -725000,
+        "minSourceY": -1050000,
+        "maxSourceY": -1000000
+      },
+      "sourceSampleCount": 66,
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "2cba4c1b71be3aa20f10c1bad5514a4bbb0898b72643ac31b4ce8f0c12f8fc61"
+      }
+    },
+    {
+      "id": "dmr5g-slice-east-25km",
+      "path": "dmr5g/dmr5g-slice-east-25km.xyz.csv",
+      "format": "dmr5g-epsg5514-bpv-csv",
+      "bounds": {
+        "minEastM": 25000,
+        "maxEastM": 50000,
+        "minNorthM": 0,
+        "maxNorthM": 50000
+      },
+      "sourceBounds": {
+        "minSourceX": -725000,
+        "maxSourceX": -700000,
+        "minSourceY": -1050000,
+        "maxSourceY": -1000000
+      },
+      "sourceSampleCount": 66,
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "cf470886b841a65615b912700074042f3dc4c98097245fec108265bdee52a775"
+      }
+    }
+  ],
+  "transforms": {
+    "sourceCrs": {
+      "authority": "EPSG",
+      "code": "5514",
+      "name": "S-JTSK / Krovak East North"
+    },
+    "targetCrs": {
+      "authority": "FLYING",
+      "code": "CZ-SLICE-ENU",
+      "name": "Flying Czech local ENU slice"
+    },
+    "sourceHeightSystem": {
+      "name": "Baltic Vertical Datum - After Adjustment",
+      "kind": "orthometric"
+    },
+    "targetHeightSystem": {
+      "name": "WGS 84 ellipsoidal",
+      "kind": "ellipsoidal"
+    },
+    "geoid": {
+      "model": "Bpv-to-WGS84 approved slice geoid",
+      "grid": "cz-bpv-wgs84-2026-08.gtx",
+      "undulationMeters": 45.25
+    },
+    "sourceToProject": {
+      "eastFromSourceXScale": 1,
+      "eastFromSourceYScale": 0,
+      "eastOffsetM": 750000,
+      "northFromSourceXScale": 0,
+      "northFromSourceYScale": 1,
+      "northOffsetM": 1050000
+    },
+    "heightTransform": {
+      "sourceHeightScale": 1,
+      "orthometricOffsetM": 0
+    },
+    "proj": {
+      "version": "9.4-recorded",
+      "pipeline": "+proj=pipeline +step +proj=affine +xoff=750000 +yoff=1050000"
+    }
+  },
+  "transformValidation": {
+    "sourceCrs": {
+      "authority": "EPSG",
+      "code": "5514",
+      "name": "S-JTSK / Krovak East North"
+    },
+    "targetCrs": {
+      "authority": "FLYING",
+      "code": "CZ-SLICE-ENU",
+      "name": "Flying Czech local ENU slice"
+    },
+    "sourceHeightSystem": {
+      "name": "Baltic Vertical Datum - After Adjustment",
+      "kind": "orthometric"
+    },
+    "targetHeightSystem": {
+      "name": "WGS 84 ellipsoidal",
+      "kind": "ellipsoidal"
+    },
+    "operation": "affine-epsg5514-to-project-enu-plus-bpv-to-ellipsoidal-geoid-offset",
+    "transformedSampleCount": 132,
+    "sampleSpacingM": 5000.0,
+    "passed": true
+  },
+  "terrainMetadata": {
+    "heightEncoding": "meters-f64-csv",
+    "heightFields": [
+      "ellipsoidal_height_m",
+      "orthometric_height_m"
+    ],
+    "normalFrame": "project-local-ENU",
+    "normalEncoding": "unit-vector-f64-csv",
+    "waterMaskEncoding": "uint8-csv",
+    "materialMaskEncoding": "uint8-csv",
+    "edgeCleaned": false,
+    "collisionTilesAreSeparate": true
+  },
+  "renderLods": [
+    {
+      "level": 0,
+      "sampleStride": 1,
+      "tiles": [
+        {
+          "tileId": "dmr5g-slice-west-25km",
+          "path": "render/lod0/dmr5g-slice-west-25km.terrain.csv",
+          "rows": 11,
+          "cols": 6,
+          "bounds": {
+            "minEastM": 0,
+            "maxEastM": 25000,
+            "minNorthM": 0,
+            "maxNorthM": 50000
+          },
+          "sourceBounds": {
+            "minSourceX": -750000,
+            "maxSourceX": -725000,
+            "minSourceY": -1050000,
+            "maxSourceY": -1000000
+          },
+          "sourceSampleSpacingM": 5000.0,
+          "checksum": {
+            "algorithm": "sha256",
+            "value": "e5eaf3ddf3ed15281afd62c8c52a62f63d2a3292b5d98caae58c0c1118d1d080"
+          }
+        },
+        {
+          "tileId": "dmr5g-slice-east-25km",
+          "path": "render/lod0/dmr5g-slice-east-25km.terrain.csv",
+          "rows": 11,
+          "cols": 6,
+          "bounds": {
+            "minEastM": 25000,
+            "maxEastM": 50000,
+            "minNorthM": 0,
+            "maxNorthM": 50000
+          },
+          "sourceBounds": {
+            "minSourceX": -725000,
+            "maxSourceX": -700000,
+            "minSourceY": -1050000,
+            "maxSourceY": -1000000
+          },
+          "sourceSampleSpacingM": 5000.0,
+          "checksum": {
+            "algorithm": "sha256",
+            "value": "7ebcea3b30d54f1e5925d4dcd456e5e176d201dd64f7e0e95a976cc2ab53ef18"
+          }
+        }
+      ]
+    },
+    {
+      "level": 1,
+      "sampleStride": 2,
+      "tiles": [
+        {
+          "tileId": "dmr5g-slice-west-25km",
+          "path": "render/lod1/dmr5g-slice-west-25km.terrain.csv",
+          "rows": 6,
+          "cols": 3,
+          "bounds": {
+            "minEastM": 0,
+            "maxEastM": 25000,
+            "minNorthM": 0,
+            "maxNorthM": 50000
+          },
+          "sourceBounds": {
+            "minSourceX": -750000,
+            "maxSourceX": -725000,
+            "minSourceY": -1050000,
+            "maxSourceY": -1000000
+          },
+          "sourceSampleSpacingM": 5000.0,
+          "checksum": {
+            "algorithm": "sha256",
+            "value": "5f7a501bcec344b256b9491206e2127cbb70d2f864b56d51ee70cb669d079cab"
+          }
+        },
+        {
+          "tileId": "dmr5g-slice-east-25km",
+          "path": "render/lod1/dmr5g-slice-east-25km.terrain.csv",
+          "rows": 6,
+          "cols": 3,
+          "bounds": {
+            "minEastM": 25000,
+            "maxEastM": 50000,
+            "minNorthM": 0,
+            "maxNorthM": 50000
+          },
+          "sourceBounds": {
+            "minSourceX": -725000,
+            "maxSourceX": -700000,
+            "minSourceY": -1050000,
+            "maxSourceY": -1000000
+          },
+          "sourceSampleSpacingM": 5000.0,
+          "checksum": {
+            "algorithm": "sha256",
+            "value": "9adf91d703004c978a38ae21c772f5ba67a92aecf37a133785080f3805d6d074"
+          }
+        }
+      ]
+    },
+    {
+      "level": 2,
+      "sampleStride": 4,
+      "tiles": [
+        {
+          "tileId": "dmr5g-slice-west-25km",
+          "path": "render/lod2/dmr5g-slice-west-25km.terrain.csv",
+          "rows": 3,
+          "cols": 2,
+          "bounds": {
+            "minEastM": 0,
+            "maxEastM": 25000,
+            "minNorthM": 0,
+            "maxNorthM": 50000
+          },
+          "sourceBounds": {
+            "minSourceX": -750000,
+            "maxSourceX": -725000,
+            "minSourceY": -1050000,
+            "maxSourceY": -1000000
+          },
+          "sourceSampleSpacingM": 5000.0,
+          "checksum": {
+            "algorithm": "sha256",
+            "value": "a2358d8788b67e1ee00a0967126ab05f23f21a01edcbe3dc381ae437f3e0dd75"
+          }
+        },
+        {
+          "tileId": "dmr5g-slice-east-25km",
+          "path": "render/lod2/dmr5g-slice-east-25km.terrain.csv",
+          "rows": 3,
+          "cols": 2,
+          "bounds": {
+            "minEastM": 25000,
+            "maxEastM": 50000,
+            "minNorthM": 0,
+            "maxNorthM": 50000
+          },
+          "sourceBounds": {
+            "minSourceX": -725000,
+            "maxSourceX": -700000,
+            "minSourceY": -1050000,
+            "maxSourceY": -1000000
+          },
+          "sourceSampleSpacingM": 5000.0,
+          "checksum": {
+            "algorithm": "sha256",
+            "value": "7be68d5e0860f1e2b858cc25589b1dbab272658add854ea74fbc2384eedc2629"
+          }
+        }
+      ]
+    }
+  ],
+  "collisionTiles": [
+    {
+      "tileId": "dmr5g-slice-west-25km",
+      "path": "collision/dmr5g-slice-west-25km.collision.csv",
+      "rows": 11,
+      "cols": 6,
+      "bounds": {
+        "minEastM": 0,
+        "maxEastM": 25000,
+        "minNorthM": 0,
+        "maxNorthM": 50000
+      },
+      "sourceBounds": {
+        "minSourceX": -750000,
+        "maxSourceX": -725000,
+        "minSourceY": -1050000,
+        "maxSourceY": -1000000
+      },
+      "sourceSampleSpacingM": 5000.0,
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "e5eaf3ddf3ed15281afd62c8c52a62f63d2a3292b5d98caae58c0c1118d1d080"
+      }
+    },
+    {
+      "tileId": "dmr5g-slice-east-25km",
+      "path": "collision/dmr5g-slice-east-25km.collision.csv",
+      "rows": 11,
+      "cols": 6,
+      "bounds": {
+        "minEastM": 25000,
+        "maxEastM": 50000,
+        "minNorthM": 0,
+        "maxNorthM": 50000
+      },
+      "sourceBounds": {
+        "minSourceX": -725000,
+        "maxSourceX": -700000,
+        "minSourceY": -1050000,
+        "maxSourceY": -1000000
+      },
+      "sourceSampleSpacingM": 5000.0,
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "7ebcea3b30d54f1e5925d4dcd456e5e176d201dd64f7e0e95a976cc2ab53ef18"
+      }
+    }
+  ],
+  "validation": {
+    "controlPoints": {
+      "points": [
+        {
+          "id": "dmr-control-lkpr-west-approach",
+          "eastM": 10000,
+          "northM": 10000,
+          "expectedOrthometricHeightM": 297.57,
+          "sourceVerticalErrorM": 0.18,
+          "source": "supplied-dmr5g-control-points-2026-08",
+          "actualOrthometricHeightM": 297.53,
+          "absoluteErrorM": 0.04,
+          "allowedErrorM": 0.48,
+          "passed": true
+        },
+        {
+          "id": "dmr-control-vltava-ridge",
+          "eastM": 25000,
+          "northM": 25000,
+          "expectedOrthometricHeightM": 333.886,
+          "sourceVerticalErrorM": 0.18,
+          "source": "supplied-dmr5g-control-points-2026-08",
+          "actualOrthometricHeightM": 333.936,
+          "absoluteErrorM": 0.05,
+          "allowedErrorM": 0.48,
+          "passed": true
+        },
+        {
+          "id": "dmr-control-brno-route-east",
+          "eastM": 40000,
+          "northM": 40000,
+          "expectedOrthometricHeightM": 370.908,
+          "sourceVerticalErrorM": 0.18,
+          "source": "supplied-dmr5g-control-points-2026-08",
+          "actualOrthometricHeightM": 370.878,
+          "absoluteErrorM": 0.03,
+          "allowedErrorM": 0.48,
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    "edgeContinuity": {
+      "adjacentPairCount": 1,
+      "comparedSampleCount": 11,
+      "unmatchedSampleCount": 0,
+      "failedSampleCount": 0,
+      "toleranceM": 0.05,
+      "maxAbsStepM": 0.0,
+      "passed": true
+    },
+    "boundaryCleaning": {
+      "adjustedSampleCount": 0,
+      "maxPreCleanStepM": 0.0,
+      "maxAdjustmentM": 0.05
+    }
+  }
+}
