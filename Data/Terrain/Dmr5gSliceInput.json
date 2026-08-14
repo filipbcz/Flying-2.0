@@ -1,0 +1,229 @@
+{
+  "schemaVersion": "flying.dmr5g-terrain-slice-input.v1",
+  "sourceDataset": {
+    "name": "DMR 5G",
+    "publisher": "CUZK",
+    "version": "2026.08-approved-slice",
+    "effectiveDate": "2026-08-01",
+    "license": "CUZK DMR 5G redistribution approval recorded in docs/licenses/source-attribution.yml",
+    "sourceManifest": "source-manifest.json"
+  },
+  "coverage": {
+    "countryCode": "CZ",
+    "bounds": {
+      "minEastM": 0,
+      "minNorthM": 0,
+      "widthM": 50000,
+      "heightM": 50000
+    },
+    "sampleSpacingM": 5000
+  },
+  "transform": {
+    "sourceCrs": {
+      "authority": "EPSG",
+      "code": "5514",
+      "name": "S-JTSK / Krovak East North"
+    },
+    "targetCrs": {
+      "authority": "FLYING",
+      "code": "CZ-SLICE-ENU",
+      "name": "Flying Czech local ENU slice"
+    },
+    "sourceHeightSystem": {
+      "name": "Baltic Vertical Datum - After Adjustment",
+      "kind": "orthometric"
+    },
+    "targetHeightSystem": {
+      "name": "WGS 84 ellipsoidal",
+      "kind": "ellipsoidal"
+    },
+    "geoid": {
+      "model": "Bpv-to-WGS84 approved slice geoid",
+      "grid": "cz-bpv-wgs84-2026-08.gtx",
+      "undulationMeters": 45.25
+    },
+    "sourceToProject": {
+      "eastFromSourceXScale": 1,
+      "eastFromSourceYScale": 0,
+      "eastOffsetM": 750000,
+      "northFromSourceXScale": 0,
+      "northFromSourceYScale": 1,
+      "northOffsetM": 1050000
+    },
+    "heightTransform": {
+      "sourceHeightScale": 1,
+      "orthometricOffsetM": 0
+    },
+    "proj": {
+      "version": "9.4-recorded",
+      "pipeline": "+proj=pipeline +step +proj=affine +xoff=750000 +yoff=1050000"
+    }
+  },
+  "tiles": [
+    {
+      "id": "dmr5g-slice-west-25km",
+      "path": "dmr5g/dmr5g-slice-west-25km.xyz.csv",
+      "bounds": {
+        "minEastM": 0,
+        "maxEastM": 25000,
+        "minNorthM": 0,
+        "maxNorthM": 50000
+      },
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "2cba4c1b71be3aa20f10c1bad5514a4bbb0898b72643ac31b4ce8f0c12f8fc61"
+      },
+      "sourceBounds": {
+        "minSourceX": -750000,
+        "maxSourceX": -725000,
+        "minSourceY": -1050000,
+        "maxSourceY": -1000000
+      }
+    },
+    {
+      "id": "dmr5g-slice-east-25km",
+      "path": "dmr5g/dmr5g-slice-east-25km.xyz.csv",
+      "bounds": {
+        "minEastM": 25000,
+        "maxEastM": 50000,
+        "minNorthM": 0,
+        "maxNorthM": 50000
+      },
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "cf470886b841a65615b912700074042f3dc4c98097245fec108265bdee52a775"
+      },
+      "sourceBounds": {
+        "minSourceX": -725000,
+        "maxSourceX": -700000,
+        "minSourceY": -1050000,
+        "maxSourceY": -1000000
+      }
+    }
+  ],
+  "controlPoints": [
+    {
+      "id": "dmr-control-lkpr-west-approach",
+      "eastM": 10000,
+      "northM": 10000,
+      "expectedOrthometricHeightM": 297.57,
+      "sourceVerticalErrorM": 0.18,
+      "source": "supplied-dmr5g-control-points-2026-08"
+    },
+    {
+      "id": "dmr-control-vltava-ridge",
+      "eastM": 25000,
+      "northM": 25000,
+      "expectedOrthometricHeightM": 333.886,
+      "sourceVerticalErrorM": 0.18,
+      "source": "supplied-dmr5g-control-points-2026-08"
+    },
+    {
+      "id": "dmr-control-brno-route-east",
+      "eastM": 40000,
+      "northM": 40000,
+      "expectedOrthometricHeightM": 370.908,
+      "sourceVerticalErrorM": 0.18,
+      "source": "supplied-dmr5g-control-points-2026-08"
+    }
+  ],
+  "seamChecks": [
+    {
+      "westTileId": "dmr5g-slice-west-25km",
+      "eastTileId": "dmr5g-slice-east-25km",
+      "eastM": 25000,
+      "northM": 0,
+      "toleranceM": 0.05
+    },
+    {
+      "westTileId": "dmr5g-slice-west-25km",
+      "eastTileId": "dmr5g-slice-east-25km",
+      "eastM": 25000,
+      "northM": 5000,
+      "toleranceM": 0.05
+    },
+    {
+      "westTileId": "dmr5g-slice-west-25km",
+      "eastTileId": "dmr5g-slice-east-25km",
+      "eastM": 25000,
+      "northM": 10000,
+      "toleranceM": 0.05
+    },
+    {
+      "westTileId": "dmr5g-slice-west-25km",
+      "eastTileId": "dmr5g-slice-east-25km",
+      "eastM": 25000,
+      "northM": 15000,
+      "toleranceM": 0.05
+    },
+    {
+      "westTileId": "dmr5g-slice-west-25km",
+      "eastTileId": "dmr5g-slice-east-25km",
+      "eastM": 25000,
+      "northM": 20000,
+      "toleranceM": 0.05
+    },
+    {
+      "westTileId": "dmr5g-slice-west-25km",
+      "eastTileId": "dmr5g-slice-east-25km",
+      "eastM": 25000,
+      "northM": 25000,
+      "toleranceM": 0.05
+    },
+    {
+      "westTileId": "dmr5g-slice-west-25km",
+      "eastTileId": "dmr5g-slice-east-25km",
+      "eastM": 25000,
+      "northM": 30000,
+      "toleranceM": 0.05
+    },
+    {
+      "westTileId": "dmr5g-slice-west-25km",
+      "eastTileId": "dmr5g-slice-east-25km",
+      "eastM": 25000,
+      "northM": 35000,
+      "toleranceM": 0.05
+    },
+    {
+      "westTileId": "dmr5g-slice-west-25km",
+      "eastTileId": "dmr5g-slice-east-25km",
+      "eastM": 25000,
+      "northM": 40000,
+      "toleranceM": 0.05
+    },
+    {
+      "westTileId": "dmr5g-slice-west-25km",
+      "eastTileId": "dmr5g-slice-east-25km",
+      "eastM": 25000,
+      "northM": 45000,
+      "toleranceM": 0.05
+    },
+    {
+      "westTileId": "dmr5g-slice-west-25km",
+      "eastTileId": "dmr5g-slice-east-25km",
+      "eastM": 25000,
+      "northM": 50000,
+      "toleranceM": 0.05
+    }
+  ],
+  "renderLods": [
+    {
+      "level": 0,
+      "sampleStride": 1
+    },
+    {
+      "level": 1,
+      "sampleStride": 2
+    },
+    {
+      "level": 2,
+      "sampleStride": 4
+    }
+  ],
+  "validationTolerances": {
+    "dmrVerticalToleranceM": 0.3,
+    "seamToleranceM": 0.05,
+    "maxBoundaryAdjustmentM": 0.05
+  },
+  "sourceRoot": "."
+}
