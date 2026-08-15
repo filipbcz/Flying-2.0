@@ -3,7 +3,7 @@
   "$id": "https://flying.local/schemas/pilot-runway-surfaces-package.schema.json",
   "title": "Flying Pilot Runway Surfaces Package",
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "required": [
     "schemaVersion",
     "packageName",
@@ -27,6 +27,7 @@
     "coordinateFrame": {"const": "airport-local-ENU-per-aerodrome"},
     "runtimeDependencies": {
       "type": "object",
+      "additionalProperties": false,
       "required": [
         "runtimeNetworkRequired",
         "externalMapApis",
@@ -40,6 +41,7 @@
     },
     "collision": {
       "type": "object",
+      "additionalProperties": false,
       "required": [
         "authority",
         "runwayOverridePriority",
@@ -58,16 +60,24 @@
       "minItems": 2,
       "items": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
+          "id",
           "airportId",
+          "aerodromeId",
           "runwayId",
+          "kind",
           "surfaceType",
           "file",
           "georeference",
           "material",
           "roughnessM",
+          "dimensionsM",
           "visualMesh",
           "collisionMesh",
+          "lod",
+          "slopes",
+          "markings",
           "transitionBands",
           "provenance",
           "thresholdCoordinateLengthM",
@@ -75,8 +85,11 @@
           "transversePercent"
         ],
         "properties": {
+          "id": {"type": "string", "minLength": 1},
           "airportId": {"type": "string", "minLength": 1},
+          "aerodromeId": {"type": "string", "minLength": 1},
           "runwayId": {"type": "string", "minLength": 1},
+          "kind": {"enum": ["runway", "taxiway", "slz_strip"]},
           "surfaceType": {"enum": ["paved", "grass"]},
           "file": {"type": "string", "minLength": 1},
           "thresholdCoordinateLengthM": {"type": "number", "exclusiveMinimum": 0},
@@ -86,6 +99,7 @@
           "roughnessM": {"type": "number", "minimum": 0},
           "georeference": {
             "type": "object",
+            "additionalProperties": false,
             "required": [
               "coordinateFrame",
               "originWgs84",
@@ -106,6 +120,7 @@
                 "maxItems": 2,
                 "items": {
                   "type": "object",
+                  "additionalProperties": false,
                   "required": ["id", "positionWgs84", "localEnuM"],
                   "properties": {
                     "id": {"type": "string", "minLength": 1},
@@ -123,6 +138,7 @@
             "minItems": 2,
             "items": {
               "type": "object",
+              "additionalProperties": false,
               "required": ["side", "widthM", "innerHeightM", "outerHeightM", "terrainMaterial", "maxStepM"],
               "properties": {
                 "side": {"enum": ["left", "right"]},
@@ -134,12 +150,55 @@
               }
             }
           },
-          "provenance": {"type": "array", "minItems": 1}
+          "provenance": {"type": "array", "minItems": 1},
+          "dimensionsM": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["length", "width"],
+            "properties": {
+              "length": {"type": "number", "exclusiveMinimum": 0},
+              "width": {"type": "number", "exclusiveMinimum": 0}
+            }
+          },
+          "lod": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["level", "maxErrorM"],
+              "properties": {
+                "level": {"type": "integer", "minimum": 0},
+                "maxErrorM": {"type": "number", "minimum": 0}
+              }
+            }
+          },
+          "slopes": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["longitudinalPercent", "transversePercent", "source"],
+            "properties": {
+              "longitudinalPercent": {"type": "number"},
+              "transversePercent": {"type": "number"},
+              "source": {"const": "verified_threshold_geometry"}
+            }
+          },
+          "markings": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["centerline", "edge", "threshold"],
+            "properties": {
+              "centerline": {"type": "boolean"},
+              "edge": {"type": "boolean"},
+              "threshold": {"type": "boolean"}
+            }
+          }
         }
       }
     },
     "validation": {
       "type": "object",
+      "additionalProperties": false,
       "required": [
         "coverageReport",
         "coordinateChecksIncluded",
@@ -158,11 +217,43 @@
         "terrainTransitionChecksIncluded": {"const": true},
         "provenanceChecksIncluded": {"const": true}
       }
+    },
+    "generatedAtUtc": {"type": "string", "minLength": 1},
+    "sourceDatabase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "checksumSha256", "schemaVersion", "databaseVersion", "airac"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "checksumSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "schemaVersion": {"type": "string", "minLength": 1},
+        "databaseVersion": {"type": "string", "minLength": 1},
+        "airac": {"type": "object"}
+      }
+    },
+    "acceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maxVisualCollisionDeltaM",
+        "terrainTransitionRequiredForMaterials",
+        "slopeSource"
+      ],
+      "properties": {
+        "maxVisualCollisionDeltaM": {"type": "number", "maximum": 0.05},
+        "terrainTransitionRequiredForMaterials": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "slopeSource": {"const": "verified_threshold_geometry"}
+      }
     }
   },
   "$defs": {
     "wgs84Position": {
       "type": "object",
+      "additionalProperties": false,
       "required": ["latDeg", "lonDeg", "elevationM"],
       "properties": {
         "latDeg": {"type": "number", "minimum": -90, "maximum": 90},
@@ -172,6 +263,7 @@
     },
     "localEnu": {
       "type": "object",
+      "additionalProperties": false,
       "required": ["east", "north", "up"],
       "properties": {
         "east": {"type": "number"},
@@ -181,6 +273,7 @@
     },
     "surfaceMesh": {
       "type": "object",
+      "additionalProperties": false,
       "required": ["vertices", "indices"],
       "properties": {
         "vertices": {
@@ -188,6 +281,7 @@
           "minItems": 4,
           "items": {
             "type": "object",
+            "additionalProperties": false,
             "required": ["stationM", "lateralM", "localEnuM", "positionWgs84", "heightM"],
             "properties": {
               "stationM": {"type": "number"},
@@ -201,7 +295,7 @@
         "indices": {
           "type": "array",
           "minItems": 6,
-          "items": {"type": "integer", "minimum": 0}
+          "items": {"type": "integer", "minimum": 0, "maximum": 26}
         }
       }
     }

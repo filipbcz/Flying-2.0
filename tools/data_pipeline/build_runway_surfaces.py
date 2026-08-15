@@ -72,6 +72,53 @@ def meters_per_degree_longitude(lat_deg: float) -> float:
     return 111_320.0 * math.cos(math.radians(lat_deg))
 
 
+WGS84_A_M = 6_378_137.0
+WGS84_F = 1.0 / 298.257223563
+WGS84_E2 = WGS84_F * (2.0 - WGS84_F)
+
+
+def geodetic_to_ecef(position: dict[str, float]) -> tuple[float, float, float]:
+    lat = math.radians(position["latDeg"])
+    lon = math.radians(position["lonDeg"])
+    sin_lat = math.sin(lat)
+    cos_lat = math.cos(lat)
+    normal_radius = WGS84_A_M / math.sqrt(1.0 - WGS84_E2 * sin_lat * sin_lat)
+    height = position["elevationM"]
+    return (
+        (normal_radius + height) * cos_lat * math.cos(lon),
+        (normal_radius + height) * cos_lat * math.sin(lon),
+        (normal_radius * (1.0 - WGS84_E2) + height) * sin_lat,
+    )
+
+
+def ecef_to_geodetic(x: float, y: float, z: float) -> dict[str, float]:
+    lon = math.atan2(y, x)
+    p = math.hypot(x, y)
+    lat = math.atan2(z, p * (1.0 - WGS84_E2))
+    for _ in range(8):
+        sin_lat = math.sin(lat)
+        normal_radius = WGS84_A_M / math.sqrt(1.0 - WGS84_E2 * sin_lat * sin_lat)
+        height = p / math.cos(lat) - normal_radius
+        lat = math.atan2(z, p * (1.0 - WGS84_E2 * normal_radius / (normal_radius + height)))
+    sin_lat = math.sin(lat)
+    normal_radius = WGS84_A_M / math.sqrt(1.0 - WGS84_E2 * sin_lat * sin_lat)
+    height = p / math.cos(lat) - normal_radius
+    return {"latDeg": math.degrees(lat), "lonDeg": math.degrees(lon), "elevationM": height}
+
+
+def enu_basis(origin: dict[str, float]) -> tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]]:
+    lat = math.radians(origin["latDeg"])
+    lon = math.radians(origin["lonDeg"])
+    east = (-math.sin(lon), math.cos(lon), 0.0)
+    north = (-math.sin(lat) * math.cos(lon), -math.sin(lat) * math.sin(lon), math.cos(lat))
+    up = (math.cos(lat) * math.cos(lon), math.cos(lat) * math.sin(lon), math.sin(lat))
+    return east, north, up
+
+
+def dot(lhs: tuple[float, float, float], rhs: tuple[float, float, float]) -> float:
+    return lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2]
+
+
 def threshold_position(runway_end: dict[str, Any], path: str) -> dict[str, float]:
     threshold = require_dict(required(runway_end, "threshold", path), f"{path}.threshold")
     physical = require_dict(
@@ -102,19 +149,30 @@ def origin_position(aerodrome: dict[str, Any]) -> dict[str, float]:
 
 
 def local_enu(origin: dict[str, float], position: dict[str, float]) -> dict[str, float]:
+    origin_ecef = geodetic_to_ecef(origin)
+    position_ecef = geodetic_to_ecef(position)
+    delta = (
+        position_ecef[0] - origin_ecef[0],
+        position_ecef[1] - origin_ecef[1],
+        position_ecef[2] - origin_ecef[2],
+    )
+    east, north, up = enu_basis(origin)
     return {
-        "east": (position["lonDeg"] - origin["lonDeg"]) * meters_per_degree_longitude(origin["latDeg"]),
-        "north": (position["latDeg"] - origin["latDeg"]) * meters_per_degree_latitude(),
-        "up": position["elevationM"] - origin["elevationM"],
+        "east": dot(delta, east),
+        "north": dot(delta, north),
+        "up": dot(delta, up),
     }
 
 
 def local_to_wgs84(origin: dict[str, float], east_m: float, north_m: float, elevation_m: float) -> dict[str, float]:
-    return {
-        "latDeg": origin["latDeg"] + north_m / meters_per_degree_latitude(),
-        "lonDeg": origin["lonDeg"] + east_m / meters_per_degree_longitude(origin["latDeg"]),
-        "elevationM": elevation_m,
-    }
+    origin_ecef = geodetic_to_ecef(origin)
+    east, north, up = enu_basis(origin)
+    up_m = elevation_m - origin["elevationM"]
+    return ecef_to_geodetic(
+        origin_ecef[0] + east[0] * east_m + north[0] * north_m + up[0] * up_m,
+        origin_ecef[1] + east[1] * east_m + north[1] * north_m + up[1] * up_m,
+        origin_ecef[2] + east[2] * east_m + north[2] * north_m + up[2] * up_m,
+    )
 
 
 def rounded_position(position: dict[str, float]) -> dict[str, float]:
@@ -205,7 +263,17 @@ def make_mesh(
             c = b + 1
             d = a + 1
             indices.extend([a, b, c, a, c, d])
+    validate_mesh_indices(vertices, indices)
     return {"vertices": vertices, "indices": indices}
+
+
+def validate_mesh_indices(vertices: list[dict[str, Any]], indices: list[int]) -> None:
+    if not vertices:
+        raise ValueError("surface mesh must contain vertices")
+    max_index = len(vertices) - 1
+    for index in indices:
+        if index < 0 or index > max_index:
+            raise ValueError(f"surface mesh index {index} is outside vertex range 0..{max_index}")
 
 
 def build_surface(aerodrome: dict[str, Any], runway: dict[str, Any]) -> dict[str, Any]:
@@ -377,6 +445,11 @@ def self_test() -> int:
         temp = Path(temp_name)
         source = temp / "verified-runways.json"
         output = temp / "runway-surfaces.json"
+        origin = {"latDeg": 50.0, "lonDeg": 14.0, "elevationM": 300.0}
+        north_a = local_to_wgs84(origin, 0.0, 500.0, 298.0)
+        north_b = local_to_wgs84(origin, 0.0, -500.0, 302.0)
+        east_a = local_to_wgs84(origin, -200.0, 0.0, 300.0)
+        east_b = local_to_wgs84(origin, 200.0, 0.0, 300.0)
         write_json(
             source,
             {
@@ -387,7 +460,7 @@ def self_test() -> int:
                     {
                         "id": "TEST",
                         "classification": "active_airport",
-                        "referencePointWgs84": {"latDeg": 50.0, "lonDeg": 14.0, "elevationM": 300.0},
+                        "referencePointWgs84": origin,
                         "runways": [
                             {
                                 "id": "RWY-18-36",
@@ -397,8 +470,8 @@ def self_test() -> int:
                                 "markings": {"centerline": True, "edge": True, "threshold": True},
                                 "sourceAttribution": [{"sourceId": "known-fixture", "permissionStatus": "permitted"}],
                                 "ends": [
-                                    {"id": "RWY-18", "threshold": {"physicalThreshold": {"positionWgs84": {"latDeg": 50.0044915559, "lonDeg": 14.0, "elevationM": 298.0}}}},
-                                    {"id": "RWY-36", "threshold": {"physicalThreshold": {"positionWgs84": {"latDeg": 49.9955084441, "lonDeg": 14.0, "elevationM": 302.0}}}},
+                                    {"id": "RWY-18", "threshold": {"physicalThreshold": {"positionWgs84": north_a}}},
+                                    {"id": "RWY-36", "threshold": {"physicalThreshold": {"positionWgs84": north_b}}},
                                 ],
                             },
                             {
@@ -408,8 +481,8 @@ def self_test() -> int:
                                 "slope": {"transversePercent": 0.25},
                                 "sourceAttribution": [{"sourceId": "known-fixture", "permissionStatus": "permitted"}],
                                 "ends": [
-                                    {"id": "SLZ-09", "threshold": {"physicalThreshold": {"positionWgs84": {"latDeg": 50.0, "lonDeg": 13.9972051821, "elevationM": 300.0}}}},
-                                    {"id": "SLZ-27", "threshold": {"physicalThreshold": {"positionWgs84": {"latDeg": 50.0, "lonDeg": 14.0027948179, "elevationM": 300.0}}}},
+                                    {"id": "SLZ-09", "threshold": {"physicalThreshold": {"positionWgs84": east_a}}},
+                                    {"id": "SLZ-27", "threshold": {"physicalThreshold": {"positionWgs84": east_b}}},
                                 ],
                             },
                         ],
