@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flying.local/schemas/aircraft.schema.json",
+  "title": "Flying Aircraft Configuration",
+  "description": "Canonical repository-facing aircraft configuration schema. The executable CoreSim copy is kept in core_sim/schemas/aircraft-config.schema.json and uses the same versioned contract.",
+  "$ref": "../core_sim/schemas/aircraft-config.schema.json"
+}

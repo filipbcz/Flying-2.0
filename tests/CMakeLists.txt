@@ -145,7 +145,7 @@ target_link_libraries(flying_core_sim_flight_dynamics_api_tests
 add_test(NAME flying.core_sim.flight_dynamics_api COMMAND flying_core_sim_flight_dynamics_api_tests)
 
 add_executable(flying_core_sim_aircraft_config_tests
-  core_sim/aircraft_config_test.cpp
+  ../Tests/AircraftConfigTests.cpp
 )
 
 target_link_libraries(flying_core_sim_aircraft_config_tests

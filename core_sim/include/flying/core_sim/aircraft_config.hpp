@@ -13,7 +13,9 @@
 namespace flying::core_sim {
 
 inline constexpr std::string_view kAircraftConfigSchemaVersion = "flying.aircraft-config.v1";
+inline constexpr std::string_view kAircraftConfigLegacySchemaVersion = "flying.aircraft-config.v0";
 inline constexpr std::string_view kAircraftConfigUnvalidatedStatus = "unvalidated";
+inline constexpr std::string_view kAircraftConfigFaithfulStatus = "faithful";
 
 struct AircraftSourceReference {
   std::string id;
@@ -24,6 +26,7 @@ struct AircraftSourceReference {
   std::string provenance;
   std::string confidence;
   std::vector<std::string> used_for;
+  bool approved_for_faithful_claim{};
 };
 
 struct AircraftValueMetadata {
@@ -198,6 +201,7 @@ struct AircraftConfiguration {
   std::string validation_status;
   std::string validation_suite;
   std::string validation_suite_status;
+  std::vector<std::string> validation_approved_references;
   std::string license_spdx;
   std::string license_notice;
   std::string provenance_summary;
@@ -215,6 +219,13 @@ struct AircraftConfiguration {
 struct AircraftConfigurationLoadResult {
   bool loaded{};
   AircraftConfiguration configuration{};
+  std::vector<std::string> errors;
+};
+
+struct AircraftConfigurationCompatibility {
+  bool supported{};
+  bool requires_migration{};
+  std::string target_schema_version;
   std::vector<std::string> errors;
 };
 
@@ -245,6 +256,10 @@ struct AircraftPropellerCoefficients {
 [[nodiscard]] std::filesystem::path default_aircraft_config_path();
 [[nodiscard]] AircraftConfigurationLoadResult load_aircraft_configuration(
     const std::filesystem::path& path);
+[[nodiscard]] AircraftConfigurationCompatibility check_aircraft_configuration_compatibility(
+    std::string_view schema_version);
+[[nodiscard]] AircraftConfiguration migrate_aircraft_configuration(
+    AircraftConfiguration configuration);
 [[nodiscard]] std::vector<std::string> validate_aircraft_configuration(
     const AircraftConfiguration& configuration);
 
