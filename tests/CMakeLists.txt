@@ -312,6 +312,26 @@ target_link_libraries(flying_geo_terrain_terrain_service_tests
 
 add_test(NAME flying.geo_terrain.terrain_service COMMAND flying_geo_terrain_terrain_service_tests)
 
+add_executable(flying_terrain_runtime_tests
+  ../Tests/TerrainRuntimeTests.cpp
+  ../Source/FlyingPresentation/TerrainCesiumAdapter.cpp
+)
+
+target_include_directories(flying_terrain_runtime_tests
+  PRIVATE
+    "${CMAKE_SOURCE_DIR}/Source/FlyingPresentation/Public"
+    "${CMAKE_SOURCE_DIR}/Source/GeoTerrain/Public"
+)
+
+target_link_libraries(flying_terrain_runtime_tests
+  PRIVATE
+    Flying::CoreSim
+    Flying::GeoTerrain
+    Flying::CompilerOptions
+)
+
+add_test(NAME flying.terrain_runtime COMMAND flying_terrain_runtime_tests)
+
 add_executable(flying_m1_vertical_slice_tests
   m1/vertical_slice_validation_test.cpp
 )
@@ -351,6 +371,7 @@ set_tests_properties(
   flying.geodesy.reference
   flying.geo_terrain.geodesy_units
   flying.geo_terrain.terrain_service
+  flying.terrain_runtime
   flying.m1.vertical_slice
   PROPERTIES
     LABELS "smoke"
@@ -368,6 +389,7 @@ set_tests_properties(
   flying.geodesy.reference
   flying.geo_terrain.geodesy_units
   flying.geo_terrain.terrain_service
+  flying.terrain_runtime
   flying.data_pipeline.dmr5g_terrain
   flying.data_pipeline.runway_importer
   flying.data_pipeline.pilot_region_packages
