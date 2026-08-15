@@ -1,0 +1,41 @@
+{
+  "features": [
+    {
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              5000,
+              5000
+            ],
+            [
+              18000,
+              5000
+            ],
+            [
+              18000,
+              18000
+            ],
+            [
+              5000,
+              18000
+            ],
+            [
+              5000,
+              5000
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": "zabaged-water-1",
+      "properties": {
+        "material": "water",
+        "name": "Approved visual slice pond",
+        "renderSurface": "water"
+      },
+      "type": "Feature"
+    }
+  ],
+  "type": "FeatureCollection"
+}

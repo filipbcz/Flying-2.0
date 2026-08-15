@@ -1,0 +1,157 @@
+{
+  "schemaVersion": "flying.visual-slice-input.v1",
+  "sourceRoot": "source",
+  "packageId": "visual-cz-initial-50km-slice",
+  "packageName": "flying-offline-visual-initial-slice",
+  "packageVersion": "2026.08-approved-slice",
+  "coverage": {
+    "scope": "initial-visual-slice",
+    "countryCode": "CZ",
+    "bounds": {
+      "minEastM": 0,
+      "maxEastM": 50000,
+      "minNorthM": 0,
+      "maxNorthM": 50000
+    }
+  },
+  "transforms": {
+    "sourceCrs": {
+      "authority": "EPSG",
+      "code": "5514",
+      "name": "S-JTSK / Krovak East North"
+    },
+    "targetCrs": {
+      "authority": "FLYING",
+      "code": "CZ-SLICE-ENU",
+      "name": "Flying Czech local ENU slice"
+    },
+    "operations": [
+      {
+        "name": "slice-affine-epsg5514-to-project-enu",
+        "method": "proj-affine",
+        "pipeline": "+proj=pipeline +step +proj=affine +xoff=750000 +yoff=1050000"
+      },
+      {
+        "name": "visual-lod-resampling",
+        "method": "nearest-source-pixel-with-recorded-lod-stride"
+      },
+      {
+        "name": "dmp1g-object-height-join",
+        "method": "approved-vector-feature-id-join"
+      }
+    ]
+  },
+  "imagerySource": {
+    "sourceDatasetId": "cuzk-ortofoto-cr",
+    "path": "ortofoto/approved-slice.ppm",
+    "format": "ppm-p3",
+    "attribution": "Contains information from the Czech Office for Surveying, Mapping and Cadastre (CUZK): DMP 1G, Ortofoto Ceske republiky, ZABAGED and Geonames, licensed under Creative Commons Attribution 4.0 International (CC BY 4.0). Source: https://geoportal.cuzk.cz/. Data were transformed, tiled, generalized and/or otherwise adapted for the Flying simulator. CUZK does not endorse this product.",
+    "lods": [
+      {"level": 0, "sampleStride": 1},
+      {"level": 1, "sampleStride": 2},
+      {"level": 2, "sampleStride": 4}
+    ]
+  },
+  "vectorSources": [
+    {
+      "category": "roads",
+      "sourceDatasetId": "cuzk-zabaged-polohopis",
+      "path": "zabaged/roads.geojson",
+      "attribution": "Contains information from the Czech Office for Surveying, Mapping and Cadastre (CUZK): DMP 1G, Ortofoto Ceske republiky, ZABAGED and Geonames, licensed under Creative Commons Attribution 4.0 International (CC BY 4.0). Source: https://geoportal.cuzk.cz/. Data were transformed, tiled, generalized and/or otherwise adapted for the Flying simulator. CUZK does not endorse this product."
+    },
+    {
+      "category": "railways",
+      "sourceDatasetId": "cuzk-zabaged-polohopis",
+      "path": "zabaged/railways.geojson",
+      "attribution": "Contains information from the Czech Office for Surveying, Mapping and Cadastre (CUZK): DMP 1G, Ortofoto Ceske republiky, ZABAGED and Geonames, licensed under Creative Commons Attribution 4.0 International (CC BY 4.0). Source: https://geoportal.cuzk.cz/. Data were transformed, tiled, generalized and/or otherwise adapted for the Flying simulator. CUZK does not endorse this product."
+    },
+    {
+      "category": "water",
+      "sourceDatasetId": "cuzk-zabaged-polohopis",
+      "path": "zabaged/water.geojson",
+      "attribution": "Contains information from the Czech Office for Surveying, Mapping and Cadastre (CUZK): DMP 1G, Ortofoto Ceske republiky, ZABAGED and Geonames, licensed under Creative Commons Attribution 4.0 International (CC BY 4.0). Source: https://geoportal.cuzk.cz/. Data were transformed, tiled, generalized and/or otherwise adapted for the Flying simulator. CUZK does not endorse this product."
+    },
+    {
+      "category": "buildings",
+      "sourceDatasetId": "cuzk-zabaged-polohopis",
+      "path": "zabaged/buildings.geojson",
+      "attribution": "Contains information from the Czech Office for Surveying, Mapping and Cadastre (CUZK): DMP 1G, Ortofoto Ceske republiky, ZABAGED and Geonames, licensed under Creative Commons Attribution 4.0 International (CC BY 4.0). Source: https://geoportal.cuzk.cz/. Data were transformed, tiled, generalized and/or otherwise adapted for the Flying simulator. CUZK does not endorse this product."
+    },
+    {
+      "category": "vegetation",
+      "sourceDatasetId": "cuzk-zabaged-polohopis",
+      "path": "zabaged/vegetation.geojson",
+      "attribution": "Contains information from the Czech Office for Surveying, Mapping and Cadastre (CUZK): DMP 1G, Ortofoto Ceske republiky, ZABAGED and Geonames, licensed under Creative Commons Attribution 4.0 International (CC BY 4.0). Source: https://geoportal.cuzk.cz/. Data were transformed, tiled, generalized and/or otherwise adapted for the Flying simulator. CUZK does not endorse this product."
+    },
+    {
+      "category": "objects",
+      "sourceDatasetId": "cuzk-zabaged-polohopis",
+      "path": "zabaged/objects.geojson",
+      "attribution": "Contains information from the Czech Office for Surveying, Mapping and Cadastre (CUZK): DMP 1G, Ortofoto Ceske republiky, ZABAGED and Geonames, licensed under Creative Commons Attribution 4.0 International (CC BY 4.0). Source: https://geoportal.cuzk.cz/. Data were transformed, tiled, generalized and/or otherwise adapted for the Flying simulator. CUZK does not endorse this product."
+    },
+    {
+      "category": "labels",
+      "sourceDatasetId": "cuzk-geonames",
+      "path": "geonames/labels.geojson",
+      "attribution": "Contains information from the Czech Office for Surveying, Mapping and Cadastre (CUZK): DMP 1G, Ortofoto Ceske republiky, ZABAGED and Geonames, licensed under Creative Commons Attribution 4.0 International (CC BY 4.0). Source: https://geoportal.cuzk.cz/. Data were transformed, tiled, generalized and/or otherwise adapted for the Flying simulator. CUZK does not endorse this product."
+    }
+  ],
+  "materialMaskSources": [
+    {"kind": "water", "path": "masks/water-mask.csv"},
+    {"kind": "material", "path": "masks/material-mask.csv"}
+  ],
+  "objectHeightSource": {
+    "sourceDatasetId": "cuzk-dmp-1g",
+    "path": "dmp/object-heights.csv",
+    "heightDerivation": "DMP 1G object returns joined by approved ZABAGED feature id; no ortho color inference is used."
+  },
+  "sourceLineage": [
+    {
+      "sourceId": "cuzk-ortofoto-cr",
+      "datasetName": "CUZK Ortofoto Ceske republiky",
+      "sourceVersion": "2026.08-approved-slice",
+      "effectiveDate": "2026-08-01",
+      "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+      "attribution": "Contains information from the Czech Office for Surveying, Mapping and Cadastre (CUZK): DMP 1G, Ortofoto Ceske republiky, ZABAGED and Geonames, licensed under Creative Commons Attribution 4.0 International (CC BY 4.0). Source: https://geoportal.cuzk.cz/. Data were transformed, tiled, generalized and/or otherwise adapted for the Flying simulator. CUZK does not endorse this product.",
+      "redistributionTerms": "allowed_with_attribution_source_metadata_and_change_notice",
+      "artifactPaths": ["ortofoto/approved-slice.ppm"]
+    },
+    {
+      "sourceId": "cuzk-zabaged-polohopis",
+      "datasetName": "CUZK ZABAGED Polohopis",
+      "sourceVersion": "2026.08-approved-slice",
+      "effectiveDate": "2026-08-01",
+      "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+      "attribution": "Contains information from the Czech Office for Surveying, Mapping and Cadastre (CUZK): DMP 1G, Ortofoto Ceske republiky, ZABAGED and Geonames, licensed under Creative Commons Attribution 4.0 International (CC BY 4.0). Source: https://geoportal.cuzk.cz/. Data were transformed, tiled, generalized and/or otherwise adapted for the Flying simulator. CUZK does not endorse this product.",
+      "redistributionTerms": "allowed_with_attribution_source_metadata_and_change_notice",
+      "artifactPaths": [
+        "zabaged/roads.geojson",
+        "zabaged/railways.geojson",
+        "zabaged/water.geojson",
+        "zabaged/buildings.geojson",
+        "zabaged/vegetation.geojson",
+        "zabaged/objects.geojson"
+      ]
+    },
+    {
+      "sourceId": "cuzk-dmp-1g",
+      "datasetName": "CUZK DMP 1G",
+      "sourceVersion": "2026.08-approved-slice",
+      "effectiveDate": "2026-08-01",
+      "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+      "attribution": "Contains information from the Czech Office for Surveying, Mapping and Cadastre (CUZK): DMP 1G, Ortofoto Ceske republiky, ZABAGED and Geonames, licensed under Creative Commons Attribution 4.0 International (CC BY 4.0). Source: https://geoportal.cuzk.cz/. Data were transformed, tiled, generalized and/or otherwise adapted for the Flying simulator. CUZK does not endorse this product.",
+      "redistributionTerms": "allowed_with_attribution_source_metadata_and_change_notice",
+      "artifactPaths": ["dmp/object-heights.csv"]
+    },
+    {
+      "sourceId": "cuzk-geonames",
+      "datasetName": "CUZK Geonames",
+      "sourceVersion": "2026.08-approved-slice",
+      "effectiveDate": "2026-08-01",
+      "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+      "attribution": "Contains information from the Czech Office for Surveying, Mapping and Cadastre (CUZK): DMP 1G, Ortofoto Ceske republiky, ZABAGED and Geonames, licensed under Creative Commons Attribution 4.0 International (CC BY 4.0). Source: https://geoportal.cuzk.cz/. Data were transformed, tiled, generalized and/or otherwise adapted for the Flying simulator. CUZK does not endorse this product.",
+      "redistributionTerms": "allowed_with_attribution_source_metadata_and_change_notice",
+      "artifactPaths": ["geonames/labels.geojson"]
+    }
+  ]
+}

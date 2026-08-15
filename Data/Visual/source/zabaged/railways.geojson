@@ -1,0 +1,26 @@
+{
+  "features": [
+    {
+      "geometry": {
+        "coordinates": [
+          [
+            0,
+            37500
+          ],
+          [
+            50000,
+            37500
+          ]
+        ],
+        "type": "LineString"
+      },
+      "id": "zabaged-rail-1",
+      "properties": {
+        "material": "ballast",
+        "name": "Approved visual slice railway"
+      },
+      "type": "Feature"
+    }
+  ],
+  "type": "FeatureCollection"
+}

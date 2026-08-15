@@ -1,0 +1,41 @@
+{
+  "features": [
+    {
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              28000,
+              8000
+            ],
+            [
+              33000,
+              8000
+            ],
+            [
+              33000,
+              13000
+            ],
+            [
+              28000,
+              13000
+            ],
+            [
+              28000,
+              8000
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": "zabaged-building-1",
+      "properties": {
+        "dmpHeightFeatureId": "dmp-building-1",
+        "material": "building",
+        "name": "Approved visual slice hangar"
+      },
+      "type": "Feature"
+    }
+  ],
+  "type": "FeatureCollection"
+}
