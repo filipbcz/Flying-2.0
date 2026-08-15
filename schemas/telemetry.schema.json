@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flying.local/schemas/telemetry.schema.json",
+  "title": "Flying JSON Telemetry Export",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "telemetry_schema_version",
+    "metadata",
+    "initial_state",
+    "initial_aircraft_controls",
+    "flight_path",
+    "graph_series",
+    "frames"
+  ],
+  "properties": {
+    "schema_version": { "const": "flying.telemetry-export.json.v1" },
+    "telemetry_schema_version": { "const": "flying.telemetry.v1" },
+    "metadata": {
+      "type": "object",
+      "required": [
+        "core_sim_version",
+        "aircraft",
+        "rigid_body_parameters",
+        "simulation_configuration_id",
+        "input_profile_id",
+        "scenario_location_id",
+        "scenario_start_mode",
+        "session_id",
+        "started_unix_ms",
+        "fixed_step_s",
+        "deterministic_tolerance",
+        "data_packages"
+      ],
+      "properties": {
+        "core_sim_version": { "type": "string" },
+        "aircraft": {
+          "type": "object",
+          "required": ["backend", "model_name", "model_version", "data_root", "source_license"],
+          "properties": {
+            "backend": { "type": "string" },
+            "model_name": { "type": "string" },
+            "model_version": { "type": "string" },
+            "data_root": { "type": "string" },
+            "source_license": { "type": "string" }
+          }
+        },
+        "rigid_body_parameters": {
+          "type": "object",
+          "required": ["mass_kg", "inertia_diagonal_kg_m2"]
+        },
+        "simulation_configuration_id": { "type": "string" },
+        "input_profile_id": { "type": "string" },
+        "scenario_location_id": { "type": "string" },
+        "scenario_start_mode": { "type": "string" },
+        "session_id": { "type": "string" },
+        "started_unix_ms": { "type": "integer" },
+        "fixed_step_s": { "type": "number" },
+        "deterministic_tolerance": {
+          "type": "object",
+          "required": [
+            "simulation_time_s",
+            "position_m",
+            "velocity_mps",
+            "quaternion_component",
+            "angular_velocity_radps",
+            "force_n",
+            "moment_nm"
+          ]
+        },
+        "data_packages": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["package_id", "version"],
+            "properties": {
+              "package_id": { "type": "string" },
+              "version": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "initial_state": { "type": "object" },
+    "initial_aircraft_controls": { "type": "object" },
+    "flight_path": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "frame_index",
+          "simulation_time_s",
+          "step_index",
+          "ecef_position_m",
+          "state_hash"
+        ]
+      }
+    },
+    "graph_series": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "unit", "points"],
+        "properties": {
+          "id": { "type": "string" },
+          "unit": { "type": "string" },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["simulation_time_s", "value"]
+            }
+          }
+        }
+      }
+    },
+    "frames": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "frame_index",
+          "host_time_unix_ms",
+          "caller_delta_s",
+          "steps_executed",
+          "fixed_step_s",
+          "remaining_accumulator_s",
+          "state_hash",
+          "inputs",
+          "engine",
+          "state"
+        ],
+        "properties": {
+          "inputs": {
+            "type": "object",
+            "required": ["core", "aircraft_controls"]
+          },
+          "engine": { "type": "object" },
+          "state": {
+            "type": "object",
+            "required": [
+              "simulation_time_s",
+              "step_index",
+              "ecef_position_m",
+              "ecef_velocity_mps",
+              "body_to_ecef",
+              "angular_velocity_body_radps",
+              "accumulated_force_body_n",
+              "accumulated_moment_body_nm",
+              "aircraft_mass_balance"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "x-csvExport": {
+    "schema_version": "flying.telemetry-export.csv.v1",
+    "required_metadata": [
+      "schema_version",
+      "telemetry_schema_version",
+      "core_sim_version",
+      "simulation_configuration_id",
+      "input_profile_id",
+      "scenario_location_id",
+      "scenario_start_mode",
+      "session_id",
+      "fixed_step_s",
+      "data_package"
+    ],
+    "required_columns": [
+      "frame_index",
+      "host_time_unix_ms",
+      "simulation_time_s",
+      "step_index",
+      "state_hash",
+      "input_force_x_n",
+      "input_moment_x_nm",
+      "force_x_n",
+      "moment_x_nm",
+      "aileron_norm",
+      "elevator_norm",
+      "rudder_norm",
+      "throttle_norm",
+      "engine_throttle_norm"
+    ]
+  }
+}
