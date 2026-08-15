@@ -97,6 +97,7 @@
         "flying_core_sim_input_mapping_tests",
         "flying_input_profile_tests",
         "flying_scenario_flow_tests",
+        "flying_cockpit_automation_tests",
         "flying_core_sim_scenario_start_tests",
         "flying_core_sim_telemetry_replay_tests",
         "flying_replay_hash_tests",
