@@ -265,6 +265,24 @@ target_link_libraries(flying_core_sim_telemetry_replay_tests
 
 add_test(NAME flying.core_sim.telemetry_replay COMMAND flying_core_sim_telemetry_replay_tests)
 
+add_executable(flying_replay_hash_tests
+  ../Tests/ReplayHashTests.cpp
+)
+
+target_link_libraries(flying_replay_hash_tests
+  PRIVATE
+    Flying::TelemetryReplay
+    Flying::CoreSim
+    Flying::CompilerOptions
+)
+
+target_compile_definitions(flying_replay_hash_tests
+  PRIVATE
+    FLYING_REPO_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+)
+
+add_test(NAME flying.telemetry_replay.replay_hash COMMAND flying_replay_hash_tests)
+
 add_executable(flying_core_sim_terrain_contact_tests
   core_sim/terrain_contact_test.cpp
 )
@@ -481,6 +499,7 @@ set_tests_properties(
   flying.presentation.scenario_flow
   flying.core_sim.scenario_start
   flying.core_sim.telemetry_replay
+  flying.telemetry_replay.replay_hash
   flying.core_sim.terrain_contact
   flying.core_sim.weather
   flying.geodesy.reference

@@ -828,6 +828,32 @@ void append_json_state(std::ostream& output, const AuthoritativeState& state) {
   output << '}';
 }
 
+[[nodiscard]] double vector_magnitude(Vector3d value) noexcept {
+  return std::sqrt(value.x * value.x + value.y * value.y + value.z * value.z);
+}
+
+void append_json_graph_series(std::ostream& output,
+                              std::string_view id,
+                              std::string_view unit,
+                              const TelemetryRecording& recording,
+                              double (*sample)(const TelemetryFrame&)) {
+  output << "{\"id\":";
+  append_json_string(output, id);
+  output << ",\"unit\":";
+  append_json_string(output, unit);
+  output << ",\"points\":[";
+  for (std::size_t index = 0; index < recording.frames.size(); ++index) {
+    if (index != 0) {
+      output << ',';
+    }
+    const TelemetryFrame& frame = recording.frames[index];
+    output << "{\"simulation_time_s\":"
+           << double_to_string(frame.state.simulation_time_s)
+           << ",\"value\":" << double_to_string(sample(frame)) << '}';
+  }
+  output << "]}";
+}
+
 void write_recording(std::ostream& output, const TelemetryRecording& recording) {
   output << kTelemetrySchemaVersion << '\n';
 
@@ -1961,6 +1987,42 @@ TelemetryExportResult export_telemetry_json(const std::filesystem::path& path,
     append_json_string(output, u64_to_hex(frame.state_hash));
     output << '}';
   }
+  output << "],\"graph_series\":[";
+  append_json_graph_series(
+      output,
+      "ecef_altitude_proxy_m",
+      "m",
+      recording,
+      [](const TelemetryFrame& frame) {
+        return frame.state.ecef_position_m.z;
+      });
+  output << ',';
+  append_json_graph_series(
+      output,
+      "speed_mps",
+      "m/s",
+      recording,
+      [](const TelemetryFrame& frame) {
+        return vector_magnitude(frame.state.ecef_velocity_mps);
+      });
+  output << ',';
+  append_json_graph_series(
+      output,
+      "force_magnitude_n",
+      "N",
+      recording,
+      [](const TelemetryFrame& frame) {
+        return vector_magnitude(frame.state.accumulated_force_body_n);
+      });
+  output << ',';
+  append_json_graph_series(
+      output,
+      "moment_magnitude_nm",
+      "N*m",
+      recording,
+      [](const TelemetryFrame& frame) {
+        return vector_magnitude(frame.state.accumulated_moment_body_nm);
+      });
   output << "],\"frames\":[";
   for (std::size_t index = 0; index < recording.frames.size(); ++index) {
     if (index != 0) {

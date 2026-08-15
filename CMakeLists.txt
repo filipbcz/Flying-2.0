@@ -26,6 +26,7 @@ include(FlyingCompilerOptions)
 
 add_subdirectory(geo_terrain)
 add_subdirectory(core_sim)
+add_subdirectory(Source/TelemetryReplay)
 add_subdirectory(data_pipeline)
 
 if(FLYING_BUILD_TESTS)
