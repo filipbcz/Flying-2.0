@@ -113,19 +113,19 @@ struct RunwayPhysicalSurface {
     return width;
   }
 
-  [[nodiscard]] constexpr double local_station(double east_m, double north_m) const noexcept {
+  [[nodiscard]] double local_station(double east_m, double north_m) const noexcept {
     const double de = east_m - center_east_m;
     const double dn = north_m - center_north_m;
     return std::sin(heading_rad) * de + std::cos(heading_rad) * dn;
   }
 
-  [[nodiscard]] constexpr double local_lateral(double east_m, double north_m) const noexcept {
+  [[nodiscard]] double local_lateral(double east_m, double north_m) const noexcept {
     const double de = east_m - center_east_m;
     const double dn = north_m - center_north_m;
     return std::cos(heading_rad) * de - std::sin(heading_rad) * dn;
   }
 
-  [[nodiscard]] constexpr bool contains(double east_m, double north_m) const noexcept {
+  [[nodiscard]] bool contains(double east_m, double north_m) const noexcept {
     return bounds.contains(east_m, north_m) &&
            std::abs(local_station(east_m, north_m)) <= length_m * 0.5 &&
            std::abs(local_lateral(east_m, north_m)) <= width_m * 0.5;
