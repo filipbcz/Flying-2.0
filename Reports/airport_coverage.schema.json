@@ -1,0 +1,239 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flying.local/schemas/airport_coverage.schema.json",
+  "title": "Flying Airport Coverage Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "generatedAtUtc",
+    "scope",
+    "airac",
+    "approvedMasterList",
+    "counts",
+    "missing",
+    "diff",
+    "blockedAutomaticOverwrites",
+    "passed"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "flying.airport-coverage-report.v1"
+    },
+    "generatedAtUtc": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scope": {
+      "type": "string",
+      "enum": [
+        "pilot_airports_only",
+        "national_airport_master_list"
+      ]
+    },
+    "airac": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cycleId",
+        "effectiveDate",
+        "source"
+      ],
+      "properties": {
+        "cycleId": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}$"
+        },
+        "effectiveDate": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "approvedMasterList": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourcePath",
+        "checksumSha256"
+      ],
+      "properties": {
+        "sourcePath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "checksumSha256": {
+          "type": "string",
+          "pattern": "^[A-Fa-f0-9]{64}$"
+        }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "masterListActiveAerodromes",
+        "masterListActiveSlzAreas",
+        "importedAerodromes",
+        "importedRunways"
+      ],
+      "properties": {
+        "masterListActiveAerodromes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "masterListActiveSlzAreas": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "importedAerodromes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "importedRunways": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "missing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "aerodromes",
+        "runways",
+        "slzAreas"
+      ],
+      "properties": {
+        "aerodromes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/missingItem"
+          }
+        },
+        "runways": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/missingItem"
+          }
+        },
+        "slzAreas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/missingItem"
+          }
+        }
+      }
+    },
+    "diff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "previousAirac",
+        "currentAirac",
+        "changes"
+      ],
+      "properties": {
+        "previousAirac": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "currentAirac": {
+          "type": "object"
+        },
+        "changes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/diffItem"
+          }
+        }
+      }
+    },
+    "blockedAutomaticOverwrites": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/diffItem"
+      }
+    },
+    "passed": {
+      "type": "boolean"
+    }
+  },
+  "$defs": {
+    "missingItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "reason"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "aerodromeId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "designator": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "diffItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "changeType",
+        "requiresManualReview"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "changeType": {
+          "type": "string",
+          "enum": [
+            "added",
+            "removed",
+            "modified",
+            "manual_geometry_overwrite_blocked"
+          ]
+        },
+        "requiresManualReview": {
+          "type": "boolean"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
