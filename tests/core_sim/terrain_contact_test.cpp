@@ -9,6 +9,7 @@ namespace {
 
 using flying::core_sim::FlightDynamicsState;
 using flying::core_sim::TerrainContactData;
+using flying::core_sim::TerrainContactQuery;
 using flying::core_sim::Vector3d;
 using flying::core_sim::query_terrain_contact;
 using flying::geo_terrain::EnuVector;
@@ -22,6 +23,7 @@ using flying::geo_terrain::TerrainSourceAuthority;
 using flying::geo_terrain::TerrainSurfaceMaterial;
 using flying::geo_terrain::make_flat_terrain_plane;
 using flying::geo_terrain::make_geodetic_degrees;
+using flying::geo_terrain::make_sloped_terrain_plane;
 
 static_assert(std::is_same_v<decltype(TerrainContactData{}.surface_normal_ned), Vector3d>);
 static_assert(std::is_same_v<decltype(TerrainContactData{}.terrain_elevation_m), double>);
@@ -97,9 +99,75 @@ void core_sim_queries_terrain_contact_without_presentation_types() {
           "CoreSim contact query should expose inactive runway override state");
 }
 
+void core_sim_queries_sloped_and_rough_terrain_contact() {
+  InMemoryTerrainHeightService terrain{make_geodetic_degrees(49.2, 16.6, {300.0})};
+  terrain.add_dem_surface({
+    TerrainLocalBounds{-100.0, 100.0, -100.0, 0.0},
+    make_sloped_terrain_plane(OrthometricHeight{330.0}, 0.0, 0.0, 0.03, -0.02),
+    TerrainSurfaceMaterial::kAsphalt,
+    TerrainCollisionMetadata{true, true, 0.01, "core-contact-sloped"},
+    "core-contact-sloped-tile",
+    TerrainConfidenceMetadata{0.98, 0.1, 0.3, true},
+    20,
+    "core-contact-sloped-asphalt",
+  });
+  terrain.add_dem_surface({
+    TerrainLocalBounds{-100.0, 100.0, 0.0, 100.0},
+    make_sloped_terrain_plane(OrthometricHeight{318.0}, 0.0, 0.0, -0.06, 0.04),
+    TerrainSurfaceMaterial::kGravel,
+    TerrainCollisionMetadata{true, false, 0.08, "core-contact-rough"},
+    "core-contact-rough-tile",
+    TerrainConfidenceMetadata{0.80, 0.7, 1.4, true},
+    20,
+    "core-contact-rough-gravel",
+  });
+
+  const auto sloped_location = terrain.query_from_local_enu(EnuVector{30.0, -20.0, 0.0});
+  const auto sloped_geodetic =
+      flying::geo_terrain::GeodeticCoordinates{sloped_location.latitude_rad,
+                                               sloped_location.longitude_rad,
+                                               {0.0}};
+  const TerrainContactData sloped = query_terrain_contact(
+      terrain,
+      TerrainContactQuery{
+        sloped_geodetic.latitude_degrees(),
+        sloped_geodetic.longitude_degrees(),
+        335.0,
+      });
+
+  require(sloped.surface_material == TerrainSurfaceMaterial::kAsphalt,
+          "sloped contact query should return the sloped material");
+  require(std::abs(sloped.surface_normal_ned.x) > 0.0 &&
+              std::abs(sloped.surface_normal_ned.y) > 0.0,
+          "sloped contact normal should include north and east components");
+  require(sloped.collision_watertight,
+          "sloped contact should preserve watertight collision metadata");
+
+  const auto rough_location = terrain.query_from_local_enu(EnuVector{30.0, 20.0, 0.0});
+  const auto rough_geodetic =
+      flying::geo_terrain::GeodeticCoordinates{rough_location.latitude_rad,
+                                               rough_location.longitude_rad,
+                                               {0.0}};
+  const TerrainContactData rough = query_terrain_contact(
+      terrain,
+      TerrainContactQuery{
+        rough_geodetic.latitude_degrees(),
+        rough_geodetic.longitude_degrees(),
+        322.0,
+      });
+
+  require(rough.surface_material == TerrainSurfaceMaterial::kGravel,
+          "rough contact query should return the rough material");
+  require(!rough.collision_watertight,
+          "rough contact should preserve non-watertight collision metadata");
+  require_near(rough.collision_contact_offset_m, 0.08, 0.0,
+               "rough contact should preserve collision offset metadata");
+}
+
 } // namespace
 
 int main() {
   core_sim_queries_terrain_contact_without_presentation_types();
+  core_sim_queries_sloped_and_rough_terrain_contact();
   return 0;
 }

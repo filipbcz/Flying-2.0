@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<initialize name="reset00">
+  <ubody unit="FT/SEC">226.0</ubody>
+  <vbody unit="FT/SEC">0.0</vbody>
+  <wbody unit="FT/SEC">0.0</wbody>
+  <longitude unit="DEG">16.6</longitude>
+  <latitude unit="DEG">49.2</latitude>
+  <phi unit="DEG">0.0</phi>
+  <theta unit="DEG">2.0</theta>
+  <psi unit="DEG">0.0</psi>
+  <altitude unit="FT">4921.259843</altitude>
+  <elevation unit="FT">0.0</elevation>
+</initialize>

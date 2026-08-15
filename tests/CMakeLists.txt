@@ -268,6 +268,28 @@ if(TARGET Flying::CoreSimJsbsim)
     PROPERTIES
       TIMEOUT 60
   )
+
+  add_executable(flying_aircraft_dynamics_tests
+    ../Tests/AircraftDynamicsTests.cpp
+  )
+
+  target_link_libraries(flying_aircraft_dynamics_tests
+    PRIVATE
+      Flying::CoreSimJsbsim
+      Flying::GeoTerrain
+      Flying::CompilerOptions
+  )
+
+  target_compile_definitions(flying_aircraft_dynamics_tests
+    PRIVATE
+      FLYING_REPO_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+  )
+
+  add_test(NAME flying.aircraft_dynamics COMMAND flying_aircraft_dynamics_tests)
+  set_tests_properties(flying.aircraft_dynamics
+    PROPERTIES
+      TIMEOUT 60
+  )
 endif()
 
 add_executable(flying_geo_terrain_geodesy_units_tests

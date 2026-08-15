@@ -16,6 +16,7 @@ namespace {
 
 constexpr double kFeetToMeters = 0.3048;
 constexpr double kMetersToFeet = 1.0 / kFeetToMeters;
+constexpr double kPoundsToKilograms = 0.45359237;
 constexpr double kPoundForceToNewtons = 4.4482216152605;
 constexpr double kFootPoundToNewtonMeters = 1.3558179483314004;
 constexpr double kKnotsToMetersPerSecond = 0.5144444444444445;
@@ -153,6 +154,13 @@ void set_property(JSBSim::FGFDMExec& executive, const char* property_name, doubl
   state.mach = require_property(executive, "velocities/mach");
   state.calibrated_airspeed_mps =
       require_property(executive, "velocities/vc-kts") * kKnotsToMetersPerSecond;
+  state.engine_rpm = require_property(executive, "propulsion/engine[0]/engine-rpm");
+  state.propeller_thrust_n =
+      require_property(executive, "propulsion/engine[0]/thrust-lbs") * kPoundForceToNewtons;
+  state.fuel_flow_kgps =
+      require_property(executive, "propulsion/engine[0]/fuel-flow-rate-pps") * kPoundsToKilograms;
+  state.fuel_quantity_kg =
+      require_property(executive, "propulsion/tank[0]/contents-lbs") * kPoundsToKilograms;
 
   return state;
 }
@@ -185,17 +193,35 @@ void apply_initial_condition(JSBSim::FGFDMExec& executive,
   }
 }
 
-void apply_controls(JSBSim::FGFDMExec& executive, const AircraftControlInputSample& controls) {
+void apply_controls(JSBSim::FGFDMExec& executive,
+                    const AircraftControlInputSample& controls,
+                    bool engine_running_latched) {
+  set_property(executive, "propulsion/magneto_cmd", controls.magnetos_on ? 3.0 : 0.0);
+  const double engine_rpm = require_property(executive, "propulsion/engine[0]/engine-rpm");
+  const bool starter_assist =
+      controls.magnetos_on &&
+      (controls.engine_starter_engaged || (engine_running_latched && engine_rpm < 450.0));
+  set_property(executive, "propulsion/starter_cmd", starter_assist ? 1.0 : 0.0);
+  if (!controls.engine_run_switch || !controls.magnetos_on) {
+    set_property(executive, "propulsion/engine[0]/set-running", 0.0);
+  } else if (engine_running_latched && controls.magnetos_on) {
+    set_property(executive, "propulsion/engine[0]/set-running", 1.0);
+  }
   set_property(executive, "fcs/aileron-cmd-norm", controls.aileron_norm);
   set_property(executive, "fcs/elevator-cmd-norm", controls.elevator_norm);
   set_property(executive, "fcs/rudder-cmd-norm", controls.rudder_norm);
   set_property(executive, "fcs/throttle-cmd-norm", controls.throttle_norm);
   set_property(executive, "fcs/throttle-cmd-norm[0]", controls.throttle_norm);
+  set_property(executive, "fcs/propeller-cmd-norm", controls.propeller_norm);
+  set_property(executive, "fcs/propeller-cmd-norm[0]", controls.propeller_norm);
   set_property(executive, "fcs/flap-cmd-norm", controls.flaps_norm);
   set_property(executive, "fcs/left-brake-cmd-norm", controls.brake_left_norm);
   set_property(executive, "fcs/right-brake-cmd-norm", controls.brake_right_norm);
   set_property(executive, "fcs/mixture-cmd-norm", controls.mixture_norm);
   set_property(executive, "fcs/mixture-cmd-norm[0]", controls.mixture_norm);
+  set_property(executive, "fcs/elevator-trim-cmd-norm", controls.elevator_trim_norm);
+  set_property(executive, "fcs/aileron-trim-cmd-norm", controls.aileron_trim_norm);
+  set_property(executive, "fcs/rudder-trim-cmd-norm", controls.rudder_trim_norm);
 }
 
 [[nodiscard]] FlightDynamicsStepRecord make_record(
@@ -217,6 +243,15 @@ void apply_controls(JSBSim::FGFDMExec& executive, const AircraftControlInputSamp
 } // namespace
 
 JsbsimAircraftConfig placeholder_jsbsim_aircraft_config() {
+  JsbsimAircraftConfig config{};
+  config.root_dir = default_jsbsim_data_root();
+  config.model_name = "flying_placeholder";
+  config.model_version = "infrastructure-v1";
+  config.source_license = "Project-authored infrastructure placeholder; no fidelity claim";
+  return config;
+}
+
+JsbsimAircraftConfig primary_jsbsim_aircraft_config() {
   JsbsimAircraftConfig config{};
   config.root_dir = default_jsbsim_data_root();
   return config;
@@ -274,6 +309,7 @@ public:
     executive_.Setdt(kFixedStepSeconds);
     apply_initial_condition(executive_, initial_condition);
     step_index_ = 0;
+    engine_running_latched_ = false;
     state_ = extract_state(executive_, step_index_);
     last_step_record_ = make_record(identity_, {}, kFixedStepSeconds, state_);
   }
@@ -286,7 +322,12 @@ public:
     }
 
     executive_.Setdt(fixed_step_s);
-    apply_controls(executive_, controls);
+    if (!controls.engine_run_switch || !controls.magnetos_on) {
+      engine_running_latched_ = false;
+    } else if (controls.engine_starter_engaged && controls.magnetos_on) {
+      engine_running_latched_ = true;
+    }
+    apply_controls(executive_, controls, engine_running_latched_);
     if (!executive_.Run()) {
       throw std::runtime_error("JSBSim reported a failed simulation step");
     }
@@ -304,6 +345,7 @@ private:
   FlightDynamicsState state_{};
   FlightDynamicsStepRecord last_step_record_{};
   std::uint64_t step_index_{};
+  bool engine_running_latched_{};
 };
 
 JsbsimFlightDynamicsBackend::JsbsimFlightDynamicsBackend(JsbsimAircraftConfig config)

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<piston_engine name="FlyingTrainerOnePiston">
+  <minmp unit="INHG">10.0</minmp>
+  <maxmp unit="INHG">28.5</maxmp>
+  <displacement unit="IN3">320.0</displacement>
+  <maxhp>160.0</maxhp>
+  <bsfc>0.36</bsfc>
+  <cycles>4.0</cycles>
+  <idlerpm>600.0</idlerpm>
+  <maxrpm>2700.0</maxrpm>
+  <maxthrottle>1.0</maxthrottle>
+  <minthrottle>0.08</minthrottle>
+  <sparkfaildrop>0.10</sparkfaildrop>
+</piston_engine>

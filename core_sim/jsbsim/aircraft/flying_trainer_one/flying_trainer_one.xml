@@ -1,0 +1,286 @@
+<?xml version="1.0"?>
+<fdm_config name="Flying Trainer One" version="2.0" release="BETA">
+  <fileheader>
+    <author>Flying project</author>
+    <filecreationdate>2026-08-15</filecreationdate>
+    <version>2026.08.primary-jsbsim-v1</version>
+    <description>
+      Project-authored unbranded single-engine piston trainer model for
+      deterministic CoreSim JSBSim integration tests. This model carries no
+      manufacturer endorsement or faithful named-type claim.
+    </description>
+  </fileheader>
+
+  <metrics>
+    <wingarea unit="FT2">174.4</wingarea>
+    <wingspan unit="FT">35.83</wingspan>
+    <chord unit="FT">4.89</chord>
+    <htailarea unit="FT2">21.85</htailarea>
+    <htailarm unit="FT">15.68</htailarm>
+    <vtailarea unit="FT2">16.47</vtailarea>
+    <vtailarm unit="FT">14.60</vtailarm>
+    <location name="AERORP" unit="IN">
+      <x>0.0</x>
+      <y>0.0</y>
+      <z>0.0</z>
+    </location>
+    <location name="EYEPOINT" unit="IN">
+      <x>-13.8</x>
+      <y>0.0</y>
+      <z>-32.3</z>
+    </location>
+    <location name="VRP" unit="IN">
+      <x>0.0</x>
+      <y>0.0</y>
+      <z>0.0</z>
+    </location>
+  </metrics>
+
+  <mass_balance>
+    <ixx unit="SLUG*FT2">947.8</ixx>
+    <iyy unit="SLUG*FT2">1345.9</iyy>
+    <izz unit="SLUG*FT2">1967.6</izz>
+    <ixy unit="SLUG*FT2">0.0</ixy>
+    <ixz unit="SLUG*FT2">0.0</ixz>
+    <iyz unit="SLUG*FT2">0.0</iyz>
+    <emptywt unit="LBS">1500.0</emptywt>
+    <location name="CG" unit="IN">
+      <x>0.0</x>
+      <y>0.0</y>
+      <z>0.0</z>
+    </location>
+  </mass_balance>
+
+  <ground_reactions>
+    <contact type="BOGEY" name="NOSE">
+      <location unit="IN">
+        <x>80.0</x>
+        <y>0.0</y>
+        <z>34.0</z>
+      </location>
+      <static_friction>0.72</static_friction>
+      <dynamic_friction>0.58</dynamic_friction>
+      <rolling_friction>0.018</rolling_friction>
+      <spring_coeff unit="LBS/FT">4200.0</spring_coeff>
+      <damping_coeff unit="LBS/FT/SEC">360.0</damping_coeff>
+      <max_steer unit="DEG">18.0</max_steer>
+      <brake_group>NONE</brake_group>
+      <retractable>0</retractable>
+    </contact>
+    <contact type="BOGEY" name="LEFT_MAIN">
+      <location unit="IN">
+        <x>-22.0</x>
+        <y>-54.0</y>
+        <z>36.0</z>
+      </location>
+      <static_friction>0.78</static_friction>
+      <dynamic_friction>0.62</dynamic_friction>
+      <rolling_friction>0.020</rolling_friction>
+      <spring_coeff unit="LBS/FT">7600.0</spring_coeff>
+      <damping_coeff unit="LBS/FT/SEC">620.0</damping_coeff>
+      <max_steer unit="DEG">0.0</max_steer>
+      <brake_group>LEFT</brake_group>
+      <retractable>0</retractable>
+    </contact>
+    <contact type="BOGEY" name="RIGHT_MAIN">
+      <location unit="IN">
+        <x>-22.0</x>
+        <y>54.0</y>
+        <z>36.0</z>
+      </location>
+      <static_friction>0.78</static_friction>
+      <dynamic_friction>0.62</dynamic_friction>
+      <rolling_friction>0.020</rolling_friction>
+      <spring_coeff unit="LBS/FT">7600.0</spring_coeff>
+      <damping_coeff unit="LBS/FT/SEC">620.0</damping_coeff>
+      <max_steer unit="DEG">0.0</max_steer>
+      <brake_group>RIGHT</brake_group>
+      <retractable>0</retractable>
+    </contact>
+  </ground_reactions>
+
+  <propulsion>
+    <engine file="flying_trainer_one_piston">
+      <feed>0</feed>
+      <thruster file="flying_trainer_one_propeller">
+        <location unit="IN">
+          <x>78.0</x>
+          <y>0.0</y>
+          <z>0.0</z>
+        </location>
+        <orient unit="DEG">
+          <pitch>0.0</pitch>
+          <roll>0.0</roll>
+          <yaw>0.0</yaw>
+        </orient>
+        <sense>1</sense>
+        <p_factor>10.0</p_factor>
+      </thruster>
+    </engine>
+
+    <tank type="FUEL" number="0">
+      <location unit="IN">
+        <x>0.0</x>
+        <y>0.0</y>
+        <z>0.0</z>
+      </location>
+      <capacity unit="LBS">310.0</capacity>
+      <contents unit="LBS">220.0</contents>
+    </tank>
+  </propulsion>
+
+  <system name="CoreSimTrimInputs">
+    <property value="0.0">fcs/elevator-trim-cmd-norm</property>
+    <property value="0.0">fcs/aileron-trim-cmd-norm</property>
+    <property value="0.0">fcs/rudder-trim-cmd-norm</property>
+  </system>
+
+  <flight_control name="FlyingTrainerOneFCS"/>
+
+  <aerodynamics>
+    <axis name="DRAG">
+      <function name="aero/force/drag">
+        <product>
+          <property>aero/qbar-psf</property>
+          <property>metrics/Sw-sqft</property>
+          <sum>
+            <value>0.034</value>
+            <product>
+              <value>0.055</value>
+              <property>aero/alpha-rad</property>
+              <property>aero/alpha-rad</property>
+            </product>
+          </sum>
+        </product>
+      </function>
+    </axis>
+
+    <axis name="SIDE">
+      <function name="aero/force/side">
+        <product>
+          <property>aero/qbar-psf</property>
+          <property>metrics/Sw-sqft</property>
+          <sum>
+            <product>
+              <value>-0.42</value>
+              <property>aero/beta-rad</property>
+            </product>
+            <product>
+              <value>0.12</value>
+              <property>fcs/rudder-cmd-norm</property>
+            </product>
+          </sum>
+        </product>
+      </function>
+    </axis>
+
+    <axis name="LIFT">
+      <function name="aero/force/lift">
+        <product>
+          <property>aero/qbar-psf</property>
+          <property>metrics/Sw-sqft</property>
+          <sum>
+            <value>0.24</value>
+            <product>
+              <value>4.95</value>
+              <property>aero/alpha-rad</property>
+            </product>
+            <product>
+              <value>0.42</value>
+              <property>fcs/flap-cmd-norm</property>
+            </product>
+          </sum>
+        </product>
+      </function>
+    </axis>
+
+    <axis name="ROLL">
+      <function name="aero/moment/roll">
+        <product>
+          <property>aero/qbar-psf</property>
+          <property>metrics/Sw-sqft</property>
+          <property>metrics/bw-ft</property>
+          <sum>
+            <product>
+              <value>-0.11</value>
+              <property>aero/beta-rad</property>
+            </product>
+            <product>
+              <value>0.075</value>
+              <property>fcs/aileron-cmd-norm</property>
+            </product>
+            <product>
+              <value>0.018</value>
+              <property>fcs/rudder-cmd-norm</property>
+            </product>
+            <product>
+              <value>-0.28</value>
+              <property>velocities/p-aero-rad_sec</property>
+            </product>
+            <product>
+              <value>-0.06</value>
+              <property>velocities/r-aero-rad_sec</property>
+            </product>
+          </sum>
+        </product>
+      </function>
+    </axis>
+
+    <axis name="PITCH">
+      <function name="aero/moment/pitch">
+        <product>
+          <property>aero/qbar-psf</property>
+          <property>metrics/Sw-sqft</property>
+          <property>metrics/cbarw-ft</property>
+          <sum>
+            <value>0.030</value>
+            <product>
+              <value>-0.95</value>
+              <property>aero/alpha-rad</property>
+            </product>
+            <product>
+              <value>-0.38</value>
+              <property>fcs/elevator-cmd-norm</property>
+            </product>
+            <product>
+              <value>-0.14</value>
+              <property>fcs/elevator-trim-cmd-norm</property>
+            </product>
+            <product>
+              <value>-3.80</value>
+              <property>velocities/q-aero-rad_sec</property>
+            </product>
+          </sum>
+        </product>
+      </function>
+    </axis>
+
+    <axis name="YAW">
+      <function name="aero/moment/yaw">
+        <product>
+          <property>aero/qbar-psf</property>
+          <property>metrics/Sw-sqft</property>
+          <property>metrics/bw-ft</property>
+          <sum>
+            <product>
+              <value>0.16</value>
+              <property>aero/beta-rad</property>
+            </product>
+            <product>
+              <value>-0.075</value>
+              <property>fcs/rudder-cmd-norm</property>
+            </product>
+            <product>
+              <value>-0.04</value>
+              <property>velocities/p-aero-rad_sec</property>
+            </product>
+            <product>
+              <value>-0.22</value>
+              <property>velocities/r-aero-rad_sec</property>
+            </product>
+          </sum>
+        </product>
+      </function>
+    </axis>
+  </aerodynamics>
+</fdm_config>

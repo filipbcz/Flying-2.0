@@ -46,6 +46,9 @@ struct AircraftControlInputSample {
   double elevator_trim_norm{};
   double aileron_trim_norm{};
   double rudder_trim_norm{};
+  bool engine_run_switch{true};
+  bool engine_starter_engaged{};
+  bool magnetos_on{true};
 };
 
 struct FlightDynamicsState {
@@ -72,6 +75,10 @@ struct FlightDynamicsState {
   double sideslip_rad{};
   double mach{};
   double calibrated_airspeed_mps{};
+  double engine_rpm{};
+  double propeller_thrust_n{};
+  double fuel_flow_kgps{};
+  double fuel_quantity_kg{};
 };
 
 struct FlightDynamicsStepRecord {
