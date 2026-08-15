@@ -312,6 +312,23 @@ target_link_libraries(flying_geo_terrain_terrain_service_tests
 
 add_test(NAME flying.geo_terrain.terrain_service COMMAND flying_geo_terrain_terrain_service_tests)
 
+add_executable(flying_runway_surface_tests
+  ../Tests/RunwaySurfaceTests.cpp
+)
+
+target_include_directories(flying_runway_surface_tests
+  PRIVATE
+    "${CMAKE_SOURCE_DIR}/Source/GeoTerrain/Public"
+)
+
+target_link_libraries(flying_runway_surface_tests
+  PRIVATE
+    Flying::GeoTerrain
+    Flying::CompilerOptions
+)
+
+add_test(NAME flying.geo_terrain.runway_surface COMMAND flying_runway_surface_tests)
+
 add_executable(flying_terrain_runtime_tests
   ../Tests/TerrainRuntimeTests.cpp
   ../Source/FlyingPresentation/TerrainCesiumAdapter.cpp
@@ -371,6 +388,7 @@ set_tests_properties(
   flying.geodesy.reference
   flying.geo_terrain.geodesy_units
   flying.geo_terrain.terrain_service
+  flying.geo_terrain.runway_surface
   flying.terrain_runtime
   flying.m1.vertical_slice
   PROPERTIES
@@ -389,6 +407,7 @@ set_tests_properties(
   flying.geodesy.reference
   flying.geo_terrain.geodesy_units
   flying.geo_terrain.terrain_service
+  flying.geo_terrain.runway_surface
   flying.terrain_runtime
   flying.data_pipeline.dmr5g_terrain
   flying.data_pipeline.runway_importer
