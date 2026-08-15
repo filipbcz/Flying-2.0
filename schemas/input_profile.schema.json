@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flying.local/schemas/input_profile.schema.json",
+  "title": "Flying Input Profile Settings",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "activeProfileId", "profiles"],
+  "properties": {
+    "schemaVersion": {
+      "const": "flying.input-settings.v1"
+    },
+    "activeProfileId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "profiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/profile"
+      }
+    }
+  },
+  "$defs": {
+    "deviceClass": {
+      "type": "string",
+      "enum": ["keyboard", "mouse", "gamepad", "hid_flight_control"]
+    },
+    "axis": {
+      "type": "string",
+      "enum": [
+        "pitch",
+        "roll",
+        "yaw",
+        "throttle",
+        "mixture",
+        "propeller",
+        "brake_left",
+        "brake_right",
+        "brake_combined",
+        "elevator_trim",
+        "aileron_trim",
+        "rudder_trim",
+        "view_pan_x",
+        "view_pan_y",
+        "view_zoom"
+      ]
+    },
+    "command": {
+      "type": "string",
+      "enum": [
+        "parking_brake_toggle",
+        "brakes_hold",
+        "flaps_up",
+        "flaps_down",
+        "gear_toggle",
+        "starter_toggle",
+        "master_battery_toggle",
+        "avionics_toggle",
+        "mixture_cutoff",
+        "mixture_rich",
+        "propeller_feather_toggle",
+        "trim_reset",
+        "view_reset",
+        "pause_toggle"
+      ]
+    },
+    "physicalSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["deviceClass", "controlPath"],
+      "properties": {
+        "deviceClass": {
+          "$ref": "#/$defs/deviceClass"
+        },
+        "deviceId": {
+          "type": "string"
+        },
+        "controlPath": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "axisCalibration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deadZoneNorm",
+        "responseCurve",
+        "inverted",
+        "saturationNegativeNorm",
+        "saturationPositiveNorm"
+      ],
+      "properties": {
+        "deadZoneNorm": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1
+        },
+        "responseCurve": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 8
+        },
+        "inverted": {
+          "type": "boolean"
+        },
+        "saturationNegativeNorm": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "saturationPositiveNorm": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "axisBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["axis", "source", "calibration", "scale"],
+      "properties": {
+        "axis": {
+          "$ref": "#/$defs/axis"
+        },
+        "source": {
+          "$ref": "#/$defs/physicalSource"
+        },
+        "calibration": {
+          "$ref": "#/$defs/axisCalibration"
+        },
+        "scale": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1
+        }
+      }
+    },
+    "commandBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "source", "activationThreshold"],
+      "properties": {
+        "command": {
+          "$ref": "#/$defs/command"
+        },
+        "source": {
+          "$ref": "#/$defs/physicalSource"
+        },
+        "activationThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profileId",
+        "displayName",
+        "deviceClass",
+        "axisBindings",
+        "commandBindings"
+      ],
+      "properties": {
+        "profileId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "deviceClass": {
+          "$ref": "#/$defs/deviceClass"
+        },
+        "hardwareId": {
+          "type": "string"
+        },
+        "axisBindings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/axisBinding"
+          }
+        },
+        "commandBindings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/commandBinding"
+          }
+        }
+      }
+    }
+  }
+}
