@@ -187,6 +187,29 @@ void scenario_setup_supports_geographic_weather_mass_fuel_and_failures() {
       flying::presentation::start_scenario_from_setup(setup, valid_availability());
   require(!unsupported_failure.started,
           "unsupported failure selections must clearly block scenario start");
+
+  flying::presentation::ScenarioSetup invalid_date{};
+  invalid_date.local_year = 2026;
+  invalid_date.local_month = 2;
+  invalid_date.local_day = 31;
+  const auto invalid_date_start =
+      flying::presentation::start_scenario_from_setup(invalid_date, valid_availability());
+  require(!invalid_date_start.started,
+          "impossible calendar dates must clearly block scenario start");
+
+  flying::presentation::ScenarioSetup over_capacity_fuel{};
+  over_capacity_fuel.fuel_weight_kg = 100000.0;
+  const auto over_capacity_fuel_start =
+      flying::presentation::start_scenario_from_setup(over_capacity_fuel, valid_availability());
+  require(!over_capacity_fuel_start.started,
+          "fuel above configured station capacity must clearly block scenario start");
+
+  flying::presentation::ScenarioSetup over_capacity_payload{};
+  over_capacity_payload.pilot_and_payload_weight_kg = 100000.0;
+  const auto over_capacity_payload_start =
+      flying::presentation::start_scenario_from_setup(over_capacity_payload, valid_availability());
+  require(!over_capacity_payload_start.started,
+          "payload above configured station capacity must clearly block scenario start");
 }
 
 void cockpit_and_external_cameras_share_authoritative_state() {

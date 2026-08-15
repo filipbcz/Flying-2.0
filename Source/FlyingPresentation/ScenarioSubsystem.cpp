@@ -8,6 +8,7 @@
 #include <exception>
 #include <fstream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
@@ -26,31 +27,13 @@ namespace {
   return {std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>()};
 }
 
-[[nodiscard]] bool extract_json_string_field(const std::string& text,
-                                             std::string_view field,
-                                             std::string& value) {
-  const std::string key = "\"" + std::string(field) + "\"";
-  const std::size_t key_pos = text.find(key);
-  if (key_pos == std::string::npos) {
-    return false;
-  }
-
-  std::size_t pos = key_pos + key.size();
-  while (pos < text.size() && std::isspace(static_cast<unsigned char>(text[pos]))) {
-    ++pos;
-  }
-  if (pos >= text.size() || text[pos] != ':') {
-    return false;
-  }
-  ++pos;
-  while (pos < text.size() && std::isspace(static_cast<unsigned char>(text[pos]))) {
-    ++pos;
-  }
+[[nodiscard]] bool parse_json_string(const std::string& text,
+                                     std::size_t& pos,
+                                     std::string& value) {
   if (pos >= text.size() || text[pos] != '"') {
     return false;
   }
   ++pos;
-
   std::string parsed;
   while (pos < text.size()) {
     const char character = text[pos++];
@@ -68,6 +51,108 @@ namespace {
     }
   }
   return false;
+}
+
+[[nodiscard]] bool extract_top_level_json_string_field(const std::string& text,
+                                                       std::string_view field,
+                                                       std::string& value) {
+  std::size_t pos = 0;
+  while (pos < text.size() && std::isspace(static_cast<unsigned char>(text[pos]))) {
+    ++pos;
+  }
+  if (pos >= text.size() || text[pos] != '{') {
+    return false;
+  }
+  ++pos;
+
+  while (pos < text.size()) {
+    while (pos < text.size() && std::isspace(static_cast<unsigned char>(text[pos]))) {
+      ++pos;
+    }
+    if (pos < text.size() && text[pos] == '}') {
+      return false;
+    }
+
+    std::string key;
+    if (!parse_json_string(text, pos, key)) {
+      return false;
+    }
+    while (pos < text.size() && std::isspace(static_cast<unsigned char>(text[pos]))) {
+      ++pos;
+    }
+    if (pos >= text.size() || text[pos] != ':') {
+      return false;
+    }
+    ++pos;
+    while (pos < text.size() && std::isspace(static_cast<unsigned char>(text[pos]))) {
+      ++pos;
+    }
+
+    if (key == field) {
+      return parse_json_string(text, pos, value);
+    }
+
+    int object_depth = 0;
+    int array_depth = 0;
+    bool in_string = false;
+    bool escaped = false;
+    while (pos < text.size()) {
+      const char character = text[pos++];
+      if (in_string) {
+        if (escaped) {
+          escaped = false;
+        } else if (character == '\\') {
+          escaped = true;
+        } else if (character == '"') {
+          in_string = false;
+        }
+        continue;
+      }
+      if (character == '"') {
+        in_string = true;
+      } else if (character == '{') {
+        ++object_depth;
+      } else if (character == '}') {
+        if (object_depth == 0 && array_depth == 0) {
+          return false;
+        }
+        --object_depth;
+      } else if (character == '[') {
+        ++array_depth;
+      } else if (character == ']') {
+        --array_depth;
+      } else if (character == ',' && object_depth == 0 && array_depth == 0) {
+        break;
+      }
+    }
+  }
+  return false;
+}
+
+[[nodiscard]] bool is_leap_year(int year) noexcept {
+  return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+}
+
+[[nodiscard]] int days_in_month(int year, int month) noexcept {
+  switch (month) {
+  case 1:
+  case 3:
+  case 5:
+  case 7:
+  case 8:
+  case 10:
+  case 12:
+    return 31;
+  case 4:
+  case 6:
+  case 9:
+  case 11:
+    return 30;
+  case 2:
+    return is_leap_year(year) ? 29 : 28;
+  default:
+    return 0;
+  }
 }
 
 void require_manifest(const std::filesystem::path& path,
@@ -89,7 +174,7 @@ void require_manifest(const std::filesystem::path& path,
     return;
   }
   std::string actual_schema_version;
-  if (!extract_json_string_field(text, "schemaVersion", actual_schema_version) ||
+  if (!extract_top_level_json_string_field(text, "schemaVersion", actual_schema_version) ||
       actual_schema_version != schema_version) {
     report.errors.push_back(label + " manifest has unsupported schema: " + path.string());
   }
@@ -146,8 +231,8 @@ void validate_setup(const ScenarioSetup& setup, ScenarioStartResult& result) {
       setup.local_month < 1 ||
       setup.local_month > 12 ||
       setup.local_day < 1 ||
-      setup.local_day > 31) {
-    result.errors.push_back("local date must be a valid calendar selection range");
+      setup.local_day > days_in_month(setup.local_year, setup.local_month)) {
+    result.errors.push_back("local date must be a valid calendar date");
   }
   if (setup.position_mode == ScenarioPositionMode::AirportOrRunway && setup.location_id.empty()) {
     result.errors.push_back("airport or runway scenario location id is required");
@@ -180,6 +265,22 @@ void validate_setup(const ScenarioSetup& setup, ScenarioStartResult& result) {
     double payload_weight_kg) {
   flying::core_sim::AircraftLoadout loadout{};
 
+  double fuel_capacity_kg = 0.0;
+  for (const auto& station : configuration.mass_balance.fuel_stations) {
+    fuel_capacity_kg += station.capacity_kg.value;
+  }
+  if (fuel_weight_kg > fuel_capacity_kg) {
+    throw std::invalid_argument("requested fuel mass exceeds configured aircraft fuel capacity");
+  }
+
+  double payload_capacity_kg = 0.0;
+  for (const auto& station : configuration.mass_balance.payload_stations) {
+    payload_capacity_kg += station.max_mass_kg.value;
+  }
+  if (payload_weight_kg > payload_capacity_kg) {
+    throw std::invalid_argument("requested payload mass exceeds configured aircraft payload capacity");
+  }
+
   double remaining_fuel_kg = fuel_weight_kg;
   for (const auto& station : configuration.mass_balance.fuel_stations) {
     const double assigned = std::min(remaining_fuel_kg, station.capacity_kg.value);
@@ -194,12 +295,6 @@ void validate_setup(const ScenarioSetup& setup, ScenarioStartResult& result) {
     remaining_payload_kg -= assigned;
   }
 
-  if (remaining_fuel_kg > 1.0e-9) {
-    loadout.fuel.push_back({"unavailable-fuel-capacity", remaining_fuel_kg});
-  }
-  if (remaining_payload_kg > 1.0e-9) {
-    loadout.payload.push_back({"unavailable-payload-capacity", remaining_payload_kg});
-  }
   return loadout;
 }
 
