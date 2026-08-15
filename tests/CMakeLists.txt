@@ -233,6 +233,24 @@ target_link_libraries(flying_core_sim_weather_tests
 
 add_test(NAME flying.core_sim.weather COMMAND flying_core_sim_weather_tests)
 
+add_executable(flying_core_sim_weather_reference_tests
+  ../Source/CoreSim/WeatherModel.cpp
+  ../Tests/WeatherReferenceTests.cpp
+)
+
+target_include_directories(flying_core_sim_weather_reference_tests
+  PRIVATE
+    "${CMAKE_SOURCE_DIR}/Source/CoreSim/Public"
+)
+
+target_link_libraries(flying_core_sim_weather_reference_tests
+  PRIVATE
+    Flying::CoreSim
+    Flying::CompilerOptions
+)
+
+add_test(NAME flying.core_sim.weather_reference COMMAND flying_core_sim_weather_reference_tests)
+
 add_executable(flying_core_sim_performance_timing_tests
   core_sim/performance_timing_test.cpp
 )
