@@ -15,6 +15,8 @@ struct AtmosphereSample {
   double density_kgpm3{1.225};
   double speed_of_sound_mps{340.294};
   double relative_humidity_norm{0.50};
+  double water_vapor_pressure_pa{0.0};
+  double dew_point_k{273.15};
 };
 
 enum class WeatherSource {
@@ -47,6 +49,19 @@ struct PrecipitationState {
   double surface_wetness_norm{};
 };
 
+struct ThermalSettings {
+  double strength_mps{};
+  double center_latitude_deg{};
+  double center_longitude_deg{};
+  double radius_m{1'000.0};
+  double top_altitude_m{1'500.0};
+};
+
+struct OrographicSettings {
+  Vector3d terrain_gradient_ned{};
+  double lift_gain{};
+};
+
 struct WeatherScenario {
   std::string scenario_id{"manual.cavok"};
   WeatherSource source{WeatherSource::Manual};
@@ -59,6 +74,8 @@ struct WeatherScenario {
   DrydenTurbulenceSettings turbulence{};
   CloudLayer cloud{};
   PrecipitationState precipitation{};
+  ThermalSettings thermal{};
+  OrographicSettings orographic{};
   double icing_severity_norm{};
 };
 

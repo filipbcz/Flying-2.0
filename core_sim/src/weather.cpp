@@ -12,9 +12,11 @@ constexpr double kSeaLevelPressurePa = 101'325.0;
 constexpr double kSeaLevelTemperatureK = 288.15;
 constexpr double kLapseRateKpm = 0.0065;
 constexpr double kGasConstantAir = 287.05287;
+constexpr double kGasConstantWaterVapor = 461.5;
 constexpr double kGammaAir = 1.4;
 constexpr double kPressureExponent = 5.2558797;
 constexpr double kMinPressurePa = 1'000.0;
+constexpr double kMetersPerDegreeLatitude = 111'320.0;
 
 [[nodiscard]] double clamp(double value, double min_value, double max_value) noexcept {
   return std::max(min_value, std::min(max_value, value));
@@ -73,6 +75,29 @@ void validate_scenario(const WeatherScenario& scenario) {
 
 [[nodiscard]] double horizontal_magnitude(Vector3d value) noexcept {
   return std::hypot(value.x, value.y);
+}
+
+[[nodiscard]] double saturation_vapor_pressure_pa(double temperature_k) noexcept {
+  const double temperature_c = temperature_k - 273.15;
+  return 611.2 * std::exp((17.67 * temperature_c) / (temperature_c + 243.5));
+}
+
+[[nodiscard]] double dew_point_k(double temperature_k, double relative_humidity_norm) noexcept {
+  const double humidity = clamp(relative_humidity_norm, 0.01, 1.0);
+  const double temperature_c = temperature_k - 273.15;
+  const double gamma = std::log(humidity) + (17.625 * temperature_c) / (243.04 + temperature_c);
+  return 273.15 + (243.04 * gamma) / (17.625 - gamma);
+}
+
+[[nodiscard]] double horizontal_distance_m(double latitude_a_deg,
+                                           double longitude_a_deg,
+                                           double latitude_b_deg,
+                                           double longitude_b_deg) noexcept {
+  const double latitude_mid_rad = ((latitude_a_deg + latitude_b_deg) * 0.5) * 3.14159265358979323846 / 180.0;
+  const double north_m = (latitude_a_deg - latitude_b_deg) * kMetersPerDegreeLatitude;
+  const double east_m =
+      (longitude_a_deg - longitude_b_deg) * kMetersPerDegreeLatitude * std::cos(latitude_mid_rad);
+  return std::hypot(north_m, east_m);
 }
 
 } // namespace
@@ -149,9 +174,22 @@ AtmosphereSample sample_weather_atmosphere(double altitude_m,
   const double pressure_ratio =
       std::pow(standard_temperature_at_altitude / kSeaLevelTemperatureK, kPressureExponent);
   const double pressure = std::max(kMinPressurePa, qnh_pa * pressure_ratio);
-  const double density = pressure / (kGasConstantAir * temperature_at_altitude);
+  const double vapor_pressure =
+      std::min(pressure * 0.5,
+               saturation_vapor_pressure_pa(temperature_at_altitude) * relative_humidity_norm);
+  const double dry_air_pressure = pressure - vapor_pressure;
+  const double density = dry_air_pressure / (kGasConstantAir * temperature_at_altitude) +
+                         vapor_pressure / (kGasConstantWaterVapor * temperature_at_altitude);
   const double speed_of_sound = std::sqrt(kGammaAir * kGasConstantAir * temperature_at_altitude);
-  return {pressure, temperature_at_altitude, density, speed_of_sound, relative_humidity_norm};
+  return {
+    pressure,
+    temperature_at_altitude,
+    density,
+    speed_of_sound,
+    relative_humidity_norm,
+    vapor_pressure,
+    dew_point_k(temperature_at_altitude, relative_humidity_norm),
+  };
 }
 
 Vector3d deterministic_dryden_turbulence(DrydenTurbulenceSettings settings,
@@ -208,6 +246,28 @@ WeatherSample sample_weather(const WeatherScenario& scenario,
       altitude_m,
       std::max(15.0, horizontal_magnitude(steady_wind)),
       simulation_time_s);
+  const double thermal_distance =
+      horizontal_distance_m(latitude_deg,
+                            longitude_deg,
+                            scenario.thermal.center_latitude_deg,
+                            scenario.thermal.center_longitude_deg);
+  const double thermal_radius = std::max(1.0, finite_or(scenario.thermal.radius_m, 1'000.0));
+  const double thermal_horizontal = std::exp(-(thermal_distance * thermal_distance) /
+                                             (thermal_radius * thermal_radius));
+  const double thermal_vertical =
+      altitude_m <= std::max(1.0, scenario.thermal.top_altitude_m)
+          ? 1.0 - clamp(altitude_m / std::max(1.0, scenario.thermal.top_altitude_m), 0.0, 1.0)
+          : 0.0;
+  const double thermal_lift_mps =
+      std::max(0.0, finite_or(scenario.thermal.strength_mps, 0.0)) *
+      thermal_horizontal *
+      thermal_vertical;
+  const double orographic_lift_mps =
+      clamp(dot(steady_wind, scenario.orographic.terrain_gradient_ned) *
+                std::max(0.0, finite_or(scenario.orographic.lift_gain, 0.0)),
+            -15.0,
+            15.0);
+  const Vector3d vertical_air_effect_ned{0.0, 0.0, -(thermal_lift_mps + orographic_lift_mps)};
   const double precipitation_rate =
       std::max(0.0, scenario.precipitation.rain_rate_mmph) +
       std::max(0.0, scenario.precipitation.snow_rate_mmph);
@@ -232,7 +292,7 @@ WeatherSample sample_weather(const WeatherScenario& scenario,
   sample.steady_wind_ned_mps = steady_wind;
   sample.gust_ned_mps = gust;
   sample.turbulence_ned_mps = turbulence;
-  sample.wind_ned_mps = steady_wind + gust + turbulence;
+  sample.wind_ned_mps = steady_wind + gust + turbulence + vertical_air_effect_ned;
   sample.visibility_m = std::min(scenario.visibility_m, std::min(precipitation_visibility, cloud_visibility));
   sample.cloud_coverage_norm = clamp(scenario.cloud.coverage_norm, 0.0, 1.0);
   sample.precipitation_rate_mmph = precipitation_rate;
