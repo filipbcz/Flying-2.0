@@ -1,0 +1,97 @@
+{
+  "schemaVersion": "flying.cockpit.layout.v1",
+  "aircraftId": "flying_trainer_one",
+  "assetRoot": "Content/Cockpit",
+  "materials": {
+    "panel": {
+      "type": "pbr",
+      "baseColor": "matte-charcoal",
+      "roughness": 0.82
+    },
+    "instrumentGlass": {
+      "type": "glass",
+      "transmission": 0.18,
+      "roughness": 0.04
+    },
+    "placards": {
+      "type": "readable-labels",
+      "minimumPixelsPerCapitalHeight": 12
+    }
+  },
+  "lighting": {
+    "nightViewStates": [
+      "cold_and_dark_night",
+      "engine_start_night",
+      "taxi_night",
+      "approach_night",
+      "shutdown_night"
+    ],
+    "instrumentBacklightControl": "instrument_dimmer",
+    "floodLightControl": "cockpit_flood_light",
+    "minimumNightReadabilityScore": 0.72,
+    "castsPanelShadows": true
+  },
+  "screenshotRequirements": {
+    "minimumWidth": 640,
+    "minimumHeight": 360
+  },
+  "screenshotCapture": {
+    "provenance": "Reports/Cockpit/cockpit-screenshot-captures.json",
+    "renderCommand": "UnrealEditor-Cmd.exe unreal/Flying.uproject -unattended -game -ExecCmds=\"Automation RunTests Flying.Cockpit.ScreenshotGate; Quit\" -ReportOutputPath=Reports/Cockpit"
+  },
+  "controls": [
+    {"id": "battery_master", "label": "BAT", "binding": "cockpit.battery_master", "kind": "toggle", "requiredFor": ["engine_start", "shutdown"]},
+    {"id": "alternator", "label": "ALT", "binding": "cockpit.alternator", "kind": "toggle", "requiredFor": ["engine_start", "flight", "shutdown"]},
+    {"id": "avionics_master", "label": "AVIONICS", "binding": "cockpit.avionics_master", "kind": "toggle", "requiredFor": ["engine_start", "flight", "shutdown"]},
+    {"id": "magnetos", "label": "MAG", "binding": "cockpit.magnetos", "kind": "selector", "positions": ["off", "right", "left", "both", "start"], "requiredFor": ["engine_start", "flight", "shutdown"]},
+    {"id": "starter", "label": "START", "binding": "cockpit.starter", "kind": "momentary", "requiredFor": ["engine_start"]},
+    {"id": "mixture", "label": "MIX", "binding": "cockpit.mixture", "kind": "axis", "requiredFor": ["engine_start", "taxi", "takeoff", "flight", "landing", "shutdown"]},
+    {"id": "throttle", "label": "THR", "binding": "cockpit.throttle", "kind": "axis", "requiredFor": ["engine_start", "taxi", "takeoff", "flight", "landing", "shutdown"]},
+    {"id": "carb_heat", "label": "CARB HEAT", "binding": "cockpit.carb_heat", "kind": "axis", "requiredFor": ["engine_start", "flight", "landing"]},
+    {"id": "fuel_selector", "label": "FUEL", "binding": "cockpit.fuel_selector", "kind": "selector", "positions": ["off", "left", "right", "both"], "requiredFor": ["engine_start", "taxi", "takeoff", "flight", "landing", "shutdown"]},
+    {"id": "electric_fuel_pump", "label": "FUEL PUMP", "binding": "cockpit.electric_fuel_pump", "kind": "toggle", "requiredFor": ["engine_start", "takeoff", "landing"]},
+    {"id": "parking_brake", "label": "PARK BRK", "binding": "cockpit.parking_brake", "kind": "toggle", "requiredFor": ["engine_start", "taxi", "shutdown"]},
+    {"id": "toe_brakes", "label": "BRAKES", "binding": "cockpit.toe_brakes", "kind": "axis", "requiredFor": ["taxi", "landing", "shutdown"]},
+    {"id": "rudder_pedals", "label": "RUDDER", "binding": "cockpit.rudder", "kind": "axis", "requiredFor": ["taxi", "takeoff", "flight", "landing"]},
+    {"id": "yoke_pitch", "label": "ELEV", "binding": "cockpit.yoke_pitch", "kind": "axis", "requiredFor": ["takeoff", "flight", "landing"]},
+    {"id": "yoke_roll", "label": "AIL", "binding": "cockpit.yoke_roll", "kind": "axis", "requiredFor": ["takeoff", "flight", "landing"]},
+    {"id": "elevator_trim", "label": "TRIM", "binding": "cockpit.elevator_trim", "kind": "axis", "requiredFor": ["takeoff", "flight", "landing"]},
+    {"id": "flaps", "label": "FLAPS", "binding": "cockpit.flaps", "kind": "selector", "positions": ["up", "10", "20", "full"], "requiredFor": ["takeoff", "flight", "landing"]},
+    {"id": "pitot_heat", "label": "PITOT HEAT", "binding": "cockpit.pitot_heat", "kind": "toggle", "requiredFor": ["flight", "landing"]},
+    {"id": "landing_light", "label": "LDG", "binding": "cockpit.landing_light", "kind": "toggle", "requiredFor": ["taxi", "takeoff", "landing"]},
+    {"id": "taxi_light", "label": "TAXI", "binding": "cockpit.taxi_light", "kind": "toggle", "requiredFor": ["taxi"]},
+    {"id": "nav_lights", "label": "NAV", "binding": "cockpit.nav_lights", "kind": "toggle", "requiredFor": ["taxi", "takeoff", "flight", "landing", "shutdown"]},
+    {"id": "beacon_light", "label": "BCN", "binding": "cockpit.beacon_light", "kind": "toggle", "requiredFor": ["engine_start", "taxi", "takeoff", "flight", "landing", "shutdown"]},
+    {"id": "instrument_dimmer", "label": "PANEL", "binding": "cockpit.instrument_dimmer", "kind": "axis", "requiredFor": ["engine_start", "taxi", "takeoff", "flight", "landing", "shutdown"]},
+    {"id": "cockpit_flood_light", "label": "FLOOD", "binding": "cockpit.flood_light", "kind": "axis", "requiredFor": ["engine_start", "taxi", "takeoff", "flight", "landing", "shutdown"]}
+  ],
+  "instruments": [
+    {"id": "airspeed_indicator", "label": "ASI", "source": "sensors.pitot_static.indicated_airspeed_mps", "animation": "needle", "units": "mps"},
+    {"id": "altimeter", "label": "ALT", "source": "sensors.pitot_static.indicated_altitude_m", "animation": "three_needle", "units": "m"},
+    {"id": "vertical_speed_indicator", "label": "VSI", "source": "sensors.pitot_static.vertical_speed_mps", "animation": "needle", "units": "mps"},
+    {"id": "magnetic_compass", "label": "COMPASS", "source": "sensors.compass.magnetic_heading_rad", "animation": "card", "units": "deg"},
+    {"id": "attitude_indicator", "label": "AI", "source": "sensors.gyro.attitude", "animation": "horizon", "units": "deg", "channels": ["roll", "pitch"]},
+    {"id": "directional_gyro", "label": "DG", "source": "sensors.gyro.heading_rad", "animation": "card", "units": "deg"},
+    {"id": "tachometer", "label": "RPM", "source": "sensors.engine.rpm", "animation": "needle", "units": "rpm"},
+    {"id": "fuel_flow", "label": "FF", "source": "sensors.engine.fuel_flow_kgps", "animation": "needle", "units": "kgps"},
+    {"id": "fuel_quantity_left", "label": "L FUEL", "source": "systems.fuel.left_quantity_kg", "animation": "needle", "units": "kg"},
+    {"id": "fuel_quantity_right", "label": "R FUEL", "source": "systems.fuel.right_quantity_kg", "animation": "needle", "units": "kg"},
+    {"id": "bus_voltage", "label": "VOLTS", "source": "systems.electrical.bus_voltage_v", "animation": "needle", "units": "v"},
+    {"id": "gps_ground_speed", "label": "GS", "source": "sensors.gps.ground_speed_mps", "animation": "digital", "units": "mps"}
+  ],
+  "audioHooks": [
+    {
+      "id": "engine_piston_loop",
+      "source": "sensors.engine.rpm",
+      "parameters": ["rpm", "throttle_norm", "fuel_flow_kgps"]
+    }
+  ],
+  "screenshotBaselines": [
+    {"id": "day_readability", "view": "pilot_default_day", "image": "Screenshots/day_readability_baseline.ppm", "maxDifferencePercent": 0.8},
+    {"id": "cold_and_dark_night", "view": "cold_and_dark_night", "image": "Screenshots/cold_and_dark_night_baseline.ppm", "maxDifferencePercent": 1.0},
+    {"id": "engine_start_night", "view": "engine_start_night", "image": "Screenshots/engine_start_night_baseline.ppm", "maxDifferencePercent": 1.0},
+    {"id": "taxi_night", "view": "taxi_night", "image": "Screenshots/taxi_night_baseline.ppm", "maxDifferencePercent": 1.0},
+    {"id": "approach_night", "view": "approach_night", "image": "Screenshots/approach_night_baseline.ppm", "maxDifferencePercent": 1.0},
+    {"id": "shutdown_night", "view": "shutdown_night", "image": "Screenshots/shutdown_night_baseline.ppm", "maxDifferencePercent": 1.0}
+  ]
+}

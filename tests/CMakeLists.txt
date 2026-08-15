@@ -241,6 +241,30 @@ target_compile_definitions(flying_scenario_flow_tests
 
 add_test(NAME flying.presentation.scenario_flow COMMAND flying_scenario_flow_tests)
 
+add_executable(flying_cockpit_automation_tests
+  ../Tests/CockpitAutomationTests.cpp
+  ../Source/FlyingPresentation/CockpitSubsystem.cpp
+)
+
+target_include_directories(flying_cockpit_automation_tests
+  PRIVATE
+    "${CMAKE_SOURCE_DIR}/Source/FlyingPresentation/Public"
+    "${CMAKE_SOURCE_DIR}/core_sim/include"
+)
+
+target_link_libraries(flying_cockpit_automation_tests
+  PRIVATE
+    Flying::CoreSim
+    Flying::CompilerOptions
+)
+
+target_compile_definitions(flying_cockpit_automation_tests
+  PRIVATE
+    FLYING_REPO_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+)
+
+add_test(NAME flying.presentation.cockpit_automation COMMAND flying_cockpit_automation_tests)
+
 add_executable(flying_core_sim_scenario_start_tests
   core_sim/scenario_start_test.cpp
 )
@@ -497,6 +521,7 @@ set_tests_properties(
   flying.core_sim.input_mapping
   flying.presentation.input_profile
   flying.presentation.scenario_flow
+  flying.presentation.cockpit_automation
   flying.core_sim.scenario_start
   flying.core_sim.telemetry_replay
   flying.telemetry_replay.replay_hash
