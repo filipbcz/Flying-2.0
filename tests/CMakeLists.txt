@@ -191,6 +191,30 @@ target_link_libraries(flying_core_sim_input_mapping_tests
 
 add_test(NAME flying.core_sim.input_mapping COMMAND flying_core_sim_input_mapping_tests)
 
+add_executable(flying_input_profile_tests
+  ../Tests/InputProfileTests.cpp
+  ../Source/FlyingPresentation/InputProfileSubsystem.cpp
+)
+
+target_include_directories(flying_input_profile_tests
+  PRIVATE
+    "${CMAKE_SOURCE_DIR}/Source/FlyingPresentation/Public"
+    "${CMAKE_SOURCE_DIR}/core_sim/include"
+)
+
+target_link_libraries(flying_input_profile_tests
+  PRIVATE
+    Flying::CoreSim
+    Flying::CompilerOptions
+)
+
+add_test(NAME flying.presentation.input_profile COMMAND flying_input_profile_tests)
+
+target_compile_definitions(flying_input_profile_tests
+  PRIVATE
+    FLYING_REPO_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+)
+
 add_executable(flying_core_sim_scenario_start_tests
   core_sim/scenario_start_test.cpp
 )
@@ -427,6 +451,7 @@ set_tests_properties(
   flying.core_sim.aircraft_config
   flying.core_sim.aircraft_systems
   flying.core_sim.input_mapping
+  flying.presentation.input_profile
   flying.core_sim.scenario_start
   flying.core_sim.telemetry_replay
   flying.core_sim.terrain_contact
@@ -447,6 +472,7 @@ set_tests_properties(
   flying.core_sim.determinism
   flying.core_sim.flight_dynamics_api
   flying.core_sim.input_mapping
+  flying.presentation.input_profile
   flying.core_sim.scenario_start
   flying.core_sim.telemetry_replay
   flying.core_sim.terrain_contact
