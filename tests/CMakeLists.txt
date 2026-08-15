@@ -472,7 +472,6 @@ set_tests_properties(
   flying.core_sim.determinism
   flying.core_sim.flight_dynamics_api
   flying.core_sim.input_mapping
-  flying.presentation.input_profile
   flying.core_sim.scenario_start
   flying.core_sim.telemetry_replay
   flying.core_sim.terrain_contact
