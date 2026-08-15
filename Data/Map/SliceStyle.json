@@ -1,0 +1,32 @@
+{
+  "externalMapApis": [],
+  "layers": {
+    "airports": {
+      "symbolColor": "#f3f7fb",
+      "visibleByDefault": true
+    },
+    "airspaces": {
+      "lineColor": "#4fb7ff",
+      "visibleByDefault": true
+    },
+    "geonames-labels": {
+      "textColor": "#d8dde2",
+      "visibleByDefault": true
+    },
+    "obstacles": {
+      "symbolColor": "#ff5a45",
+      "visibleByDefault": true
+    },
+    "runways": {
+      "lineColor": "#ffffff",
+      "visibleByDefault": true
+    },
+    "zabaged-base": {
+      "lineColor": "#7f8f9a",
+      "visibleByDefault": true
+    }
+  },
+  "remoteTileServerUrls": [],
+  "runtimeNetworkRequired": false,
+  "schemaVersion": "flying.offline-navigation-map-style.v1"
+}

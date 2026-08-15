@@ -1,0 +1,125 @@
+{
+  "coverage": {
+    "bounds": {
+      "maxEastM": 50000,
+      "maxNorthM": 50000,
+      "minEastM": 0,
+      "minNorthM": 0
+    },
+    "countryCode": "CZ",
+    "scope": "initial-navigation-map-slice"
+  },
+  "layers": {
+    "featureCounts": {
+      "airports": 2,
+      "airspaces": 1,
+      "geonames-labels": 1,
+      "obstacles": 8,
+      "runways": 2,
+      "zabaged-base": 5
+    },
+    "independentToggles": [
+      "airports",
+      "runways",
+      "obstacles",
+      "airspaces"
+    ],
+    "required": [
+      "zabaged-base",
+      "geonames-labels",
+      "airports",
+      "runways",
+      "obstacles",
+      "airspaces"
+    ]
+  },
+  "packageId": "nav-map-cz-initial-50km-slice",
+  "packageVersion": "2026.08-approved-slice",
+  "runtimeDependencies": {
+    "externalMapApis": [],
+    "remoteTileServerUrls": [],
+    "renderableWithNetworkingDisabled": true,
+    "runtimeNetworkRequired": false
+  },
+  "schemaVersion": "flying.offline-navigation-map-slice.v1",
+  "sourcePermissions": [
+    {
+      "attribution": "Contains information from the Czech Office for Surveying, Mapping and Cadastre (CUZK): ZABAGED and Geonames, licensed under Creative Commons Attribution 4.0 International (CC BY 4.0). Project-derived aerodrome, runway, obstacle and airspace slice overlays are approved Flying fixtures for simulator validation and are not operational navigation data.",
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "7f0316ad5b55fa719edb929ccef94d99818d19db3e25dcd2836c4d257a161162"
+      },
+      "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+      "permissionStatus": "permitted",
+      "sourceId": "cuzk-zabaged-polohopis"
+    },
+    {
+      "attribution": "Contains information from the Czech Office for Surveying, Mapping and Cadastre (CUZK): ZABAGED and Geonames, licensed under Creative Commons Attribution 4.0 International (CC BY 4.0). Project-derived aerodrome, runway, obstacle and airspace slice overlays are approved Flying fixtures for simulator validation and are not operational navigation data.",
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "7f0316ad5b55fa719edb929ccef94d99818d19db3e25dcd2836c4d257a161162"
+      },
+      "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+      "permissionStatus": "permitted",
+      "sourceId": "cuzk-geonames"
+    },
+    {
+      "attribution": "Contains information from the Czech Office for Surveying, Mapping and Cadastre (CUZK): ZABAGED and Geonames, licensed under Creative Commons Attribution 4.0 International (CC BY 4.0). Project-derived aerodrome, runway, obstacle and airspace slice overlays are approved Flying fixtures for simulator validation and are not operational navigation data.",
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "0a163cd064f4932e9aa27113d301503006a76ce2c2ed2bf5d39337b84cb10ada"
+      },
+      "license": "Project-internal fixture data",
+      "permissionStatus": "permitted",
+      "sourceId": "project-pilot-fixture-2026-08"
+    },
+    {
+      "attribution": "Contains information from the Czech Office for Surveying, Mapping and Cadastre (CUZK): ZABAGED and Geonames, licensed under Creative Commons Attribution 4.0 International (CC BY 4.0). Project-derived aerodrome, runway, obstacle and airspace slice overlays are approved Flying fixtures for simulator validation and are not operational navigation data.",
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "0e1bd2551254916fee3ca843025f1018155c64bbfb1f372daba9bd003ed47a5e"
+      },
+      "license": "Project-internal fixture data",
+      "permissionStatus": "permitted",
+      "sourceId": "detailed-airport-template-2026-08"
+    },
+    {
+      "attribution": "Contains information from the Czech Office for Surveying, Mapping and Cadastre (CUZK): ZABAGED and Geonames, licensed under Creative Commons Attribution 4.0 International (CC BY 4.0). Project-derived aerodrome, runway, obstacle and airspace slice overlays are approved Flying fixtures for simulator validation and are not operational navigation data.",
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "d813960c1598bc1137a16e010f6eca486cf56b78c2ba232190a20547f8870727"
+      },
+      "license": "Project-internal fixture data",
+      "permissionStatus": "permitted",
+      "sourceDocument": "tools/data_pipeline/build_nav_map.py:PROJECT_AIRSPACE_SOURCE_PAYLOAD",
+      "sourceId": "project-approved-airspace-slice-2026-08"
+    }
+  ],
+  "style": {
+    "checksum": {
+      "algorithm": "sha256",
+      "value": "b9ffd829fa5e71180e26b7b9e24e783b0bebc3f134eaefdf0404797bc4f7a8a2"
+    },
+    "path": "SliceStyle.json"
+  },
+  "tileArchive": {
+    "checksum": {
+      "algorithm": "sha256",
+      "value": "751f2ffbe840bf8eb4cf56446bc2bc0c3b07ac9a2433bbd681ff9e28dd71e66a"
+    },
+    "format": "pmtiles",
+    "path": "Slice.pmtiles",
+    "tilePayloadFormat": "flying.navigation-vector-tile+json"
+  },
+  "validation": {
+    "attributionVisible": true,
+    "mandatoryLayersToggleIndependently": [
+      "airports",
+      "runways",
+      "obstacles",
+      "airspaces"
+    ],
+    "networkDisabledOpenAndPan": "validated_by_manifest_and_local_archive",
+    "passed": true
+  }
+}
