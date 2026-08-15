@@ -54,8 +54,14 @@ AircraftConfiguration load_config() {
 
 void schema_requires_production_aircraft_sections() {
   const std::filesystem::path schema_path =
+      repo_root() / "schemas" / "aircraft.schema.json";
+  const std::string root_schema = read_text(schema_path);
+  require(root_schema.find("../core_sim/schemas/aircraft-config.schema.json") != std::string::npos,
+          "canonical aircraft schema must reference the executable CoreSim schema");
+
+  const std::filesystem::path core_schema_path =
       repo_root() / "core_sim" / "schemas" / "aircraft-config.schema.json";
-  const std::string schema = read_text(schema_path);
+  const std::string schema = read_text(core_schema_path);
 
   for (const char* required : {
            "\"geometry\"",
@@ -72,8 +78,11 @@ void schema_requires_production_aircraft_sections() {
     require(schema.find(required) != std::string::npos,
             "aircraft schema must require every production aircraft section");
   }
-  require(schema.find("\"status\": {\"const\": \"unvalidated\"}") != std::string::npos,
-          "aircraft schema must keep the model explicitly unvalidated");
+  require(schema.find("\"status\": {\"enum\": [\"unvalidated\", \"faithful\"]}") !=
+              std::string::npos,
+          "aircraft schema must version validation status values");
+  require(schema.find("\"approvedReferences\"") != std::string::npos,
+          "aircraft schema must require approved references for faithful claims");
 }
 
 void production_aircraft_data_loads_with_provenance() {
@@ -113,9 +122,52 @@ void validation_rejects_missing_provenance_and_validated_status() {
           "aircraft validation must reject data without source references");
 
   configuration = load_config();
-  configuration.validation_status = "validated";
+  configuration.validation_status = "faithful";
+  configuration.validation_suite_status = "not_run";
   require(!flying::core_sim::validate_aircraft_configuration(configuration).empty(),
-          "aircraft validation must reject premature validated status");
+          "aircraft validation must reject faithful status before validation suite approval");
+
+  configuration.validation_suite_status = "passed";
+  configuration.validation_approved_references.clear();
+  require(!flying::core_sim::validate_aircraft_configuration(configuration).empty(),
+          "aircraft validation must reject faithful status without approved references");
+
+  configuration.validation_approved_references = {"flying-step16-owned-model"};
+  require(!flying::core_sim::validate_aircraft_configuration(configuration).empty(),
+          "aircraft validation must reject faithful status without approved validation source");
+
+  for (auto& source : configuration.source_references) {
+    if (source.id == "flying-step16-owned-model") {
+      source.approved_for_faithful_claim = true;
+      source.used_for.push_back("validation");
+    }
+  }
+  require(flying::core_sim::validate_aircraft_configuration(configuration).empty(),
+          "aircraft validation must accept faithful status with approved validation references");
+}
+
+void config_versioning_reports_compatibility_and_migration() {
+  const auto current = flying::core_sim::check_aircraft_configuration_compatibility(
+      flying::core_sim::kAircraftConfigSchemaVersion);
+  require(current.supported, "current aircraft schema version must be compatible");
+  require(!current.requires_migration,
+          "current aircraft schema version must not require migration");
+
+  const auto legacy = flying::core_sim::check_aircraft_configuration_compatibility(
+      flying::core_sim::kAircraftConfigLegacySchemaVersion);
+  require(legacy.supported, "legacy aircraft schema version must be migratable");
+  require(legacy.requires_migration,
+          "legacy aircraft schema version must report migration requirement");
+
+  AircraftConfiguration configuration = load_config();
+  configuration.schema_version = std::string{flying::core_sim::kAircraftConfigLegacySchemaVersion};
+  const AircraftConfiguration migrated =
+      flying::core_sim::migrate_aircraft_configuration(configuration);
+  require(migrated.schema_version ==
+              std::string{flying::core_sim::kAircraftConfigSchemaVersion},
+          "aircraft config migration must update the schema version");
+  require(flying::core_sim::validate_aircraft_configuration(migrated).empty(),
+          "migrated aircraft config must pass compatibility validation");
 }
 
 void mass_balance_loadouts_update_core_sim_state() {
@@ -220,6 +272,7 @@ int main() {
   schema_requires_production_aircraft_sections();
   production_aircraft_data_loads_with_provenance();
   validation_rejects_missing_provenance_and_validated_status();
+  config_versioning_reports_compatibility_and_migration();
   mass_balance_loadouts_update_core_sim_state();
   invalid_loadouts_are_rejected();
   aerodynamic_engine_and_propeller_tables_evaluate();

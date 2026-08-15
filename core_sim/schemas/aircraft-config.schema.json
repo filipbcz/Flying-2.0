@@ -19,6 +19,38 @@
     "landingGear",
     "brakes"
   ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "aircraft": {
+            "properties": {
+              "validation": {
+                "properties": {
+                  "status": {"const": "faithful"}
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "sourceReferences": {
+            "contains": {
+              "type": "object",
+              "required": ["id", "usedFor", "approvedForFaithfulClaim"],
+              "properties": {
+                "id": {"$ref": "#/$defs/approvedValidationReferenceId"},
+                "usedFor": {"contains": {"const": "validation"}},
+                "approvedForFaithfulClaim": {"const": true}
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
   "properties": {
     "schemaVersion": {"const": "flying.aircraft-config.v1"},
     "aircraft": {
@@ -45,11 +77,33 @@
           "additionalProperties": false,
           "required": ["status", "requiredSuite", "suiteStatus", "notes"],
           "properties": {
-            "status": {"const": "unvalidated"},
+            "status": {"enum": ["unvalidated", "faithful"]},
             "requiredSuite": {"type": "string", "minLength": 1},
-            "suiteStatus": {"const": "not_run"},
+            "suiteStatus": {"enum": ["not_run", "passed"]},
+            "approvedReferences": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {"$ref": "#/$defs/approvedValidationReferenceId"}
+            },
             "notes": {"type": "string", "minLength": 1}
-          }
+          },
+          "allOf": [
+            {
+              "if": {"properties": {"status": {"const": "unvalidated"}}},
+              "then": {
+                "properties": {"suiteStatus": {"const": "not_run"}},
+                "not": {"required": ["approvedReferences"]}
+              }
+            },
+            {
+              "if": {"properties": {"status": {"const": "faithful"}}},
+              "then": {
+                "required": ["approvedReferences"],
+                "properties": {"suiteStatus": {"const": "passed"}}
+              }
+            }
+          ]
         }
       }
     },
@@ -109,6 +163,9 @@
   },
   "$defs": {
     "confidence": {"enum": ["low", "medium", "high"]},
+    "approvedValidationReferenceId": {
+      "enum": ["flying-trainer-one-validation-suite-v1"]
+    },
     "sourceReference": {
       "type": "object",
       "additionalProperties": false,
@@ -134,7 +191,8 @@
           "type": "array",
           "minItems": 1,
           "items": {"type": "string", "minLength": 1}
-        }
+        },
+        "approvedForFaithfulClaim": {"type": "boolean", "default": false}
       }
     },
     "sourceRefs": {

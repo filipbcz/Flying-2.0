@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AircraftConfig.h"
 #include "flying/core_sim/determinism.hpp"
 #include "flying/core_sim/fixed_step.hpp"
 #include "flying/core_sim/input.hpp"

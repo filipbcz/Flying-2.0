@@ -369,6 +369,20 @@ private:
   return value->boolean;
 }
 
+[[nodiscard]] bool optional_bool(const JsonValue::Object& object,
+                                 std::string_view key,
+                                 bool fallback,
+                                 std::string_view context) {
+  const JsonValue* value = find_member(object, key);
+  if (value == nullptr) {
+    return fallback;
+  }
+  if (value->type != JsonValue::Type::bool_value) {
+    throw std::runtime_error(std::string(context) + "." + std::string(key) + " must be a bool");
+  }
+  return value->boolean;
+}
+
 [[nodiscard]] int require_int(const JsonValue::Object& object,
                               std::string_view key,
                               std::string_view context) {
@@ -394,6 +408,16 @@ private:
     values.push_back(array[index].string);
   }
   return values;
+}
+
+[[nodiscard]] std::vector<std::string> optional_string_array(
+    const JsonValue::Object& object,
+    std::string_view key,
+    std::string_view context) {
+  if (find_member(object, key) == nullptr) {
+    return {};
+  }
+  return parse_string_array(object, key, context);
 }
 
 [[nodiscard]] Vector3d parse_vector_object(const JsonValue::Object& object,
@@ -514,6 +538,7 @@ private:
     require_string(object, "provenance", context),
     require_string(object, "confidence", context),
     parse_string_array(object, "usedFor", context),
+    optional_bool(object, "approvedForFaithfulClaim", false, context),
   };
 }
 
@@ -679,6 +704,8 @@ private:
       require_string(validation, "requiredSuite", "aircraftConfig.aircraft.validation");
   configuration.validation_suite_status =
       require_string(validation, "suiteStatus", "aircraftConfig.aircraft.validation");
+  configuration.validation_approved_references =
+      optional_string_array(validation, "approvedReferences", "aircraftConfig.aircraft.validation");
   configuration.license_spdx = require_string(license, "spdxId", "aircraftConfig.license");
   configuration.license_notice = require_string(license, "notice", "aircraftConfig.license");
   configuration.provenance_summary =
@@ -1064,10 +1091,48 @@ AircraftConfigurationLoadResult load_aircraft_configuration(const std::filesyste
   return result;
 }
 
+AircraftConfigurationCompatibility check_aircraft_configuration_compatibility(
+    std::string_view schema_version) {
+  AircraftConfigurationCompatibility compatibility{};
+  compatibility.target_schema_version = std::string{kAircraftConfigSchemaVersion};
+  if (schema_version == kAircraftConfigSchemaVersion) {
+    compatibility.supported = true;
+    return compatibility;
+  }
+  if (schema_version == kAircraftConfigLegacySchemaVersion) {
+    compatibility.supported = true;
+    compatibility.requires_migration = true;
+    return compatibility;
+  }
+  compatibility.errors.push_back("unsupported aircraft schemaVersion: " +
+                                 std::string(schema_version));
+  return compatibility;
+}
+
+AircraftConfiguration migrate_aircraft_configuration(AircraftConfiguration configuration) {
+  const AircraftConfigurationCompatibility compatibility =
+      check_aircraft_configuration_compatibility(configuration.schema_version);
+  if (!compatibility.supported) {
+    throw std::invalid_argument(compatibility.errors.front());
+  }
+  if (compatibility.requires_migration) {
+    configuration.schema_version = std::string{kAircraftConfigSchemaVersion};
+    if (configuration.validation_status.empty()) {
+      configuration.validation_status = std::string{kAircraftConfigUnvalidatedStatus};
+    }
+    if (configuration.validation_suite_status.empty()) {
+      configuration.validation_suite_status = "not_run";
+    }
+  }
+  return configuration;
+}
+
 std::vector<std::string> validate_aircraft_configuration(
     const AircraftConfiguration& configuration) {
   std::vector<std::string> errors;
-  if (configuration.schema_version != kAircraftConfigSchemaVersion) {
+  const AircraftConfigurationCompatibility compatibility =
+      check_aircraft_configuration_compatibility(configuration.schema_version);
+  if (!compatibility.supported || compatibility.requires_migration) {
     errors.push_back("aircraft schemaVersion must be flying.aircraft-config.v1");
   }
   if (configuration.identity.backend.empty() ||
@@ -1080,9 +1145,19 @@ std::vector<std::string> validate_aircraft_configuration(
   if (configuration.display_name.empty()) {
     errors.push_back("aircraft display name must be populated");
   }
-  if (configuration.validation_status != kAircraftConfigUnvalidatedStatus ||
-      configuration.validation_suite_status != "not_run") {
-    errors.push_back("aircraft model must remain unvalidated until the aircraft validation suite passes");
+  if (configuration.validation_status == kAircraftConfigUnvalidatedStatus) {
+    if (configuration.validation_suite_status != "not_run") {
+      errors.push_back("unvalidated aircraft validation suite status must be not_run");
+    }
+  } else if (configuration.validation_status == kAircraftConfigFaithfulStatus) {
+    if (configuration.validation_suite_status != "passed") {
+      errors.push_back("faithful aircraft model requires a passed aircraft validation suite");
+    }
+    if (configuration.validation_approved_references.empty()) {
+      errors.push_back("faithful aircraft model requires approved validation references");
+    }
+  } else {
+    errors.push_back("aircraft validation status must be unvalidated or faithful");
   }
   if (configuration.validation_suite.empty()) {
     errors.push_back("aircraft validation suite requirement must be recorded");
@@ -1110,6 +1185,22 @@ std::vector<std::string> validate_aircraft_configuration(
   }
   if (known_sources.empty()) {
     errors.push_back("aircraft source references must not be empty");
+  }
+  if (configuration.validation_status == kAircraftConfigFaithfulStatus) {
+    for (const std::string& ref_id : configuration.validation_approved_references) {
+      const auto source = std::find_if(configuration.source_references.begin(),
+                                       configuration.source_references.end(),
+                                       [&](const AircraftSourceReference& candidate) {
+                                         return candidate.id == ref_id;
+                                       });
+      if (source == configuration.source_references.end()) {
+        errors.push_back("faithful aircraft validation reference is unknown: " + ref_id);
+      } else if (!source->approved_for_faithful_claim ||
+                 std::find(source->used_for.begin(), source->used_for.end(), "validation") ==
+                     source->used_for.end()) {
+        errors.push_back("faithful aircraft validation reference is not approved: " + ref_id);
+      }
+    }
   }
 
   const AircraftGeometryModel& geometry = configuration.geometry;
