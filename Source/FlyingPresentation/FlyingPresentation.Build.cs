@@ -1,3 +1,4 @@
+using System.IO;
 using UnrealBuildTool;
 
 public class FlyingPresentation : ModuleRules
@@ -23,5 +24,11 @@ public class FlyingPresentation : ModuleRules
         });
 
         PublicDefinitions.Add("FLYING_PRESENTATION_OFFLINE_ONLY=1");
+
+        PublicIncludePaths.AddRange(new[]
+        {
+            Path.Combine(ModuleDirectory, "..", "GeoTerrain", "Public"),
+            Path.Combine(ModuleDirectory, "..", "..", "geo_terrain", "include")
+        });
     }
 }
