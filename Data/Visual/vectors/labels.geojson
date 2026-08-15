@@ -1,0 +1,21 @@
+{
+  "features": [
+    {
+      "geometry": {
+        "coordinates": [
+          25000,
+          25000
+        ],
+        "type": "Point"
+      },
+      "id": "geonames-label-1",
+      "properties": {
+        "featureClass": "P",
+        "labelPriority": 1,
+        "name": "Approved Visual Slice"
+      },
+      "type": "Feature"
+    }
+  ],
+  "type": "FeatureCollection"
+}

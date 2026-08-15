@@ -1,0 +1,6 @@
+cell,eastM,northM,material,sourceLayer
+0,12500,12500,asphalt,roads
+1,37500,37500,ballast,railways
+2,5000,5000,water,water
+3,28000,8000,building,buildings
+4,6000,29000,vegetation,vegetation

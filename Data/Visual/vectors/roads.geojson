@@ -1,0 +1,26 @@
+{
+  "features": [
+    {
+      "geometry": {
+        "coordinates": [
+          [
+            0,
+            12500
+          ],
+          [
+            50000,
+            12500
+          ]
+        ],
+        "type": "LineString"
+      },
+      "id": "zabaged-road-1",
+      "properties": {
+        "material": "asphalt",
+        "name": "Approved visual slice road"
+      },
+      "type": "Feature"
+    }
+  ],
+  "type": "FeatureCollection"
+}

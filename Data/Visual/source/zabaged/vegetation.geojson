@@ -1,0 +1,41 @@
+{
+  "features": [
+    {
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              6000,
+              29000
+            ],
+            [
+              19000,
+              29000
+            ],
+            [
+              19000,
+              44000
+            ],
+            [
+              6000,
+              44000
+            ],
+            [
+              6000,
+              29000
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": "zabaged-vegetation-1",
+      "properties": {
+        "dmpHeightFeatureId": "dmp-vegetation-1",
+        "material": "vegetation",
+        "name": "Approved visual slice forest"
+      },
+      "type": "Feature"
+    }
+  ],
+  "type": "FeatureCollection"
+}

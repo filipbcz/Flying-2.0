@@ -1,0 +1,43 @@
+{
+  "features": [
+    {
+      "geometry": {
+        "coordinates": [
+          42000,
+          26000
+        ],
+        "type": "Point"
+      },
+      "id": "zabaged-object-1",
+      "properties": {
+        "heightM": 34.0,
+        "kind": "mast",
+        "name": "Approved visual slice mast"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          [
+            36000,
+            31000
+          ],
+          [
+            48000,
+            31000
+          ]
+        ],
+        "type": "LineString"
+      },
+      "id": "zabaged-object-2",
+      "properties": {
+        "dmpHeightFeatureId": "dmp-power-line-1",
+        "kind": "power_line",
+        "name": "Approved visual slice power line"
+      },
+      "type": "Feature"
+    }
+  ],
+  "type": "FeatureCollection"
+}

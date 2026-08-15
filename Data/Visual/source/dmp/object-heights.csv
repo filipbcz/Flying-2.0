@@ -1,0 +1,4 @@
+featureId,category,heightM,sourceDatasetId,derivation
+zabaged-building-1,buildings,9.0,cuzk-dmp-1g,dmp1g-normalized-surface-model
+zabaged-vegetation-1,vegetation,16.0,cuzk-dmp-1g,dmp1g-canopy-top-minus-dmr5g-ground
+zabaged-object-2,objects,21.0,cuzk-dmp-1g,dmp1g-line-support-default-from-approved-slice
