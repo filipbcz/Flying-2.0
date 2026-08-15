@@ -49,26 +49,6 @@ FlightDynamicsStepper make_stepper() {
   return stepper;
 }
 
-std::uint64_t run_placeholder_stream() {
-  auto stepper = make_stepper();
-  const std::array<std::pair<double, AircraftControlInputSample>, 8> stream{{
-    {1.0 / 480.0, {0.05, -0.03, 0.01, 0.45, 0.0, 0.0, 0.0, 1.0}},
-    {1.0 / 480.0, {0.05, -0.03, 0.01, 0.45, 0.0, 0.0, 0.0, 1.0}},
-    {1.0 / 120.0, {0.02, -0.02, 0.00, 0.47, 0.0, 0.0, 0.0, 1.0}},
-    {1.0 / 240.0, {-0.01, 0.01, -0.01, 0.43, 0.0, 0.0, 0.0, 1.0}},
-    {1.0 / 720.0, {0.00, 0.00, 0.00, 0.42, 0.0, 0.0, 0.0, 1.0}},
-    {1.0 / 720.0, {0.00, 0.00, 0.00, 0.42, 0.0, 0.0, 0.0, 1.0}},
-    {1.0 / 720.0, {0.00, 0.00, 0.00, 0.42, 0.0, 0.0, 0.0, 1.0}},
-    {1.0 / 60.0, {-0.02, 0.02, 0.03, 0.44, 0.0, 0.0, 0.0, 1.0}},
-  }};
-
-  for (const auto& sample : stream) {
-    stepper.advance(sample.first, sample.second);
-  }
-
-  return stepper.last_step_record().record_hash;
-}
-
 void jsbsim_backend_records_identity_inputs_and_output_state() {
   auto stepper = make_stepper();
   const AircraftControlInputSample controls{0.10, -0.05, 0.02, 0.50, 0.0, 0.0, 0.0, 1.0};
@@ -80,8 +60,8 @@ void jsbsim_backend_records_identity_inputs_and_output_state() {
   require(report.has_step_record, "JSBSim step should emit a replay record");
   require(report.step_records.size() == 1, "JSBSim report should retain the fixed-step record");
   require(record.aircraft.backend == "JSBSim", "record should include JSBSim backend identity");
-  require(record.aircraft.model_name == "flying_placeholder",
-          "record should include placeholder aircraft identity");
+  require(record.aircraft.model_name == "flying_trainer_one",
+          "record should include primary aircraft identity");
   require_near(record.fixed_step_s, kFixedStepSeconds, 1.0e-15,
                "recorded JSBSim step should be the CoreSim 240 Hz interval");
   require_near(record.controls.throttle_norm, controls.throttle_norm, 0.0,
@@ -100,20 +80,40 @@ void jsbsim_backend_records_identity_inputs_and_output_state() {
           "JSBSim record hash should cover stable aircraft identity, controls, and output state");
 }
 
-void jsbsim_placeholder_stream_is_repeatable() {
-  const std::uint64_t first_hash = run_placeholder_stream();
-  const std::uint64_t second_hash = run_placeholder_stream();
-  const std::uint64_t third_hash = run_placeholder_stream();
+void jsbsim_primary_stream_is_repeatable() {
+  auto run_primary_stream = [] {
+    auto stepper = make_stepper();
+    const std::array<std::pair<double, AircraftControlInputSample>, 8> stream{{
+      {1.0 / 480.0, {0.05, -0.03, 0.01, 0.45, 0.0, 0.0, 0.0, 1.0}},
+      {1.0 / 480.0, {0.05, -0.03, 0.01, 0.45, 0.0, 0.0, 0.0, 1.0}},
+      {1.0 / 120.0, {0.02, -0.02, 0.00, 0.47, 0.0, 0.0, 0.0, 1.0}},
+      {1.0 / 240.0, {-0.01, 0.01, -0.01, 0.43, 0.0, 0.0, 0.0, 1.0}},
+      {1.0 / 720.0, {0.00, 0.00, 0.00, 0.42, 0.0, 0.0, 0.0, 1.0}},
+      {1.0 / 720.0, {0.00, 0.00, 0.00, 0.42, 0.0, 0.0, 0.0, 1.0}},
+      {1.0 / 720.0, {0.00, 0.00, 0.00, 0.42, 0.0, 0.0, 0.0, 1.0}},
+      {1.0 / 60.0, {-0.02, 0.02, 0.03, 0.44, 0.0, 0.0, 0.0, 1.0}},
+    }};
 
-  require(first_hash != 0, "placeholder JSBSim stream should produce a non-zero record hash");
-  require(first_hash == second_hash, "first and second JSBSim placeholder runs should match");
-  require(second_hash == third_hash, "second and third JSBSim placeholder runs should match");
+    for (const auto& sample : stream) {
+      stepper.advance(sample.first, sample.second);
+    }
+
+    return stepper.last_step_record().record_hash;
+  };
+
+  const std::uint64_t first_hash = run_primary_stream();
+  const std::uint64_t second_hash = run_primary_stream();
+  const std::uint64_t third_hash = run_primary_stream();
+
+  require(first_hash != 0, "primary JSBSim stream should produce a non-zero record hash");
+  require(first_hash == second_hash, "first and second JSBSim primary runs should match");
+  require(second_hash == third_hash, "second and third JSBSim primary runs should match");
 }
 
 } // namespace
 
 int main() {
   jsbsim_backend_records_identity_inputs_and_output_state();
-  jsbsim_placeholder_stream_is_repeatable();
+  jsbsim_primary_stream_is_repeatable();
   return 0;
 }

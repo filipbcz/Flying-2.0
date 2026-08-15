@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "flying.primary-aircraft-package.v1",
+  "aircraftId": "flying_trainer_one",
+  "displayName": "Flying Trainer One",
+  "coreSimConfiguration": "core_sim/aircraft/flying_trainer_one/aircraft-config.json",
+  "jsbsimModel": "core_sim/jsbsim/aircraft/flying_trainer_one/flying_trainer_one.xml",
+  "jsbsimEngine": "core_sim/jsbsim/engine/flying_trainer_one_piston.xml",
+  "jsbsimPropeller": "core_sim/jsbsim/engine/flying_trainer_one_propeller.xml",
+  "jsbsimReset": "core_sim/jsbsim/aircraft/flying_trainer_one/reset00.xml",
+  "modelVersion": "2026.08.primary-jsbsim-v1",
+  "license": "CC0-1.0 project-authored unbranded piston trainer model; no manufacturer endorsement",
+  "validationStatus": "unvalidated",
+  "capabilities": [
+    "six_degree_of_freedom_rigid_body_dynamics",
+    "full_inertia_tensor",
+    "earth_referenced_initial_conditions",
+    "aerodynamic_force_and_moment_tables",
+    "piston_engine_throttle_channel",
+    "propeller_control_channel",
+    "tricycle_landing_gear_contacts",
+    "differential_brake_channels",
+    "control_actuator_channels"
+  ],
+  "provenance": {
+    "source": "Project-authored data derived from core_sim/aircraft/flying_trainer_one/aircraft-config.json",
+    "createdDate": "2026-08-15"
+  }
+}

@@ -11,8 +11,8 @@ namespace {
 
 constexpr std::uint64_t kFnvOffset = 14'695'981'039'346'656'037ull;
 constexpr std::uint64_t kFnvPrime = 1'099'511'628'211ull;
-constexpr std::uint64_t kFlightDynamicsStateHashSchemaVersion = 1;
-constexpr std::uint64_t kFlightDynamicsRecordHashSchemaVersion = 1;
+constexpr std::uint64_t kFlightDynamicsStateHashSchemaVersion = 2;
+constexpr std::uint64_t kFlightDynamicsRecordHashSchemaVersion = 2;
 
 [[nodiscard]] bool is_finite(Vector3d value) noexcept {
   return std::isfinite(value.x) && std::isfinite(value.y) && std::isfinite(value.z);
@@ -86,6 +86,10 @@ void require_unit_interval(double value, const char* field_name) {
   return hash;
 }
 
+[[nodiscard]] std::uint64_t append_bool(std::uint64_t hash, bool value) noexcept {
+  return append_byte(hash, value ? std::uint8_t{1} : std::uint8_t{0});
+}
+
 [[nodiscard]] std::uint64_t append_controls(std::uint64_t hash,
                                             const AircraftControlInputSample& controls) noexcept {
   hash = append_double(hash, controls.aileron_norm);
@@ -99,7 +103,10 @@ void require_unit_interval(double value, const char* field_name) {
   hash = append_double(hash, controls.propeller_norm);
   hash = append_double(hash, controls.elevator_trim_norm);
   hash = append_double(hash, controls.aileron_trim_norm);
-  return append_double(hash, controls.rudder_trim_norm);
+  hash = append_double(hash, controls.rudder_trim_norm);
+  hash = append_bool(hash, controls.engine_run_switch);
+  hash = append_bool(hash, controls.engine_starter_engaged);
+  return append_bool(hash, controls.magnetos_on);
 }
 
 [[nodiscard]] std::uint64_t append_stable_aircraft_identity(
@@ -229,7 +236,11 @@ std::uint64_t hash_flight_dynamics_state(const FlightDynamicsState& state) noexc
   hash = append_double(hash, state.angle_of_attack_rad);
   hash = append_double(hash, state.sideslip_rad);
   hash = append_double(hash, state.mach);
-  return append_double(hash, state.calibrated_airspeed_mps);
+  hash = append_double(hash, state.calibrated_airspeed_mps);
+  hash = append_double(hash, state.engine_rpm);
+  hash = append_double(hash, state.propeller_thrust_n);
+  hash = append_double(hash, state.fuel_flow_kgps);
+  return append_double(hash, state.fuel_quantity_kg);
 }
 
 std::uint64_t hash_flight_dynamics_step_record(const FlightDynamicsStepRecord& record) noexcept {

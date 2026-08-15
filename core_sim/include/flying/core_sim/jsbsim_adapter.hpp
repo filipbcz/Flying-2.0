@@ -13,16 +13,18 @@ struct JsbsimAircraftConfig {
   std::filesystem::path aircraft_path{"aircraft"};
   std::filesystem::path engine_path{"engine"};
   std::filesystem::path systems_path{"systems"};
-  std::string model_name{"flying_placeholder"};
-  std::string model_version{"infrastructure-v1"};
-  std::string source_license{"Project-authored infrastructure placeholder; no fidelity claim"};
+  std::string model_name{"flying_trainer_one"};
+  std::string model_version{"2026.08.primary-jsbsim-v1"};
+  std::string source_license{
+    "CC0-1.0 project-authored unbranded piston trainer model; no manufacturer endorsement"};
 };
 
 [[nodiscard]] JsbsimAircraftConfig placeholder_jsbsim_aircraft_config();
+[[nodiscard]] JsbsimAircraftConfig primary_jsbsim_aircraft_config();
 
 class JsbsimFlightDynamicsBackend final : public IFlightDynamicsBackend {
 public:
-  explicit JsbsimFlightDynamicsBackend(JsbsimAircraftConfig config = placeholder_jsbsim_aircraft_config());
+  explicit JsbsimFlightDynamicsBackend(JsbsimAircraftConfig config = primary_jsbsim_aircraft_config());
   ~JsbsimFlightDynamicsBackend() override;
 
   JsbsimFlightDynamicsBackend(const JsbsimFlightDynamicsBackend&) = delete;
