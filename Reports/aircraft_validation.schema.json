@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "flying.aircraft_validation_report.v1",
+  "title": "Flying Aircraft Validation Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "aircraftModel",
+    "suiteId",
+    "runId",
+    "runStatus",
+    "sourceReleaseBlockingStatus",
+    "releaseBlockingStatus",
+    "faithfulTypeClaim",
+    "faithfulTypeClaimBlockedBy",
+    "scenarioDefinitions",
+    "referenceRegistry",
+    "sourceResults",
+    "blockerRegistry",
+    "requiredCategories",
+    "mandatoryReferenceBackedFailures",
+    "approvedExclusions",
+    "results"
+  ],
+  "properties": {
+    "schemaVersion": {"const": "flying.aircraft_validation_report.v1"},
+    "aircraftModel": {"const": "flying_trainer_one"},
+    "suiteId": {"type": "string", "minLength": 1},
+    "runId": {"type": "string", "minLength": 1},
+    "runStatus": {"type": "string", "minLength": 1},
+    "sourceReleaseBlockingStatus": {"type": "string", "minLength": 1},
+    "releaseBlockingStatus": {"const": "blocked_missing_credible_reference_data"},
+    "faithfulTypeClaim": {"const": false},
+    "faithfulTypeClaimBlockedBy": {"const": "aircraft-poh-afm-validation-rights"},
+    "scenarioDefinitions": {"type": "string", "minLength": 1},
+    "referenceRegistry": {"type": "string", "minLength": 1},
+    "sourceResults": {"type": "string", "minLength": 1},
+    "blockerRegistry": {"const": "docs/blockers/external-inputs.yml"},
+    "requiredCategories": {
+      "type": "array",
+      "minItems": 16,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "mandatoryReferenceBackedFailures": {
+      "type": "array",
+      "maxItems": 0,
+      "items": {"type": "string"}
+    },
+    "approvedExclusions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "results": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/result"}
+    }
+  },
+  "$defs": {
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scenarioId",
+        "category",
+        "title",
+        "inputs",
+        "outputs",
+        "referenceSource",
+        "referenceSourceDocument",
+        "tolerance",
+        "resultStatus",
+        "sourceReleaseBlocking",
+        "releaseBlocking",
+        "stateHash",
+        "deviationGraph",
+        "deviationGraphRows"
+      ],
+      "properties": {
+        "scenarioId": {"type": "string", "minLength": 1},
+        "category": {"type": "string", "minLength": 1},
+        "title": {"type": "string", "minLength": 1},
+        "inputs": {"type": "object"},
+        "outputs": {"type": "object"},
+        "referenceSource": {"type": "string", "minLength": 1},
+        "referenceSourceDocument": {"type": "string", "minLength": 1},
+        "tolerance": {"type": "object"},
+        "resultStatus": {
+          "enum": ["pass", "fail", "approved_exclusion_missing_credible_data"]
+        },
+        "sourceReleaseBlocking": {"type": "boolean"},
+        "releaseBlocking": {"type": "boolean"},
+        "stateHash": {"type": "string", "pattern": "^0x[0-9a-fA-F]+$"},
+        "deviationGraph": {"type": "string", "minLength": 1},
+        "deviationGraphRows": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/deviationGraphRow"}
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "resultStatus": {"const": "approved_exclusion_missing_credible_data"}
+            }
+          },
+          "then": {
+            "properties": {
+              "releaseBlocking": {"const": true}
+            }
+          }
+        }
+      ]
+    },
+    "deviationGraphRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metric", "reference", "actual", "deviation", "tolerance", "status"],
+      "properties": {
+        "metric": {"type": "string", "minLength": 1},
+        "reference": {"type": "string"},
+        "actual": {"type": "string"},
+        "deviation": {"type": "string"},
+        "tolerance": {"type": "string"},
+        "status": {
+          "enum": ["pass", "fail", "approved_exclusion_missing_credible_data"]
+        },
+        "missingDataReason": {"type": "string", "minLength": 1}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {"const": "approved_exclusion_missing_credible_data"}
+            }
+          },
+          "then": {
+            "required": ["missingDataReason"]
+          },
+          "else": {
+            "properties": {
+              "reference": {"type": "string", "minLength": 1},
+              "actual": {"type": "string", "minLength": 1},
+              "deviation": {"type": "string", "minLength": 1},
+              "tolerance": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      ]
+    }
+  }
+}
