@@ -1,0 +1,129 @@
+{
+  "schemaVersion": "flying.pilot-region-package.v1",
+  "packageName": "flying-czech-republic-offline-gis",
+  "packageVersion": "2026.08-cz-blocked",
+  "packageId": "visual-cz-national",
+  "contentHash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "sourceManifestVersion": "blocked-missing-authoritative-cuzk-source-manifest",
+  "status": "blocked",
+  "blockerRef": "docs/blockers/external-inputs.yml#national-cuzk-production-source-package",
+  "coverage": {
+    "scope": "czech-republic",
+    "countryCode": "CZ",
+    "completeWithinDeclaredBounds": false,
+    "requiredTileSet": null,
+    "blockedReason": "No immutable Czech boundary/tile coverage index or official CUZK Ortofoto/ZABAGED/DMP/Geonames production source manifest is present."
+  },
+  "sourceLineage": [],
+  "pilotRegion": {
+    "id": "czech-republic",
+    "status": "blocked_missing_authoritative_visual_sources"
+  },
+  "runtimeDependencies": {
+    "runtimeNetworkRequired": false,
+    "externalMapApis": [],
+    "remoteTileServerUrls": []
+  },
+  "imagery": {
+    "encoding": "unavailable",
+    "tileSizePx": 0,
+    "mipmapped": false,
+    "lods": []
+  },
+  "vectorPackages": {
+    "coordinateFrame": "project-local-ENU",
+    "layers": [],
+    "labels": {
+      "labelCount": 0,
+      "sourceId": "blocked",
+      "file": {
+        "id": "blocked",
+        "path": "blocked",
+        "checksum": {
+          "algorithm": "sha256",
+          "value": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "sizeBytes": 0
+      }
+    }
+  },
+  "worldObjects": {
+    "renderer": "FlyingOfflinePilotTerrainActor",
+    "schemaVersion": "flying.world-objects.v1",
+    "objectCount": 0,
+    "file": {
+      "id": "blocked",
+      "path": "blocked",
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sizeBytes": 0
+    },
+    "placementPolicy": {
+      "approvedVectorDataOnly": true,
+      "orthoColorInferenceAllowed": false,
+      "heightSource": "blocked_missing_dmp_and_vector_sources"
+    },
+    "criticalObjectTypes": [],
+    "environmentAudioHooks": [],
+    "activeZoneCollisionOnly": true,
+    "densityScalesPreserveFlightCriticalObjects": true
+  },
+  "masks": {
+    "grid": {
+      "coverageScope": "czech-republic",
+      "status": "blocked"
+    },
+    "waterMask": {
+      "id": "blocked",
+      "path": "blocked",
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sizeBytes": 0
+    },
+    "materialMask": {
+      "id": "blocked",
+      "path": "blocked",
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "sizeBytes": 0
+    }
+  },
+  "streaming": {
+    "runtimeNetworkRequired": false,
+    "externalMapApis": [],
+    "remoteTileServerUrls": [],
+    "addressing": "unavailable_until_package_generated",
+    "coverageScope": "czech-republic",
+    "interruptionFreeWithinDeclaredBounds": false,
+    "boundaryTraversalEvidence": "Reports/terrain_coverage.json#missing-runtime-streaming-evidence"
+  },
+  "packagingLayout": {
+    "imageryRoot": "imagery",
+    "vectorRoot": "vectors",
+    "maskRoot": "masks",
+    "orthoTileCount": 0,
+    "vectorLayerCount": 0,
+    "waterMaskAvailable": false,
+    "materialMaskAvailable": false,
+    "imageryBytes": 0,
+    "vectorBytes": 0,
+    "worldObjectBytes": 0,
+    "maskBytes": 0,
+    "totalBytes": 0
+  },
+  "validation": {
+    "offlineRuntime": {
+      "manifestsChecked": 0,
+      "externalMapApiKeys": 0,
+      "remoteTileServerUrls": 0,
+      "passed": false,
+      "blockedReason": "No production visual package exists to validate."
+    }
+  }
+}

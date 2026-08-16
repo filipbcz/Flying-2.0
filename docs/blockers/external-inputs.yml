@@ -48,3 +48,38 @@ blockers:
     release_gate_effect: "Blocks national airport completeness claims and downstream production airport import."
     acceptable_resolution:
       - "Freeze the production master list with source, reviewer, uncertainty, license, redistribution status, attribution, and effective-date metadata for every active airport/runway/SLZ record."
+  - blocker_id: national-cuzk-production-source-package
+    requirement_ids:
+      - REQ-GIS-DATA-PIPELINE
+      - REQ-DMR-TERRAIN-COVERAGE
+      - REQ-OFFLINE-ORTHO-VECTOR
+      - REQ-EVIDENCE-TRACEABILITY
+      - REQ-RELEASE-GATES
+    external_input: "Official CUZK national DMR 5G, DMP 1G, Ortofoto, ZABAGED and Geonames source payloads with immutable manifest, source versions, CRS, checksums, attribution and effective dates"
+    current_status: blocked
+    source_version: "not archived in repository or release evidence"
+    license: "CC BY 4.0 allowed only when official source manifest and attribution are recorded"
+    attribution: "must be copied from the official source manifest and docs/licenses/source-attribution.yml"
+    redistribution_status: blocked_until_official_source_manifest_and_checksums_are_recorded
+    effective_date: "2026-08-16"
+    release_gate_effect: "Blocks claims of complete Czech terrain, imagery, vector, water/material mask, object, and control-point coverage."
+    acceptable_resolution:
+      - "Archive the official CUZK source manifest with local payload paths, source versions, checksums, CRS/height-system metadata, attribution, effective dates and change notices."
+      - "Generate the Czech boundary/tile coverage index and source-derived terrain control-point report from that manifest."
+      - "Generate national terrain and visual packages only from those recorded source payloads."
+  - blocker_id: national-terrain-runtime-streaming-evidence
+    requirement_ids:
+      - REQ-DMR-TERRAIN-COVERAGE
+      - REQ-OFFLINE-ORTHO-VECTOR
+      - REQ-RELEASE-GATES
+    external_input: "Offline simulator or package-streamer telemetry/replay log for a Czech cross-country scenario traversing national package boundaries"
+    current_status: blocked
+    source_version: "no runtime telemetry, replay, or streamer log archived"
+    license: "not applicable"
+    attribution: "not applicable"
+    redistribution_status: blocked_until_runtime_evidence_is_recorded
+    effective_date: "2026-08-16"
+    release_gate_effect: "Blocks package-boundary streaming acceptance because manual JSON summaries are not runtime evidence."
+    acceptable_resolution:
+      - "Run the offline simulator/package streamer with networking disabled over a route that crosses generated national terrain and visual package boundaries."
+      - "Archive telemetry or replay output with timestamped tile load/unload events, frame/load-state samples, route tile sequence and loading-screen state transitions."

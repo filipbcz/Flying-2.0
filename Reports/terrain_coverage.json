@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "flying.terrain-coverage-report.v1",
+  "generatedAtUtc": "2026-08-16T00:00:00Z",
+  "coverageScope": "czech-republic",
+  "countryCode": "CZ",
+  "status": "blocked",
+  "blockerRefs": [
+    "docs/blockers/external-inputs.yml#national-cuzk-production-source-package",
+    "docs/blockers/external-inputs.yml#national-terrain-runtime-streaming-evidence"
+  ],
+  "requiredTileIndex": null,
+  "requiredTileSetId": null,
+  "coverageBounds": null,
+  "coveredTiles": [],
+  "missingRequiredTiles": null,
+  "tileCoverage": {
+    "requiredCount": 0,
+    "coveredCount": 0,
+    "missingCount": null,
+    "completeWithinDeclaredBounds": false
+  },
+  "packageBoundaryStreamingEvidence": null,
+  "manifests": {
+    "terrain": "Data/Terrain/CZManifest.json",
+    "visual": "Data/Visual/CZManifest.json"
+  },
+  "blockedInputs": [
+    {
+      "id": "authoritative-cz-boundary-tile-index",
+      "requiredFor": "Proving no required Czech terrain coverage tiles are missing.",
+      "expectedArtifact": "A generated tile index derived from official Czech boundary/source coverage data with source checksums and provenance."
+    },
+    {
+      "id": "official-cuzk-national-source-manifest",
+      "requiredFor": "Generating and validating DMR 5G terrain, Ortofoto imagery, ZABAGED/Geonames vectors, DMP-derived object metadata, water masks, material masks, and source-derived control points.",
+      "expectedArtifact": "A source manifest listing official CUZK payload paths, versions, licenses, attributions, checksums, CRS and effective dates."
+    },
+    {
+      "id": "offline-runtime-boundary-streaming-log",
+      "requiredFor": "Proving package-boundary traversal without loading screens.",
+      "expectedArtifact": "Simulator/package-streamer telemetry or replay log with timestamped tile load/unload events, frame/load-state samples, route tiles, and loading-screen state transitions."
+    }
+  ],
+  "validation": {
+    "checksums": "blocked",
+    "sourceVersions": "blocked",
+    "lods": "blocked",
+    "attribution": "blocked",
+    "controlPoints": "blocked",
+    "streamingScenario": "blocked",
+    "passed": false
+  }
+}
