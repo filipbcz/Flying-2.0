@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "flying.terrain-package.v1",
+  "packageName": "flying-dmr5g-czech-republic-terrain",
+  "packageVersion": "2026.08-cz-blocked",
+  "packageId": "dmr5g-cz-national",
+  "sourceManifestVersion": "blocked-missing-authoritative-cuzk-source-manifest",
+  "status": "blocked",
+  "blockerRef": "docs/blockers/external-inputs.yml#national-cuzk-production-source-package",
+  "coverage": {
+    "scope": "czech-republic",
+    "countryCode": "CZ",
+    "completeWithinDeclaredBounds": false,
+    "requiredTileSet": null,
+    "blockedReason": "No immutable Czech boundary/tile coverage index generated from an official CUZK source package is present in the repository."
+  },
+  "sourceLineage": [],
+  "pilotRegion": {
+    "id": "czech-republic",
+    "status": "blocked_missing_authoritative_source_index"
+  },
+  "recordedProjGeoidConfiguration": {},
+  "terrainMetadata": {
+    "heightEncoding": "unavailable",
+    "heightFields": [],
+    "normalFrame": "unavailable",
+    "normalEncoding": "unavailable",
+    "edgeCleaned": false,
+    "collisionTilesAreSeparate": false
+  },
+  "renderLods": [],
+  "collisionTiles": [],
+  "streaming": {
+    "runtimeNetworkRequired": false,
+    "externalMapApis": [],
+    "addressing": "unavailable_until_package_generated",
+    "coverageScope": "czech-republic",
+    "interruptionFreeWithinDeclaredBounds": false,
+    "boundaryTraversalEvidence": "Reports/terrain_coverage.json#missing-runtime-streaming-evidence"
+  },
+  "packagingLayout": {
+    "renderRoot": "render",
+    "collisionRoot": "collision",
+    "renderTileCount": 0,
+    "collisionTileCount": 0,
+    "renderBytes": 0,
+    "collisionBytes": 0,
+    "totalBytes": 0
+  },
+  "validation": {
+    "controlPoints": {
+      "status": "blocked",
+      "blockerRef": "docs/blockers/external-inputs.yml#national-cuzk-production-source-package",
+      "points": [],
+      "blockedReason": "Expected DMR 5G control-point heights must come from independent source data; no such source control report is present."
+    },
+    "edgeContinuity": {
+      "passed": false,
+      "blockedReason": "No generated national terrain tile set is available for edge-continuity validation."
+    },
+    "boundaryCleaning": {
+      "adjustedSampleCount": 0,
+      "blockedReason": "No generated national terrain tile set is available for boundary cleaning."
+    }
+  }
+}
