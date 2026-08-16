@@ -1,12 +1,16 @@
 #include "WorldSubsystem.h"
 
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <map>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <utility>
+#include <variant>
 #include <vector>
 
 namespace flying::presentation {
@@ -74,8 +78,249 @@ constexpr double kEarthRadiusM = 6'371'000.0;
   return {std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>()};
 }
 
-[[nodiscard]] bool contains(std::string_view text, std::string_view token) noexcept {
-  return text.find(token) != std::string_view::npos;
+struct JsonValue {
+  using Object = std::map<std::string, JsonValue>;
+  using Array = std::vector<JsonValue>;
+  std::variant<std::nullptr_t, bool, double, std::string, Array, Object> value;
+};
+
+class JsonParser {
+public:
+  explicit JsonParser(std::string text) : text_(std::move(text)) {}
+
+  [[nodiscard]] JsonValue parse() {
+    JsonValue parsed = parse_value();
+    skip_ws();
+    if (pos_ != text_.size()) {
+      throw std::runtime_error("trailing content after JSON document");
+    }
+    return parsed;
+  }
+
+private:
+  void skip_ws() {
+    while (pos_ < text_.size() &&
+           std::isspace(static_cast<unsigned char>(text_[pos_])) != 0) {
+      ++pos_;
+    }
+  }
+
+  [[nodiscard]] char peek() {
+    skip_ws();
+    if (pos_ >= text_.size()) {
+      throw std::runtime_error("unexpected end of JSON document");
+    }
+    return text_[pos_];
+  }
+
+  [[nodiscard]] bool consume(char expected) {
+    skip_ws();
+    if (pos_ < text_.size() && text_[pos_] == expected) {
+      ++pos_;
+      return true;
+    }
+    return false;
+  }
+
+  void expect(char expected) {
+    if (!consume(expected)) {
+      throw std::runtime_error("unexpected JSON token");
+    }
+  }
+
+  [[nodiscard]] JsonValue parse_value() {
+    const char next = peek();
+    if (next == '{') {
+      return JsonValue{parse_object()};
+    }
+    if (next == '[') {
+      return JsonValue{parse_array()};
+    }
+    if (next == '"') {
+      return JsonValue{parse_string()};
+    }
+    if (next == 't') {
+      expect_literal("true");
+      return JsonValue{true};
+    }
+    if (next == 'f') {
+      expect_literal("false");
+      return JsonValue{false};
+    }
+    if (next == 'n') {
+      expect_literal("null");
+      return JsonValue{nullptr};
+    }
+    return JsonValue{parse_number()};
+  }
+
+  [[nodiscard]] JsonValue::Object parse_object() {
+    expect('{');
+    JsonValue::Object object;
+    if (consume('}')) {
+      return object;
+    }
+    do {
+      std::string key = parse_string();
+      expect(':');
+      object.emplace(std::move(key), parse_value());
+    } while (consume(','));
+    expect('}');
+    return object;
+  }
+
+  [[nodiscard]] JsonValue::Array parse_array() {
+    expect('[');
+    JsonValue::Array array;
+    if (consume(']')) {
+      return array;
+    }
+    do {
+      array.push_back(parse_value());
+    } while (consume(','));
+    expect(']');
+    return array;
+  }
+
+  [[nodiscard]] std::string parse_string() {
+    expect('"');
+    std::string value;
+    while (pos_ < text_.size()) {
+      const char ch = text_[pos_++];
+      if (ch == '"') {
+        return value;
+      }
+      if (ch == '\\') {
+        if (pos_ >= text_.size()) {
+          throw std::runtime_error("unterminated JSON escape");
+        }
+        const char escaped = text_[pos_++];
+        switch (escaped) {
+        case '"':
+        case '\\':
+        case '/':
+          value.push_back(escaped);
+          break;
+        case 'b':
+          value.push_back('\b');
+          break;
+        case 'f':
+          value.push_back('\f');
+          break;
+        case 'n':
+          value.push_back('\n');
+          break;
+        case 'r':
+          value.push_back('\r');
+          break;
+        case 't':
+          value.push_back('\t');
+          break;
+        default:
+          throw std::runtime_error("unsupported JSON escape");
+        }
+      } else {
+        value.push_back(ch);
+      }
+    }
+    throw std::runtime_error("unterminated JSON string");
+  }
+
+  [[nodiscard]] double parse_number() {
+    skip_ws();
+    const std::size_t start = pos_;
+    if (pos_ < text_.size() && text_[pos_] == '-') {
+      ++pos_;
+    }
+    while (pos_ < text_.size() &&
+           std::isdigit(static_cast<unsigned char>(text_[pos_])) != 0) {
+      ++pos_;
+    }
+    if (pos_ < text_.size() && text_[pos_] == '.') {
+      ++pos_;
+      while (pos_ < text_.size() &&
+             std::isdigit(static_cast<unsigned char>(text_[pos_])) != 0) {
+        ++pos_;
+      }
+    }
+    if (pos_ < text_.size() && (text_[pos_] == 'e' || text_[pos_] == 'E')) {
+      ++pos_;
+      if (pos_ < text_.size() && (text_[pos_] == '-' || text_[pos_] == '+')) {
+        ++pos_;
+      }
+      while (pos_ < text_.size() &&
+             std::isdigit(static_cast<unsigned char>(text_[pos_])) != 0) {
+        ++pos_;
+      }
+    }
+    if (start == pos_) {
+      throw std::runtime_error("expected JSON number");
+    }
+    return std::stod(text_.substr(start, pos_ - start));
+  }
+
+  void expect_literal(std::string_view literal) {
+    skip_ws();
+    if (text_.compare(pos_, literal.size(), literal) != 0) {
+      throw std::runtime_error("unexpected JSON literal");
+    }
+    pos_ += literal.size();
+  }
+
+  std::string text_;
+  std::size_t pos_{};
+};
+
+[[nodiscard]] const JsonValue::Object& as_object(const JsonValue& value,
+                                                 const char* field_name) {
+  const auto* object = std::get_if<JsonValue::Object>(&value.value);
+  if (object == nullptr) {
+    throw std::runtime_error(std::string("expected JSON object for ") + field_name);
+  }
+  return *object;
+}
+
+[[nodiscard]] const JsonValue::Array& as_array(const JsonValue& value,
+                                               const char* field_name) {
+  const auto* array = std::get_if<JsonValue::Array>(&value.value);
+  if (array == nullptr) {
+    throw std::runtime_error(std::string("expected JSON array for ") + field_name);
+  }
+  return *array;
+}
+
+[[nodiscard]] const std::string& as_string(const JsonValue& value,
+                                           const char* field_name) {
+  const auto* text = std::get_if<std::string>(&value.value);
+  if (text == nullptr) {
+    throw std::runtime_error(std::string("expected JSON string for ") + field_name);
+  }
+  return *text;
+}
+
+[[nodiscard]] bool as_bool(const JsonValue& value, const char* field_name) {
+  const auto* boolean = std::get_if<bool>(&value.value);
+  if (boolean == nullptr) {
+    throw std::runtime_error(std::string("expected JSON boolean for ") + field_name);
+  }
+  return *boolean;
+}
+
+[[nodiscard]] const JsonValue& required_field(const JsonValue::Object& object,
+                                              const char* field_name) {
+  const auto found = object.find(field_name);
+  if (found == object.end()) {
+    throw std::runtime_error(std::string("missing JSON field ") + field_name);
+  }
+  return found->second;
+}
+
+[[nodiscard]] bool array_contains_string(const JsonValue::Array& array,
+                                         std::string_view expected) {
+  return std::any_of(array.begin(), array.end(), [expected](const JsonValue& value) {
+    const auto* text = std::get_if<std::string>(&value.value);
+    return text != nullptr && *text == expected;
+  });
 }
 
 } // namespace
@@ -194,14 +439,26 @@ constexpr double kEarthRadiusM = 6'371'000.0;
 
 [[nodiscard]] ProceduralWorldRules load_world_procedural_rules(
     const std::filesystem::path& path) {
-  const std::string text = read_text_file(path);
+  JsonParser parser(read_text_file(path));
+  const JsonValue document = parser.parse();
+  const auto& root = as_object(document, "root");
+
   ProceduralWorldRules rules{};
-  rules.offline_only = contains(text, "\"offlineOnly\": true");
-  rules.day_night_cycle = contains(text, "\"dayNightCycle\"");
+  rules.offline_only = as_bool(required_field(root, "offlineOnly"), "offlineOnly");
   rules.weather_visuals_from_core_sim =
-      contains(text, "\"weatherStateSource\": \"CoreSim\"");
+      as_string(required_field(root, "weatherStateSource"), "weatherStateSource") == "CoreSim";
+
+  const auto& lighting = as_object(required_field(root, "lighting"), "lighting");
+  rules.day_night_cycle = lighting.find("dayNightCycle") != lighting.end();
+
+  const auto& collision = as_object(required_field(root, "criticalObjectCollision"),
+                                    "criticalObjectCollision");
   rules.active_zone_collision_only =
-      contains(text, "\"collisionPolicy\": \"active_safety_zone_only\"");
+      as_string(required_field(collision, "collisionPolicy"), "collisionPolicy") ==
+      "active_safety_zone_only";
+
+  const auto& layers = as_array(required_field(root, "proceduralLayers"), "proceduralLayers");
+  const auto& audio_hooks = as_array(required_field(root, "audioHooks"), "audioHooks");
 
   constexpr std::string_view kLayers[] = {"buildings",
                                           "vegetation",
@@ -211,7 +468,7 @@ constexpr double kEarthRadiusM = 6'371'000.0;
                                           "runway_objects",
                                           "windsocks"};
   for (const auto layer : kLayers) {
-    if (contains(text, "\"" + std::string(layer) + "\"")) {
+    if (array_contains_string(layers, layer)) {
       rules.object_layers.emplace_back(layer);
     }
   }
@@ -224,7 +481,7 @@ constexpr double kEarthRadiusM = 6'371'000.0;
                                          "water_ambience",
                                          "airport_windsock_wind"};
   for (const auto hook : kHooks) {
-    if (contains(text, "\"" + std::string(hook) + "\"")) {
+    if (array_contains_string(audio_hooks, hook)) {
       rules.audio_hooks.emplace_back(hook);
     }
   }

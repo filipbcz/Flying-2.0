@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <filesystem>
+#include <fstream>
 #include <stdexcept>
 #include <string>
 
@@ -192,6 +193,26 @@ void procedural_rules_cover_required_world_layers() {
           "world procedural rules must cover simulator-state and environment audio hooks");
 }
 
+void malformed_procedural_rules_are_rejected() {
+  const auto path =
+      std::filesystem::temp_directory_path() / "flying-world-rules-malformed.json";
+  {
+    std::ofstream output(path);
+    output << "{ \"offlineOnly\": true, \"weatherStateSource\": \"CoreSim\", ";
+    output << "\"collisionPolicy\": \"active_safety_zone_only\" ";
+  }
+
+  bool rejected = false;
+  try {
+    (void)flying::presentation::load_world_procedural_rules(path);
+  } catch (const std::runtime_error&) {
+    rejected = true;
+  }
+  std::filesystem::remove(path);
+  require(rejected,
+          "malformed JSON must not satisfy world rules through comment-like or partial tokens");
+}
+
 } // namespace
 
 int main() {
@@ -200,5 +221,6 @@ int main() {
   critical_object_collision_is_limited_to_active_safety_zone();
   world_audio_is_driven_by_aircraft_and_weather_state();
   procedural_rules_cover_required_world_layers();
+  malformed_procedural_rules_are_rejected();
   return 0;
 }
