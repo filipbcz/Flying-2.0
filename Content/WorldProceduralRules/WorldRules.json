@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "offlineOnly": true,
+  "weatherStateSource": "CoreSim",
+  "lighting": {
+    "dayNightCycle": {
+      "sunPosition": "geodetic-utc",
+      "moonAndStars": "derived-from-utc"
+    }
+  },
+  "weatherVisuals": {
+    "clouds": "cloud_coverage_norm",
+    "precipitation": "precipitation_rate_mmph",
+    "visibility": "visibility_m",
+    "wetSurfaces": "surface_wetness_norm",
+    "icing": "icing_severity_norm"
+  },
+  "proceduralLayers": [
+    "buildings",
+    "vegetation",
+    "water",
+    "critical_obstacles",
+    "wires",
+    "runway_objects",
+    "windsocks"
+  ],
+  "criticalObjectCollision": {
+    "collisionPolicy": "active_safety_zone_only",
+    "defaultActiveSafetyZoneRadiusM": 750.0,
+    "requiredKinds": [
+      "critical_obstacle",
+      "wire",
+      "runway_object",
+      "windsock",
+      "water_surface"
+    ]
+  },
+  "audioHooks": [
+    "engine_state",
+    "wheel_roll",
+    "wind",
+    "precipitation",
+    "vegetation_wind",
+    "water_ambience",
+    "airport_windsock_wind"
+  ]
+}
