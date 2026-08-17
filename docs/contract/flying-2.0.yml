@@ -8,7 +8,21 @@
     "runtime": "offline Czech Republic flight simulator",
     "engine": "Unreal Engine 5.8 C++",
     "physicsCore": "standalone deterministic CoreSim/JSBSim",
-    "terrainRuntime": "Cesium for Unreal 2.28+ with local Czech packages"
+    "terrainRuntime": "Cesium for Unreal 2.28+ with manifest-backed regional Czech packages"
+  },
+  "authoritativeDocumentation": {
+    "currentSources": [
+      "docs/contract/flying-2.0.yml",
+      "docs/governance/v1-scope-freeze.md",
+      "docs/release/data-transformation-protocol.md",
+      "data_pipeline/README.md"
+    ],
+    "taskContext": "AGENTS.md is non-authoritative for this regional scope update; it may describe legacy roadmap context but does not override this contract."
+  },
+  "regionalDataScope": {
+    "defaultModel": "GIS source data and generated terrain, imagery, vector, map and runtime package outputs are regional by default, selected by explicit region configuration and stored under configured data roots outside Git-tracked repository content.",
+    "supersededAssumption": "Prior whole-Czech-Republic GIS packaging assumptions are superseded for the Raspberry Pi target. Full-country coverage may remain a product goal or separately configured package mode, but it is not the default pipeline, storage or acceptance baseline for constrained hardware.",
+    "pilotRegion": "Ceska Trebova is the first checked-in 10 x 10 km pilot region configuration used to prove the end-to-end process. Ceska Trebova coordinates must not be hard-coded into architecture or pipeline logic."
   },
   "governance": {
     "changeProcess": "mandatory requirements may change only by approved versioned contract update",
@@ -47,9 +61,11 @@
       "id": "M2",
       "name": "Production Content And Systems",
       "requiredRequirementIds": [
-        "REQ-EVIDENCE-TRACEABILITY"
+        "REQ-EVIDENCE-TRACEABILITY",
+        "REQ-REGIONAL-GIS",
+        "REQ-PILOT-REGION"
       ],
-      "exitGate": "production aircraft, Czech terrain, airport coverage, weather and cockpit evidence is recorded"
+      "exitGate": "production aircraft, configured regional Czech terrain packages, airport coverage, weather and cockpit evidence is recorded"
     },
     {
       "id": "M3",
@@ -92,6 +108,30 @@
       "milestone": "M4",
       "summary": "Release completes only when performance, physics, terrain, airport coverage, legal/license, stability, installer, replay, telemetry, privacy and end-to-end workflow gates pass.",
       "evidenceGate": "must have linked proof and passing mandatory gate results for release"
+    },
+    {
+      "id": "REQ-AUTHORITATIVE-DOCS",
+      "title": "Authoritative Documentation Alignment",
+      "mandatory": true,
+      "milestone": "M0",
+      "summary": "Current authoritative Flying 2.0 documentation records regional GIS scope and treats AGENTS.md as non-authoritative task context.",
+      "evidenceGate": "must have updated documentation proving the active regional contract before dependent implementation work"
+    },
+    {
+      "id": "REQ-REGIONAL-GIS",
+      "title": "Regional GIS Pipeline",
+      "mandatory": true,
+      "milestone": "M2",
+      "summary": "GIS source discovery, normalization and generated runtime packages are selected by region and configured margins, not by complete Czech Republic download or local storage by default.",
+      "evidenceGate": "must have region configuration, source-selection evidence and package manifests before production terrain claims"
+    },
+    {
+      "id": "REQ-PILOT-REGION",
+      "title": "Ceska Trebova Pilot Region",
+      "mandatory": true,
+      "milestone": "M2",
+      "summary": "The first milestone for the regional GIS pipeline is a complete end-to-end 10 x 10 km Ceska Trebova pilot package; the pilot is configuration data, not architecture logic.",
+      "evidenceGate": "must have pilot region package evidence before broader regional rollout claims"
     }
   ],
   "evidenceLedger": {

@@ -17,6 +17,10 @@ Every source package must be declared in a machine-readable source manifest befo
 | Geospatial metadata | CRS, vertical datum/geoid configuration, units, bounds and transformation parameters. |
 | Use status | Allowed, blocked, derived, operator-confirmed or validation-pending status. |
 
+GIS source and generated datasets are regional by default. Source discovery must select only tiles or spatial records intersecting the requested region and configured margins, and generated source, normalized and runtime package outputs must live under configured data roots outside Git-tracked repository content. Complete Czech Republic source download, normalization or local storage is a separately configured package mode, not the default Raspberry Pi workflow.
+
+Ceska Trebova is the first 10 x 10 km pilot region configuration for end-to-end validation. It is not architecture logic and must not be embedded as hard-coded coordinates in pipeline implementations.
+
 ## Approved Source Rules
 
 CUZK DMR 5G, DMP 1G, Ortofoto Ceske republiky, ZABAGED and Geonames are approved only when sourced from official CUZK channels and recorded under CC BY 4.0 with attribution and change notices.
