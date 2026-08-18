@@ -12,6 +12,7 @@
 #include <set>
 #include <sstream>
 #include <stdexcept>
+#include <system_error>
 #include <string_view>
 #include <utility>
 
@@ -828,6 +829,54 @@ private:
   return confidence == "low" || confidence == "medium" || confidence == "high";
 }
 
+[[nodiscard]] bool contains_string(const std::vector<std::string>& values,
+                                   std::string_view expected) noexcept {
+  return std::find(values.begin(), values.end(), expected) != values.end();
+}
+
+[[nodiscard]] std::optional<std::filesystem::path> repository_root_for_validation_reports() {
+#ifdef FLYING_CORE_SIM_AIRCRAFT_CONFIG_DIR
+  const std::filesystem::path aircraft_config_dir{FLYING_CORE_SIM_AIRCRAFT_CONFIG_DIR};
+  const std::filesystem::path core_sim_dir = aircraft_config_dir.parent_path();
+  const std::filesystem::path repo_root = core_sim_dir.parent_path();
+  if (!repo_root.empty()) {
+    return repo_root;
+  }
+#endif
+  return std::nullopt;
+}
+
+[[nodiscard]] bool is_repository_local_aircraft_validation_report(
+    const std::string& document) {
+  const std::filesystem::path path{document};
+  const std::string generic = path.generic_string();
+  if (document.empty() || path.is_absolute() || generic.find("://") != std::string::npos ||
+      generic.rfind("docs/validation/aircraft/", 0) != 0) {
+    return false;
+  }
+  for (const auto& part : path) {
+    if (part == "..") {
+      return false;
+    }
+  }
+  const std::string filename = path.filename().generic_string();
+  const std::string extension = path.extension().generic_string();
+  if ((extension != ".md" && extension != ".json") ||
+      (filename.find("validation") == std::string::npos &&
+       filename.find("report") == std::string::npos)) {
+    return false;
+  }
+
+  const std::optional<std::filesystem::path> repo_root =
+      repository_root_for_validation_reports();
+  if (!repo_root.has_value()) {
+    return true;
+  }
+  std::error_code error;
+  const bool exists = std::filesystem::is_regular_file(*repo_root / path, error);
+  return exists && !error;
+}
+
 void append_source_errors(const std::vector<std::string>& refs,
                           const std::set<std::string>& known_sources,
                           std::string_view context,
@@ -1182,6 +1231,10 @@ std::vector<std::string> validate_aircraft_configuration(
     if (!known_sources.insert(source.id).second) {
       errors.push_back("aircraft source reference ids must be unique");
     }
+    if (contains_string(source.used_for, "validation") &&
+        !is_repository_local_aircraft_validation_report(source.document)) {
+      errors.push_back("aircraft validation source reference document must be a repository-local validation report artifact: " + source.id);
+    }
   }
   if (known_sources.empty()) {
     errors.push_back("aircraft source references must not be empty");
@@ -1196,9 +1249,10 @@ std::vector<std::string> validate_aircraft_configuration(
       if (source == configuration.source_references.end()) {
         errors.push_back("faithful aircraft validation reference is unknown: " + ref_id);
       } else if (!source->approved_for_faithful_claim ||
-                 std::find(source->used_for.begin(), source->used_for.end(), "validation") ==
-                     source->used_for.end()) {
+                 !contains_string(source->used_for, "validation")) {
         errors.push_back("faithful aircraft validation reference is not approved: " + ref_id);
+      } else if (!is_repository_local_aircraft_validation_report(source->document)) {
+        errors.push_back("faithful aircraft validation reference document is not repository-local validation report artifact: " + ref_id);
       }
     }
   }

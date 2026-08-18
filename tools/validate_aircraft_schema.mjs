@@ -163,6 +163,12 @@ function validate(value, schema, root, basePath, at = "$") {
   if (typeof value === "string" && schema.minLength !== undefined && value.length < schema.minLength) {
     errors.push(`${at} must not be empty`);
   }
+  if (typeof value === "string" && schema.pattern !== undefined) {
+    const pattern = new RegExp(schema.pattern);
+    if (!pattern.test(value)) {
+      errors.push(`${at} must match ${schema.pattern}`);
+    }
+  }
   if (typeof value === "number" && schema.minimum !== undefined && value < schema.minimum) {
     errors.push(`${at} must be >= ${schema.minimum}`);
   }
@@ -181,6 +187,19 @@ function assertInvalid(schema, basePath, document, label) {
   const errors = validate(document, schema, schema, basePath);
   if (errors.length === 0) {
     fail(`${label} should be rejected by aircraft schema`);
+  }
+}
+
+function assertProductionValidationReportsExist(document) {
+  const validationSources = document.sourceReferences.filter((source) => source.usedFor.includes("validation"));
+  if (validationSources.length === 0) {
+    fail("production aircraft config must link validation source references to repository reports");
+  }
+  for (const source of validationSources) {
+    const resolved = path.resolve(repoRoot, source.document);
+    if (!resolved.startsWith(`${repoRoot}${path.sep}`) || !fs.existsSync(resolved)) {
+      fail(`validation source ${source.id} must reference an existing repository-local artifact`);
+    }
   }
 }
 
@@ -204,6 +223,7 @@ const schema = loadSchema(rootSchemaPath);
 const production = readJson("core_sim/aircraft/flying_trainer_one/aircraft-config.json");
 
 assertValid(schema, rootSchemaPath, production, "production unvalidated aircraft config");
+assertProductionValidationReportsExist(production);
 
 const faithful = structuredClone(production);
 faithful.aircraft.validation.status = "faithful";
@@ -223,3 +243,27 @@ assertInvalid(schema, rootSchemaPath, unapprovedReference, "faithful config with
 const missingValidationUse = structuredClone(faithful);
 missingValidationUse.sourceReferences = [...production.sourceReferences, approvedSource({ usedFor: ["aerodynamics"] })];
 assertInvalid(schema, rootSchemaPath, missingValidationUse, "faithful config with source lacking validation use");
+
+const missingValidationReportLink = structuredClone(faithful);
+missingValidationReportLink.sourceReferences = [
+  ...production.sourceReferences,
+  approvedSource({ document: "internal:flying/validation-suite" }),
+];
+assertInvalid(
+  schema,
+  rootSchemaPath,
+  missingValidationReportLink,
+  "faithful config with missing repository-local validation report link",
+);
+
+const externalOnlyValidationReportLink = structuredClone(faithful);
+externalOnlyValidationReportLink.sourceReferences = [
+  ...production.sourceReferences,
+  approvedSource({ document: "https://example.invalid/aircraft-validation-report.md" }),
+];
+assertInvalid(
+  schema,
+  rootSchemaPath,
+  externalOnlyValidationReportLink,
+  "faithful config with external-only validation report link",
+);
