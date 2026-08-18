@@ -1,13 +1,14 @@
 {
   "coverage": {
     "bounds": {
-      "maxEastM": 50000,
-      "maxNorthM": 50000,
-      "minEastM": 0,
-      "minNorthM": 0
+      "maxEastM": 10000.0,
+      "maxNorthM": 10000.0,
+      "minEastM": 0.0,
+      "minNorthM": 0.0
     },
     "countryCode": "CZ",
-    "scope": "initial-navigation-map-slice"
+    "regionId": "ceska-trebova-pilot-10km",
+    "scope": "pilot-region"
   },
   "layers": {
     "featureCounts": {
@@ -33,8 +34,31 @@
       "airspaces"
     ]
   },
-  "packageId": "nav-map-cz-initial-50km-slice",
+  "packageId": "nav-map-ceska-trebova-pilot-10km",
   "packageVersion": "2026.08-approved-slice",
+  "regionManifest": {
+    "bounds": {
+      "crs": "EPSG:4326",
+      "maxLatDeg": 49.95,
+      "maxLonDeg": 16.546,
+      "minLatDeg": 49.86,
+      "minLonDeg": 16.396
+    },
+    "checksum": {
+      "algorithm": "sha256",
+      "value": "597f9d4565e9c4ac00df1a7bc1f58d8fc953bb80a1a9bcd51a95af3dfa2fb69d"
+    },
+    "coverageScope": "pilot-region",
+    "path": "Config/Regions/ceska-trebova-pilot-region.json",
+    "projectBounds": {
+      "maxEastM": 10000,
+      "maxNorthM": 10000,
+      "minEastM": 0,
+      "minNorthM": 0
+    },
+    "regionId": "ceska-trebova-pilot-10km",
+    "schemaVersion": "flying.region-manifest.v1"
+  },
   "runtimeDependencies": {
     "externalMapApis": [],
     "remoteTileServerUrls": [],
@@ -105,7 +129,7 @@
   "tileArchive": {
     "checksum": {
       "algorithm": "sha256",
-      "value": "751f2ffbe840bf8eb4cf56446bc2bc0c3b07ac9a2433bbd681ff9e28dd71e66a"
+      "value": "0781bf5261eee21db77559ed22a1a970e088c5b16dd763c1f7f79d446b620463"
     },
     "format": "pmtiles",
     "path": "Slice.pmtiles",

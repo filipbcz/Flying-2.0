@@ -51,6 +51,8 @@ const settings = read("unreal/Source/FlyingPresentation/Public/FlyingPresentatio
 const gameConfig = read("unreal/Config/DefaultGame.ini");
 const packageSchema = read("data_pipeline/schemas/pilot-region-package.schema.json");
 const pipeline = read("data_pipeline/src/pilot_region_packages.cpp");
+const navMapBuilder = read("tools/data_pipeline/build_nav_map.py");
+const navMapFixture = read("tests/data_pipeline/navigation_map_validation_fixture.json");
 
 requirePathExists(
   "unreal/Source/FlyingPresentation/Private/FlyingOfflineNavigationMapWidget.cpp",
@@ -150,6 +152,40 @@ requireTokens(
     "airspaces",
   ],
   "local vector tile generation integration",
+);
+
+requireTokens(
+  navMapBuilder,
+  [
+    "--region-manifest",
+    "validate_region_manifest",
+    "regionManifest",
+    "load_tile_payload",
+    "load_mbtiles_payload",
+    "runtimeNetworkRequired",
+    "externalMapApis",
+    "remoteTileServerUrls",
+    "tile payload missing layer",
+    "manifest must not reference remote tile servers",
+    "resolve_package_artifact",
+    "must remain inside installed map package",
+    "artifact path must not include a drive or scheme",
+    "run_validation_fixture",
+  ],
+  "regional navigation map validator",
+);
+
+const parsedFixture = JSON.parse(navMapFixture);
+requireCondition(
+  parsedFixture.schemaVersion === "flying.navigation-map-validation-fixture.v1" &&
+    parsedFixture.explicitRegionManifest === "Config/Regions/ceska-trebova-pilot-region.json" &&
+    ["airports", "runways", "obstacles", "airspaces"].every((layer) =>
+      parsedFixture.failureCases?.missingRequiredLayers?.some((entry) => entry.layerId === layer),
+    ) &&
+    /^https:\/\//.test(parsedFixture.failureCases?.runtimeInternetDependency?.remoteTileServerUrl ?? "") &&
+    parsedFixture.failureCases?.localArtifactEscapes?.some((entry) => entry.field === "tileArchive") &&
+    parsedFixture.failureCases?.localArtifactEscapes?.some((entry) => entry.field === "style"),
+  "navigation map validation fixture must cover explicit region, all mandatory aeronautical layers, remote dependency failures and package path escapes",
 );
 
 requireCondition(
