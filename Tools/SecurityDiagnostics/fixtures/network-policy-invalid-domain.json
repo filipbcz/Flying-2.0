@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "flying.security-diagnostics.v1",
+  "network": {
+    "allowedDomains": ["updates.flying.local"],
+    "observedDownloads": [
+      {
+        "url": "https://tiles.example.net/cz/terrain.bin"
+      }
+    ]
+  },
+  "telemetry": {
+    "defaultUploadEnabled": false,
+    "personalDataConsentRequired": true,
+    "fields": []
+  },
+  "atomicPersistence": {
+    "settings": {
+      "interruptedWriteTested": true,
+      "recoveredLastValid": true,
+      "corruptWriteRejected": true,
+      "lastValidChecksum": "sha256:settings",
+      "interruptedWriteProbe": "fixture:settings"
+    },
+    "saves": {
+      "interruptedWriteTested": true,
+      "recoveredLastValid": true,
+      "corruptWriteRejected": true,
+      "lastValidChecksum": "sha256:saves",
+      "interruptedWriteProbe": "fixture:saves"
+    },
+    "profiles": {
+      "interruptedWriteTested": true,
+      "recoveredLastValid": true,
+      "corruptWriteRejected": true,
+      "lastValidChecksum": "sha256:profiles",
+      "interruptedWriteProbe": "fixture:profiles"
+    },
+    "scenarios": {
+      "interruptedWriteTested": true,
+      "recoveredLastValid": true,
+      "corruptWriteRejected": true,
+      "lastValidChecksum": "sha256:scenarios",
+      "interruptedWriteProbe": "fixture:scenarios"
+    },
+    "consentState": {
+      "interruptedWriteTested": true,
+      "recoveredLastValid": true,
+      "corruptWriteRejected": true,
+      "lastValidChecksum": "sha256:consent",
+      "interruptedWriteProbe": "fixture:consentState"
+    }
+  },
+  "diagnostics": {
+    "sbom": {
+      "present": true,
+      "path": "docs/release/sbom.spdx.json"
+    },
+    "licenseInventory": {
+      "present": true,
+      "path": "docs/release/license-inventory.md"
+    },
+    "structuredLogs": {
+      "present": true,
+      "paths": [
+        "unreal/Config/DefaultGame.ini",
+        "unreal/Source/FlyingPresentation/Private/FlyingPresentation.cpp"
+      ]
+    },
+    "minidumpConfig": {
+      "present": true,
+      "paths": [
+        "unreal/Config/DefaultEngine.ini",
+        "unreal/Source/Flying.Target.cs",
+        "unreal/Source/FlyingPresentation/Private/FlyingPresentation.cpp"
+      ]
+    },
+    "buildId": {
+      "present": true,
+      "value": "flying-1.0.0+20260807.1"
+    }
+  }
+}

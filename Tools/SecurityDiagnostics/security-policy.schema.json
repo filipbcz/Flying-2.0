@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flying.local/schemas/security-policy.schema.json",
+  "title": "Flying Security Diagnostics Policy",
+  "type": "object",
+  "required": ["schemaVersion", "network", "telemetry", "atomicPersistence", "diagnostics"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "flying.security-diagnostics.v1"
+    },
+    "network": {
+      "type": "object",
+      "required": ["allowedDomains", "observedDownloads"],
+      "additionalProperties": false,
+      "properties": {
+        "allowedDomains": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "observedDownloads": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["url"],
+            "additionalProperties": true,
+            "properties": {
+              "url": {
+                "type": "string",
+                "format": "uri"
+              }
+            }
+          }
+        }
+      }
+    },
+    "telemetry": {
+      "type": "object",
+      "required": ["defaultUploadEnabled", "personalDataConsentRequired", "fields"],
+      "additionalProperties": false,
+      "properties": {
+        "defaultUploadEnabled": {
+          "const": false
+        },
+        "personalDataConsentRequired": {
+          "const": true
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "personalData"],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "personalData": {
+                "type": "boolean"
+              },
+              "requiresExplicitConsent": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    },
+    "atomicPersistence": {
+      "type": "object",
+      "required": ["settings", "saves", "profiles", "scenarios", "consentState"],
+      "additionalProperties": false,
+      "patternProperties": {
+        "^(settings|saves|profiles|scenarios|consentState)$": {
+          "type": "object",
+          "required": ["interruptedWriteTested", "recoveredLastValid", "corruptWriteRejected", "lastValidChecksum", "interruptedWriteProbe"],
+          "additionalProperties": false,
+          "properties": {
+            "interruptedWriteTested": {"const": true},
+            "recoveredLastValid": {"const": true},
+            "corruptWriteRejected": {"const": true},
+            "lastValidChecksum": {"type": "string", "minLength": 1},
+            "interruptedWriteProbe": {"type": "string", "minLength": 1}
+          }
+        }
+      }
+    },
+    "diagnostics": {
+      "type": "object",
+      "required": ["sbom", "licenseInventory", "structuredLogs", "minidumpConfig", "buildId"],
+      "additionalProperties": false,
+      "properties": {
+        "sbom": {"$ref": "#/$defs/diagnosticArtifact"},
+        "licenseInventory": {"$ref": "#/$defs/diagnosticArtifact"},
+        "structuredLogs": {"$ref": "#/$defs/diagnosticArtifact"},
+        "minidumpConfig": {"$ref": "#/$defs/diagnosticArtifact"},
+        "buildId": {
+          "type": "object",
+          "required": ["present", "value"],
+          "additionalProperties": false,
+          "properties": {
+            "present": {"const": true},
+            "value": {"type": "string", "minLength": 1}
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "diagnosticArtifact": {
+      "type": "object",
+      "required": ["present"],
+      "additionalProperties": false,
+      "properties": {
+        "present": {"const": true},
+        "path": {"type": "string", "minLength": 1},
+        "paths": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}
