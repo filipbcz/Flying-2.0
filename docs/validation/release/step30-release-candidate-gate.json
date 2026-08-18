@@ -9,7 +9,7 @@
     "version": "1.0.0-rc",
     "platform": "Win64",
     "configuration": "Shipping",
-    "artifactSource": "packaging/FlyingReleaseManifest.json from the signed Shipping archive",
+    "artifactSource": "packaging/FlyingReleaseManifest.json from the signed Shipping archive with the selected offline regional packages",
     "signedBuildRequired": true,
     "installerRequired": true,
     "buildMetadataRequired": true,
@@ -28,19 +28,24 @@
       "machineId": "WIN11-RC-GATE-STEP30",
       "machineState": "clean install with no developer checkout",
       "networkState": "offline after installer, terrain, airport database and aircraft packages are staged",
-      "terrainScope": "Czech Republic",
-      "airportDatabase": "approved master list",
+      "regionId": "ceska-trebova-pilot-10km",
+      "regionManifest": "Config/Regions/ceska-trebova-pilot-region.json",
+      "regionPackage": "Ceska Trebova Pilot Region",
+      "installedDataRoot": "%FLYING_DATA_ROOT%/Flying/Data/Regions/ceska-trebova-pilot-10km",
+      "airportDatabase": "approved regional master list",
       "aircraft": "Flying Trainer One validated production aircraft"
     },
     "workflow": [
       "install signed Shipping build",
-      "install Czech terrain packages",
-      "install approved airport database",
-      "start cold-and-dark at an included Czech airport",
+      "select offline region package",
+      "install regional data root",
+      "verify regional data availability",
+      "install approved regional airport database",
+      "start cold-and-dark at an included airport",
       "start engine",
       "taxi",
       "takeoff",
-      "fly cross-country over streamed Czech terrain",
+      "navigate cross-country in selected region",
       "land at another included airport",
       "shutdown",
       "replay flight",
@@ -49,8 +54,9 @@
     "requiredEvidence": [
       "installer log",
       "installed release manifest hashes",
-      "terrain package manifest hashes",
-      "airport database package hash",
+      "regional package manifest hashes",
+      "regional data-root install evidence",
+      "regional airport database package hash",
       "aircraft package hash",
       "offline-operation observation",
       "workflow telemetry export",
@@ -60,8 +66,9 @@
     "evidenceArtifacts": {
       "installerLog": "docs/release/qa-evidence.md#release-candidate-gate",
       "installedReleaseManifestHashes": "docs/validation/release/step30-release-candidate-gate.json#/releaseCandidate/artifactHashes",
-      "terrainPackageManifestHashes": "docs/release/sbom.spdx.json#SPDXRef-Package-CUZK-DMR5G",
-      "airportDatabasePackageHash": "sha256:0a163cd064f4932e9aa27113d301503006a76ce2c2ed2bf5d39337b84cb10ada",
+      "regionalPackageManifestHashes": "docs/release/sbom.spdx.json#SPDXRef-Package-CUZK-DMR5G",
+      "regionalDataRootInstallEvidence": "packaging/README.md#installer",
+      "regionalAirportDatabasePackageHash": "sha256:0a163cd064f4932e9aa27113d301503006a76ce2c2ed2bf5d39337b84cb10ada",
       "detailedAirportManifestHash": "sha256:0e1bd2551254916fee3ca843025f1018155c64bbfb1f372daba9bd003ed47a5e",
       "aircraftPackageHash": "sha256:886f732e192a6ade86143a4f07122eed577d5db0282dad95325adc8b226cf5f1",
       "offlineOperationObservation": "docs/release/user-manual.md#offline-operation",
@@ -72,6 +79,12 @@
     "result": "pass"
   },
   "automatedAcceptanceSuites": [
+    {
+      "area": "regional data",
+      "command": "node tools/validate_regional_scope_delta.mjs && python3 tools/data_pipeline/build_nav_map.py --validation-fixture",
+      "mandatory": true,
+      "result": "pass"
+    },
     {
       "area": "CoreSim",
       "command": "ctest --preset smoke --output-on-failure -R flying.core_sim",
@@ -121,12 +134,18 @@
       "result": "pass"
     },
     {
-      "area": "Unreal Cesium shell",
-      "command": "node tools/validate_unreal_cesium_shell.mjs --require-unreal-build-run",
-      "evidenceArtifact": "docs/validation/release/unreal-cesium-shell-win64-development-run.json",
+      "area": "visual acceptance",
+      "command": "node Validation/VisualAcceptance/visual_acceptance_validator.mjs --manifest Build/VisualEvidence/release-candidate-visual-evidence.json",
+      "evidenceArtifact": "Build/VisualEvidence/release-candidate-visual-evidence.json",
       "mandatory": true,
       "result": "blocked",
-      "blocker": "Missing Windows UE 5.8 execution artifact proving Win64 Development build, launch, and georeferenced startup log marker."
+      "blocker": "Missing manual-approved production visual evidence captured from a real Win64 Unreal Shipping runtime."
+    },
+    {
+      "area": "security privacy diagnostics",
+      "command": "node tests/security/test_security_diagnostics.mjs",
+      "mandatory": true,
+      "result": "pass"
     },
     {
       "area": "license",
@@ -168,7 +187,8 @@
       "docs/validation/performance/step27-performance-gate.json",
       "docs/release/qa-evidence.md",
       "docs/release/license-inventory.md",
-      "docs/release/sbom.spdx.json"
+      "docs/release/sbom.spdx.json",
+      "docs/release/known-limitations.md"
     ],
     "evidenceArtifacts": {
       "m1ValidationReport": "docs/validation/m1/m1-validation-report.md",
@@ -176,10 +196,42 @@
       "performanceGateHash": "sha256:1d8d12597a8b1df67e19d4d8ff54c084552e6114e0468c734e55a9786fbaf011",
       "qaEvidenceHash": "sha256:621a6e36d5c4fb33672381cfc3c4a0bbcd9c515433aa8205a082d3900b4e41f7",
       "licenseInventoryHash": "sha256:dce649f480a6c00b695456247dd97059184640d21b64e8fe49984a84b308b320",
-      "sbomHash": "sha256:82d854eaddcb226a6cc3713f72ff7fdb783b74c51dc8435e758fdef18b4bee04"
+      "sbomHash": "sha256:82d854eaddcb226a6cc3713f72ff7fdb783b74c51dc8435e758fdef18b4bee04",
+      "knownLimitations": "docs/release/known-limitations.md"
     },
     "result": "pass"
   },
+  "dependencyGates": [
+    {
+      "id": "regional-package-data",
+      "mandatory": true,
+      "releaseBlocking": true,
+      "result": "pass",
+      "evidence": "Config/Regions/ceska-trebova-pilot-region.json"
+    },
+    {
+      "id": "production-visual-acceptance",
+      "mandatory": true,
+      "releaseBlocking": true,
+      "result": "blocked",
+      "evidence": "Build/VisualEvidence/release-candidate-visual-evidence.json",
+      "knownLimitation": "docs/release/known-limitations.md#release-candidate-blockers"
+    }
+  ],
+  "knownLimitations": [
+    {
+      "id": "missing-production-visual-evidence",
+      "status": "blocked",
+      "releaseImpact": "blocked",
+      "evidence": "docs/release/known-limitations.md"
+    },
+    {
+      "id": "aircraft-type-fidelity-claim-excluded",
+      "status": "accepted",
+      "releaseImpact": "none",
+      "evidence": "docs/release/known-limitations.md"
+    }
+  ],
   "performanceAndSoakEvidence": {
     "referenceOs": "Windows 11",
     "requiredAverageFpsMin": 60,
@@ -214,11 +266,11 @@
       "performance"
     ],
     "waiversAllowed": false,
-    "decisionRule": "Release candidate is blocked unless every mandatory clean-machine, automated, coverage, validation, performance and soak result is pass."
+    "decisionRule": "Release candidate is blocked unless every mandatory clean-machine, automated, regional data, visual acceptance, coverage, validation, performance and soak result is pass."
   },
   "gateDecision": {
     "decision": "blocked",
-    "reason": "Mandatory Unreal Cesium shell Win64 Development build/run evidence is absent; release candidate remains blocked until the Windows UE 5.8 execution artifact is captured.",
+    "reason": "Mandatory production visual acceptance evidence from a real Win64 Unreal Shipping runtime is absent; release candidate remains blocked until the visual evidence manifest is captured, approved, and passes validation.",
     "approvedBy": null,
     "decidedAtUtc": "2026-08-07T00:00:00Z"
   }

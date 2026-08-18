@@ -32,6 +32,9 @@ function parseArgs(argv) {
   if (!args.input) {
     fail("usage: node Tools/ReleaseGate/release-gate.mjs --input <release-report.json> [--expect-status complete|partial|blocked]", 2);
   }
+  if (args.expectStatus && !["complete", "partial", "blocked"].includes(args.expectStatus)) {
+    fail("--expect-status must be complete, partial, or blocked", 2);
+  }
   return args;
 }
 
@@ -195,6 +198,119 @@ function validateVisualGate(report) {
   };
 }
 
+const REQUIRED_CLEAN_INSTALL_PHASES = Object.freeze([
+  "install signed Shipping build",
+  "select offline region package",
+  "install regional data root",
+  "verify regional data availability",
+  "start cold-and-dark at included airport",
+  "start engine",
+  "taxi",
+  "takeoff",
+  "navigate cross-country in selected region",
+  "land at another included airport",
+  "shutdown",
+  "replay flight",
+  "export telemetry",
+]);
+
+const REQUIRED_CLEAN_INSTALL_EVIDENCE = Object.freeze([
+  "installer log",
+  "installed release manifest hashes",
+  "regional package manifest hashes",
+  "regional data-root install evidence",
+  "offline-operation observation",
+  "workflow telemetry export",
+  "workflow replay artifact",
+]);
+
+function validateCleanInstallWorkflow(report) {
+  const workflow = report.cleanInstallWorkflow;
+  const errors = [];
+  if (workflow === undefined) {
+    return { status: "blocked", errors: ["cleanInstallWorkflow is required"] };
+  }
+  if (!isObject(workflow)) {
+    return { status: "blocked", errors: ["cleanInstallWorkflow must be an object"] };
+  }
+  if (workflow.required !== true) {
+    errors.push("cleanInstallWorkflow.required must be true");
+  }
+  if (workflow.result !== "pass") {
+    errors.push("cleanInstallWorkflow.result must be pass");
+  }
+  if (workflow.environment?.os !== "Windows 11") {
+    errors.push("cleanInstallWorkflow.environment.os must be Windows 11");
+  }
+  if (typeof workflow.environment?.regionPackage !== "string" || workflow.environment.regionPackage.length === 0) {
+    errors.push("cleanInstallWorkflow.environment.regionPackage is required");
+  }
+  if (!String(workflow.environment?.networkState ?? "").toLowerCase().includes("offline")) {
+    errors.push("cleanInstallWorkflow.environment.networkState must document offline operation");
+  }
+  const phases = new Set(Array.isArray(workflow.phases) ? workflow.phases : []);
+  for (const phase of REQUIRED_CLEAN_INSTALL_PHASES) {
+    if (!phases.has(phase)) {
+      errors.push(`cleanInstallWorkflow.phases missing required phase: ${phase}`);
+    }
+  }
+  const evidence = new Set(Array.isArray(workflow.requiredEvidence) ? workflow.requiredEvidence : []);
+  for (const item of REQUIRED_CLEAN_INSTALL_EVIDENCE) {
+    if (!evidence.has(item)) {
+      errors.push(`cleanInstallWorkflow.requiredEvidence missing required item: ${item}`);
+    }
+  }
+  return {
+    status: errors.length === 0 ? "complete" : "blocked",
+    errors,
+  };
+}
+
+function collectMandatoryResults(report) {
+  const results = [];
+  for (const check of Array.isArray(report.mandatoryChecks) ? report.mandatoryChecks : []) {
+    if (check?.mandatory === true) {
+      results.push({
+        id: check.id ?? "mandatoryChecks entry",
+        result: check.result ?? "missing",
+        releaseBlocking: true,
+      });
+    }
+  }
+  for (const gate of Array.isArray(report.dependencyGates) ? report.dependencyGates : []) {
+    if (gate?.mandatory === true) {
+      results.push({
+        id: gate.id ?? "dependencyGates entry",
+        result: gate.result ?? "missing",
+        releaseBlocking: gate.releaseBlocking === true,
+      });
+    }
+  }
+  if (report.cleanInstallWorkflow?.required === true) {
+    results.push({
+      id: "clean-install-workflow",
+      result: report.cleanInstallWorkflow.result ?? "missing",
+      releaseBlocking: true,
+    });
+  }
+  return results;
+}
+
+function deriveReleaseStatus(report, schemaErrors, visual, cleanInstall) {
+  if (schemaErrors.length > 0 || visual.status === "blocked" || cleanInstall.status === "blocked") {
+    return "blocked";
+  }
+  const mandatoryResults = collectMandatoryResults(report);
+  const failing = mandatoryResults.filter((entry) => entry.result !== "pass");
+  if (failing.some((entry) => entry.releaseBlocking || entry.result === "blocked" || entry.result === "missing")) {
+    return "blocked";
+  }
+  if (failing.length > 0) {
+    return "partial";
+  }
+  return "complete";
+}
+
 function main() {
   const args = parseArgs(process.argv.slice(2));
   const schema = readJson(releaseReportSchemaPath);
@@ -202,9 +318,15 @@ function main() {
 
   const schemaErrors = validateReleaseReportSchema(report, schema);
   const visual = validateVisualGate(report);
-  const mandatoryChecks = Array.isArray(report.mandatoryChecks) ? report.mandatoryChecks : [];
-  const failedMandatory = mandatoryChecks.filter((check) => check?.mandatory === true && check?.result !== "pass");
-  const status = schemaErrors.length > 0 || visual.status === "blocked" || failedMandatory.length > 0 ? "blocked" : "complete";
+  const cleanInstall = validateCleanInstallWorkflow(report);
+  const status = deriveReleaseStatus(report, schemaErrors, visual, cleanInstall);
+  const statusErrors = [];
+  if (report.status !== status) {
+    statusErrors.push(`status must be ${status} for the supplied mandatory evidence`);
+  }
+  if (isObject(report.gateDecision) && report.gateDecision.decision !== status) {
+    statusErrors.push(`gateDecision.decision must be ${status}`);
+  }
 
   if (args.expectStatus && status !== args.expectStatus) {
     for (const error of schemaErrors) {
@@ -213,7 +335,20 @@ function main() {
     for (const error of visual.errors) {
       console.error(`release-gate: ${error}`);
     }
+    for (const error of cleanInstall.errors) {
+      console.error(`release-gate: ${error}`);
+    }
+    for (const error of statusErrors) {
+      console.error(`release-gate: ${error}`);
+    }
     fail(`expected status ${args.expectStatus}, got ${status}`);
+  }
+
+  if (statusErrors.length > 0) {
+    for (const error of statusErrors) {
+      console.error(`release-gate: ${error}`);
+    }
+    fail("release report status does not match mandatory evidence");
   }
 
   if (status === "blocked" && args.expectStatus !== "blocked") {
@@ -221,6 +356,9 @@ function main() {
       console.error(`release-gate: ${error}`);
     }
     for (const error of visual.errors) {
+      console.error(`release-gate: ${error}`);
+    }
+    for (const error of cleanInstall.errors) {
       console.error(`release-gate: ${error}`);
     }
     fail("release status blocked");
