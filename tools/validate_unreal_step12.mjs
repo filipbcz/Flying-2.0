@@ -48,6 +48,10 @@ function checkUproject() {
     modules.get("FlyingPresentation")?.Type === "Runtime",
     "FlyingPresentation runtime module is missing",
   );
+  requireCondition(
+    modules.get("FlyingCoreSimBridge")?.Type === "Runtime",
+    "FlyingCoreSimBridge runtime module is missing",
+  );
 
   const plugins = new Map((project.Plugins ?? []).map((plugin) => [plugin.Name, plugin]));
   requireCondition(
@@ -72,6 +76,7 @@ function checkTargetsAndBuildRules() {
   for (const token of [
     "CppStandardVersion.Cpp20",
     "bEnableExceptions = true",
+    '"FlyingCoreSimBridge"',
     '"CesiumRuntime"',
     '"ProceduralMeshComponent"',
     '"Json"',
@@ -112,10 +117,11 @@ function checkSourceContracts() {
     "unreal/Source/FlyingPresentation/Private/FlyingCoreSimAircraftActor.cpp",
     "unreal/Source/FlyingPresentation/Public/FlyingOfflinePilotTerrainActor.h",
     "unreal/Source/FlyingPresentation/Private/FlyingOfflinePilotTerrainActor.cpp",
-    "unreal/Source/FlyingPresentation/Private/CoreSimStandalone/simulator.cpp",
-    "unreal/Source/FlyingPresentation/Private/CoreSimStandalone/determinism.cpp",
-    "unreal/Source/FlyingPresentation/Private/CoreSimStandalone/fixed_step.cpp",
-    "unreal/Source/FlyingPresentation/Private/GeoTerrainStandalone/geodesy.cpp",
+    "unreal/Source/FlyingCoreSimBridge/FlyingCoreSimBridge.Build.cs",
+    "unreal/Source/FlyingCoreSimBridge/Private/CoreSimStandalone/simulator.cpp",
+    "unreal/Source/FlyingCoreSimBridge/Private/CoreSimStandalone/determinism.cpp",
+    "unreal/Source/FlyingCoreSimBridge/Private/CoreSimStandalone/fixed_step.cpp",
+    "unreal/Source/FlyingCoreSimBridge/Private/GeoTerrainStandalone/geodesy.cpp",
   ];
   for (const relativePath of requiredFiles) {
     requireCondition(
@@ -205,11 +211,12 @@ function checkSourceContracts() {
   );
 
   const standaloneCpp = read(
-    "unreal/Source/FlyingPresentation/Private/CoreSimStandalone/simulator.cpp",
+    "unreal/Source/FlyingCoreSimBridge/Private/CoreSimStandalone/simulator.cpp",
   );
   requireCondition(
-    standaloneCpp.includes("../../../../../core_sim/src/simulator.cpp"),
-    "Unreal module must compile the existing CoreSim simulator source",
+    standaloneCpp.includes("CoreSimulator::advance") &&
+      standaloneCpp.includes("geo_terrain::ecef_to_geodetic"),
+    "Unreal CoreSim bridge must compile the existing CoreSim simulator implementation",
   );
 }
 
