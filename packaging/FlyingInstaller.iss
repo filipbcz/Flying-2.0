@@ -49,23 +49,57 @@ Name: "terrain\gis"; Description: "Regional ortofoto, vector, water, vegetation,
 Name: "terrain\navigation"; Description: "Offline regional navigation map"; Types: full custom
 
 [Dirs]
-Name: "{userappdata}\{#RegionDataRootSubdir}"
+Name: "{code:GetRegionDataRoot}"
 
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: sim; Excludes: "Flying\Saved\Flying\PilotRegion\Terrain\*,Flying\Saved\Flying\PilotRegion\GIS\*,Flying\Saved\Flying\PilotRegion\Navigation\*"
-Source: "{#SourceDir}\Flying\Saved\Flying\PilotRegion\Terrain\*"; DestDir: "{userappdata}\{#RegionDataRootSubdir}\Terrain"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: terrain\elevation
-Source: "{#SourceDir}\Flying\Saved\Flying\PilotRegion\GIS\*"; DestDir: "{userappdata}\{#RegionDataRootSubdir}\GIS"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: terrain\gis
-Source: "{#SourceDir}\Flying\Saved\Flying\PilotRegion\Navigation\*"; DestDir: "{userappdata}\{#RegionDataRootSubdir}\Navigation"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: terrain\navigation
-Source: "..\Config\Regions\ceska-trebova-pilot-region.json"; DestDir: "{userappdata}\{#RegionDataRootSubdir}"; Flags: ignoreversion; Components: terrain\elevation
+Source: "{#SourceDir}\Flying\Saved\Flying\PilotRegion\Terrain\*"; DestDir: "{code:GetRegionDataRoot}\Terrain"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: terrain\elevation
+Source: "{#SourceDir}\Flying\Saved\Flying\PilotRegion\GIS\*"; DestDir: "{code:GetRegionDataRoot}\GIS"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: terrain\gis
+Source: "{#SourceDir}\Flying\Saved\Flying\PilotRegion\Navigation\*"; DestDir: "{code:GetRegionDataRoot}\Navigation"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: terrain\navigation
+Source: "..\Config\Regions\ceska-trebova-pilot-region.json"; DestDir: "{code:GetRegionDataRoot}"; Flags: ignoreversion; Components: terrain\elevation
 Source: "{#SourceDir}\FlyingReleaseManifest.json"; DestDir: "{app}"; Flags: ignoreversion; Components: sim
 Source: "update-repair.ps1"; DestDir: "{app}\Packaging"; Flags: ignoreversion; Components: sim
 
 [Registry]
-Root: HKCU; Subkey: "Environment"; ValueType: expandsz; ValueName: "FLYING_DATA_ROOT"; ValueData: "{userappdata}\{#RegionDataRootSubdir}"; Flags: preservestringtype
+Root: HKCU; Subkey: "Environment"; ValueType: expandsz; ValueName: "FLYING_DATA_ROOT"; ValueData: "{code:GetRegionDataRoot}"; Flags: preservestringtype
 
 [Icons]
 Name: "{group}\Flying"; Filename: "{app}\Flying.exe"
-Name: "{group}\Repair Flying Data"; Filename: "powershell.exe"; Parameters: "-ExecutionPolicy Bypass -File ""{app}\Packaging\update-repair.ps1"" -InstallRoot ""{app}"" -DataRoot ""{userappdata}\{#RegionDataRootSubdir}"""
+Name: "{group}\Repair Flying Data"; Filename: "powershell.exe"; Parameters: "-ExecutionPolicy Bypass -File ""{app}\Packaging\update-repair.ps1"" -InstallRoot ""{app}"" -DataRoot ""{code:GetRegionDataRoot}"""
 
 [Run]
-Filename: "powershell.exe"; Parameters: "-ExecutionPolicy Bypass -File ""{app}\Packaging\update-repair.ps1"" -InstallRoot ""{app}"" -DataRoot ""{userappdata}\{#RegionDataRootSubdir}"" -RequireOfflineLaunch"; Flags: runhidden; StatusMsg: "Verifying installed simulator and regional data packages..."
+Filename: "powershell.exe"; Parameters: "-ExecutionPolicy Bypass -File ""{app}\Packaging\update-repair.ps1"" -InstallRoot ""{app}"" -DataRoot ""{code:GetRegionDataRoot}"" -RequireOfflineLaunch"; Flags: runhidden; StatusMsg: "Verifying installed simulator and regional data packages..."
+
+[Code]
+var
+  DataRootPage: TInputDirWizardPage;
+
+procedure InitializeWizard();
+begin
+  DataRootPage := CreateInputDirPage(
+    wpSelectDir,
+    'Select Flying Data Root',
+    'Choose where Flying installs offline regional data.',
+    'Select the folder that will hold installed terrain, GIS, navigation, and region manifests.',
+    False,
+    ''
+  );
+  DataRootPage.Add('');
+  DataRootPage.Values[0] := ExpandConstant('{param:FLYINGDATAROOT|{userappdata}\{#RegionDataRootSubdir}}');
+end;
+
+function GetRegionDataRoot(Param: String): String;
+begin
+  Result := DataRootPage.Values[0];
+end;
+
+function NextButtonClick(CurPageID: Integer): Boolean;
+begin
+  Result := True;
+  if CurPageID = DataRootPage.ID then begin
+    if Trim(DataRootPage.Values[0]) = '' then begin
+      MsgBox('Flying data root is required for offline regional packages.', mbError, MB_OK);
+      Result := False;
+    end;
+  end;
+end;
