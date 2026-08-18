@@ -136,14 +136,71 @@ void validation_rejects_missing_provenance_and_validated_status() {
   require(!flying::core_sim::validate_aircraft_configuration(configuration).empty(),
           "aircraft validation must reject faithful status without approved validation source");
 
+  configuration.validation_approved_references = {"flying-trainer-one-validation-suite-v1"};
   for (auto& source : configuration.source_references) {
-    if (source.id == "flying-step16-owned-model") {
+    if (source.id == "flying-trainer-one-validation-suite-v1") {
       source.approved_for_faithful_claim = true;
-      source.used_for.push_back("validation");
     }
   }
   require(flying::core_sim::validate_aircraft_configuration(configuration).empty(),
           "aircraft validation must accept faithful status with approved validation references");
+}
+
+void validation_rejects_non_local_validation_report_links() {
+  AircraftConfiguration configuration = load_config();
+  configuration.validation_status = "faithful";
+  configuration.validation_suite_status = "passed";
+  configuration.validation_approved_references = {"flying-trainer-one-validation-suite-v1"};
+
+  for (auto& source : configuration.source_references) {
+    if (source.id == "flying-trainer-one-validation-suite-v1") {
+      source.approved_for_faithful_claim = true;
+      source.document.clear();
+    }
+  }
+  require(!flying::core_sim::validate_aircraft_configuration(configuration).empty(),
+          "aircraft validation must reject approved validation references without document links");
+
+  configuration = load_config();
+  configuration.validation_status = "faithful";
+  configuration.validation_suite_status = "passed";
+  configuration.validation_approved_references = {"flying-trainer-one-validation-suite-v1"};
+  for (auto& source : configuration.source_references) {
+    if (source.id == "flying-trainer-one-validation-suite-v1") {
+      source.approved_for_faithful_claim = true;
+      source.document = "https://example.invalid/flying-trainer-one-validation-report.md";
+    }
+  }
+  require(!flying::core_sim::validate_aircraft_configuration(configuration).empty(),
+          "aircraft validation must reject external-only validation report links");
+
+  configuration = load_config();
+  configuration.validation_status = "faithful";
+  configuration.validation_suite_status = "passed";
+  configuration.validation_approved_references = {"flying-trainer-one-validation-suite-v1"};
+  for (auto& source : configuration.source_references) {
+    if (source.id == "flying-trainer-one-validation-suite-v1") {
+      source.approved_for_faithful_claim = true;
+      source.document =
+          "docs/validation/aircraft/flying_trainer_one/nonexistent-validation-report.md";
+    }
+  }
+  require(!flying::core_sim::validate_aircraft_configuration(configuration).empty(),
+          "aircraft validation must reject nonexistent repository-local validation report links");
+
+  configuration = load_config();
+  configuration.validation_status = "faithful";
+  configuration.validation_suite_status = "passed";
+  configuration.validation_approved_references = {"flying-trainer-one-validation-suite-v1"};
+  for (auto& source : configuration.source_references) {
+    if (source.id == "flying-trainer-one-validation-suite-v1") {
+      source.approved_for_faithful_claim = true;
+      source.document =
+          "docs/validation/aircraft/flying_trainer_one/aircraft-validation-report.md";
+    }
+  }
+  require(flying::core_sim::validate_aircraft_configuration(configuration).empty(),
+          "aircraft validation must accept repository-local validation report links");
 }
 
 void config_versioning_reports_compatibility_and_migration() {
@@ -272,6 +329,7 @@ int main() {
   schema_requires_production_aircraft_sections();
   production_aircraft_data_loads_with_provenance();
   validation_rejects_missing_provenance_and_validated_status();
+  validation_rejects_non_local_validation_report_links();
   config_versioning_reports_compatibility_and_migration();
   mass_balance_loadouts_update_core_sim_state();
   invalid_loadouts_are_rejected();

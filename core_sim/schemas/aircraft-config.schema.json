@@ -42,6 +42,7 @@
               "required": ["id", "usedFor", "approvedForFaithfulClaim"],
               "properties": {
                 "id": {"$ref": "#/$defs/approvedValidationReferenceId"},
+                "document": {"$ref": "#/$defs/repositoryLocalAircraftValidationReport"},
                 "usedFor": {"contains": {"const": "validation"}},
                 "approvedForFaithfulClaim": {"const": true}
               }
@@ -166,6 +167,10 @@
     "approvedValidationReferenceId": {
       "enum": ["flying-trainer-one-validation-suite-v1"]
     },
+    "repositoryLocalAircraftValidationReport": {
+      "type": "string",
+      "pattern": "^docs/validation/aircraft/[^/]+/[^/]*(validation|report)[^/]*\\.(md|json)$"
+    },
     "sourceReference": {
       "type": "object",
       "additionalProperties": false,
@@ -193,7 +198,22 @@
           "items": {"type": "string", "minLength": 1}
         },
         "approvedForFaithfulClaim": {"type": "boolean", "default": false}
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "usedFor": {"contains": {"const": "validation"}}
+            },
+            "required": ["usedFor"]
+          },
+          "then": {
+            "properties": {
+              "document": {"$ref": "#/$defs/repositoryLocalAircraftValidationReport"}
+            }
+          }
+        }
+      ]
     },
     "sourceRefs": {
       "type": "array",
