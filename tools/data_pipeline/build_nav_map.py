@@ -7,14 +7,18 @@ import argparse
 import hashlib
 import json
 import math
+import shutil
+import sqlite3
 import struct
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "Data" / "Map"
+DEFAULT_VALIDATION_FIXTURE = REPO_ROOT / "tests" / "data_pipeline" / "navigation_map_validation_fixture.json"
 DEFAULT_VISUAL_MANIFEST = REPO_ROOT / "Data" / "Visual" / "SliceManifest.json"
 DEFAULT_AIRPORT_DATABASE = REPO_ROOT / "data_pipeline" / "seeds" / "pilot-airport-master-list.json"
 DEFAULT_DETAILED_AIRPORTS = REPO_ROOT / "data_pipeline" / "seeds" / "detailed-airport-manifest.json"
@@ -77,9 +81,71 @@ def read_json(path: Path) -> dict[str, Any]:
 
 def assert_local_artifact(relative_path: str) -> None:
     path = Path(relative_path)
+    normalized = relative_path.replace("\\", "/")
+    normalized_path = Path(normalized)
+    first_part = normalized_path.parts[0] if normalized_path.parts else ""
     require(not path.is_absolute(), f"artifact path must be relative: {relative_path}")
+    require(not normalized_path.is_absolute(), f"artifact path must be relative: {relative_path}")
+    require(":" not in first_part, f"artifact path must not include a drive or scheme: {relative_path}")
     require("://" not in relative_path, f"artifact path must not be remote: {relative_path}")
-    require(".." not in path.parts, f"artifact path must not traverse parents: {relative_path}")
+    require(not normalized.startswith("//"), f"artifact path must not be a UNC path: {relative_path}")
+    require(".." not in normalized_path.parts, f"artifact path must not traverse parents: {relative_path}")
+
+
+def resolve_package_artifact(output_dir: Path, relative_path: str, label: str) -> Path:
+    assert_local_artifact(relative_path)
+    package_root = output_dir.resolve()
+    resolved_path = (package_root / Path(relative_path.replace("\\", "/"))).resolve()
+    try:
+        resolved_path.relative_to(package_root)
+    except ValueError as exc:
+        raise ValueError(f"{label} must remain inside installed map package: {relative_path}") from exc
+    return resolved_path
+
+
+def contains_remote_dependency(value: Any) -> bool:
+    if isinstance(value, str):
+        lowered = value.lower()
+        return (
+            "://" in lowered
+            or "mapbox" in lowered
+            or "access_token" in lowered
+            or "api_key" in lowered
+            or "apikey" in lowered
+        )
+    if isinstance(value, list):
+        return any(contains_remote_dependency(entry) for entry in value)
+    if isinstance(value, dict):
+        return any(contains_remote_dependency(entry) for entry in value.values())
+    return False
+
+
+def validate_region_manifest(region_manifest: dict[str, Any]) -> None:
+    require(region_manifest.get("schemaVersion") == "flying.region-manifest.v1", "region manifest schema version mismatch")
+    require(isinstance(region_manifest.get("regionId"), str) and region_manifest["regionId"], "region manifest missing regionId")
+    require(region_manifest.get("coverageScope") in {"pilot-region", "czech-republic"}, "region manifest coverageScope is invalid")
+    require(region_manifest.get("runtimeCompatibility", {}).get("runtimeNetworkRequired") is False, "region manifest must disable runtime networking")
+    bounds = region_manifest.get("bounds", {})
+    require(bounds.get("crs") == "EPSG:4326", "region bounds must declare EPSG:4326")
+    for key in ["minLonDeg", "maxLonDeg", "minLatDeg", "maxLatDeg"]:
+        require(isinstance(bounds.get(key), (int, float)), f"region bounds missing numeric {key}")
+    project_bounds = region_manifest.get("projectBounds", {})
+    for key in ["minEastM", "maxEastM", "minNorthM", "maxNorthM"]:
+        require(isinstance(project_bounds.get(key), (int, float)), f"region projectBounds missing numeric {key}")
+    data_root = region_manifest.get("dataRoot", {})
+    require(data_root.get("installVariable") == "FLYING_DATA_ROOT", "region manifest must use configured data root")
+    require(isinstance(data_root.get("defaultRelativePath"), str) and data_root["defaultRelativePath"], "region manifest missing default data-root path")
+    assert_local_artifact(data_root["defaultRelativePath"])
+
+
+def region_project_bounds(region_manifest: dict[str, Any]) -> dict[str, float]:
+    bounds = region_manifest["projectBounds"]
+    return {
+        "minEastM": float(bounds["minEastM"]),
+        "maxEastM": float(bounds["maxEastM"]),
+        "minNorthM": float(bounds["minNorthM"]),
+        "maxNorthM": float(bounds["maxNorthM"]),
+    }
 
 
 def source_checksum(path: Path) -> dict[str, str]:
@@ -267,12 +333,13 @@ def build_airspaces() -> list[dict[str, Any]]:
     ]
 
 
-def build_tile_payload(visual_manifest: dict[str, Any], airport_database: dict[str, Any], detailed_airports: dict[str, Any]) -> dict[str, Any]:
+def build_tile_payload(region_manifest: dict[str, Any], visual_manifest: dict[str, Any], airport_database: dict[str, Any], detailed_airports: dict[str, Any]) -> dict[str, Any]:
     airports, runways = build_airports_and_runways(airport_database)
     return {
         "schemaVersion": TILE_SCHEMA_VERSION,
-        "tileId": "cz-slice-z0-x0-y0",
-        "bounds": visual_manifest["coverage"]["bounds"],
+        "regionId": region_manifest["regionId"],
+        "tileId": f"{region_manifest['regionId']}-z0-x0-y0",
+        "bounds": region_project_bounds(region_manifest),
         "runtimeNetworkRequired": False,
         "layers": {
             "zabaged-base": {"features": build_zabaged_base(visual_manifest)},
@@ -317,7 +384,7 @@ def render_style() -> dict[str, Any]:
     }
 
 
-def build_manifest(tile_payload: dict[str, Any], archive_bytes: bytes, style_bytes: bytes, inputs: dict[str, Path]) -> dict[str, Any]:
+def build_manifest(region_manifest: dict[str, Any], tile_payload: dict[str, Any], archive_bytes: bytes, style_bytes: bytes, inputs: dict[str, Path]) -> dict[str, Any]:
     layer_counts = {
         "zabaged-base": len(tile_payload["layers"]["zabaged-base"]["features"]),
         "geonames-labels": len(tile_payload["layers"]["geonames-labels"]["labels"]),
@@ -326,11 +393,26 @@ def build_manifest(tile_payload: dict[str, Any], archive_bytes: bytes, style_byt
         "obstacles": len(tile_payload["layers"]["obstacles"]["features"]),
         "airspaces": len(tile_payload["layers"]["airspaces"]["features"]),
     }
+    region_id = region_manifest["regionId"]
     return {
         "schemaVersion": SCHEMA_VERSION,
-        "packageId": "nav-map-cz-initial-50km-slice",
+        "packageId": f"nav-map-{region_id}",
         "packageVersion": "2026.08-approved-slice",
-        "coverage": {"countryCode": "CZ", "scope": "initial-navigation-map-slice", "bounds": tile_payload["bounds"]},
+        "regionManifest": {
+            "path": str(inputs["region_manifest"].relative_to(REPO_ROOT)),
+            "schemaVersion": region_manifest["schemaVersion"],
+            "regionId": region_id,
+            "coverageScope": region_manifest["coverageScope"],
+            "bounds": region_manifest["bounds"],
+            "projectBounds": region_manifest["projectBounds"],
+            "checksum": source_checksum(inputs["region_manifest"]),
+        },
+        "coverage": {
+            "countryCode": "CZ",
+            "scope": region_manifest["coverageScope"],
+            "regionId": region_id,
+            "bounds": tile_payload["bounds"],
+        },
         "runtimeDependencies": {
             "runtimeNetworkRequired": False,
             "externalMapApis": [],
@@ -402,19 +484,23 @@ def build_manifest(tile_payload: dict[str, Any], archive_bytes: bytes, style_byt
     }
 
 
-def write_package(output_dir: Path, visual_manifest_path: Path, airport_database_path: Path, detailed_airports_path: Path) -> None:
+def write_package(output_dir: Path, region_manifest_path: Path, visual_manifest_path: Path, airport_database_path: Path, detailed_airports_path: Path) -> None:
+    region_manifest = read_json(region_manifest_path)
+    validate_region_manifest(region_manifest)
     visual_manifest = read_json(visual_manifest_path)
     airport_database = read_json(airport_database_path)
     detailed_airports = read_json(detailed_airports_path)
-    payload = build_tile_payload(visual_manifest, airport_database, detailed_airports)
+    payload = build_tile_payload(region_manifest, visual_manifest, airport_database, detailed_airports)
     payload_bytes = stable_json(payload).encode("utf-8")
     archive_bytes = build_pmtiles(payload_bytes)
     style_bytes = stable_json(render_style()).encode("utf-8")
     manifest = build_manifest(
+        region_manifest,
         payload,
         archive_bytes,
         style_bytes,
         {
+            "region_manifest": region_manifest_path,
             "visual_manifest": visual_manifest_path,
             "airport_database": airport_database_path,
             "detailed_airports": detailed_airports_path,
@@ -437,6 +523,29 @@ def load_pmtiles_payload(path: Path) -> dict[str, Any]:
     return json.loads(data[offset:offset + length].decode("utf-8"))
 
 
+def load_mbtiles_payload(path: Path) -> dict[str, Any]:
+    with sqlite3.connect(f"file:{path}?mode=ro", uri=True) as connection:
+        row = connection.execute(
+            "SELECT tile_data FROM tiles ORDER BY zoom_level, tile_column, tile_row LIMIT 1"
+        ).fetchone()
+    require(row is not None and row[0], "MBTiles archive contains no tile payload")
+    payload = row[0]
+    if isinstance(payload, memoryview):
+        payload = payload.tobytes()
+    if isinstance(payload, str):
+        payload = payload.encode("utf-8")
+    require(isinstance(payload, bytes), "MBTiles tile payload must be bytes")
+    return json.loads(payload.decode("utf-8"))
+
+
+def load_tile_payload(archive_path: Path, archive_format: str) -> dict[str, Any]:
+    if archive_format == "pmtiles":
+        return load_pmtiles_payload(archive_path)
+    if archive_format == "mbtiles":
+        return load_mbtiles_payload(archive_path)
+    raise ValueError(f"unsupported tile archive format: {archive_format}")
+
+
 def payload_source_ids(payload: dict[str, Any]) -> set[str]:
     source_ids: set[str] = set()
     layers = payload.get("layers", {})
@@ -455,28 +564,54 @@ def payload_source_ids(payload: dict[str, Any]) -> set[str]:
     return source_ids
 
 
-def validate_package(output_dir: Path) -> None:
+def validate_package(output_dir: Path, region_manifest_path: Path) -> None:
+    region_manifest = read_json(region_manifest_path)
+    validate_region_manifest(region_manifest)
     manifest_path = output_dir / MANIFEST_PATH
-    archive_path = output_dir / ARCHIVE_PATH
-    style_path = output_dir / STYLE_PATH
     manifest = read_json(manifest_path)
+    archive_relative_path = manifest.get("tileArchive", {}).get("path")
+    style_relative_path = manifest.get("style", {}).get("path")
+    require(isinstance(archive_relative_path, str) and archive_relative_path, "manifest tileArchive.path missing")
+    require(isinstance(style_relative_path, str) and style_relative_path, "manifest style.path missing")
+    archive_path = resolve_package_artifact(output_dir, archive_relative_path, "tile archive")
+    style_path = resolve_package_artifact(output_dir, style_relative_path, "style")
     style = read_json(style_path)
-    payload = load_pmtiles_payload(archive_path)
+    archive_format = manifest.get("tileArchive", {}).get("format")
+    require(archive_format in {"pmtiles", "mbtiles"}, "manifest tileArchive.format must be pmtiles or mbtiles")
+    require(archive_path.suffix.lower() == f".{archive_format}", "tile archive extension must match declared format")
+    payload = load_tile_payload(archive_path, archive_format)
 
     require(manifest.get("schemaVersion") == SCHEMA_VERSION, "navigation manifest schema version mismatch")
+    require(manifest.get("regionManifest", {}).get("regionId") == region_manifest["regionId"], "navigation manifest regionId does not match explicit region manifest")
+    require(manifest.get("regionManifest", {}).get("checksum", {}).get("value") == source_checksum(region_manifest_path)["value"], "navigation manifest region checksum does not match explicit region manifest")
+    require(manifest.get("coverage", {}).get("regionId") == region_manifest["regionId"], "navigation coverage regionId does not match explicit region manifest")
+    require(payload.get("regionId") == region_manifest["regionId"], "tile payload regionId does not match explicit region manifest")
+    require(manifest.get("coverage", {}).get("bounds") == region_project_bounds(region_manifest), "navigation coverage bounds must match explicit region project bounds")
+    require(payload.get("bounds") == region_project_bounds(region_manifest), "tile payload bounds must match explicit region project bounds")
     require(manifest.get("runtimeDependencies", {}).get("runtimeNetworkRequired") is False, "manifest must disable runtime networking")
+    require(manifest.get("runtimeDependencies", {}).get("externalMapApis") == [], "manifest must not require external map APIs")
+    require(manifest.get("runtimeDependencies", {}).get("remoteTileServerUrls") == [], "manifest must not reference remote tile servers")
+    require(manifest.get("runtimeDependencies", {}).get("renderableWithNetworkingDisabled") is True, "manifest must be renderable with networking disabled")
     require(style.get("runtimeNetworkRequired") is False, "style must disable runtime networking")
     require(style.get("externalMapApis") == [] and style.get("remoteTileServerUrls") == [], "style must not reference remote maps")
+    require(not contains_remote_dependency(style), "style must not contain remote map/API dependencies")
     require(manifest["tileArchive"]["checksum"]["value"] == sha256_bytes(archive_path.read_bytes()), "archive checksum mismatch")
     require(manifest["style"]["checksum"]["value"] == sha256_bytes(style_path.read_bytes()), "style checksum mismatch")
     require(payload.get("runtimeNetworkRequired") is False, "tile payload must disable runtime networking")
+    require(not contains_remote_dependency(payload), "tile payload must not contain remote map/API dependencies")
 
     layers = payload.get("layers", {})
     for layer in REQUIRED_LAYERS:
+        require(layer in manifest.get("layers", {}).get("required", []), f"manifest missing required layer declaration: {layer}")
         require(layer in layers, f"tile payload missing layer: {layer}")
         count = manifest["layers"]["featureCounts"][layer]
         require(count > 0, f"manifest has empty required layer: {layer}")
+        require(style.get("layers", {}).get(layer), f"style missing required layer: {layer}")
+        collection = "labels" if layer == "geonames-labels" else "features"
+        require(len(layers[layer].get(collection, [])) == count, f"manifest feature count mismatch for layer: {layer}")
     require(manifest["layers"]["independentToggles"] == TOGGLE_LAYERS, "mandatory layer toggles are not independent")
+    for layer in TOGGLE_LAYERS:
+        require(layer in style.get("layers", {}), f"style missing toggle layer: {layer}")
     permitted_source_ids = set()
     for source in manifest.get("sourcePermissions", []):
         require(source.get("permissionStatus") == "permitted", f"source is not permitted: {source.get('sourceId')}")
@@ -486,23 +621,95 @@ def validate_package(output_dir: Path) -> None:
     missing_sources = payload_source_ids(payload) - permitted_source_ids
     require(not missing_sources, f"manifest missing source permissions for: {sorted(missing_sources)}")
     require(len(manifest.get("sourcePermissions", [])) >= 5, "manifest must record source permissions and attribution")
+    require(manifest.get("validation", {}).get("attributionVisible") is True, "map attribution must be visible")
+
+
+def write_json(path: Path, value: dict[str, Any]) -> None:
+    path.write_text(stable_json(value), encoding="utf-8")
+
+
+def expect_validation_failure(output_dir: Path, region_manifest_path: Path, expected: str) -> None:
+    try:
+        validate_package(output_dir, region_manifest_path)
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        require(expected in str(exc), f"expected failure containing {expected!r}, got: {exc}")
+        return
+    raise ValueError(f"expected validation failure containing {expected!r}")
+
+
+def run_validation_fixture(region_manifest_path: Path, output_dir: Path, fixture_path: Path) -> None:
+    fixture = read_json(fixture_path)
+    require(fixture.get("schemaVersion") == "flying.navigation-map-validation-fixture.v1", "navigation map validation fixture schema version mismatch")
+    missing_layer_cases = fixture.get("failureCases", {}).get("missingRequiredLayers", [])
+    remote_case = fixture.get("failureCases", {}).get("runtimeInternetDependency", {})
+    path_escape_cases = fixture.get("failureCases", {}).get("localArtifactEscapes", [])
+    remote_url = remote_case.get("remoteTileServerUrl")
+    require(isinstance(missing_layer_cases, list) and missing_layer_cases, "fixture must declare missingRequiredLayers cases")
+    for case in missing_layer_cases:
+        require(case.get("layerId") in REQUIRED_LAYERS, "fixture missingRequiredLayers.layerId must name a required layer")
+    require(isinstance(remote_url, str) and contains_remote_dependency(remote_url), "fixture runtimeInternetDependency must provide a remote URL")
+    require(isinstance(path_escape_cases, list) and path_escape_cases, "fixture must declare localArtifactEscapes cases")
+
+    with tempfile.TemporaryDirectory(prefix="flying-nav-map-validation-") as temp:
+        fixture_dir = Path(temp)
+        shutil.copytree(output_dir, fixture_dir / "ok")
+        validate_package(fixture_dir / "ok", region_manifest_path)
+
+        for case in missing_layer_cases:
+            missing_layer = case["layerId"]
+            missing_layer_dir = fixture_dir / f"missing-layer-{missing_layer}"
+            shutil.copytree(output_dir, missing_layer_dir)
+            archive_path = missing_layer_dir / ARCHIVE_PATH
+            payload = load_pmtiles_payload(archive_path)
+            del payload["layers"][missing_layer]
+            archive_path.write_bytes(build_pmtiles(stable_json(payload).encode("utf-8")))
+            manifest = read_json(missing_layer_dir / MANIFEST_PATH)
+            manifest["tileArchive"]["checksum"]["value"] = sha256_bytes(archive_path.read_bytes())
+            write_json(missing_layer_dir / MANIFEST_PATH, manifest)
+            expect_validation_failure(missing_layer_dir, region_manifest_path, f"tile payload missing layer: {missing_layer}")
+
+        remote_dir = fixture_dir / "remote-runtime"
+        shutil.copytree(output_dir, remote_dir)
+        manifest = read_json(remote_dir / MANIFEST_PATH)
+        manifest["runtimeDependencies"]["remoteTileServerUrls"] = [remote_url]
+        write_json(remote_dir / MANIFEST_PATH, manifest)
+        expect_validation_failure(remote_dir, region_manifest_path, "remote tile servers")
+
+        for case in path_escape_cases:
+            escape_dir = fixture_dir / f"artifact-escape-{case['field']}"
+            shutil.copytree(output_dir, escape_dir)
+            manifest = read_json(escape_dir / MANIFEST_PATH)
+            manifest[case["field"]]["path"] = case["path"]
+            write_json(escape_dir / MANIFEST_PATH, manifest)
+            expect_validation_failure(escape_dir, region_manifest_path, case["expectedFailure"])
 
 
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
+    parser.add_argument("--region-manifest", type=Path, required=True)
     parser.add_argument("--visual-manifest", type=Path, default=DEFAULT_VISUAL_MANIFEST)
     parser.add_argument("--airport-database", type=Path, default=DEFAULT_AIRPORT_DATABASE)
     parser.add_argument("--detailed-airports", type=Path, default=DEFAULT_DETAILED_AIRPORTS)
     parser.add_argument("--write", action="store_true", help="write Data/Map artifacts before validation")
     parser.add_argument("--validate", action="store_true", help="validate the existing or newly written package")
+    parser.add_argument("--validation-fixture", action="store_true", help="exercise failure fixtures for mandatory layers and network dependencies")
+    parser.add_argument("--validation-fixture-path", type=Path, default=DEFAULT_VALIDATION_FIXTURE)
     args = parser.parse_args(argv)
+    args.output_dir = args.output_dir.resolve()
+    args.region_manifest = args.region_manifest.resolve()
+    args.visual_manifest = args.visual_manifest.resolve()
+    args.airport_database = args.airport_database.resolve()
+    args.detailed_airports = args.detailed_airports.resolve()
+    args.validation_fixture_path = args.validation_fixture_path.resolve()
 
     try:
         if args.write:
-            write_package(args.output_dir, args.visual_manifest, args.airport_database, args.detailed_airports)
+            write_package(args.output_dir, args.region_manifest, args.visual_manifest, args.airport_database, args.detailed_airports)
         if args.validate or not args.write:
-            validate_package(args.output_dir)
+            validate_package(args.output_dir, args.region_manifest)
+        if args.validation_fixture:
+            run_validation_fixture(args.region_manifest, args.output_dir, args.validation_fixture_path)
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"build_nav_map: {exc}", file=sys.stderr)
         return 1

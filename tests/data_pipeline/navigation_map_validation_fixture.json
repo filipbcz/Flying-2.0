@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "flying.navigation-map-validation-fixture.v1",
+  "description": "Mutation cases used by tools/data_pipeline/build_nav_map.py to prove regional offline navigation map validation rejects missing mandatory aeronautical layers and runtime internet dependencies.",
+  "explicitRegionManifest": "Config/Regions/ceska-trebova-pilot-region.json",
+  "installedMapPackage": "Data/Map",
+  "failureCases": {
+    "missingRequiredLayers": [
+      {
+        "layerId": "airports",
+        "expectedFailure": "tile payload missing layer: airports"
+      },
+      {
+        "layerId": "runways",
+        "expectedFailure": "tile payload missing layer: runways"
+      },
+      {
+        "layerId": "obstacles",
+        "expectedFailure": "tile payload missing layer: obstacles"
+      },
+      {
+        "layerId": "airspaces",
+        "expectedFailure": "tile payload missing layer: airspaces"
+      }
+    ],
+    "runtimeInternetDependency": {
+      "remoteTileServerUrl": "https://tiles.example.invalid/{z}/{x}/{y}.pbf",
+      "expectedFailure": "manifest must not reference remote tile servers"
+    },
+    "localArtifactEscapes": [
+      {
+        "field": "tileArchive",
+        "path": "/tmp/outside-package.pmtiles",
+        "expectedFailure": "artifact path must be relative"
+      },
+      {
+        "field": "style",
+        "path": "C:\\outside-package\\style.json",
+        "expectedFailure": "artifact path must not include a drive or scheme"
+      }
+    ]
+  }
+}
