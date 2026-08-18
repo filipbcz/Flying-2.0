@@ -218,6 +218,7 @@ function validateImplementation(evidence) {
 function validateCaptureArtifact(evidence) {
   const artifactPath = requireRepoFile(evidence.captureArtifact, "captureArtifact");
   const capture = readJson(artifactPath);
+  const currentCommit = runGit(["rev-parse", "HEAD"]);
   requireCondition(capture.schemaVersion === "flying.georeferenced-content-render-capture.v1", "capture schemaVersion is invalid");
   requireCondition(capture.scenarioId === evidence.startupScenarioId, "capture scenarioId must match evidence startupScenarioId");
   requireCondition(capture.captureSource === "unreal-automation-test", "captureSource must be unreal-automation-test");
@@ -230,6 +231,7 @@ function validateCaptureArtifact(evidence) {
   requireCondition(isNonEmptyString(capture.build?.id), "capture build.id is required");
   requireCondition(isNonEmptyString(capture.build?.commit), "capture build.commit is required");
   requireCondition(/^[a-f0-9]{40}$/i.test(capture.build?.commit ?? ""), "capture build.commit must be a Git commit id");
+  requireCondition(capture.build.commit === currentCommit, "capture build.commit must match the current repository commit");
   requireCondition(isObject(capture.provenance), "capture must include generation provenance");
   requireCondition(capture.provenance?.generatedBy === "tools/validate_unreal_georeferenced_content.mjs --require-unreal-runtime", "capture provenance generatedBy is invalid");
   requireCondition(capture.provenance?.exitCode === 0, "capture provenance exitCode must be zero");
@@ -294,6 +296,7 @@ function validateCaptureArtifact(evidence) {
 function validateEvidence(relativeEvidencePath, options = {}) {
   const evidencePath = requireRepoFile(relativeEvidencePath, "evidence");
   const evidence = readJson(evidencePath);
+  const currentCommit = runGit(["rev-parse", "HEAD"]);
   requireCondition(evidence.schemaVersion === "flying.georeferenced-content-rendering-evidence.v1", "schemaVersion is invalid");
   requireCondition(isIsoUtc(evidence.createdAt), "createdAt must be an ISO UTC timestamp");
   requireCondition(evidence.startupScenarioId === "startup.offline-regional-georeferenced-content", "startupScenarioId is invalid");
@@ -306,6 +309,7 @@ function validateEvidence(relativeEvidencePath, options = {}) {
   requireCondition(isNonEmptyString(evidence.build?.id), "evidence build.id is required");
   requireCondition(isNonEmptyString(evidence.build?.commit), "evidence build.commit is required");
   requireCondition(/^[a-f0-9]{40}$/i.test(evidence.build?.commit ?? ""), "evidence build.commit must be a Git commit id");
+  requireCondition(evidence.build.commit === currentCommit, "evidence build.commit must match the current repository commit");
   requireCondition(isObject(evidence.runtimeValidation), "evidence must include runtimeValidation provenance");
   requireCondition(evidence.runtimeValidation?.automationTest === automationTestName, "runtimeValidation automationTest is invalid");
   requireCondition(
