@@ -9,7 +9,7 @@
   "offlineOnly": true,
   "build": {
     "id": "rc-startup-georef-rendering",
-    "commit": "f9270995ae8bc6ba6cacbc6e3fa10d89b52a810c",
+    "commit": "fa9d1c535a78aaa5426d0e1984c988d076a1a016",
     "platform": "Win64",
     "configuration": "Unreal Editor runtime automation",
     "unrealEngine": "5.8"
