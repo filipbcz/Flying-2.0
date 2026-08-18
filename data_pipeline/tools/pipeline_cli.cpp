@@ -1,3 +1,4 @@
+#include "flying/data_pipeline/airport_database.hpp"
 #include "flying/data_pipeline/dmr5g_terrain.hpp"
 #include "flying/data_pipeline/manifest.hpp"
 #include "flying/data_pipeline/pilot_region_packages.hpp"
@@ -5,8 +6,11 @@
 
 #include <filesystem>
 #include <exception>
+#include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <optional>
+#include <sstream>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -38,6 +42,9 @@ void print_usage(std::ostream& output) {
   output
     << "  flying-data-pipeline runway-import --airport-database PATH "
        "--package-version VERSION --output-dir DIR --report PATH [--package-name NAME]\n";
+  output
+    << "  flying-data-pipeline airport-coverage --airport-database PATH "
+       "--regional-master-list PATH --runway-surfaces-package PATH --report PATH\n";
 }
 
 struct ParsedArgs {
@@ -51,9 +58,88 @@ struct ParsedArgs {
   std::filesystem::path terrain_config;
   std::filesystem::path package_config;
   std::filesystem::path airport_database;
+  std::filesystem::path regional_master_list;
+  std::filesystem::path runway_surfaces_package;
   std::string package_name = "flying-gis-package";
   std::string package_version;
 };
+
+std::string json_escape(std::string_view text) {
+  std::ostringstream escaped;
+  for (const unsigned char ch : text) {
+    switch (ch) {
+      case '"':
+        escaped << "\\\"";
+        break;
+      case '\\':
+        escaped << "\\\\";
+        break;
+      case '\b':
+        escaped << "\\b";
+        break;
+      case '\f':
+        escaped << "\\f";
+        break;
+      case '\n':
+        escaped << "\\n";
+        break;
+      case '\r':
+        escaped << "\\r";
+        break;
+      case '\t':
+        escaped << "\\t";
+        break;
+      default:
+        if (ch < 0x20U) {
+          escaped << "\\u" << std::hex << std::setw(4) << std::setfill('0')
+                  << static_cast<unsigned int>(ch) << std::dec << std::setfill(' ');
+        } else {
+          escaped << static_cast<char>(ch);
+        }
+        break;
+    }
+  }
+  return escaped.str();
+}
+
+std::string json_quote(std::string_view text) {
+  return "\"" + json_escape(text) + "\"";
+}
+
+void write_validation_report_json(
+  const std::filesystem::path& path,
+  const flying::data_pipeline::ValidationReport& report) {
+  const std::filesystem::path parent = path.parent_path();
+  if (!parent.empty()) {
+    std::filesystem::create_directories(parent);
+  }
+  std::ofstream output(path, std::ios::binary);
+  if (!output) {
+    throw std::runtime_error("failed to open validation report " + path.string());
+  }
+  output << "{\n";
+  output << "  \"schemaVersion\": " << json_quote(report.schema_version) << ",\n";
+  output << "  \"passed\": " << (report.passed ? "true" : "false") << ",\n";
+  output << "  \"sourceManifestPath\": " << json_quote(report.source_manifest_path) << ",\n";
+  output << "  \"packageManifestPath\": " << json_quote(report.package_manifest_path) << ",\n";
+  output << "  \"issues\": [\n";
+  for (std::size_t i = 0U; i < report.issues.size(); ++i) {
+    const flying::data_pipeline::ValidationIssue& issue = report.issues[i];
+    output << "    {\"severity\": " << json_quote(issue.severity)
+           << ", \"code\": " << json_quote(issue.code)
+           << ", \"message\": " << json_quote(issue.message)
+           << ", \"sourceId\": " << json_quote(issue.source_id) << "}";
+    if (i + 1U != report.issues.size()) {
+      output << ",";
+    }
+    output << "\n";
+  }
+  output << "  ]\n";
+  output << "}\n";
+  if (!output) {
+    throw std::runtime_error("failed to write validation report " + path.string());
+  }
+}
 
 std::optional<std::string> take_value(const std::vector<std::string_view>& args,
                                       std::size_t& index,
@@ -88,7 +174,8 @@ std::optional<ParsedArgs> parse_args(int argc, char** argv) {
       parsed.command != "dmr5g-czech-republic-terrain" &&
       parsed.command != "pilot-region-packages" &&
       parsed.command != "czech-republic-packages" &&
-      parsed.command != "runway-import") {
+      parsed.command != "runway-import" &&
+      parsed.command != "airport-coverage") {
     std::cerr << "Unknown command: " << parsed.command << "\n";
     return std::nullopt;
   }
@@ -150,6 +237,18 @@ std::optional<ParsedArgs> parse_args(int argc, char** argv) {
         return std::nullopt;
       }
       parsed.airport_database = *value;
+    } else if (flag == "--regional-master-list") {
+      value = take_value(args, i, flag);
+      if (!value.has_value()) {
+        return std::nullopt;
+      }
+      parsed.regional_master_list = *value;
+    } else if (flag == "--runway-surfaces-package") {
+      value = take_value(args, i, flag);
+      if (!value.has_value()) {
+        return std::nullopt;
+      }
+      parsed.runway_surfaces_package = *value;
     } else if (flag == "--package-name") {
       value = take_value(args, i, flag);
       if (!value.has_value()) {
@@ -168,7 +267,8 @@ std::optional<ParsedArgs> parse_args(int argc, char** argv) {
     }
   }
 
-  if (parsed.command != "runway-import" && parsed.source_manifest.empty()) {
+  if (parsed.command != "runway-import" && parsed.command != "airport-coverage" &&
+      parsed.source_manifest.empty()) {
     std::cerr << "--source-manifest is required\n";
     return std::nullopt;
   }
@@ -237,6 +337,20 @@ std::optional<ParsedArgs> parse_args(int argc, char** argv) {
     }
     if (parsed.output_dir.empty()) {
       std::cerr << "--output-dir is required for runway-import\n";
+      return std::nullopt;
+    }
+  }
+  if (parsed.command == "airport-coverage") {
+    if (parsed.airport_database.empty()) {
+      std::cerr << "--airport-database is required for airport-coverage\n";
+      return std::nullopt;
+    }
+    if (parsed.regional_master_list.empty()) {
+      std::cerr << "--regional-master-list is required for airport-coverage\n";
+      return std::nullopt;
+    }
+    if (parsed.runway_surfaces_package.empty()) {
+      std::cerr << "--runway-surfaces-package is required for airport-coverage\n";
       return std::nullopt;
     }
   }
@@ -337,6 +451,23 @@ int main(int argc, char** argv) {
       }
       std::cout << "Pilot runway surface package " << result.report.package_id
                 << " written to " << result.package_manifest_path << "\n";
+      return 0;
+    }
+
+    if (parsed->command == "airport-coverage") {
+      const flying::data_pipeline::ValidationReport report =
+        flying::data_pipeline::validate_regional_airport_coverage_files(
+          parsed->airport_database,
+          parsed->regional_master_list,
+          parsed->runway_surfaces_package);
+      write_validation_report_json(parsed->report, report);
+      if (!report.passed) {
+        std::cerr << "Regional airport coverage failed; report written to "
+                  << parsed->report << "\n";
+        return 2;
+      }
+      std::cout << "Regional airport coverage passed; report written to "
+                << parsed->report << "\n";
       return 0;
     }
 

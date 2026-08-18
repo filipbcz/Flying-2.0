@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flying.local/schemas/regional-airport-master-list.schema.json",
+  "title": "Flying Regional Airport Master List",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "regionId",
+    "masterList"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "flying.regional-airport-master-list.v1"
+    },
+    "regionId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "airac": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "masterList": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/regionalMasterListRecord"
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "regionalMasterListRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "aerodromeId",
+        "name",
+        "classification",
+        "operationalStatus"
+      ],
+      "properties": {
+        "aerodromeId": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "name": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "classification": {
+          "enum": [
+            "active_airport",
+            "slz_field",
+            "closed_field"
+          ]
+        },
+        "operationalStatus": {
+          "enum": [
+            "active",
+            "inactive",
+            "closed",
+            "unknown"
+          ]
+        },
+        "requiredRunways": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/runwayRequirement"
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "operationalStatus": {
+                "const": "active"
+              },
+              "classification": {
+                "enum": [
+                  "active_airport",
+                  "slz_field"
+                ]
+              }
+            },
+            "required": [
+              "operationalStatus",
+              "classification"
+            ]
+          },
+          "then": {
+            "required": [
+              "requiredRunways"
+            ],
+            "properties": {
+              "requiredRunways": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "runwayRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "designator": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
