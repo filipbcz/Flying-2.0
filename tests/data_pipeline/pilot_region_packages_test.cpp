@@ -591,6 +591,94 @@ int main() {
   }
 
   {
+    const std::filesystem::path missing_ortho_root = make_temp_root();
+    write_fixture_inputs(missing_ortho_root);
+    write_file(missing_ortho_root / "pilot-config.json",
+               replace_once(package_config(),
+                            "  \"orthoImagery\": {\n",
+                            "  \"orthoImageryMissing\": {\n"));
+    pipeline::PilotRegionPackageOptions missing_ortho_options =
+      make_options(missing_ortho_root);
+    const pipeline::PilotRegionPackageResult missing_ortho_result =
+      pipeline::process_pilot_region_packages(missing_ortho_options);
+    assert(!missing_ortho_result.created());
+    const std::string missing_ortho_report =
+      read_file(missing_ortho_options.report_path);
+    assert(missing_ortho_report.find(
+             "\"code\": \"pilot.config.orthoImagery.missing\"") !=
+           std::string::npos);
+    std::filesystem::remove_all(missing_ortho_root);
+  }
+
+  {
+    const std::filesystem::path missing_vector_root = make_temp_root();
+    write_fixture_inputs(missing_vector_root);
+    write_file(missing_vector_root / "pilot-config.json",
+               replace_once(package_config(),
+                            "\"category\": \"runway\"",
+                            "\"category\": \"runwayMissing\""));
+    pipeline::PilotRegionPackageOptions missing_vector_options =
+      make_options(missing_vector_root);
+    const pipeline::PilotRegionPackageResult missing_vector_result =
+      pipeline::process_pilot_region_packages(missing_vector_options);
+    assert(!missing_vector_result.created());
+    const std::string missing_vector_report =
+      read_file(missing_vector_options.report_path);
+    assert(missing_vector_report.find(
+             "\"code\": \"pilot.config.vectorLayers.category.missing\"") !=
+           std::string::npos);
+    assert(missing_vector_report.find("\"sourceId\": \"runway\"") !=
+           std::string::npos);
+    std::filesystem::remove_all(missing_vector_root);
+  }
+
+  {
+    const std::filesystem::path missing_source_metadata_root = make_temp_root();
+    write_fixture_inputs(missing_source_metadata_root);
+    std::string manifest = source_manifest();
+    manifest = replace_once(manifest,
+                            "      \"version\": \"2026.08.fixture\",\n",
+                            "");
+    manifest = replace_once(
+      manifest,
+      "      \"license\": {\"name\": \"CUZK Open Data / Geonames Fixture License\"},\n",
+      "");
+    manifest = replace_once(
+      manifest,
+      "      \"attribution\": {\"text\": \"Contains CUZK Ortofoto pilot fixture imagery.\"},\n",
+      "");
+    manifest = replace_once(
+      manifest,
+      "      \"permittedUse\": {\"terrainDerivatives\": true, \"runtimeRedistribution\": true, \"attributionRequired\": true},\n",
+      "      \"permittedUse\": {\"terrainDerivatives\": true, \"attributionRequired\": true},\n");
+    manifest = replace_once(
+      manifest,
+      "      \"checksum\": {\"path\": \"ortofoto/pilot.ppm\", \"algorithm\": \"sha256\", \"value\": \"" +
+        std::string{kChecksumFixture} + "\"}\n",
+      "      \"checksum\": {}\n");
+    write_file(missing_source_metadata_root / "source-manifest.json", manifest);
+    pipeline::PilotRegionPackageOptions missing_source_metadata_options =
+      make_options(missing_source_metadata_root);
+    const pipeline::PilotRegionPackageResult missing_source_metadata_result =
+      pipeline::process_pilot_region_packages(missing_source_metadata_options);
+    assert(!missing_source_metadata_result.created());
+    const std::string missing_source_metadata_report =
+      read_file(missing_source_metadata_options.report_path);
+    assert(missing_source_metadata_report.find("\"code\": \"source.version.missing\"") !=
+           std::string::npos);
+    assert(missing_source_metadata_report.find("\"code\": \"source.license.missing\"") !=
+           std::string::npos);
+    assert(missing_source_metadata_report.find("\"code\": \"source.attribution.missing\"") !=
+           std::string::npos);
+    assert(missing_source_metadata_report.find(
+             "\"code\": \"source.permittedUse.runtimeRedistribution.missing\"") !=
+           std::string::npos);
+    assert(missing_source_metadata_report.find("\"code\": \"source.checksum.path.missing\"") !=
+           std::string::npos);
+    std::filesystem::remove_all(missing_source_metadata_root);
+  }
+
+  {
     const std::filesystem::path mip_root = make_temp_root();
     write_fixture_inputs(mip_root);
     write_file(mip_root / "pilot-config.json",

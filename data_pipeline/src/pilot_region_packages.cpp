@@ -1476,7 +1476,15 @@ std::optional<PilotPackageConfig> parse_package_config(const JsonValue& root,
   }
 
   const std::set<std::string> required_categories = {
-    "notableObjects", "rail", "roads", "settlements", "vegetationAreas", "water"};
+    "airport",
+    "notableObjects",
+    "rail",
+    "roads",
+    "runway",
+    "settlements",
+    "vegetationAreas",
+    "water",
+  };
   std::set<std::string> declared_categories;
   for (const VectorLayerConfig& layer : config.vector_layers) {
     declared_categories.insert(layer.category);
