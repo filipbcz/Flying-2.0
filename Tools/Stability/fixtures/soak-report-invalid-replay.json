@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "flying.long-flight-soak-report.v1",
+  "scenarioId": "regional-cross-country-soak",
+  "startedAtUtc": "2026-08-18T00:00:00Z",
+  "completedAtUtc": "2026-08-18T10:00:00Z",
+  "durationHoursRequired": 10,
+  "durationHoursActual": 10,
+  "identity": {
+    "coreSimVersion": "1.0.0-rc",
+    "dataVersion": "pilot-region-ceska-trebova-2026-08-18",
+    "configVersion": "shipping-high",
+    "inputProfile": "deterministic-soak-v1",
+    "weatherSeed": "424242"
+  },
+  "process": {
+    "exitCode": 0,
+    "signal": null,
+    "crashed": false
+  },
+  "memorySamples": [
+    {
+      "type": "memory",
+      "capturedAtUtc": "2026-08-18T01:00:00Z",
+      "workingSetMiB": 11320
+    }
+  ],
+  "hitches": [],
+  "streamingErrors": [],
+  "replayHashes": [
+    {
+      "type": "replay-hash",
+      "scenarioId": "regional-cross-country-soak",
+      "coreSimVersion": "1.0.0-rc",
+      "dataVersion": "pilot-region-ceska-trebova-2026-08-18",
+      "configVersion": "shipping-high",
+      "inputProfile": "deterministic-soak-v1",
+      "weatherSeed": "424242",
+      "hash": "sha256:95b4c1d41c90f6cf2d27d5b31db0e884c1ac4a6f04abc850de6272d86fb4ad55"
+    },
+    {
+      "type": "replay-hash",
+      "scenarioId": "regional-cross-country-soak",
+      "coreSimVersion": "1.0.0-rc",
+      "dataVersion": "pilot-region-ceska-trebova-2026-08-18",
+      "configVersion": "shipping-high",
+      "inputProfile": "deterministic-soak-v1",
+      "weatherSeed": "424242",
+      "hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "flying.stability-qa-matrix.v1",
+  "referenceEnvironment": {
+    "os": "Windows 11",
+    "configuration": "Shipping"
+  },
+  "requiredSupportedGpus": [
+    {
+      "id": "nvidia-rtx-4070",
+      "name": "NVIDIA GeForce RTX 4070",
+      "supported": true
+    },
+    {
+      "id": "amd-rx-7800-xt",
+      "name": "AMD Radeon RX 7800 XT",
+      "supported": true
+    }
+  ],
+  "requiredSupportedDevices": [
+    {
+      "id": "keyboard-mouse",
+      "name": "Keyboard and mouse",
+      "supported": true
+    },
+    {
+      "id": "xinput-gamepad",
+      "name": "XInput gamepad",
+      "supported": true
+    }
+  ],
+  "gpuEvidence": [
+    {
+      "id": "nvidia-rtx-4070",
+      "result": "pass",
+      "executedAtUtc": "2026-08-18T10:10:00Z",
+      "evidenceArtifact": "artifacts/nvidia-rtx-4070-soak.json"
+    },
+    {
+      "id": "amd-rx-7800-xt",
+      "result": "pass",
+      "executedAtUtc": "2026-08-18T10:20:00Z",
+      "evidenceArtifact": "artifacts/amd-rx-7800-xt-soak.json"
+    }
+  ],
+  "deviceEvidence": [
+    {
+      "id": "keyboard-mouse",
+      "result": "pass",
+      "executedAtUtc": "2026-08-18T10:30:00Z",
+      "evidenceArtifact": "artifacts/keyboard-mouse-soak.json"
+    }
+  ]
+}

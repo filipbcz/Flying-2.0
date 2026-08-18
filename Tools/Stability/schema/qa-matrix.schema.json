@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flying.local/schemas/stability-qa-matrix.schema.json",
+  "title": "Flying stability QA matrix",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "referenceEnvironment",
+    "requiredSupportedGpus",
+    "requiredSupportedDevices",
+    "gpuEvidence",
+    "deviceEvidence"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "flying.stability-qa-matrix.v1"
+    },
+    "referenceEnvironment": {
+      "type": "object",
+      "required": [
+        "os"
+      ],
+      "properties": {
+        "os": {
+          "const": "Windows 11"
+        },
+        "configuration": {
+          "type": "string"
+        }
+      }
+    },
+    "requiredSupportedGpus": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "supported"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string"
+          },
+          "supported": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "requiredSupportedDevices": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "supported"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string"
+          },
+          "supported": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "gpuEvidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "result",
+          "executedAtUtc",
+          "evidenceArtifact"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "result": {
+            "type": "string",
+            "minLength": 1
+          },
+          "executedAtUtc": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidenceArtifact": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "deviceEvidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "result",
+          "executedAtUtc",
+          "evidenceArtifact"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "result": {
+            "type": "string",
+            "minLength": 1
+          },
+          "executedAtUtc": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidenceArtifact": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}
