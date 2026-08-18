@@ -49,6 +49,32 @@ bool ControlEngaged(const TArray<FFlyingCockpitControlState>& Controls,
   return State ? State->bEngaged : bDefaultValue;
 }
 
+bool IsAttachedTo(const USceneComponent* Component, const USceneComponent* ExpectedRoot)
+{
+  for (const USceneComponent* Current = Component; Current; Current = Current->GetAttachParent())
+  {
+    if (Current == ExpectedRoot)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool SnapshotsMatch(const FFlyingCoreSimImmutableStateSnapshot& Left,
+                    const FFlyingCoreSimImmutableStateSnapshot& Right)
+{
+  return Left.bValid == Right.bValid &&
+         Left.SimulationTimeSeconds == Right.SimulationTimeSeconds &&
+         Left.StepIndex == Right.StepIndex &&
+         Left.StateHash == Right.StateHash &&
+         Left.EcefPositionMeters.Equals(Right.EcefPositionMeters, KINDA_SMALL_NUMBER) &&
+         Left.EcefVelocityMetersPerSecond.Equals(
+           Right.EcefVelocityMetersPerSecond,
+           KINDA_SMALL_NUMBER) &&
+         Left.BodyToEcef.Equals(Right.BodyToEcef, KINDA_SMALL_NUMBER);
+}
+
 constexpr int32 kProceduralAudioSampleRate = 22050;
 constexpr float kMinimumProceduralAudioQueueSeconds = 0.005f;
 constexpr float kMaximumProceduralAudioQueueSeconds = 0.5f;
@@ -294,7 +320,7 @@ void AFlyingCoreSimAircraftActor::UpdatePresentationFromCoreSim()
     return;
   }
 
-  UpdatePresentationFromSnapshot(CoreSimComponent->GetCurrentSnapshot());
+  UpdatePresentationFromImmutableSnapshot(CoreSimComponent->GetCurrentImmutableSnapshot());
   UpdateCockpitFromInstruments(CoreSimComponent->GetCurrentInstrumentSnapshot());
 }
 
@@ -317,6 +343,54 @@ void AFlyingCoreSimAircraftActor::UpdatePresentationFromSnapshot(
     false,
     nullptr,
     ETeleportType::TeleportPhysics);
+}
+
+void AFlyingCoreSimAircraftActor::UpdatePresentationFromImmutableSnapshot(
+  const FFlyingCoreSimImmutableStateSnapshot& Snapshot)
+{
+  if (!Snapshot.bValid || !GeoreferenceComponent)
+  {
+    return;
+  }
+
+  const FVector UnrealLocation =
+    GeoreferenceComponent->TransformEcefPositionToUnreal(Snapshot.EcefPositionMeters);
+  const FRotator UnrealRotation =
+    GeoreferenceComponent->TransformBodyToUnrealRotator(Snapshot);
+
+  SetActorLocationAndRotation(
+    UnrealLocation,
+    UnrealRotation,
+    false,
+    nullptr,
+    ETeleportType::TeleportPhysics);
+  LastAppliedImmutableSnapshot = Snapshot;
+  LastAppliedUnrealLocation = UnrealLocation;
+  LastAppliedUnrealRotation = UnrealRotation;
+  bHasAppliedImmutableSnapshot = true;
+}
+
+bool AFlyingCoreSimAircraftActor::DoCockpitAndExternalVisualsShareAuthoritativeSnapshotRoot() const
+{
+  return bHasAppliedImmutableSnapshot &&
+         SceneRoot && GetRootComponent() == SceneRoot &&
+         AircraftMesh && IsAttachedTo(AircraftMesh, SceneRoot) &&
+         CockpitRoot && IsAttachedTo(CockpitRoot, SceneRoot) &&
+         CockpitCamera && IsAttachedTo(CockpitCamera, SceneRoot) &&
+         InstrumentCamera && IsAttachedTo(InstrumentCamera, SceneRoot) &&
+         ExteriorSpringArm && IsAttachedTo(ExteriorSpringArm, SceneRoot) &&
+         ExteriorCamera && IsAttachedTo(ExteriorCamera, SceneRoot);
+}
+
+bool AFlyingCoreSimAircraftActor::DoesVisualPresentationMatchImmutableSnapshot(
+  const FFlyingCoreSimImmutableStateSnapshot& Snapshot) const
+{
+  return bHasAppliedImmutableSnapshot &&
+         Snapshot.bValid &&
+         SnapshotsMatch(LastAppliedImmutableSnapshot, Snapshot) &&
+         GetActorLocation().Equals(LastAppliedUnrealLocation, KINDA_SMALL_NUMBER) &&
+         GetActorRotation().Equals(LastAppliedUnrealRotation, KINDA_SMALL_NUMBER) &&
+         DoCockpitAndExternalVisualsShareAuthoritativeSnapshotRoot();
 }
 
 void AFlyingCoreSimAircraftActor::InteractCockpitControl(

@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "FlyingCoreSimBridge.h"
 #include "FlyingCoreSimStateSnapshot.h"
 #include "FlyingInputMappingTypes.h"
 
@@ -84,6 +85,15 @@ public:
 
   UFUNCTION(BlueprintCallable, Category="Flying|CoreSim")
   void UpdatePresentationFromSnapshot(const FFlyingCoreSimStateSnapshot& Snapshot);
+
+  void UpdatePresentationFromImmutableSnapshot(
+    const FFlyingCoreSimImmutableStateSnapshot& Snapshot);
+
+  UFUNCTION(BlueprintPure, Category="Flying|CoreSim")
+  bool DoCockpitAndExternalVisualsShareAuthoritativeSnapshotRoot() const;
+
+  bool DoesVisualPresentationMatchImmutableSnapshot(
+    const FFlyingCoreSimImmutableStateSnapshot& Snapshot) const;
 
   UFUNCTION(BlueprintCallable, Category="Flying|Cockpit")
   void InteractCockpitControl(EFlyingCockpitControl Control, double PositionNorm, bool bEngaged);
@@ -239,4 +249,9 @@ private:
 
   UPROPERTY(VisibleAnywhere, Category="Flying|Components")
   TObjectPtr<UFlyingCesiumGeoreferenceComponent> GeoreferenceComponent;
+
+  FFlyingCoreSimImmutableStateSnapshot LastAppliedImmutableSnapshot;
+  FVector LastAppliedUnrealLocation = FVector::ZeroVector;
+  FRotator LastAppliedUnrealRotation = FRotator::ZeroRotator;
+  bool bHasAppliedImmutableSnapshot = false;
 };

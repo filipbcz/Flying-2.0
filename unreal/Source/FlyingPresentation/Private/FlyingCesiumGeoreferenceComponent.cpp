@@ -10,6 +10,25 @@ FVector RotatedEcefDirection(const FQuat& BodyToEcef, const FVector& BodyAxis)
   return BodyToEcef.RotateVector(BodyAxis).GetSafeNormal();
 }
 
+FRotator TransformBodyQuatToUnrealRotator(
+  const UFlyingCesiumGeoreferenceComponent& Component,
+  const FQuat& BodyToEcef)
+{
+  const FVector ForwardEcef =
+    RotatedEcefDirection(BodyToEcef, FVector::ForwardVector);
+  const FVector RightEcef =
+    RotatedEcefDirection(BodyToEcef, FVector::RightVector);
+  const FVector ForwardUnreal = Component.TransformEcefDirectionToUnreal(ForwardEcef).GetSafeNormal();
+  const FVector RightUnreal = Component.TransformEcefDirectionToUnreal(RightEcef).GetSafeNormal();
+
+  if (ForwardUnreal.IsNearlyZero() || RightUnreal.IsNearlyZero())
+  {
+    return FRotator::ZeroRotator;
+  }
+
+  return FRotationMatrix::MakeFromXY(ForwardUnreal, RightUnreal).Rotator();
+}
+
 } // namespace
 
 UFlyingCesiumGeoreferenceComponent::UFlyingCesiumGeoreferenceComponent()
@@ -77,17 +96,16 @@ FRotator UFlyingCesiumGeoreferenceComponent::TransformBodyToUnrealRotator(
     return FRotator::ZeroRotator;
   }
 
-  const FVector ForwardEcef =
-    RotatedEcefDirection(Snapshot.BodyToEcef, FVector::ForwardVector);
-  const FVector RightEcef =
-    RotatedEcefDirection(Snapshot.BodyToEcef, FVector::RightVector);
-  const FVector ForwardUnreal = TransformEcefDirectionToUnreal(ForwardEcef).GetSafeNormal();
-  const FVector RightUnreal = TransformEcefDirectionToUnreal(RightEcef).GetSafeNormal();
+  return TransformBodyQuatToUnrealRotator(*this, Snapshot.BodyToEcef);
+}
 
-  if (ForwardUnreal.IsNearlyZero() || RightUnreal.IsNearlyZero())
+FRotator UFlyingCesiumGeoreferenceComponent::TransformBodyToUnrealRotator(
+  const FFlyingCoreSimImmutableStateSnapshot& Snapshot) const
+{
+  if (!Snapshot.bValid)
   {
     return FRotator::ZeroRotator;
   }
 
-  return FRotationMatrix::MakeFromXY(ForwardUnreal, RightUnreal).Rotator();
+  return TransformBodyQuatToUnrealRotator(*this, Snapshot.BodyToEcef);
 }
