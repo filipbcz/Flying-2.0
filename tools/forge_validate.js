@@ -45,14 +45,54 @@ function validateLedgerSchema(schema) {
     "ledger requirement id pattern mismatch",
   );
 
-  const requiredSets = new Set((requirementSchema.anyOf ?? []).map((item) => (item.required ?? []).join(",")));
+  const evidenceOptions = requirementSchema.oneOf ?? requirementSchema.anyOf ?? [];
+  const requiredSets = new Set(evidenceOptions.map((item) => (item.required ?? []).join(",")));
   requireCondition(
     requiredSets.has("proofRefs") && requiredSets.has("blockerRef"),
     "ledger must reject requirements without proofRefs or blockerRef",
   );
   requireCondition(
+    Array.isArray(requirementSchema.oneOf),
+    "ledger must make proofRefs and blockerRef mutually exclusive",
+  );
+  requireCondition(
     requirementSchema.properties?.proofRefs?.minItems === 1,
     "ledger proofRefs must require at least one proof",
+  );
+}
+
+function refBase(ref) {
+  return ref.split("#", 1)[0];
+}
+
+function validateProofRef(entry, proofRef) {
+  requireCondition(proofRef && typeof proofRef === "object", `invalid proofRef: ${entry.requirementId}`);
+  requireCondition(proofRef.status === "pass", `proofRef must be passing: ${entry.requirementId}`);
+  requireCondition(proofRef.kind !== "external", `external references are blockers, not proof: ${entry.requirementId}`);
+  requireCondition(
+    !/(^|[/\\])(fixtures?|synthetic|declarations?)([/\\]|$)/i.test(proofRef.path),
+    `synthetic, fixture, or declaration path cannot be production proof: ${entry.requirementId}`,
+  );
+  if (proofRef.kind !== "command") {
+    const proofPath = path.resolve(repoRoot, refBase(proofRef.path));
+    requireCondition(
+      proofPath === repoRoot || proofPath.startsWith(`${repoRoot}${path.sep}`),
+      `proofRef path must stay inside the repository: ${entry.requirementId}`,
+    );
+    requireCondition(fs.existsSync(proofPath), `proofRef path is missing: ${proofRef.path}`);
+  }
+}
+
+function validateBlockerRef(entry) {
+  requireCondition(
+    entry.blockerRef.startsWith("docs/blockers/external-inputs.yml#"),
+    `blockerRef must link the external blocker registry: ${entry.requirementId}`,
+  );
+  const blockerId = entry.blockerRef.slice("docs/blockers/external-inputs.yml#".length);
+  const blockerRegistry = fs.readFileSync(path.join(repoRoot, "docs", "blockers", "external-inputs.yml"), "utf8");
+  requireCondition(
+    blockerRegistry.includes(`blocker_id: ${blockerId}`),
+    `blockerRef does not exist in external blocker registry: ${entry.blockerRef}`,
   );
 }
 
@@ -131,18 +171,33 @@ function validateLedgerEntries(contract, ledger) {
     requireCondition(requirement, `ledger references unknown requirement: ${entry.requirementId}`);
     requireCondition(!seen.has(entry.requirementId), `duplicate ledger evidence entry: ${entry.requirementId}`);
     seen.add(entry.requirementId);
-    requireCondition(
-      Array.isArray(entry.proofRefs) && entry.proofRefs.length > 0 || Boolean(entry.blockerRef),
-      `ledger entry must link proofRefs or blockerRef: ${entry.requirementId}`,
-    );
+    const hasProof = Array.isArray(entry.proofRefs) && entry.proofRefs.length > 0;
+    const hasBlocker = Boolean(entry.blockerRef);
+    requireCondition(hasProof !== hasBlocker, `ledger entry must link exactly one of proofRefs or blockerRef: ${entry.requirementId}`);
     requireCondition(entry.milestone === requirement.milestone, `ledger milestone mismatch: ${entry.requirementId}`);
     if (requirement.mandatory) {
       requireCondition(entry.mandatory === true, `mandatory flag mismatch: ${entry.requirementId}`);
+    }
+    if (hasProof) {
+      requireCondition(entry.status === "pass", `proof-backed ledger entry must be pass: ${entry.requirementId}`);
+      for (const proofRef of entry.proofRefs) {
+        validateProofRef(entry, proofRef);
+      }
+    }
+    if (hasBlocker) {
+      requireCondition(entry.status === "blocked", `blocker-backed ledger entry must be blocked: ${entry.requirementId}`);
+      validateBlockerRef(entry);
     }
   }
 
   const missing = [...requirementById.keys()].filter((requirementId) => !seen.has(requirementId));
   requireCondition(missing.length === 0, `evidence ledger missing requirements: ${missing.join(", ")}`);
+}
+
+function validateEvidenceLedger(args) {
+  const contract = validateContract();
+  const ledger = readJson(resolveLedgerPath(args));
+  validateLedgerEntries(contract, ledger);
 }
 
 function resolveLedgerPath(args) {
@@ -192,6 +247,33 @@ function validateMissingEvidenceSelftest() {
   throw new ValidationError("missing mandatory evidence was accepted");
 }
 
+function validateMissingRequirementSelftest() {
+  const contract = validateContract();
+  const validEntries = contract.requirements.map((requirement) => ({
+    requirementId: requirement.id,
+    milestone: requirement.milestone,
+    mandatory: requirement.mandatory,
+    status: "blocked",
+    blockerRef: "docs/blockers/external-inputs.yml#production-visual-shipping-evidence",
+  }));
+  const invalidLedger = {
+    schemaVersion: "flying.evidence-ledger.v1",
+    contractId: contract.contractId,
+    generatedAtUtc: "2026-08-18T00:00:00Z",
+    requirements: validEntries.slice(1),
+  };
+
+  try {
+    validateLedgerEntries(contract, invalidLedger);
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      return;
+    }
+    throw error;
+  }
+  throw new ValidationError("missing requirement evidence was accepted");
+}
+
 function main() {
   const [command, ...args] = process.argv.slice(2);
   switch (command) {
@@ -208,9 +290,17 @@ function main() {
       validateReleaseGate(args);
       console.log("forge_validate: release gate ok");
       return;
+    case "evidence-ledger":
+      validateEvidenceLedger(args);
+      console.log("forge_validate: evidence ledger ok");
+      return;
     case "missing-evidence-selftest":
       validateMissingEvidenceSelftest();
       console.log("forge_validate: missing mandatory evidence rejected");
+      return;
+    case "missing-requirement-selftest":
+      validateMissingRequirementSelftest();
+      console.log("forge_validate: missing requirement evidence rejected");
       return;
     default:
       throw new ValidationError(`unknown command: ${command ?? "(missing)"}`);

@@ -127,16 +127,56 @@ def validate_ledger_schema(schema: dict[str, Any]) -> None:
     requirement_schema = schema.get("$defs", {}).get("requirementEvidence", {})
     require(requirement_schema.get("properties", {}).get("requirementId", {}).get("pattern") == REQ_ID.pattern,
             "ledger requirement id pattern mismatch")
-    any_of = requirement_schema.get("anyOf")
-    require(isinstance(any_of, list), "ledger requirement evidence must declare anyOf proof/blocker rule")
-    required_sets = {tuple(item.get("required", [])) for item in any_of if isinstance(item, dict)}
+    one_of = requirement_schema.get("oneOf")
+    evidence_options = one_of or requirement_schema.get("anyOf")
+    require(isinstance(evidence_options, list), "ledger requirement evidence must declare proof/blocker rule")
+    required_sets = {tuple(item.get("required", [])) for item in evidence_options if isinstance(item, dict)}
     require(("proofRefs",) in required_sets and ("blockerRef",) in required_sets,
             "ledger must reject requirements without proofRefs or blockerRef")
+    require(isinstance(one_of, list), "ledger must make proofRefs and blockerRef mutually exclusive")
     proof_refs = requirement_schema.get("properties", {}).get("proofRefs", {})
     require(proof_refs.get("minItems") == 1, "ledger proofRefs must require at least one proof")
 
 
+def ref_base(ref: str) -> str:
+    return ref.split("#", 1)[0]
+
+
+def validate_proof_ref(entry: dict[str, Any], proof_ref: dict[str, Any]) -> None:
+    requirement_id = entry.get("requirementId")
+    require(isinstance(proof_ref, dict), f"invalid proofRef: {requirement_id}")
+    require(proof_ref.get("status") == "pass", f"proofRef must be passing: {requirement_id}")
+    require(proof_ref.get("kind") != "external", f"external references are blockers, not proof: {requirement_id}")
+    path_text = proof_ref.get("path")
+    require(isinstance(path_text, str) and path_text, f"proofRef path is required: {requirement_id}")
+    require(
+        re.search(r"(^|[/\\])(fixtures?|synthetic|declarations?)([/\\]|$)", path_text, flags=re.IGNORECASE) is None,
+        f"synthetic, fixture, or declaration path cannot be production proof: {requirement_id}",
+    )
+    if proof_ref.get("kind") != "command":
+        proof_path = (REPO_ROOT / ref_base(path_text)).resolve()
+        require(
+            proof_path == REPO_ROOT or REPO_ROOT in proof_path.parents,
+            f"proofRef path must stay inside the repository: {requirement_id}",
+        )
+        require(proof_path.exists(), f"proofRef path is missing: {path_text}")
+
+
+def validate_blocker_ref(entry: dict[str, Any]) -> None:
+    blocker_ref = entry.get("blockerRef")
+    requirement_id = entry.get("requirementId")
+    prefix = "docs/blockers/external-inputs.yml#"
+    require(isinstance(blocker_ref, str) and blocker_ref.startswith(prefix),
+            f"blockerRef must link the external blocker registry: {requirement_id}")
+    blocker_id = blocker_ref[len(prefix):]
+    registry = (REPO_ROOT / "docs" / "blockers" / "external-inputs.yml").read_text(encoding="utf-8")
+    require(f"blocker_id: {blocker_id}" in registry,
+            f"blockerRef does not exist in external blocker registry: {blocker_ref}")
+
+
 def validate_ledger_entries(contract: dict[str, Any], ledger: dict[str, Any]) -> None:
+    require(ledger.get("schemaVersion") == "flying.evidence-ledger.v1", "ledger schemaVersion mismatch")
+    require(ledger.get("contractId") == contract.get("contractId"), "ledger contractId mismatch")
     requirement_by_id = {item["id"]: item for item in contract["requirements"]}
     entries = ledger.get("requirements")
     require(isinstance(entries, list) and entries, "evidence ledger requirements must be a non-empty list")
@@ -147,14 +187,21 @@ def validate_ledger_entries(contract: dict[str, Any], ledger: dict[str, Any]) ->
         require(requirement_id in requirement_by_id, f"ledger references unknown requirement: {requirement_id}")
         require(requirement_id not in seen, f"duplicate ledger evidence entry: {requirement_id}")
         seen.add(requirement_id)
-        has_proof = bool(entry.get("proofRefs"))
+        has_proof = isinstance(entry.get("proofRefs"), list) and bool(entry.get("proofRefs"))
         has_blocker = bool(entry.get("blockerRef"))
-        require(has_proof or has_blocker,
-                f"ledger entry must link proofRefs or blockerRef: {requirement_id}")
+        require(has_proof != has_blocker,
+                f"ledger entry must link exactly one of proofRefs or blockerRef: {requirement_id}")
         require(entry.get("milestone") == requirement_by_id[requirement_id]["milestone"],
                 f"ledger milestone mismatch: {requirement_id}")
         if requirement_by_id[requirement_id].get("mandatory") is True:
             require(entry.get("mandatory") is True, f"mandatory flag mismatch: {requirement_id}")
+        if has_proof:
+            require(entry.get("status") == "pass", f"proof-backed ledger entry must be pass: {requirement_id}")
+            for proof_ref in entry["proofRefs"]:
+                validate_proof_ref(entry, proof_ref)
+        if has_blocker:
+            require(entry.get("status") == "blocked", f"blocker-backed ledger entry must be blocked: {requirement_id}")
+            validate_blocker_ref(entry)
 
     missing = set(requirement_by_id) - seen
     require(not missing, f"evidence ledger missing requirements: {sorted(missing)}")
@@ -358,6 +405,14 @@ def command_release_gate(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_evidence_ledger(args: argparse.Namespace) -> int:
+    contract = validate_contract()
+    ledger = load_json(REPO_ROOT / args.ledger)
+    validate_ledger_entries(contract, ledger)
+    print("forge_validate: evidence ledger ok")
+    return 0
+
+
 def command_missing_evidence_selftest(_: argparse.Namespace) -> int:
     contract = validate_contract()
     bad_ledger = {
@@ -384,6 +439,34 @@ def command_missing_evidence_selftest(_: argparse.Namespace) -> int:
     raise ValidationError("missing mandatory evidence was accepted")
 
 
+def command_missing_requirement_selftest(_: argparse.Namespace) -> int:
+    contract = validate_contract()
+    valid_entries = [
+        {
+            "requirementId": requirement["id"],
+            "milestone": requirement["milestone"],
+            "mandatory": requirement["mandatory"],
+            "status": "blocked",
+            "blockerRef": "docs/blockers/external-inputs.yml#production-visual-shipping-evidence",
+        }
+        for requirement in contract["requirements"]
+    ]
+    bad_ledger = {
+        "schemaVersion": "flying.evidence-ledger.v1",
+        "contractId": contract["contractId"],
+        "generatedAtUtc": "2026-08-18T00:00:00Z",
+        "requirements": valid_entries[1:],
+    }
+
+    try:
+        validate_ledger_entries(contract, bad_ledger)
+    except ValidationError:
+        print("forge_validate: missing requirement evidence rejected")
+        return 0
+
+    raise ValidationError("missing requirement evidence was accepted")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate Flying 2.0 contract evidence gates.")
     subcommands = parser.add_subparsers(dest="command", required=True)
@@ -407,11 +490,21 @@ def main() -> int:
     release_gate.add_argument("--ledger", default="docs/evidence/ledger.json")
     release_gate.set_defaults(func=command_release_gate)
 
+    evidence_ledger = subcommands.add_parser("evidence-ledger", help="validate an evidence ledger for coverage and proof/blocker shape")
+    evidence_ledger.add_argument("--ledger", default="docs/evidence/ledger.json")
+    evidence_ledger.set_defaults(func=command_evidence_ledger)
+
     missing_evidence = subcommands.add_parser(
         "missing-evidence-selftest",
         help="prove mandatory requirements without proof or blockers are rejected",
     )
     missing_evidence.set_defaults(func=command_missing_evidence_selftest)
+
+    missing_requirement = subcommands.add_parser(
+        "missing-requirement-selftest",
+        help="prove ledgers missing contract requirements are rejected",
+    )
+    missing_requirement.set_defaults(func=command_missing_requirement_selftest)
 
     args = parser.parse_args()
     try:

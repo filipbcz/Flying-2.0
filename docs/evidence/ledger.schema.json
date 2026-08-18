@@ -108,7 +108,7 @@
           "type": "string"
         }
       },
-      "anyOf": [
+      "oneOf": [
         {
           "required": [
             "proofRefs"

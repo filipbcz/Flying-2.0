@@ -83,3 +83,36 @@ blockers:
     acceptable_resolution:
       - "Run the offline simulator/package streamer with networking disabled over a route that crosses generated national terrain and visual package boundaries."
       - "Archive telemetry or replay output with timestamped tile load/unload events, frame/load-state samples, route tile sequence and loading-screen state transitions."
+  - blocker_id: pilot-region-production-source-package
+    requirement_ids:
+      - REQ-DMR-TERRAIN-COVERAGE
+      - REQ-REGIONAL-DATA-PACKAGES
+      - REQ-PILOT-REGION
+      - REQ-EVIDENCE-TRACEABILITY
+    external_input: "Official production source payloads and generated package manifests for the configured Ceska Trebova 10 x 10 km pilot region"
+    current_status: blocked
+    source_version: "approved pilot configuration exists; production source payload manifest and generated terrain/visual package evidence are not archived as release proof"
+    license: "depends on official source manifest and attribution records"
+    attribution: "must be copied from the official source manifest and installed package manifests"
+    redistribution_status: blocked_until_official_regional_source_manifest_and_package_checksums_are_recorded
+    effective_date: "2026-08-18"
+    release_gate_effect: "Blocks treating configuration files, validation fixtures, or slice declarations as production proof for the first offline regional package."
+    acceptable_resolution:
+      - "Archive the official regional source manifest with payload paths, versions, checksums, CRS/height-system metadata, attribution, license, effective dates and change notices."
+      - "Generate the Ceska Trebova pilot terrain, visual, navigation-map and runtime package manifests from those recorded source payloads."
+      - "Record validator output proving package-local coverage, offline runtime dependencies, provenance completeness and absence of synthetic package content."
+  - blocker_id: production-visual-shipping-evidence
+    requirement_ids:
+      - REQ-RELEASE-GATES
+      - REQ-EVIDENCE-TRACEABILITY
+    external_input: "Manual-approved production visual evidence captured from a real Win64 Unreal Shipping runtime"
+    current_status: blocked
+    source_version: "Build/VisualEvidence/release-candidate-visual-evidence.json is not archived"
+    license: "not applicable"
+    attribution: "not applicable"
+    redistribution_status: blocked_until_real_shipping_visual_evidence_is_recorded
+    effective_date: "2026-08-18"
+    release_gate_effect: "Blocks final release acceptance because fixture manifests, synthetic renders, headless captures and non-Shipping builds are prohibited production visual substitutes."
+    acceptable_resolution:
+      - "Capture the canonical mandatory visual scenes from the signed Win64 Unreal Shipping build with approved graphics profile and scenario metadata."
+      - "Archive artifact paths, build id, placeholder/primitive scan result, performance metrics and manual baseline approval."
