@@ -46,6 +46,12 @@ public:
   UFUNCTION(BlueprintCallable, Category="Flying|Offline Packages")
   bool LoadOfflinePackages();
 
+  UFUNCTION(BlueprintPure, Category="Flying|Offline Packages")
+  int32 GetRenderedTerrainSectionCount() const;
+
+  UFUNCTION(BlueprintPure, Category="Flying|Offline Packages")
+  bool HasRenderedTerrainSections() const;
+
 private:
   UPROPERTY(VisibleAnywhere, Category="Flying|Components")
   TObjectPtr<UProceduralMeshComponent> TerrainMesh;

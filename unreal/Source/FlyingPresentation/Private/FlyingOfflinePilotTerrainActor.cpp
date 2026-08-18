@@ -966,3 +966,13 @@ bool AFlyingOfflinePilotTerrainActor::LoadOfflinePackages()
 
   return SectionIndex > 0;
 }
+
+int32 AFlyingOfflinePilotTerrainActor::GetRenderedTerrainSectionCount() const
+{
+  return TerrainMesh ? TerrainMesh->GetNumSections() : 0;
+}
+
+bool AFlyingOfflinePilotTerrainActor::HasRenderedTerrainSections() const
+{
+  return GetRenderedTerrainSectionCount() > 0;
+}
