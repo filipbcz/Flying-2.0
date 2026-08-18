@@ -7,6 +7,7 @@
 #include <initializer_list>
 #include <map>
 #include <optional>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -21,6 +22,10 @@ constexpr std::string_view kAirportDatabaseSchemaVersion =
   "flying.airport-database.v1";
 constexpr std::string_view kValidationReportSchemaVersion =
   "flying.validation-report.v1";
+constexpr std::string_view kRegionalMasterListSchemaVersion =
+  "flying.regional-airport-master-list.v1";
+constexpr std::string_view kRunwaySurfacesPackageSchemaVersion =
+  "flying.pilot-runway-surfaces-package.v1";
 
 struct JsonValue {
   enum class Type {
@@ -391,6 +396,15 @@ const JsonValue::Object* optional_object(const JsonValue::Object& object,
     return nullptr;
   }
   return &value->object;
+}
+
+const JsonValue::Array* optional_array(const JsonValue::Object& object,
+                                       std::string_view key) {
+  const JsonValue* value = find_member(object, key);
+  if (value == nullptr || value->type != JsonValue::Type::array_value) {
+    return nullptr;
+  }
+  return &value->array;
 }
 
 std::string require_non_empty_string(const JsonValue::Object& object,
@@ -1359,6 +1373,310 @@ void validate_root_object(const JsonValue::Object& root, ValidationReport& repor
   }
 }
 
+struct CoverageRunwayRequirement {
+  std::string id;
+  std::string designator;
+};
+
+struct CoverageMasterRecord {
+  std::string aerodrome_id;
+  std::string name;
+  std::string classification;
+  std::string operational_status;
+  std::vector<CoverageRunwayRequirement> required_runways;
+};
+
+std::string validation_status(const JsonValue::Object& object) {
+  const JsonValue::Object* validation = optional_object(object, "validation");
+  if (validation == nullptr) {
+    return {};
+  }
+  return optional_string(*validation, "status").value_or(std::string{});
+}
+
+std::string manual_verification_status(const JsonValue::Object& object) {
+  const JsonValue::Object* validation = optional_object(object, "validation");
+  if (validation == nullptr) {
+    return {};
+  }
+  const JsonValue::Object* manual = optional_object(*validation, "manualVerification");
+  if (manual == nullptr) {
+    return {};
+  }
+  return optional_string(*manual, "status").value_or(std::string{});
+}
+
+bool is_validated_coverage_record(const JsonValue::Object& object) {
+  const std::string status = validation_status(object);
+  return (status == "manually_verified" || status == "production_validated") &&
+         manual_verification_status(object) == "reviewer_approved";
+}
+
+bool is_active_regional_requirement(const CoverageMasterRecord& record) {
+  return record.operational_status == "active" &&
+         (record.classification == "active_airport" ||
+          record.classification == "slz_field");
+}
+
+std::string coverage_id(std::string_view aerodrome_id, std::string_view runway_id) {
+  return std::string{aerodrome_id} + "/" + std::string{runway_id};
+}
+
+std::vector<CoverageMasterRecord> parse_regional_master_list(
+  const JsonValue::Object& root,
+  ValidationReport& report) {
+  const std::string schema_version = require_non_empty_string(
+    root, "schemaVersion", report, "airport.coverage.master_list", "Regional master list", {});
+  if (!schema_version.empty() && schema_version != kRegionalMasterListSchemaVersion) {
+    add_issue(report,
+              "error",
+              "airport.coverage.master_list.schemaVersion.unsupported",
+              "Regional airport master list schemaVersion is unsupported.");
+  }
+  (void)require_non_empty_string(
+    root, "regionId", report, "airport.coverage.master_list", "Regional master list", {});
+  const JsonValue::Array* entries = require_array(
+    root, "masterList", report, "airport.coverage.master_list", "Regional master list", {}, 1U);
+
+  std::vector<CoverageMasterRecord> records;
+  if (entries == nullptr) {
+    return records;
+  }
+  for (std::size_t i = 0U; i < entries->size(); ++i) {
+    const JsonValue& value = (*entries)[i];
+    const std::string subject = indexed_subject("regionalMasterList", i);
+    if (value.type != JsonValue::Type::object_value) {
+      add_issue(report,
+                "error",
+                "airport.coverage.master_list.record.invalid_type",
+                "Regional master list records must be objects.",
+                subject);
+      continue;
+    }
+    const JsonValue::Object& object = value.object;
+    CoverageMasterRecord record;
+    record.aerodrome_id = require_non_empty_string(object,
+                                                   "aerodromeId",
+                                                   report,
+                                                   "airport.coverage.master_list.record",
+                                                   subject,
+                                                   subject);
+    const std::string issue_id = record.aerodrome_id.empty() ? subject : record.aerodrome_id;
+    record.name = require_non_empty_string(object,
+                                           "name",
+                                           report,
+                                           "airport.coverage.master_list.record",
+                                           subject,
+                                           issue_id);
+    (void)require_enum_string(object,
+                              "classification",
+                              {"active_airport", "slz_field", "closed_field"},
+                              report,
+                              "airport.coverage.master_list.record",
+                              subject,
+                              issue_id);
+    record.classification = optional_string(object, "classification").value_or(std::string{});
+    (void)require_enum_string(object,
+                              "operationalStatus",
+                              {"active", "inactive", "closed", "unknown"},
+                              report,
+                              "airport.coverage.master_list.record",
+                              subject,
+                              issue_id);
+    record.operational_status =
+      optional_string(object, "operationalStatus").value_or(std::string{});
+
+    const JsonValue::Array* required_runways = optional_array(object, "requiredRunways");
+    if (required_runways != nullptr) {
+      for (std::size_t runway_index = 0U; runway_index < required_runways->size();
+           ++runway_index) {
+        const JsonValue& runway_value = (*required_runways)[runway_index];
+        if (runway_value.type != JsonValue::Type::object_value) {
+          add_issue(report,
+                    "error",
+                    "airport.coverage.master_list.requiredRunways.invalid_type",
+                    "Required runway entries must be objects.",
+                    issue_id);
+          continue;
+        }
+        CoverageRunwayRequirement runway;
+        runway.id = require_non_empty_string(runway_value.object,
+                                             "id",
+                                             report,
+                                             "airport.coverage.master_list.requiredRunways",
+                                             indexed_subject("requiredRunway", runway_index),
+                                             issue_id);
+        runway.designator =
+          optional_string(runway_value.object, "designator").value_or(std::string{});
+        if (!runway.id.empty()) {
+          record.required_runways.push_back(std::move(runway));
+        }
+      }
+    }
+    if (is_active_regional_requirement(record) && record.required_runways.empty()) {
+      add_issue(report,
+                "error",
+                "airport.coverage.master_list.active_runways.missing",
+                "Active regional airport and SLZ records must declare required runways.",
+                issue_id);
+    }
+    records.push_back(std::move(record));
+  }
+  return records;
+}
+
+std::set<std::string> parse_runway_surface_coverage(const JsonValue::Object& root,
+                                                    ValidationReport& report) {
+  const std::string schema_version = require_non_empty_string(
+    root, "schemaVersion", report, "airport.coverage.surfaces", "Runway surfaces package", {});
+  if (!schema_version.empty() && schema_version != kRunwaySurfacesPackageSchemaVersion) {
+    add_issue(report,
+              "error",
+              "airport.coverage.surfaces.schemaVersion.unsupported",
+              "Runway surfaces package schemaVersion is unsupported.");
+  }
+  std::set<std::string> runway_surface_ids;
+  const JsonValue::Array* surfaces = require_array(
+    root, "surfaces", report, "airport.coverage.surfaces", "Runway surfaces package", {});
+  if (surfaces == nullptr) {
+    return runway_surface_ids;
+  }
+  for (std::size_t i = 0U; i < surfaces->size(); ++i) {
+    const JsonValue& value = (*surfaces)[i];
+    if (value.type != JsonValue::Type::object_value) {
+      add_issue(report,
+                "error",
+                "airport.coverage.surfaces.surface.invalid_type",
+                "Runway surface coverage entries must be objects.",
+                indexed_subject("surface", i));
+      continue;
+    }
+    const JsonValue::Object& object = value.object;
+    const std::string aerodrome_id =
+      require_non_empty_string(object,
+                               "aerodromeId",
+                               report,
+                               "airport.coverage.surfaces.surface",
+                               indexed_subject("surface", i),
+                               indexed_subject("surface", i));
+    const std::string runway_id =
+      require_non_empty_string(object,
+                               "runwayId",
+                               report,
+                               "airport.coverage.surfaces.surface",
+                               indexed_subject("surface", i),
+                               aerodrome_id);
+    if (!aerodrome_id.empty() && !runway_id.empty()) {
+      runway_surface_ids.insert(coverage_id(aerodrome_id, runway_id));
+    }
+  }
+  return runway_surface_ids;
+}
+
+const JsonValue::Object* find_aerodrome(const JsonValue::Object& database,
+                                        std::string_view aerodrome_id) {
+  const JsonValue::Array* aerodromes = optional_array(database, "aerodromes");
+  if (aerodromes == nullptr) {
+    return nullptr;
+  }
+  for (const JsonValue& value : *aerodromes) {
+    if (value.type != JsonValue::Type::object_value) {
+      continue;
+    }
+    if (optional_string(value.object, "id").value_or(std::string{}) == aerodrome_id) {
+      return &value.object;
+    }
+  }
+  return nullptr;
+}
+
+const JsonValue::Object* find_runway(const JsonValue::Object& aerodrome,
+                                     std::string_view runway_id) {
+  const JsonValue::Array* runways = optional_array(aerodrome, "runways");
+  if (runways == nullptr) {
+    return nullptr;
+  }
+  for (const JsonValue& value : *runways) {
+    if (value.type != JsonValue::Type::object_value) {
+      continue;
+    }
+    if (optional_string(value.object, "id").value_or(std::string{}) == runway_id) {
+      return &value.object;
+    }
+  }
+  return nullptr;
+}
+
+void validate_regional_coverage(const JsonValue::Object& airport_database,
+                                const JsonValue::Object& regional_master_list,
+                                const JsonValue::Object& runway_surfaces_package,
+                                ValidationReport& report) {
+  validate_root_object(airport_database, report);
+  const std::vector<CoverageMasterRecord> regional_records =
+    parse_regional_master_list(regional_master_list, report);
+  const std::set<std::string> surface_runways =
+    parse_runway_surface_coverage(runway_surfaces_package, report);
+
+  for (const CoverageMasterRecord& expected : regional_records) {
+    if (!is_active_regional_requirement(expected)) {
+      continue;
+    }
+    const JsonValue::Object* aerodrome =
+      find_aerodrome(airport_database, expected.aerodrome_id);
+    if (aerodrome == nullptr) {
+      add_issue(report,
+                "error",
+                expected.classification == "slz_field"
+                  ? "airport.coverage.slz_area.missing"
+                  : "airport.coverage.aerodrome.missing",
+                "Regional coverage is missing an active master-list aerodrome or SLZ area.",
+                expected.aerodrome_id);
+      continue;
+    }
+    if (!is_validated_coverage_record(*aerodrome)) {
+      add_issue(report,
+                "error",
+                expected.classification == "slz_field"
+                  ? "airport.coverage.slz_area.unverified"
+                  : "airport.coverage.aerodrome.unverified",
+                "Unverified aerodrome and SLZ records are excluded from validated regional coverage.",
+                expected.aerodrome_id);
+      continue;
+    }
+
+    for (const CoverageRunwayRequirement& expected_runway : expected.required_runways) {
+      const std::string runway_scope_id =
+        coverage_id(expected.aerodrome_id, expected_runway.id);
+      const JsonValue::Object* runway = find_runway(*aerodrome, expected_runway.id);
+      if (runway == nullptr) {
+        add_issue(report,
+                  "error",
+                  expected.classification == "slz_field"
+                    ? "airport.coverage.slz_runway.missing"
+                    : "airport.coverage.runway.missing",
+                  "Regional coverage is missing an active master-list runway or SLZ surface.",
+                  runway_scope_id);
+        continue;
+      }
+      if (!is_validated_coverage_record(*runway)) {
+        add_issue(report,
+                  "error",
+                  "airport.coverage.runway.unverified",
+                  "Unverified runway records are excluded from validated regional coverage.",
+                  runway_scope_id);
+        continue;
+      }
+      if (surface_runways.find(runway_scope_id) == surface_runways.end()) {
+        add_issue(report,
+                  "error",
+                  "airport.coverage.runway_surface.missing",
+                  "Validated regional runways must be linked to an installed physical runway surface.",
+                  runway_scope_id);
+      }
+    }
+  }
+}
+
 } // namespace
 
 ValidationReport validate_airport_database_text(std::string_view airport_database_json) {
@@ -1385,6 +1703,53 @@ ValidationReport validate_airport_database_text(std::string_view airport_databas
   return report;
 }
 
+ValidationReport validate_regional_airport_coverage_text(
+  std::string_view airport_database_json,
+  std::string_view regional_master_list_json,
+  std::string_view runway_surfaces_package_json) {
+  ValidationReport report;
+
+  try {
+    JsonValue airport_database = JsonParser{airport_database_json}.parse();
+    JsonValue regional_master_list = JsonParser{regional_master_list_json}.parse();
+    JsonValue runway_surfaces_package = JsonParser{runway_surfaces_package_json}.parse();
+    if (airport_database.type != JsonValue::Type::object_value) {
+      add_issue(report,
+                "error",
+                "airport.coverage.database.invalid_type",
+                "Airport database root must be a JSON object.");
+    }
+    if (regional_master_list.type != JsonValue::Type::object_value) {
+      add_issue(report,
+                "error",
+                "airport.coverage.master_list.invalid_type",
+                "Regional master list root must be a JSON object.");
+    }
+    if (runway_surfaces_package.type != JsonValue::Type::object_value) {
+      add_issue(report,
+                "error",
+                "airport.coverage.surfaces.invalid_type",
+                "Runway surfaces package root must be a JSON object.");
+    }
+    if (airport_database.type == JsonValue::Type::object_value &&
+        regional_master_list.type == JsonValue::Type::object_value &&
+        runway_surfaces_package.type == JsonValue::Type::object_value) {
+      validate_regional_coverage(airport_database.object,
+                                 regional_master_list.object,
+                                 runway_surfaces_package.object,
+                                 report);
+    }
+  } catch (const std::exception& error) {
+    add_issue(report,
+              "error",
+              "airport.coverage.json.parse_failed",
+              std::string{"Regional airport coverage JSON parse failed: "} + error.what());
+  }
+
+  finalize_report(report);
+  return report;
+}
+
 ValidationReport validate_airport_database_file(const std::filesystem::path& path) {
   ValidationReport report;
   report.source_manifest_path = path.string();
@@ -1396,6 +1761,31 @@ ValidationReport validate_airport_database_file(const std::filesystem::path& pat
               "error",
               "airport.file.read_failed",
               std::string{"Airport database file could not be read: "} + error.what());
+    finalize_report(report);
+  }
+  return report;
+}
+
+ValidationReport validate_regional_airport_coverage_files(
+  const std::filesystem::path& airport_database_path,
+  const std::filesystem::path& regional_master_list_path,
+  const std::filesystem::path& runway_surfaces_package_path) {
+  ValidationReport report;
+  report.source_manifest_path = regional_master_list_path.string();
+  report.package_manifest_path = runway_surfaces_package_path.string();
+  try {
+    report = validate_regional_airport_coverage_text(
+      read_text_file(airport_database_path),
+      read_text_file(regional_master_list_path),
+      read_text_file(runway_surfaces_package_path));
+    report.source_manifest_path = regional_master_list_path.string();
+    report.package_manifest_path = runway_surfaces_package_path.string();
+  } catch (const std::exception& error) {
+    add_issue(report,
+              "error",
+              "airport.coverage.file.read_failed",
+              std::string{"Regional airport coverage files could not be read: "} +
+                error.what());
     finalize_report(report);
   }
   return report;

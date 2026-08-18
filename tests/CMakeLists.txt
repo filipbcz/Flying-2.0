@@ -26,6 +26,25 @@ add_test(NAME flying.data_pipeline.manifest COMMAND flying_data_pipeline_manifes
 
 add_test(NAME flying.data_pipeline.cli_help COMMAND flying_data_pipeline_cli --help)
 
+add_test(NAME flying.data_pipeline.airport_coverage_cli_requires_report
+  COMMAND flying_data_pipeline_cli airport-coverage
+          --airport-database "${CMAKE_SOURCE_DIR}/data_pipeline/seeds/pilot-airport-master-list.json"
+          --regional-master-list "${CMAKE_SOURCE_DIR}/data_pipeline/seeds/pilot-airport-master-list.json"
+          --runway-surfaces-package "${CMAKE_SOURCE_DIR}/data_pipeline/seeds/pilot-airport-master-list.json")
+set_tests_properties(flying.data_pipeline.airport_coverage_cli_requires_report
+  PROPERTIES
+    WILL_FAIL TRUE)
+
+add_test(NAME flying.data_pipeline.airport_coverage_cli_report_write_failure
+  COMMAND flying_data_pipeline_cli airport-coverage
+          --airport-database "${CMAKE_SOURCE_DIR}/data_pipeline/seeds/pilot-airport-master-list.json"
+          --regional-master-list "${CMAKE_SOURCE_DIR}/data_pipeline/seeds/pilot-airport-master-list.json"
+          --runway-surfaces-package "${CMAKE_SOURCE_DIR}/data_pipeline/seeds/pilot-airport-master-list.json"
+          --report "${CMAKE_SOURCE_DIR}")
+set_tests_properties(flying.data_pipeline.airport_coverage_cli_report_write_failure
+  PROPERTIES
+    WILL_FAIL TRUE)
+
 add_executable(flying_data_pipeline_dmr5g_terrain_tests
   data_pipeline/dmr5g_terrain_test.cpp
 )
