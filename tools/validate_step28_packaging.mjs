@@ -28,8 +28,10 @@ function requireToken(source, token, label) {
 const packagingReadme = read("packaging/README.md");
 const buildScript = read("packaging/build-win64-shipping.ps1");
 const signScript = read("packaging/sign-artifacts.ps1");
+const verifySignaturesScript = read("packaging/verify-signatures.ps1");
 const repairScript = read("packaging/update-repair.ps1");
 const repairSelfTest = read("tools/validate_step28_update_repair.ps1");
+const cleanInstallValidation = read("tools/validate_step28_clean_install.ps1");
 const installer = read("packaging/FlyingInstaller.iss");
 const buildMetadataExample = JSON.parse(read("packaging/FlyingBuildMetadata.example.json"));
 const target = read("unreal/Source/Flying.Target.cs");
@@ -46,23 +48,54 @@ for (const token of [
   "-targetplatform=Win64",
   "-clientconfig=Shipping",
   "-CrashReporter",
+  '[Parameter(Mandatory=$true)][string]$CertificateThumbprint',
   "FlyingBuildMetadata.json",
   "flying.release-manifest.v1",
   "Get-FileHash -Algorithm SHA256",
 ]) {
   requireToken(buildScript, token, "Win64 Shipping build script");
 }
+if (buildScript.includes("if ($CertificateThumbprint)")) {
+  fail("Win64 Shipping release candidate packaging must not make signing optional");
+}
 
 const signingIndex = buildScript.indexOf("Binary signing failed");
+const binarySignatureVerificationIndex = buildScript.indexOf("Binary signature verification failed");
 const manifestIndex = buildScript.indexOf('schema = "flying.release-manifest.v1"');
 if (signingIndex === -1 || manifestIndex === -1 || signingIndex > manifestIndex) {
   fail("release manifest must be generated after application binary signing so hashes match installed signed files");
+}
+if (
+  binarySignatureVerificationIndex === -1 ||
+  signingIndex === -1 ||
+  manifestIndex === -1 ||
+  signingIndex > binarySignatureVerificationIndex ||
+  binarySignatureVerificationIndex > manifestIndex
+) {
+  fail("release manifest must be generated only after binary signature verification passes");
+}
+const installerSigningIndex = buildScript.indexOf("Installer signing failed");
+const installerSignatureVerificationIndex = buildScript.indexOf("Installer signature verification failed");
+if (
+  installerSigningIndex === -1 ||
+  installerSignatureVerificationIndex === -1 ||
+  installerSigningIndex > installerSignatureVerificationIndex
+) {
+  fail("installer signing must be followed by installer signature verification");
 }
 requireToken(
   buildScript,
   'Copy-Item -Force $manifestPath (Join-Path $archiveRoot "Windows\\FlyingReleaseManifest.json")',
   "release manifest archive placement",
 );
+for (const token of [
+  "verify-signatures.ps1",
+  "-ExpectedThumbprint $CertificateThumbprint",
+  "Binary signature verification failed",
+  "Installer signature verification failed",
+]) {
+  requireToken(buildScript, token, "Win64 Shipping build signature verification gate");
+}
 
 for (const token of [
   "signtool.exe",
@@ -74,6 +107,18 @@ for (const token of [
 ]) {
   requireToken(signScript, token, "code signing script");
 }
+for (const token of [
+  "Get-AuthenticodeSignature",
+  "$normalizedExtensions",
+  '$Extensions | ForEach-Object { $_.ToLowerInvariant() }',
+  '$signature.Status -ne "Valid"',
+  "$signature.SignerCertificate.Thumbprint",
+  "ExpectedThumbprint",
+  "No signed artifacts were found",
+  "exit 3",
+]) {
+  requireToken(verifySignaturesScript, token, "signature verification script");
+}
 
 for (const token of [
   "ArchitecturesAllowed=x64compatible",
@@ -83,6 +128,12 @@ for (const token of [
   "terrain\\navigation",
   "FLYING_DATA_ROOT",
   "RegionDataRootSubdir",
+  "CreateInputDirPage",
+  "{param:FLYINGDATAROOT|",
+  "DataRootPage.Values[0]",
+  "GetRegionDataRoot",
+  "NextButtonClick",
+  "Trim(DataRootPage.Values[0]) = ''",
   "ceska-trebova-pilot-region.json",
   "FlyingReleaseManifest.json",
   "update-repair.ps1",
@@ -91,13 +142,19 @@ for (const token of [
 }
 
 for (const token of [
+  'DestDir: "{code:GetRegionDataRoot}\\Terrain"',
+  'DestDir: "{code:GetRegionDataRoot}\\GIS"',
+  'DestDir: "{code:GetRegionDataRoot}\\Navigation"',
+  'ValueData: "{code:GetRegionDataRoot}"',
+  '-DataRoot ""{code:GetRegionDataRoot}""',
+]) {
+  requireToken(installer, token, "installer user-configured regional data root");
+}
+for (const invalidToken of [
   'DestDir: "{userappdata}\\{#RegionDataRootSubdir}\\Terrain"',
   'DestDir: "{userappdata}\\{#RegionDataRootSubdir}\\GIS"',
   'DestDir: "{userappdata}\\{#RegionDataRootSubdir}\\Navigation"',
-]) {
-  requireToken(installer, token, "installer terrain package destination");
-}
-for (const invalidToken of [
+  'ValueData: "{userappdata}\\{#RegionDataRootSubdir}"',
   'DestDir: "{app}\\Flying\\Saved\\Flying\\PilotRegion\\Terrain"',
   'DestDir: "{app}\\Flying\\Saved\\Flying\\PilotRegion\\GIS"',
   'DestDir: "{app}\\Flying\\Saved\\Flying\\PilotRegion\\Navigation"',
@@ -177,6 +234,19 @@ for (const token of [
   requireToken(repairSelfTest, token, "update and repair executable self-test");
 }
 
+for (const token of [
+  "InstallerPath",
+  "/DIR=$InstallRoot",
+  "/FLYINGDATAROOT=$DataRoot",
+  'Assert-InstalledFile (Join-Path $InstallRoot "Flying.exe")',
+  'Assert-InstalledFile (Join-Path $InstallRoot "FlyingReleaseManifest.json")',
+  'Assert-InstalledFile (Join-Path $InstallRoot "Packaging\\update-repair.ps1")',
+  'Assert-InstalledFile (Join-Path $DataRoot "ceska-trebova-pilot-region.json")',
+  'Assert-InstalledFile (Join-Path $DataRoot "Terrain")',
+]) {
+  requireToken(cleanInstallValidation, token, "clean Windows install validation command");
+}
+
 if (buildMetadataExample.schema !== "flying.build-metadata.v1") {
   fail("build metadata example schema mismatch");
 }
@@ -240,6 +310,8 @@ for (const token of [
   "FLYING_DATA_ROOT",
   "without requiring network access",
   "signed releases",
+  "verifies Authenticode",
+  "selected `FLYING_DATA_ROOT`",
   "minidump",
   "no personal telemetry",
 ]) {

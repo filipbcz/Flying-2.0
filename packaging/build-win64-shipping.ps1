@@ -5,9 +5,9 @@ param(
   [Parameter(Mandatory=$true)][string]$Version,
   [Parameter(Mandatory=$true)][string]$Commit,
   [Parameter(Mandatory=$true)][string]$TerrainRoot,
+  [Parameter(Mandatory=$true)][string]$CertificateThumbprint,
   [string]$Channel = "shipping",
   [string]$OutputRoot = "artifacts/win64",
-  [string]$CertificateThumbprint = "",
   [string]$TimestampUrl = "http://timestamp.digicert.com",
   [string]$InnoSetupCompiler = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
 )
@@ -78,13 +78,16 @@ $terrainInstallRoot = Join-Path $archiveRoot "Windows\Flying\Saved\Flying\PilotR
 New-Item -ItemType Directory -Force -Path $terrainInstallRoot | Out-Null
 Copy-Item -Recurse -Force (Join-Path $terrainRootFull "*") $terrainInstallRoot
 
-if ($CertificateThumbprint) {
-  & (Join-Path $PSScriptRoot "sign-artifacts.ps1") `
-    -Root (Join-Path $archiveRoot "Windows") `
-    -CertificateThumbprint $CertificateThumbprint `
-    -TimestampUrl $TimestampUrl
-  if ($LASTEXITCODE -ne 0) { throw "Binary signing failed with exit code $LASTEXITCODE" }
-}
+& (Join-Path $PSScriptRoot "sign-artifacts.ps1") `
+  -Root (Join-Path $archiveRoot "Windows") `
+  -CertificateThumbprint $CertificateThumbprint `
+  -TimestampUrl $TimestampUrl
+if ($LASTEXITCODE -ne 0) { throw "Binary signing failed with exit code $LASTEXITCODE" }
+
+& (Join-Path $PSScriptRoot "verify-signatures.ps1") `
+  -Root (Join-Path $archiveRoot "Windows") `
+  -ExpectedThumbprint $CertificateThumbprint
+if ($LASTEXITCODE -ne 0) { throw "Binary signature verification failed with exit code $LASTEXITCODE" }
 
 $releaseRoot = Join-Path $archiveRoot "Windows"
 $files = Get-ChildItem -Path $releaseRoot -Recurse -File | Sort-Object FullName
@@ -116,13 +119,17 @@ if (-not (Test-Path $InnoSetupCompiler)) { throw "ISCC.exe was not found at $Inn
   (Join-Path $PSScriptRoot "FlyingInstaller.iss")
 if ($LASTEXITCODE -ne 0) { throw "Installer compilation failed with exit code $LASTEXITCODE" }
 
-if ($CertificateThumbprint) {
-  & (Join-Path $PSScriptRoot "sign-artifacts.ps1") `
-    -Root $installerOut `
-    -CertificateThumbprint $CertificateThumbprint `
-    -TimestampUrl $TimestampUrl `
-    -Extensions ".exe"
-  if ($LASTEXITCODE -ne 0) { throw "Installer signing failed with exit code $LASTEXITCODE" }
-}
+& (Join-Path $PSScriptRoot "sign-artifacts.ps1") `
+  -Root $installerOut `
+  -CertificateThumbprint $CertificateThumbprint `
+  -TimestampUrl $TimestampUrl `
+  -Extensions ".exe"
+if ($LASTEXITCODE -ne 0) { throw "Installer signing failed with exit code $LASTEXITCODE" }
+
+& (Join-Path $PSScriptRoot "verify-signatures.ps1") `
+  -Root $installerOut `
+  -Extensions ".exe" `
+  -ExpectedThumbprint $CertificateThumbprint
+if ($LASTEXITCODE -ne 0) { throw "Installer signature verification failed with exit code $LASTEXITCODE" }
 
 Write-Host "Flying Win64 Shipping release staged at $stageRoot"

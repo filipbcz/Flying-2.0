@@ -35,11 +35,13 @@ The build script writes `unreal/Config/FlyingBuildMetadata.json`, invokes
 Unreal Automation Tool with `BuildCookRun -targetplatform=Win64 -clientconfig=Shipping`,
 copies required runtime content and terrain packages to `artifacts/win64/<BuildId>`,
 signs application binaries, compiles the installer, signs it, and emits a
-release manifest with SHA-256 hashes.
+release manifest with SHA-256 hashes. The packaging flow verifies Authenticode
+signatures after signing the staged binaries and again after signing the
+installer; missing, invalid, or thumbprint-mismatched signatures fail the
+release-candidate gate.
 
-If signing parameters are omitted, the script stops before publishing the
-installer as a signed release. Unsigned artifacts are only valid for local
-engineering runs.
+The release-candidate packaging command requires `-CertificateThumbprint`.
+Unsigned artifacts are not valid release-candidate evidence.
 
 ## Installer
 
@@ -48,7 +50,7 @@ engineering runs.
 - Win64 Shipping simulator binaries and cooked content.
 - Required runtime metadata, including `FlyingBuildMetadata.json`.
 - The selected regional terrain packages: terrain elevation, imagery/vector
-  GIS, and offline navigation map data under `FLYING_DATA_ROOT`.
+  GIS, and offline navigation map data under the selected `FLYING_DATA_ROOT`.
 - The installed region manifest, which records package bounds, source margin,
   data-root location and offline runtime compatibility.
 - Start menu entries for Flying and the offline repair tool.
