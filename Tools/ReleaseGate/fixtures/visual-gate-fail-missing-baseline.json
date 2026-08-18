@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "flying.release-report.v1",
+  "status": "blocked",
+  "visualAcceptance": {
+    "required": true,
+    "evidenceManifest": "Validation/VisualAcceptance/fixtures/valid-visual-evidence.json",
+    "mandatoryScenes": [
+      "cold_and_dark_cockpit",
+      "engine_start_cockpit",
+      "taxi_runway_signs_lights",
+      "takeoff_aircraft_exterior",
+      "cross_country_regional_world",
+      "approach_landing_airport",
+      "shutdown_cockpit",
+      "replay_review",
+      "telemetry_export_review"
+    ],
+    "baselineApproval": "missing",
+    "placeholderScan": "pass",
+    "result": "pass"
+  },
+  "mandatoryChecks": [
+    {"id": "regional-package", "mandatory": true, "result": "pass"},
+    {"id": "installer", "mandatory": true, "result": "pass"},
+    {"id": "licensing", "mandatory": true, "result": "pass"}
+  ]
+}

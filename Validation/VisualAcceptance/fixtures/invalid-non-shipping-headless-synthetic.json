@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "flying.visual-evidence-manifest.v1",
+  "createdAt": "2026-08-18T00:00:00Z",
+  "build": {
+    "id": "Flying-editor-preview",
+    "platform": "Win64",
+    "configuration": "Development",
+    "renderer": "Unreal"
+  },
+  "graphicsProfile": {
+    "id": "preview",
+    "qualityPreset": "Low",
+    "resolution": {
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "mandatoryScenes": [
+    "cold_and_dark_cockpit"
+  ],
+  "captures": [
+    {
+      "scenarioId": "cold_and_dark_cockpit",
+      "captureSource": "headless-test-renderer",
+      "headless": true,
+      "syntheticRaster": true,
+      "artifacts": [
+        {"type": "screenshot", "path": "https://example.invalid/synthetic.png"}
+      ],
+      "performanceMetrics": {
+        "averageFps": 0,
+        "onePercentLowFps": 0,
+        "streamingHitchMsMax": -1,
+        "frameTimeMsP95": 0
+      },
+      "assetRefs": [
+        "/Engine/BasicShapes/Cube",
+        "/Game/Flying/Developer/Placeholders/SM_BlockoutHangar"
+      ]
+    }
+  ],
+  "baselineApproval": {
+    "state": "pending",
+    "approvedBy": "",
+    "approvedAtUtc": "2026-08-18T00:00:00Z",
+    "baselineId": ""
+  },
+  "placeholderScan": {
+    "result": "fail",
+    "scannedAtUtc": "2026-08-18T00:00:00Z",
+    "registeredPlaceholderAssets": [
+      "/Game/Flying/Developer/Placeholders/SM_BlockoutHangar"
+    ],
+    "primitiveTestMeshes": [
+      "/Engine/BasicShapes/Cube"
+    ],
+    "findings": [
+      {
+        "asset": "/Engine/BasicShapes/Cube",
+        "scene": "cold_and_dark_cockpit"
+      }
+    ]
+  }
+}

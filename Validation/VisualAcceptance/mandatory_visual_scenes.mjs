@@ -1,0 +1,18 @@
+export const MANDATORY_VISUAL_SCENES = Object.freeze([
+  "cockpit_day_readability",
+  "cockpit_night_lighting",
+  "cold_and_dark_cockpit",
+  "engine_start_cockpit",
+  "aircraft_exterior",
+  "taxi_runway_signs_lights",
+  "takeoff_aircraft_exterior",
+  "cross_country_regional_world",
+  "low_pass_built_region",
+  "low_pass_natural_region",
+  "cloudy_precipitation_weather",
+  "sunrise_sunset_lighting",
+  "approach_landing_airport",
+  "shutdown_cockpit",
+  "replay_review",
+  "telemetry_export_review",
+]);

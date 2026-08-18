@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "flying.release-report.v1",
+  "status": "complete",
+  "visualAcceptance": {
+    "required": true,
+    "evidenceManifest": "Validation/VisualAcceptance/fixtures/invalid-reduced-mandatory-scenes.json",
+    "mandatoryScenes": [
+      "cold_and_dark_cockpit"
+    ],
+    "baselineApproval": "approved",
+    "placeholderScan": "pass",
+    "result": "pass"
+  },
+  "mandatoryChecks": [
+    {"id": "regional-package", "mandatory": true, "result": "pass"}
+  ]
+}

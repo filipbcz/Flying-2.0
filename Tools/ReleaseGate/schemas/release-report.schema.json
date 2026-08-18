@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flying.local/schemas/release-report.schema.json",
+  "title": "Flying release report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "status", "visualAcceptance", "mandatoryChecks"],
+  "properties": {
+    "schemaVersion": {
+      "const": "flying.release-report.v1"
+    },
+    "status": {
+      "enum": ["complete", "partial", "blocked"]
+    },
+    "visualAcceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required",
+        "evidenceManifest",
+        "mandatoryScenes",
+        "baselineApproval",
+        "placeholderScan",
+        "result"
+      ],
+      "properties": {
+        "required": {"const": true},
+        "evidenceManifest": {"type": "string", "minLength": 1},
+        "mandatoryScenes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "cockpit_day_readability",
+              "cockpit_night_lighting",
+              "cold_and_dark_cockpit",
+              "engine_start_cockpit",
+              "aircraft_exterior",
+              "taxi_runway_signs_lights",
+              "takeoff_aircraft_exterior",
+              "cross_country_regional_world",
+              "low_pass_built_region",
+              "low_pass_natural_region",
+              "cloudy_precipitation_weather",
+              "sunrise_sunset_lighting",
+              "approach_landing_airport",
+              "shutdown_cockpit",
+              "replay_review",
+              "telemetry_export_review"
+            ]
+          },
+          "uniqueItems": true,
+          "minItems": 16
+        },
+        "baselineApproval": {"const": "approved"},
+        "placeholderScan": {"const": "pass"},
+        "result": {"const": "pass"}
+      }
+    },
+    "mandatoryChecks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "mandatory", "result"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "mandatory": {"type": "boolean"},
+          "result": {"enum": ["pass", "fail", "blocked"]}
+        }
+      }
+    }
+  }
+}
