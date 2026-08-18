@@ -1105,15 +1105,16 @@ struct FFlyingCoreSimBridgeImpl
   FFlyingCoreSimStateSnapshot Snapshot() const
   {
     const AuthoritativeState& State = Simulator.state();
+    const FFlyingCoreSimImmutableStateSnapshot ImmutableSnapshot = SnapshotImmutable();
 
     FFlyingCoreSimStateSnapshot Snapshot;
-    Snapshot.bValid = true;
-    Snapshot.SimulationTimeSeconds = State.simulation_time_s;
-    Snapshot.StepIndex = static_cast<int64>(State.step_index);
-    Snapshot.StateHash = static_cast<int64>(flying::core_sim::hash_state(State));
-    Snapshot.EcefPositionMeters = ToUnrealVector(State.ecef_position_m);
-    Snapshot.EcefVelocityMetersPerSecond = ToUnrealVector(State.ecef_velocity_mps);
-    Snapshot.BodyToEcef = ToUnrealQuat(State.body_to_ecef);
+    Snapshot.bValid = ImmutableSnapshot.bValid;
+    Snapshot.SimulationTimeSeconds = ImmutableSnapshot.SimulationTimeSeconds;
+    Snapshot.StepIndex = ImmutableSnapshot.StepIndex;
+    Snapshot.StateHash = ImmutableSnapshot.StateHash;
+    Snapshot.EcefPositionMeters = ImmutableSnapshot.EcefPositionMeters;
+    Snapshot.EcefVelocityMetersPerSecond = ImmutableSnapshot.EcefVelocityMetersPerSecond;
+    Snapshot.BodyToEcef = ImmutableSnapshot.BodyToEcef;
     Snapshot.BodyToEcefQuaternionXyzw = FVector4(
       Snapshot.BodyToEcef.X,
       Snapshot.BodyToEcef.Y,
@@ -1123,6 +1124,21 @@ struct FFlyingCoreSimBridgeImpl
     Snapshot.RelativeAirVelocityBodyMetersPerSecond =
       ToUnrealVector(State.relative_air_velocity_body_mps);
     Snapshot.WeatherDynamicPressurePascal = State.weather_dynamic_pressure_pa;
+    return Snapshot;
+  }
+
+  FFlyingCoreSimImmutableStateSnapshot SnapshotImmutable() const
+  {
+    const AuthoritativeState& State = Simulator.state();
+
+    FFlyingCoreSimImmutableStateSnapshot Snapshot;
+    Snapshot.bValid = true;
+    Snapshot.SimulationTimeSeconds = State.simulation_time_s;
+    Snapshot.StepIndex = static_cast<int64>(State.step_index);
+    Snapshot.StateHash = static_cast<int64>(flying::core_sim::hash_state(State));
+    Snapshot.EcefPositionMeters = ToUnrealVector(State.ecef_position_m);
+    Snapshot.EcefVelocityMetersPerSecond = ToUnrealVector(State.ecef_velocity_mps);
+    Snapshot.BodyToEcef = ToUnrealQuat(State.body_to_ecef);
     return Snapshot;
   }
 
@@ -1406,6 +1422,7 @@ void UFlyingCoreSimComponent::ResetCoreSim()
   {
     UE_LOG(LogTemp, Error, TEXT("CoreSim reset failed: %s"), ANSI_TO_TCHAR(Error.what()));
     CurrentSnapshot = {};
+    CurrentImmutableSnapshot = {};
     CurrentInstrumentSnapshot = {};
     if (Bridge)
     {
@@ -1431,6 +1448,7 @@ bool UFlyingCoreSimComponent::StartScenario(const FFlyingScenarioSelection& Sele
   {
     UE_LOG(LogTemp, Error, TEXT("CoreSim scenario start failed: %s"), ANSI_TO_TCHAR(Error.what()));
     CurrentSnapshot = {};
+    CurrentImmutableSnapshot = {};
     CurrentInstrumentSnapshot = {};
     CurrentScenarioState = {};
     if (Bridge)
@@ -1468,6 +1486,7 @@ bool UFlyingCoreSimComponent::StartScenarioAtPosition(
   {
     UE_LOG(LogTemp, Error, TEXT("CoreSim custom-position scenario start failed: %s"), ANSI_TO_TCHAR(Error.what()));
     CurrentSnapshot = {};
+    CurrentImmutableSnapshot = {};
     CurrentInstrumentSnapshot = {};
     CurrentScenarioState = {};
     if (Bridge)
@@ -1601,6 +1620,11 @@ void UFlyingCoreSimComponent::ApplyMappedAircraftControls(
 const FFlyingCoreSimStateSnapshot& UFlyingCoreSimComponent::GetCurrentSnapshot() const
 {
   return CurrentSnapshot;
+}
+
+const FFlyingCoreSimImmutableStateSnapshot& UFlyingCoreSimComponent::GetCurrentImmutableSnapshot() const
+{
+  return CurrentImmutableSnapshot;
 }
 
 const FFlyingAircraftInstrumentSnapshot& UFlyingCoreSimComponent::GetCurrentInstrumentSnapshot() const
@@ -1907,6 +1931,7 @@ void UFlyingCoreSimComponent::EnsureBridge()
 
 void UFlyingCoreSimComponent::PublishSnapshot()
 {
+  CurrentImmutableSnapshot = Bridge ? Bridge->SnapshotImmutable() : FFlyingCoreSimImmutableStateSnapshot{};
   CurrentSnapshot = Bridge ? Bridge->Snapshot() : FFlyingCoreSimStateSnapshot{};
   CurrentInstrumentSnapshot = Bridge ? Bridge->InstrumentSnapshot() : FFlyingAircraftInstrumentSnapshot{};
 }

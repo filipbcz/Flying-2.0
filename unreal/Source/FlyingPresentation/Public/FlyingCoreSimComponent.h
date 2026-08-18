@@ -101,6 +101,8 @@ public:
   UFUNCTION(BlueprintPure, Category="Flying|CoreSim")
   const FFlyingCoreSimStateSnapshot& GetCurrentSnapshot() const;
 
+  const FFlyingCoreSimImmutableStateSnapshot& GetCurrentImmutableSnapshot() const;
+
   UFUNCTION(BlueprintPure, Category="Flying|Instruments")
   const FFlyingAircraftInstrumentSnapshot& GetCurrentInstrumentSnapshot() const;
 
@@ -192,6 +194,8 @@ private:
 
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|CoreSim", meta=(AllowPrivateAccess="true"))
   FFlyingCoreSimStateSnapshot CurrentSnapshot;
+
+  FFlyingCoreSimImmutableStateSnapshot CurrentImmutableSnapshot;
 
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Instruments", meta=(AllowPrivateAccess="true"))
   FFlyingAircraftInstrumentSnapshot CurrentInstrumentSnapshot;

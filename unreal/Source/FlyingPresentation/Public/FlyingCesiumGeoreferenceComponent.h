@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "FlyingCoreSimBridge.h"
 #include "FlyingCoreSimStateSnapshot.h"
 
 #include "FlyingCesiumGeoreferenceComponent.generated.h"
@@ -33,4 +34,7 @@ public:
 
   UFUNCTION(BlueprintPure, Category="Flying|Cesium")
   FRotator TransformBodyToUnrealRotator(const FFlyingCoreSimStateSnapshot& Snapshot) const;
+
+  FRotator TransformBodyToUnrealRotator(
+    const FFlyingCoreSimImmutableStateSnapshot& Snapshot) const;
 };
