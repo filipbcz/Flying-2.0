@@ -1,0 +1,360 @@
+{
+  "schemaVersion": "flying.visual-evidence-manifest.v1",
+  "createdAt": "2026-08-18T00:00:00Z",
+  "build": {
+    "id": "Flying-1.0.0-rc1-win64-shipping-signed",
+    "platform": "Win64",
+    "configuration": "Shipping",
+    "renderer": "Unreal",
+    "signed": true
+  },
+  "graphicsProfile": {
+    "id": "production-epic-1080p",
+    "qualityPreset": "Epic",
+    "resolution": {
+      "width": 1920,
+      "height": 1080
+    }
+  },
+  "mandatoryScenes": [
+    "cockpit_day_readability",
+    "cockpit_night_lighting",
+    "cold_and_dark_cockpit",
+    "engine_start_cockpit",
+    "aircraft_exterior",
+    "taxi_runway_signs_lights",
+    "takeoff_aircraft_exterior",
+    "cross_country_regional_world",
+    "low_pass_built_region",
+    "low_pass_natural_region",
+    "cloudy_precipitation_weather",
+    "sunrise_sunset_lighting",
+    "approach_landing_airport",
+    "shutdown_cockpit",
+    "replay_review",
+    "telemetry_export_review"
+  ],
+  "captures": [
+    {
+      "scenarioId": "cockpit_day_readability",
+      "captureSource": "win64-unreal-shipping-runtime",
+      "headless": false,
+      "syntheticRaster": false,
+      "artifacts": [
+        {"type": "screenshot", "path": "Docs/ReleaseEvidence/visual/cockpit-day-readability.png"}
+      ],
+      "performanceMetrics": {
+        "averageFps": 68.2,
+        "onePercentLowFps": 52.8,
+        "streamingHitchMsMax": 36.0,
+        "frameTimeMsP95": 17.6
+      },
+      "assetRefs": [
+        "/Game/Flying/Aircraft/TrainerOne/Cockpit/MI_MainPanelDay",
+        "/Game/Flying/Aircraft/TrainerOne/Cockpit/MI_GlassReadable"
+      ]
+    },
+    {
+      "scenarioId": "cockpit_night_lighting",
+      "captureSource": "win64-unreal-shipping-runtime",
+      "headless": false,
+      "syntheticRaster": false,
+      "artifacts": [
+        {"type": "screenshot", "path": "Docs/ReleaseEvidence/visual/cockpit-night-lighting.png"}
+      ],
+      "performanceMetrics": {
+        "averageFps": 67.8,
+        "onePercentLowFps": 51.7,
+        "streamingHitchMsMax": 40.0,
+        "frameTimeMsP95": 18.0
+      },
+      "assetRefs": [
+        "/Game/Flying/Aircraft/TrainerOne/Cockpit/MI_PanelNight",
+        "/Game/Flying/Aircraft/TrainerOne/Cockpit/BP_InstrumentBacklight"
+      ]
+    },
+    {
+      "scenarioId": "cold_and_dark_cockpit",
+      "captureSource": "win64-unreal-shipping-runtime",
+      "headless": false,
+      "syntheticRaster": false,
+      "artifacts": [
+        {"type": "screenshot", "path": "Docs/ReleaseEvidence/visual/cold-and-dark-cockpit.png"}
+      ],
+      "performanceMetrics": {
+        "averageFps": 67.4,
+        "onePercentLowFps": 51.2,
+        "streamingHitchMsMax": 41.0,
+        "frameTimeMsP95": 18.4
+      },
+      "assetRefs": [
+        "/Game/Flying/Aircraft/TrainerOne/Cockpit/MI_MainPanel",
+        "/Game/Flying/World/CeskaTrebovaPilot/Materials/M_RunwayAsphalt"
+      ]
+    },
+    {
+      "scenarioId": "engine_start_cockpit",
+      "captureSource": "win64-unreal-shipping-runtime",
+      "headless": false,
+      "syntheticRaster": false,
+      "artifacts": [
+        {"type": "video", "path": "Docs/ReleaseEvidence/visual/engine-start-cockpit.mp4"}
+      ],
+      "performanceMetrics": {
+        "averageFps": 66.8,
+        "onePercentLowFps": 49.7,
+        "streamingHitchMsMax": 45.0,
+        "frameTimeMsP95": 18.7
+      },
+      "assetRefs": [
+        "/Game/Flying/Aircraft/TrainerOne/Cockpit/MI_Gauges",
+        "/Game/Flying/Audio/Aircraft/TrainerOne/EngineStartCue"
+      ]
+    },
+    {
+      "scenarioId": "aircraft_exterior",
+      "captureSource": "win64-unreal-shipping-runtime",
+      "headless": false,
+      "syntheticRaster": false,
+      "artifacts": [
+        {"type": "screenshot", "path": "Docs/ReleaseEvidence/visual/aircraft-exterior.png"}
+      ],
+      "performanceMetrics": {
+        "averageFps": 64.2,
+        "onePercentLowFps": 48.9,
+        "streamingHitchMsMax": 55.0,
+        "frameTimeMsP95": 19.6
+      },
+      "assetRefs": [
+        "/Game/Flying/Aircraft/TrainerOne/Exterior/SK_TrainerOne",
+        "/Game/Flying/Aircraft/TrainerOne/Exterior/MI_TrainerOnePaint"
+      ]
+    },
+    {
+      "scenarioId": "taxi_runway_signs_lights",
+      "captureSource": "win64-unreal-shipping-runtime",
+      "headless": false,
+      "syntheticRaster": false,
+      "artifacts": [
+        {"type": "screenshot", "path": "Docs/ReleaseEvidence/visual/taxi-runway-signs-lights.png"}
+      ],
+      "performanceMetrics": {
+        "averageFps": 64.5,
+        "onePercentLowFps": 48.6,
+        "streamingHitchMsMax": 58.0,
+        "frameTimeMsP95": 19.8
+      },
+      "assetRefs": [
+        "/Game/Flying/Airports/Shared/RunwaySigns/SM_RunwayHoldSign",
+        "/Game/Flying/Airports/Shared/Lights/SM_EdgeLight"
+      ]
+    },
+    {
+      "scenarioId": "takeoff_aircraft_exterior",
+      "captureSource": "win64-unreal-shipping-runtime",
+      "headless": false,
+      "syntheticRaster": false,
+      "artifacts": [
+        {"type": "video", "path": "Docs/ReleaseEvidence/visual/takeoff-aircraft-exterior.mp4"}
+      ],
+      "performanceMetrics": {
+        "averageFps": 63.1,
+        "onePercentLowFps": 47.9,
+        "streamingHitchMsMax": 64.0,
+        "frameTimeMsP95": 20.2
+      },
+      "assetRefs": [
+        "/Game/Flying/Aircraft/TrainerOne/Exterior/SK_TrainerOne",
+        "/Game/Flying/Effects/WheelDust/NS_RunwayDust"
+      ]
+    },
+    {
+      "scenarioId": "cross_country_regional_world",
+      "captureSource": "win64-unreal-shipping-runtime",
+      "headless": false,
+      "syntheticRaster": false,
+      "artifacts": [
+        {"type": "video", "path": "Docs/ReleaseEvidence/visual/cross-country-regional-world.mp4"}
+      ],
+      "performanceMetrics": {
+        "averageFps": 61.7,
+        "onePercentLowFps": 46.4,
+        "streamingHitchMsMax": 72.0,
+        "frameTimeMsP95": 21.0
+      },
+      "assetRefs": [
+        "/Game/Flying/World/RegionalPackages/Pilot/MI_Ortofoto",
+        "/Game/Flying/World/RegionalPackages/Pilot/HISM_Forest"
+      ]
+    },
+    {
+      "scenarioId": "low_pass_built_region",
+      "captureSource": "win64-unreal-shipping-runtime",
+      "headless": false,
+      "syntheticRaster": false,
+      "artifacts": [
+        {"type": "video", "path": "Docs/ReleaseEvidence/visual/low-pass-built-region.mp4"}
+      ],
+      "performanceMetrics": {
+        "averageFps": 61.2,
+        "onePercentLowFps": 45.9,
+        "streamingHitchMsMax": 78.0,
+        "frameTimeMsP95": 21.4
+      },
+      "assetRefs": [
+        "/Game/Flying/World/RegionalPackages/Pilot/HISM_Buildings",
+        "/Game/Flying/World/RegionalPackages/Pilot/MI_RoadMaterials"
+      ]
+    },
+    {
+      "scenarioId": "low_pass_natural_region",
+      "captureSource": "win64-unreal-shipping-runtime",
+      "headless": false,
+      "syntheticRaster": false,
+      "artifacts": [
+        {"type": "video", "path": "Docs/ReleaseEvidence/visual/low-pass-natural-region.mp4"}
+      ],
+      "performanceMetrics": {
+        "averageFps": 61.5,
+        "onePercentLowFps": 46.1,
+        "streamingHitchMsMax": 76.0,
+        "frameTimeMsP95": 21.2
+      },
+      "assetRefs": [
+        "/Game/Flying/World/RegionalPackages/Pilot/HISM_Forest",
+        "/Game/Flying/World/RegionalPackages/Pilot/MI_WaterPond"
+      ]
+    },
+    {
+      "scenarioId": "cloudy_precipitation_weather",
+      "captureSource": "win64-unreal-shipping-runtime",
+      "headless": false,
+      "syntheticRaster": false,
+      "artifacts": [
+        {"type": "video", "path": "Docs/ReleaseEvidence/visual/cloudy-precipitation-weather.mp4"}
+      ],
+      "performanceMetrics": {
+        "averageFps": 60.8,
+        "onePercentLowFps": 45.4,
+        "streamingHitchMsMax": 82.0,
+        "frameTimeMsP95": 21.8
+      },
+      "assetRefs": [
+        "/Game/Flying/Weather/Materials/MI_CloudLayer",
+        "/Game/Flying/Weather/Effects/NS_Rain"
+      ]
+    },
+    {
+      "scenarioId": "sunrise_sunset_lighting",
+      "captureSource": "win64-unreal-shipping-runtime",
+      "headless": false,
+      "syntheticRaster": false,
+      "artifacts": [
+        {"type": "screenshot", "path": "Docs/ReleaseEvidence/visual/sunrise-sunset-lighting.png"}
+      ],
+      "performanceMetrics": {
+        "averageFps": 62.9,
+        "onePercentLowFps": 47.2,
+        "streamingHitchMsMax": 68.0,
+        "frameTimeMsP95": 20.4
+      },
+      "assetRefs": [
+        "/Game/Flying/World/Lighting/BP_TimeOfDayController",
+        "/Game/Flying/World/Atmosphere/MI_AerialPerspective"
+      ]
+    },
+    {
+      "scenarioId": "approach_landing_airport",
+      "captureSource": "win64-unreal-shipping-runtime",
+      "headless": false,
+      "syntheticRaster": false,
+      "artifacts": [
+        {"type": "video", "path": "Docs/ReleaseEvidence/visual/approach-landing-airport.mp4"}
+      ],
+      "performanceMetrics": {
+        "averageFps": 62.2,
+        "onePercentLowFps": 46.8,
+        "streamingHitchMsMax": 69.0,
+        "frameTimeMsP95": 20.7
+      },
+      "assetRefs": [
+        "/Game/Flying/Airports/Regional/LKCT/SM_RunwaySurface",
+        "/Game/Flying/Airports/Shared/Windsock/SK_Windsock"
+      ]
+    },
+    {
+      "scenarioId": "shutdown_cockpit",
+      "captureSource": "win64-unreal-shipping-runtime",
+      "headless": false,
+      "syntheticRaster": false,
+      "artifacts": [
+        {"type": "screenshot", "path": "Docs/ReleaseEvidence/visual/shutdown-cockpit.png"}
+      ],
+      "performanceMetrics": {
+        "averageFps": 68.1,
+        "onePercentLowFps": 52.4,
+        "streamingHitchMsMax": 39.0,
+        "frameTimeMsP95": 17.9
+      },
+      "assetRefs": [
+        "/Game/Flying/Aircraft/TrainerOne/Cockpit/MI_PanelNight",
+        "/Game/Flying/Audio/Aircraft/TrainerOne/ShutdownCue"
+      ]
+    },
+    {
+      "scenarioId": "replay_review",
+      "captureSource": "win64-unreal-shipping-runtime",
+      "headless": false,
+      "syntheticRaster": false,
+      "artifacts": [
+        {"type": "screenshot", "path": "Docs/ReleaseEvidence/visual/replay-review.png"}
+      ],
+      "performanceMetrics": {
+        "averageFps": 66.0,
+        "onePercentLowFps": 50.1,
+        "streamingHitchMsMax": 42.0,
+        "frameTimeMsP95": 18.9
+      },
+      "assetRefs": [
+        "/Game/Flying/UI/PostFlight/WBP_ReplayReview"
+      ]
+    },
+    {
+      "scenarioId": "telemetry_export_review",
+      "captureSource": "win64-unreal-shipping-runtime",
+      "headless": false,
+      "syntheticRaster": false,
+      "artifacts": [
+        {"type": "screenshot", "path": "Docs/ReleaseEvidence/visual/telemetry-export-review.png"}
+      ],
+      "performanceMetrics": {
+        "averageFps": 65.8,
+        "onePercentLowFps": 50.0,
+        "streamingHitchMsMax": 43.0,
+        "frameTimeMsP95": 19.0
+      },
+      "assetRefs": [
+        "/Game/Flying/UI/PostFlight/WBP_TelemetryExport"
+      ]
+    }
+  ],
+  "baselineApproval": {
+    "state": "approved",
+    "approvedBy": "Visual acceptance review board",
+    "approvedAtUtc": "2026-08-18T00:00:00Z",
+    "baselineId": "VISUAL-BASELINE-2026-08-18"
+  },
+  "placeholderScan": {
+    "result": "pass",
+    "scannedAtUtc": "2026-08-18T00:00:00Z",
+    "registeredPlaceholderAssets": [
+      "/Game/Flying/Developer/Placeholders/SM_BlockoutHangar",
+      "/Game/Flying/Developer/Placeholders/MI_Checkerboard"
+    ],
+    "primitiveTestMeshes": [
+      "/Engine/BasicShapes/Cube",
+      "/Engine/BasicShapes/Sphere"
+    ],
+    "findings": []
+  }
+}

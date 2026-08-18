@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "flying.visual-evidence-manifest.v1",
+  "createdAt": "2026-08-18T00:00:00Z",
+  "build": {
+    "platform": "Win64",
+    "configuration": "Shipping",
+    "renderer": "Unreal"
+  },
+  "graphicsProfile": {
+    "qualityPreset": "Epic",
+    "resolution": {
+      "width": 1920,
+      "height": 1080
+    }
+  },
+  "mandatoryScenes": [
+    "cold_and_dark_cockpit",
+    "cross_country_regional_world"
+  ],
+  "captures": [
+    {
+      "scenarioId": "cold_and_dark_cockpit",
+      "captureSource": "win64-unreal-shipping-runtime",
+      "headless": false,
+      "syntheticRaster": false,
+      "artifacts": [],
+      "performanceMetrics": {
+        "averageFps": 60.0,
+        "onePercentLowFps": 45.0,
+        "streamingHitchMsMax": 80.0
+      },
+      "assetRefs": []
+    }
+  ],
+  "baselineApproval": {
+    "state": "approved",
+    "approvedBy": "Visual acceptance review board",
+    "approvedAtUtc": "2026-08-18T00:00:00Z",
+    "baselineId": "VISUAL-BASELINE-2026-08-18"
+  },
+  "placeholderScan": {
+    "result": "pass",
+    "scannedAtUtc": "2026-08-18T00:00:00Z",
+    "registeredPlaceholderAssets": [],
+    "primitiveTestMeshes": [],
+    "findings": []
+  }
+}

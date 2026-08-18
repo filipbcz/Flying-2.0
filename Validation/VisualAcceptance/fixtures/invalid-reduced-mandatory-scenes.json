@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "flying.visual-evidence-manifest.v1",
+  "createdAt": "2026-08-18T00:00:00Z",
+  "build": {
+    "id": "Flying-1.0.0-rc1-win64-shipping-signed",
+    "platform": "Win64",
+    "configuration": "Shipping",
+    "renderer": "Unreal",
+    "signed": true
+  },
+  "graphicsProfile": {
+    "id": "production-epic-1080p",
+    "qualityPreset": "Epic",
+    "resolution": {
+      "width": 1920,
+      "height": 1080
+    }
+  },
+  "mandatoryScenes": [
+    "cold_and_dark_cockpit"
+  ],
+  "captures": [
+    {
+      "scenarioId": "cold_and_dark_cockpit",
+      "captureSource": "win64-unreal-shipping-runtime",
+      "headless": false,
+      "syntheticRaster": false,
+      "artifacts": [
+        {"type": "screenshot", "path": "Docs/ReleaseEvidence/visual/cold-and-dark-cockpit.png"}
+      ],
+      "performanceMetrics": {
+        "averageFps": 60.0,
+        "onePercentLowFps": 45.0,
+        "streamingHitchMsMax": 80.0,
+        "frameTimeMsP95": 20.0
+      },
+      "assetRefs": [
+        "/Game/Flying/Aircraft/TrainerOne/Cockpit/MI_MainPanel"
+      ]
+    }
+  ],
+  "baselineApproval": {
+    "state": "approved",
+    "approvedBy": "Visual acceptance review board",
+    "approvedAtUtc": "2026-08-18T00:00:00Z",
+    "baselineId": "VISUAL-BASELINE-2026-08-18"
+  },
+  "placeholderScan": {
+    "result": "pass",
+    "scannedAtUtc": "2026-08-18T00:00:00Z",
+    "registeredPlaceholderAssets": [],
+    "primitiveTestMeshes": [],
+    "findings": []
+  }
+}
