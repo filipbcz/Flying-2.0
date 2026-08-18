@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "flying.security-diagnostics.negative-cases.v1",
+  "atomicPersistence": [
+    {
+      "category": "settings",
+      "field": "interruptedWriteTested",
+      "value": false,
+      "expectedError": "atomicPersistence.settings.interruptedWriteTested must be true"
+    },
+    {
+      "category": "saves",
+      "field": "recoveredLastValid",
+      "value": false,
+      "expectedError": "atomicPersistence.saves.recoveredLastValid must be true"
+    },
+    {
+      "category": "profiles",
+      "field": "corruptWriteRejected",
+      "value": false,
+      "expectedError": "atomicPersistence.profiles.corruptWriteRejected must be true"
+    },
+    {
+      "category": "scenarios",
+      "field": "lastValidChecksum",
+      "value": "",
+      "expectedError": "atomicPersistence.scenarios.lastValidChecksum is required"
+    },
+    {
+      "category": "consentState",
+      "field": "interruptedWriteProbe",
+      "value": "",
+      "expectedError": "atomicPersistence.consentState.interruptedWriteProbe is required"
+    }
+  ],
+  "diagnostics": [
+    {
+      "artifact": "sbom",
+      "mutation": "missing",
+      "expectedError": "diagnostics.sbom evidence is required"
+    },
+    {
+      "artifact": "licenseInventory",
+      "mutation": "missing",
+      "expectedError": "diagnostics.licenseInventory evidence is required"
+    },
+    {
+      "artifact": "structuredLogs",
+      "mutation": "emptyPaths",
+      "expectedError": "diagnostics.structuredLogs.path or paths is required"
+    },
+    {
+      "artifact": "minidumpConfig",
+      "mutation": "wrongPath",
+      "expectedError": "diagnostics.minidumpConfig missing required content token"
+    },
+    {
+      "artifact": "buildId",
+      "mutation": "missingValue",
+      "expectedError": "diagnostics.buildId.value is required"
+    }
+  ]
+}
