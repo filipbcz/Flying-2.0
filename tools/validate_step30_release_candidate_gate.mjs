@@ -53,6 +53,7 @@ const gate = readJson(gatePath);
 const qaEvidence = read("docs/release/qa-evidence.md");
 const licenseInventory = read("docs/release/license-inventory.md");
 const sbom = readJson("docs/release/sbom.spdx.json");
+const releaseKnownLimitations = read("docs/release/known-limitations.md");
 const aircraftReport = read("docs/validation/aircraft/flying_trainer_one/aircraft-validation-report.md");
 const performanceGate = readJson("docs/validation/performance/step27-performance-gate.json");
 
@@ -70,8 +71,19 @@ requireCondition(gate.releaseCandidate?.buildMetadataRequired === true, "build m
 const cleanMachine = gate.cleanMachineAcceptance;
 requireCondition(cleanMachine?.required === true, "clean-machine acceptance must be required");
 requireCondition(cleanMachine.environment?.os === "Windows 11", "clean-machine OS must be Windows 11");
-requireCondition(cleanMachine.environment?.terrainScope === "Czech Republic", "terrain scope must be Czech Republic");
-requireCondition(cleanMachine.environment?.airportDatabase === "approved master list", "approved airport database must be required");
+requireCondition(
+  cleanMachine.environment?.regionId === "ceska-trebova-pilot-10km",
+  "clean-machine acceptance must select the pilot region by regionId",
+);
+requireCondition(
+  cleanMachine.environment?.regionManifest === "Config/Regions/ceska-trebova-pilot-region.json",
+  "clean-machine acceptance must identify the explicit region manifest",
+);
+requireCondition(
+  cleanMachine.environment?.installedDataRoot === "%FLYING_DATA_ROOT%/Flying/Data/Regions/ceska-trebova-pilot-10km",
+  "clean-machine acceptance must prove regional data-root installation",
+);
+requireCondition(cleanMachine.environment?.airportDatabase === "approved regional master list", "approved regional airport database must be required");
 requireCondition(
   cleanMachine.environment?.aircraft === "Flying Trainer One validated production aircraft",
   "validated aircraft must be required",
@@ -80,13 +92,15 @@ requireToken(cleanMachine.environment?.networkState ?? "", "offline", "clean-mac
 
 for (const phase of [
   "install signed Shipping build",
-  "install Czech terrain packages",
-  "install approved airport database",
-  "start cold-and-dark at an included Czech airport",
+  "select offline region package",
+  "install regional data root",
+  "verify regional data availability",
+  "install approved regional airport database",
+  "start cold-and-dark at an included airport",
   "start engine",
   "taxi",
   "takeoff",
-  "fly cross-country over streamed Czech terrain",
+  "navigate cross-country in selected region",
   "land at another included airport",
   "shutdown",
   "replay flight",
@@ -98,8 +112,9 @@ for (const phase of [
 for (const evidence of [
   "installer log",
   "installed release manifest hashes",
-  "terrain package manifest hashes",
-  "airport database package hash",
+  "regional package manifest hashes",
+  "regional data-root install evidence",
+  "regional airport database package hash",
   "aircraft package hash",
   "offline-operation observation",
   "workflow telemetry export",
@@ -110,6 +125,7 @@ for (const evidence of [
 
 const suites = new Map((gate.automatedAcceptanceSuites ?? []).map((suite) => [suite.area, suite]));
 for (const area of [
+  "regional data",
   "CoreSim",
   "geodesy",
   "terrain",
@@ -118,7 +134,8 @@ for (const area of [
   "weather",
   "replay",
   "packaging",
-  "Unreal Cesium shell",
+  "visual acceptance",
+  "security privacy diagnostics",
   "license",
   "performance",
   "soak",
@@ -134,57 +151,33 @@ requireCondition(
   "license suite must run the standalone Step 30 licensing acceptance validator",
 );
 requireCondition(
-  suites.get("Unreal Cesium shell").command ===
-    "node tools/validate_unreal_cesium_shell.mjs --require-unreal-build-run",
-  "Unreal Cesium shell suite must require the Win64 Development build/run validator",
+  suites.get("visual acceptance").command ===
+    "node Validation/VisualAcceptance/visual_acceptance_validator.mjs --manifest Build/VisualEvidence/release-candidate-visual-evidence.json",
+  "visual acceptance suite must require the production visual evidence validator",
 );
-const unrealShellSuite = suites.get("Unreal Cesium shell");
 requireCondition(
-  unrealShellSuite.evidenceArtifact ===
-    "docs/validation/release/unreal-cesium-shell-win64-development-run.json",
-  "Unreal Cesium shell suite must reference its Windows execution artifact",
+  suites.get("security privacy diagnostics").command === "node tests/security/test_security_diagnostics.mjs",
+  "security privacy diagnostics suite must run the standalone privacy validator",
 );
-if (unrealShellSuite.result === "pass") {
-  const shellRun = readJson(unrealShellSuite.evidenceArtifact);
+const visualSuite = suites.get("visual acceptance");
+requireCondition(
+  visualSuite.evidenceArtifact ===
+    "Build/VisualEvidence/release-candidate-visual-evidence.json",
+  "visual acceptance suite must reference production visual evidence",
+);
+if (visualSuite.result === "pass") {
+  const visualEvidence = readJson(visualSuite.evidenceArtifact);
+  requireCondition(visualEvidence.build?.platform === "Win64", "visual evidence must target Win64");
+  requireCondition(visualEvidence.build?.configuration === "Shipping", "visual evidence must use a Shipping build");
   requireCondition(
-    shellRun.schemaVersion === "flying.unreal-cesium-shell-run.v1",
-    "Unreal Cesium shell run artifact schema mismatch",
-  );
-  requireCondition(
-    shellRun.command === "node tools/validate_unreal_cesium_shell.mjs --require-unreal-build-run",
-    "Unreal Cesium shell run artifact command mismatch",
-  );
-  requireCondition(shellRun.exitCode === 0, "Unreal Cesium shell run artifact must record exitCode 0");
-  requireIsoTimestamp(shellRun.executedAtUtc, "Unreal Cesium shell run artifact executedAtUtc");
-  requireCondition(shellRun.host?.os === "Windows 11", "Unreal Cesium shell run artifact must target Windows 11");
-  requireCondition(shellRun.host?.processPlatform === "win32", "Unreal Cesium shell run artifact must come from win32");
-  requireCondition(
-    shellRun.unrealEngine?.majorVersion === 5 && shellRun.unrealEngine?.minorVersion === 8,
-    "Unreal Cesium shell run artifact must use UE 5.8",
-  );
-  requireCondition(shellRun.build?.targetPlatform === "Win64", "Unreal Cesium shell build target must be Win64");
-  requireCondition(shellRun.build?.configuration === "Development", "Unreal Cesium shell build must be Development");
-  requireCondition(shellRun.build?.projectPath === "Flying.uproject", "Unreal Cesium shell project path mismatch");
-  requireCondition(
-    typeof shellRun.build?.executablePath === "string" &&
-      /(?:^|[\\/])Binaries[\\/]Win64[\\/].+\.exe$/i.test(shellRun.build.executablePath),
-    "Unreal Cesium shell run artifact must record a Win64 executable path",
-  );
-  requireCondition(
-    typeof shellRun.launch?.logPath === "string" &&
-      shellRun.launch.logPath.includes("FlyingCesiumShellValidation.log"),
-    "Unreal Cesium shell run artifact must record the validation log path",
-  );
-  requireCondition(
-    typeof shellRun.launch?.logExcerpt === "string" &&
-      shellRun.launch.logExcerpt.includes("Flying georeferenced simulator shell initialized"),
-    "Unreal Cesium shell run artifact must include the georeferenced startup log marker",
+    visualEvidence.captures?.every((capture) => capture.captureSource === "win64-unreal-shipping-runtime"),
+    "visual evidence captures must come from a Win64 Unreal Shipping runtime",
   );
 } else {
   requireCondition(
-    typeof unrealShellSuite.blocker === "string" &&
-      unrealShellSuite.blocker.includes("Windows UE 5.8 execution artifact"),
-    "blocked Unreal Cesium shell suite must document the missing execution artifact",
+    typeof visualSuite.blocker === "string" &&
+      visualSuite.blocker.includes("real Win64 Unreal Shipping"),
+    "blocked visual acceptance suite must document the missing Shipping visual evidence",
   );
 }
 
@@ -213,8 +206,21 @@ for (const report of [
   "docs/release/qa-evidence.md",
   "docs/release/license-inventory.md",
   "docs/release/sbom.spdx.json",
+  "docs/release/known-limitations.md",
 ]) {
   requireCondition(gate.validationReportReview?.requiredReports?.includes(report), `validation report missing: ${report}`);
+}
+
+for (const limitation of gate.knownLimitations ?? []) {
+  requireCondition(limitation.evidence === "docs/release/known-limitations.md", `known limitation ${limitation.id} must link release limitations`);
+  requireCondition(
+    ["accepted", "blocked"].includes(limitation.status),
+    `known limitation ${limitation.id} status must be accepted or blocked`,
+  );
+  requireCondition(
+    ["none", "partial", "blocked"].includes(limitation.releaseImpact),
+    `known limitation ${limitation.id} releaseImpact mismatch`,
+  );
 }
 
 const perf = gate.performanceAndSoakEvidence;
@@ -256,20 +262,25 @@ const mandatoryResults = [
   gate.validationReportReview?.result,
   perf.result,
   ...(gate.automatedAcceptanceSuites ?? []).filter((suite) => suite.mandatory).map((suite) => suite.result),
+  ...(gate.dependencyGates ?? []).filter((dependency) => dependency.mandatory).map((dependency) => dependency.result),
 ];
 const allMandatoryPassed = mandatoryResults.every(resultIsPass);
 
 if (allMandatoryPassed) {
-  requireCondition(gate.status === "pass", "gate status must pass when every mandatory result passes");
-  requireCondition(gate.gateDecision?.decision === "pass", "gate must pass when every mandatory result passes");
+  requireCondition(gate.status === "complete", "gate status must be complete when every mandatory result passes");
+  requireCondition(gate.gateDecision?.decision === "complete", "gate must be complete when every mandatory result passes");
   requireCondition(typeof gate.gateDecision?.approvedBy === "string" && gate.gateDecision.approvedBy.length > 0,
     "passing gate must identify approver");
   requireCondition(typeof gate.operator === "string" && gate.operator.length > 0, "passing gate must identify operator");
   requireCondition(typeof cleanMachine.environment?.machineId === "string" && cleanMachine.environment.machineId.length > 0,
     "passing gate must identify clean-machine ID");
 } else {
-  requireCondition(gate.status === "blocked", "gate status must remain blocked until every mandatory result passes");
-  requireCondition(gate.gateDecision?.decision === "blocked", "gate decision must block when mandatory evidence is not pass");
+  requireCondition(["partial", "blocked"].includes(gate.status), "gate status must be partial or blocked until every mandatory result passes");
+  requireCondition(["partial", "blocked"].includes(gate.gateDecision?.decision), "gate decision must be partial or blocked when mandatory evidence is not pass");
+  if (mandatoryResults.includes("blocked") || mandatoryResults.includes("missing")) {
+    requireCondition(gate.status === "blocked", "blocked or missing mandatory evidence must block the release");
+    requireCondition(gate.gateDecision?.decision === "blocked", "blocked or missing mandatory evidence must block the gate decision");
+  }
   requireCondition(gate.gateDecision?.approvedBy === null, "blocked gate must not identify an approver");
 }
 
@@ -277,6 +288,8 @@ requireToken(qaEvidence, "Release Candidate Gate", "QA evidence");
 requireToken(qaEvidence, gatePath, "QA evidence");
 requireToken(licenseInventory, "Flying 1.0.0 Win64 offline release", "license inventory");
 requireCondition(sbom.SPDXID === "SPDXRef-DOCUMENT", "SBOM document SPDXID mismatch");
+requireToken(releaseKnownLimitations, "Release Candidate Blockers", "release known limitations");
+requireToken(releaseKnownLimitations, "real Win64 Unreal Shipping build", "release known limitations");
 requireToken(aircraftReport, "Flying Trainer One", "aircraft validation report");
 requireToken(aircraftReport, "Status:", "aircraft validation report");
 

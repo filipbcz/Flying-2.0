@@ -1,6 +1,14 @@
 {
   "schemaVersion": "flying.release-report.v1",
-  "status": "complete",
+  "status": "partial",
+  "releaseCandidate": {
+    "version": "1.0.0-rc",
+    "platform": "Win64",
+    "configuration": "Shipping",
+    "signedBuildRequired": true,
+    "installerRequired": true,
+    "regionalPackagesRequired": true
+  },
   "cleanInstallWorkflow": {
     "required": true,
     "environment": {
@@ -64,5 +72,28 @@
     {"id": "regional-package", "mandatory": true, "result": "pass"},
     {"id": "installer", "mandatory": true, "result": "pass"},
     {"id": "licensing", "mandatory": true, "result": "pass"}
-  ]
+  ],
+  "dependencyGates": [
+    {
+      "id": "observer-notes-review",
+      "mandatory": true,
+      "releaseBlocking": false,
+      "result": "fail",
+      "evidence": "docs/validation/m1/vertical-slice-flight-plan.md",
+      "knownLimitation": "docs/release/known-limitations.md"
+    }
+  ],
+  "knownLimitations": [
+    {
+      "id": "observer-notes-review",
+      "status": "accepted",
+      "releaseImpact": "partial",
+      "evidence": "docs/release/known-limitations.md"
+    }
+  ],
+  "gateDecision": {
+    "decision": "partial",
+    "reason": "A mandatory non-release-blocking review item failed and is linked to known limitations.",
+    "approvedBy": null
+  }
 }

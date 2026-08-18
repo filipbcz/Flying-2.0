@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "flying.release-report.v1",
+  "status": "blocked",
+  "visualAcceptance": {
+    "required": true,
+    "evidenceManifest": "Validation/VisualAcceptance/fixtures/valid-visual-evidence.json",
+    "mandatoryScenes": [
+      "cockpit_day_readability",
+      "cockpit_night_lighting",
+      "cold_and_dark_cockpit",
+      "engine_start_cockpit",
+      "aircraft_exterior",
+      "taxi_runway_signs_lights",
+      "takeoff_aircraft_exterior",
+      "cross_country_regional_world",
+      "low_pass_built_region",
+      "low_pass_natural_region",
+      "cloudy_precipitation_weather",
+      "sunrise_sunset_lighting",
+      "approach_landing_airport",
+      "shutdown_cockpit",
+      "replay_review",
+      "telemetry_export_review"
+    ],
+    "baselineApproval": "approved",
+    "placeholderScan": "pass",
+    "result": "pass"
+  },
+  "mandatoryChecks": [
+    {"id": "regional-package", "mandatory": true, "result": "pass"},
+    {"id": "installer", "mandatory": true, "result": "pass"},
+    {"id": "licensing", "mandatory": true, "result": "pass"}
+  ],
+  "gateDecision": {
+    "decision": "blocked",
+    "reason": "Clean-install workflow evidence is mandatory for release.",
+    "approvedBy": null
+  }
+}

@@ -1,6 +1,14 @@
 {
   "schemaVersion": "flying.release-report.v1",
-  "status": "complete",
+  "status": "blocked",
+  "releaseCandidate": {
+    "version": "1.0.0-rc",
+    "platform": "Win64",
+    "configuration": "Shipping",
+    "signedBuildRequired": true,
+    "installerRequired": true,
+    "regionalPackagesRequired": true
+  },
   "cleanInstallWorkflow": {
     "required": true,
     "environment": {
@@ -64,5 +72,28 @@
     {"id": "regional-package", "mandatory": true, "result": "pass"},
     {"id": "installer", "mandatory": true, "result": "pass"},
     {"id": "licensing", "mandatory": true, "result": "pass"}
-  ]
+  ],
+  "dependencyGates": [
+    {
+      "id": "production-visual-acceptance",
+      "mandatory": true,
+      "releaseBlocking": true,
+      "result": "missing",
+      "evidence": "Build/VisualEvidence/release-candidate-visual-evidence.json",
+      "knownLimitation": "docs/release/known-limitations.md"
+    }
+  ],
+  "knownLimitations": [
+    {
+      "id": "production-visual-acceptance",
+      "status": "blocked",
+      "releaseImpact": "blocked",
+      "evidence": "docs/release/known-limitations.md"
+    }
+  ],
+  "gateDecision": {
+    "decision": "blocked",
+    "reason": "Mandatory production visual evidence is missing.",
+    "approvedBy": null
+  }
 }

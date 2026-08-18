@@ -35,3 +35,7 @@ Replay compatibility depends on build, aircraft, scenario and data-package ident
 ## Performance Evidence
 
 Performance evidence is tied to the tested hardware, build configuration, terrain package and scenario. Passing the release performance gate on one reference PC does not certify performance for all hardware or package combinations.
+
+## Release Candidate Blockers
+
+The release candidate is blocked until production visual acceptance evidence is captured from a real Win64 Unreal Shipping build, covers the mandatory visual scene checklist, passes placeholder and primitive asset scans, records performance metrics, and receives manual baseline approval. Fixture manifests, headless captures, synthetic rasters, non-Shipping builds and Development build launch logs are not release evidence.
