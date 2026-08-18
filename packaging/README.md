@@ -2,15 +2,16 @@
 
 This directory contains the reproducible Windows 11 x64 Shipping packaging
 flow for Flying. The pipeline is offline-first: packaged terrain archives are
-bundled beside the installer and installed into `Saved/Flying/PilotRegion` so
-normal Czech VFR flight runs without requiring network access.
+bundled beside the installer and installed under the configured
+`FLYING_DATA_ROOT` regional data root so normal regional Czech VFR flight runs
+without requiring network access.
 
 ## Required tools
 
 - Unreal Engine 5.8 with `RunUAT.bat` available.
 - Windows SDK signing tools (`signtool.exe`) for signed releases.
 - Inno Setup 6 (`ISCC.exe`) for installer creation.
-- Prebuilt Czech terrain packages in the release terrain directory:
+- Prebuilt regional terrain packages in the release terrain directory:
   - `Terrain/flying-cz-terrain.zip`
   - `GIS/flying-cz-gis.zip`
   - `Navigation/flying-cz-navigation.zip`
@@ -25,7 +26,7 @@ Run from a Windows PowerShell prompt at the repository root:
   -BuildId "flying-1.0.0+20260807.1" `
   -Version "1.0.0" `
   -Commit "0000000000000000000000000000000000000000" `
-  -TerrainRoot "D:\FlyingTerrain\CzechRepublic" `
+  -TerrainRoot "D:\FlyingTerrain\CeskaTrebovaPilot" `
   -CertificateThumbprint "<code-signing-thumbprint>" `
   -TimestampUrl "http://timestamp.digicert.com"
 ```
@@ -46,8 +47,10 @@ engineering runs.
 
 - Win64 Shipping simulator binaries and cooked content.
 - Required runtime metadata, including `FlyingBuildMetadata.json`.
-- The selected Czech terrain packages: terrain elevation, imagery/vector GIS,
-  and offline navigation map data.
+- The selected regional terrain packages: terrain elevation, imagery/vector
+  GIS, and offline navigation map data under `FLYING_DATA_ROOT`.
+- The installed region manifest, which records package bounds, source margin,
+  data-root location and offline runtime compatibility.
 - Start menu entries for Flying and the offline repair tool.
 
 The installer does not configure Steam, store publishing, mandatory online
@@ -55,10 +58,12 @@ updates, or cloud telemetry.
 
 ## Update And Repair
 
-`update-repair.ps1` verifies the installed release manifest and restores missing
-or corrupted simulator/terrain files from a local package cache or removable
-media. It never downloads data by default. A network source may only be supplied
-explicitly by the operator and is not required for normal flight.
+`update-repair.ps1` verifies the installed release manifest, configured
+`FLYING_DATA_ROOT`, installed region manifest and offline-launch compatibility,
+then restores missing or corrupted simulator/terrain files from a local package
+cache or removable media. It never downloads data by default. A network source
+may only be supplied explicitly by the operator and is not required for normal
+flight.
 
 ## Crash Diagnostics And Privacy
 

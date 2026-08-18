@@ -1028,6 +1028,14 @@ struct GeoNamesConfig {
   std::string format = "csv";
   std::string x_field = "eastM";
   std::string y_field = "northM";
+  std::optional<Bounds> bounds;
+  std::string source_manifest_id;
+};
+
+struct PackageInputConfig {
+  std::string role;
+  std::filesystem::path path;
+  std::optional<Bounds> bounds;
   std::string source_manifest_id;
 };
 
@@ -1070,8 +1078,23 @@ struct PilotPackageConfig {
   OrthoConfig ortho;
   std::vector<VectorLayerConfig> vector_layers;
   GeoNamesConfig geonames;
+  std::vector<PackageInputConfig> package_inputs;
   MaskConfig masks;
   WorldObjectsConfig world_objects;
+};
+
+struct RegionManifest {
+  std::string schema_version;
+  std::string region_id;
+  std::string display_name;
+  std::string coverage_scope;
+  std::string package_mode;
+  Bounds project_bounds;
+  double source_margin_m = 0.0;
+  std::string data_root_variable;
+  std::filesystem::path data_root_relative_path;
+  std::string min_app_version;
+  bool runtime_network_required = true;
 };
 
 std::optional<Bounds> parse_bounds(const JsonValue::Object& object,
@@ -1499,6 +1522,85 @@ std::optional<PilotPackageConfig> parse_package_config(const JsonValue& root,
         !field->string.empty()) {
       config.geonames.y_field = field->string;
     }
+    if (find_member(*geonames, "bounds") != nullptr) {
+      config.geonames.bounds =
+        parse_bounds(*geonames, "bounds", report, "pilot.config.geonamesLabels", "Geonames labels");
+    }
+  }
+
+  const JsonValue::Array* package_inputs =
+    require_array(object, "packageInputs", report, "pilot.config", "Pilot package config");
+  if (package_inputs != nullptr) {
+    std::set<std::string> roles;
+    for (std::size_t i = 0; i < package_inputs->size(); ++i) {
+      const JsonValue& entry = (*package_inputs)[i];
+      const std::string source_id = "<packageInput[" + std::to_string(i) + "]>";
+      if (entry.type != JsonValue::Type::object_value) {
+        add_issue(report,
+                  "error",
+                  "pilot.config.packageInputs.invalid_type",
+                  "Package input entries must be objects.",
+                  source_id);
+        continue;
+      }
+      PackageInputConfig input;
+      if (const auto value = require_string(entry.object,
+                                            "role",
+                                            report,
+                                            "pilot.config.packageInputs",
+                                            "Package input",
+                                            source_id)) {
+        input.role = *value;
+      }
+      const std::string issue_source_id = input.role.empty() ? source_id : input.role;
+      if (const auto value = require_string(entry.object,
+                                            "path",
+                                            report,
+                                            "pilot.config.packageInputs",
+                                            "Package input",
+                                            issue_source_id)) {
+        input.path = *value;
+        (void)validate_local_input_path(input.path,
+                                        report,
+                                        "pilot.config.packageInputs.path",
+                                        "Package input");
+      }
+      if (find_member(entry.object, "bounds") != nullptr) {
+        input.bounds =
+          parse_bounds(entry.object, "bounds", report, "pilot.config.packageInputs", "Package input");
+      }
+      if (!input.role.empty() && !roles.insert(input.role).second) {
+        add_issue(report,
+                  "error",
+                  "pilot.config.packageInputs.role.duplicate",
+                  "Package input roles must be unique.",
+                  input.role);
+      }
+      config.package_inputs.push_back(std::move(input));
+    }
+  }
+
+  const std::set<std::string> required_package_input_roles = {
+    "terrainElevation",
+    "terrainCollision",
+    "airportDatabase",
+    "runwaySurfaces",
+    "navigationMap",
+    "maskSources",
+    "worldObjectSources",
+  };
+  std::set<std::string> declared_package_input_roles;
+  for (const PackageInputConfig& input : config.package_inputs) {
+    declared_package_input_roles.insert(input.role);
+  }
+  for (const std::string& role : required_package_input_roles) {
+    if (declared_package_input_roles.find(role) == declared_package_input_roles.end()) {
+      add_issue(report,
+                "error",
+                "pilot.config.packageInputs.role.missing",
+                "Region-aware package validation requires package input role '" + role + "'.",
+                role);
+    }
   }
 
   if (const JsonValue::Object* masks =
@@ -1670,6 +1772,271 @@ std::optional<PilotPackageConfig> parse_package_config(const JsonValue& root,
   return config;
 }
 
+std::optional<RegionManifest> parse_region_manifest(const JsonValue& root,
+                                                    ValidationReport& report) {
+  if (root.type != JsonValue::Type::object_value) {
+    add_issue(report, "error", "region.manifest.invalid_type", "Region manifest root must be an object.");
+    return std::nullopt;
+  }
+
+  const JsonValue::Object& object = root.object;
+  RegionManifest manifest;
+  if (const auto value =
+        require_string(object, "schemaVersion", report, "region.manifest", "Region manifest")) {
+    manifest.schema_version = *value;
+  }
+  if (manifest.schema_version != "flying.region-manifest.v1") {
+    add_issue(report,
+              "error",
+              "region.manifest.schemaVersion.unsupported",
+              "Region manifest schemaVersion must be 'flying.region-manifest.v1'.");
+  }
+  if (const auto value =
+        require_string(object, "regionId", report, "region.manifest", "Region manifest")) {
+    manifest.region_id = *value;
+  }
+  if (const auto value =
+        require_string(object, "displayName", report, "region.manifest", "Region manifest")) {
+    manifest.display_name = *value;
+  }
+  if (const auto value =
+        require_string(object, "coverageScope", report, "region.manifest", "Region manifest")) {
+    manifest.coverage_scope = *value;
+  }
+  if (manifest.coverage_scope != "pilot-region" &&
+      manifest.coverage_scope != "czech-republic") {
+    add_issue(report,
+              "error",
+              "region.manifest.coverageScope.unsupported",
+              "Region manifest coverageScope must be 'pilot-region' or 'czech-republic'.");
+  }
+  if (const auto value =
+        require_string(object, "packageMode", report, "region.manifest", "Region manifest")) {
+    manifest.package_mode = *value;
+  }
+  if (manifest.package_mode != "private-local" && manifest.package_mode != "distributable") {
+    add_issue(report,
+              "error",
+              "region.manifest.packageMode.unsupported",
+              "Region manifest packageMode must be 'private-local' or 'distributable'.");
+  }
+
+  if (const JsonValue::Object* bounds =
+        require_object(object, "bounds", report, "region.manifest", "Region manifest")) {
+    if (const auto crs = require_string(*bounds, "crs", report, "region.manifest.bounds", "Region WGS-84 bounds");
+        crs.has_value() && *crs != "EPSG:4326") {
+      add_issue(report,
+                "error",
+                "region.manifest.bounds.crs.unsupported",
+                "Region bounds must declare WGS-84 longitude/latitude CRS as EPSG:4326.");
+    }
+    const auto min_lon =
+      require_number(*bounds, "minLonDeg", report, "region.manifest.bounds", "Region WGS-84 bounds");
+    const auto max_lon =
+      require_number(*bounds, "maxLonDeg", report, "region.manifest.bounds", "Region WGS-84 bounds");
+    const auto min_lat =
+      require_number(*bounds, "minLatDeg", report, "region.manifest.bounds", "Region WGS-84 bounds");
+    const auto max_lat =
+      require_number(*bounds, "maxLatDeg", report, "region.manifest.bounds", "Region WGS-84 bounds");
+    if (min_lon.has_value() && max_lon.has_value() && min_lat.has_value() &&
+        max_lat.has_value() && (*max_lon <= *min_lon || *max_lat <= *min_lat)) {
+      add_issue(report,
+                "error",
+                "region.manifest.bounds.invalid",
+                "Region WGS-84 bounds must have positive longitude and latitude extents.");
+    }
+  }
+
+  if (const auto bounds =
+        parse_bounds(object, "projectBounds", report, "region.manifest", "Region manifest")) {
+    manifest.project_bounds = *bounds;
+  }
+
+  if (const JsonValue::Object* scope =
+        require_object(object, "sourceScope", report, "region.manifest", "Region manifest")) {
+    if (const auto margin =
+          require_number(*scope, "allowedMarginM", report, "region.manifest.sourceScope", "Region source scope")) {
+      manifest.source_margin_m = *margin;
+      if (*margin < 0.0) {
+        add_issue(report,
+                  "error",
+                  "region.manifest.sourceScope.allowedMarginM.invalid",
+                  "Region source-scope allowedMarginM must be zero or greater.");
+      }
+    }
+    const JsonValue* reject_synthetic = find_member(*scope, "rejectSyntheticFixtures");
+    if (reject_synthetic == nullptr || reject_synthetic->type != JsonValue::Type::bool_value ||
+        !reject_synthetic->boolean) {
+      add_issue(report,
+                "error",
+                "region.manifest.sourceScope.rejectSyntheticFixtures.required",
+                "Production region manifests must reject synthetic fixture inputs.");
+    }
+  }
+
+  if (const JsonValue::Object* data_root =
+        require_object(object, "dataRoot", report, "region.manifest", "Region manifest")) {
+    if (const auto value =
+          require_string(*data_root, "installVariable", report, "region.manifest.dataRoot", "Region data root")) {
+      manifest.data_root_variable = *value;
+    }
+    if (manifest.data_root_variable != "FLYING_DATA_ROOT") {
+      add_issue(report,
+                "error",
+                "region.manifest.dataRoot.installVariable.unsupported",
+                "Region package installation must use the configured FLYING_DATA_ROOT variable.");
+    }
+    if (const auto value = require_string(*data_root,
+                                          "defaultRelativePath",
+                                          report,
+                                          "region.manifest.dataRoot",
+                                          "Region data root")) {
+      manifest.data_root_relative_path = *value;
+      (void)validate_local_input_path(manifest.data_root_relative_path,
+                                      report,
+                                      "region.manifest.dataRoot.defaultRelativePath",
+                                      "Region data-root default path");
+    }
+  }
+
+  if (const JsonValue::Object* runtime = require_object(object,
+                                                       "runtimeCompatibility",
+                                                       report,
+                                                       "region.manifest",
+                                                       "Region manifest")) {
+    if (const auto value = require_string(*runtime,
+                                          "minAppVersion",
+                                          report,
+                                          "region.manifest.runtimeCompatibility",
+                                          "Region runtime compatibility")) {
+      manifest.min_app_version = *value;
+    }
+    const JsonValue* network = find_member(*runtime, "runtimeNetworkRequired");
+    if (network == nullptr || network->type != JsonValue::Type::bool_value) {
+      add_issue(report,
+                "error",
+                "region.manifest.runtimeCompatibility.runtimeNetworkRequired.missing",
+                "Region runtime compatibility must declare runtimeNetworkRequired.");
+    } else {
+      manifest.runtime_network_required = network->boolean;
+      if (manifest.runtime_network_required) {
+        add_issue(report,
+                  "error",
+                  "region.manifest.runtimeCompatibility.runtimeNetworkRequired.invalid",
+                  "Installed region packages must support offline runtime launch.");
+      }
+    }
+  }
+
+  return manifest;
+}
+
+bool bounds_within(const Bounds& candidate, const Bounds& allowed) {
+  return candidate.min_east_m >= allowed.min_east_m &&
+         candidate.max_east_m <= allowed.max_east_m &&
+         candidate.min_north_m >= allowed.min_north_m &&
+         candidate.max_north_m <= allowed.max_north_m;
+}
+
+Bounds expand_bounds(const Bounds& bounds, double margin_m) {
+  return {
+    bounds.min_east_m - margin_m,
+    bounds.max_east_m + margin_m,
+    bounds.min_north_m - margin_m,
+    bounds.max_north_m + margin_m,
+  };
+}
+
+void validate_source_scope(const PilotPackageConfig& config,
+                           const RegionManifest& region,
+                           ValidationReport& report) {
+  if (config.coverage_scope != region.coverage_scope) {
+    add_issue(report,
+              "error",
+              "pilot.region.coverageScope.mismatch",
+              "Package config coverageScope must match the selected region manifest.",
+              region.region_id);
+  }
+  if (config.pilot_region.id != region.region_id) {
+    add_issue(report,
+              "error",
+              "pilot.region.id.mismatch",
+              "Package config pilotRegion.id must match the selected region manifest regionId.",
+              region.region_id);
+  }
+
+  const Bounds config_bounds{
+    config.pilot_region.min_east_m,
+    config.pilot_region.max_east_m(),
+    config.pilot_region.min_north_m,
+    config.pilot_region.max_north_m(),
+  };
+  if (!bounds_within(config_bounds, region.project_bounds) ||
+      !bounds_within(region.project_bounds, config_bounds)) {
+    add_issue(report,
+              "error",
+              "pilot.region.projectBounds.mismatch",
+              "Package config local bounds must match the selected region manifest projectBounds.",
+              region.region_id);
+  }
+
+  const Bounds allowed = expand_bounds(region.project_bounds, region.source_margin_m);
+  for (const OrthoSourceConfig& source : config.ortho.sources) {
+    if (!bounds_within(source.bounds, allowed)) {
+      add_issue(report,
+                "error",
+                "pilot.sourceScope.orthoImagery.out_of_region",
+                "Ortofoto source bounds exceed the selected region bounds plus explicit source margin.",
+                source.id);
+    }
+  }
+  for (const VectorLayerConfig& layer : config.vector_layers) {
+    if (!layer.bounds.has_value()) {
+      add_issue(report,
+                "error",
+                "pilot.sourceScope.vectorLayers.bounds_missing",
+                "Region-aware package validation requires vector source bounds for source-scope enforcement.",
+                layer.category);
+      continue;
+    }
+    if (!bounds_within(*layer.bounds, allowed)) {
+      add_issue(report,
+                "error",
+                "pilot.sourceScope.vectorLayers.out_of_region",
+                "Vector source bounds exceed the selected region bounds plus explicit source margin.",
+                layer.category);
+    }
+  }
+  if (!config.geonames.bounds.has_value()) {
+    add_issue(report,
+              "error",
+              "pilot.sourceScope.geonamesLabels.bounds_missing",
+              "Region-aware package validation requires Geonames source bounds for source-scope enforcement.");
+  } else if (!bounds_within(*config.geonames.bounds, allowed)) {
+    add_issue(report,
+              "error",
+              "pilot.sourceScope.geonamesLabels.out_of_region",
+              "Geonames source bounds exceed the selected region bounds plus explicit source margin.");
+  }
+  for (const PackageInputConfig& input : config.package_inputs) {
+    if (!input.bounds.has_value()) {
+      add_issue(report,
+                "error",
+                "pilot.sourceScope.packageInputs.bounds_missing",
+                "Region-aware package validation requires package input bounds for terrain, airport, runway, navigation, mask and world-object source-scope enforcement.",
+                input.role);
+      continue;
+    }
+    if (!bounds_within(*input.bounds, allowed)) {
+      add_issue(report,
+                "error",
+                "pilot.sourceScope.packageInputs.out_of_region",
+                "Package input bounds exceed the selected region bounds plus explicit source margin.",
+                input.role);
+    }
+  }
+}
+
 using SourceByPath = std::map<std::string, const SourceDataset*>;
 
 SourceByPath index_sources_by_path(const SourceManifest& manifest, ValidationReport& report) {
@@ -1732,6 +2099,14 @@ void bind_config_sources(PilotPackageConfig& config,
                    report,
                    "pilot.geonames",
                    "Geonames labels");
+  for (PackageInputConfig& input : config.package_inputs) {
+    bind_source_path(sources_by_path,
+                     input.path,
+                     input.source_manifest_id,
+                     report,
+                     "pilot.packageInput",
+                     "Package input");
+  }
 }
 
 std::vector<const SourceDataset*> lineage_sources(const SourceManifest& manifest,
@@ -3516,6 +3891,9 @@ std::set<std::string> collect_used_source_ids(const PilotPackageConfig& config) 
     source_ids.insert(layer.source_manifest_id);
   }
   source_ids.insert(config.geonames.source_manifest_id);
+  for (const PackageInputConfig& input : config.package_inputs) {
+    source_ids.insert(input.source_manifest_id);
+  }
   source_ids.erase("");
   return source_ids;
 }
@@ -3575,6 +3953,7 @@ std::optional<std::string> find_disallowed_generated_runtime_reference(
 std::string package_identity_input(const PilotRegionPackageOptions& options,
                                    const SourceManifest& source_manifest,
                                    const PilotPackageConfig& config,
+                                   const RegionManifest& region,
                                    const ImageryPackageMetadata& imagery,
                                    const std::vector<VectorLayerOutput>& vector_layers,
                                    const LabelOutput& labels,
@@ -3586,7 +3965,27 @@ std::string package_identity_input(const PilotRegionPackageOptions& options,
         << ",\"packageVersion\":" << json_quote(options.package_version)
         << ",\"sourceManifestVersion\":" << json_quote(source_manifest.manifest_version)
         << ",\"pilotRegion\":" << json_quote(config.pilot_region.id)
-        << ",\"imagery\":[";
+        << ",\"regionManifest\":{\"regionId\":" << json_quote(region.region_id)
+        << ",\"coverageScope\":" << json_quote(region.coverage_scope)
+        << ",\"packageMode\":" << json_quote(region.package_mode)
+        << ",\"sourceMarginM\":" << render_number(region.source_margin_m)
+        << ",\"dataRoot\":" << json_quote(region.data_root_relative_path.generic_string())
+        << ",\"minAppVersion\":" << json_quote(region.min_app_version) << "}";
+  input << ",\"packageInputs\":[";
+  for (std::size_t i = 0; i < config.package_inputs.size(); ++i) {
+    const PackageInputConfig& package_input = config.package_inputs[i];
+    if (i != 0U) {
+      input << ",";
+    }
+    input << "{\"role\":" << json_quote(package_input.role)
+          << ",\"sourceId\":" << json_quote(package_input.source_manifest_id)
+          << ",\"path\":" << json_quote(package_input.path.generic_string());
+    if (package_input.bounds.has_value()) {
+      input << ",\"bounds\":" << render_bounds(*package_input.bounds);
+    }
+    input << "}";
+  }
+  input << "],\"imagery\":[";
   bool first = true;
   for (const ImageryLodMetadata& lod : imagery.lods) {
     for (const ImageryTileMetadata& tile : lod.tiles) {
@@ -3660,6 +4059,7 @@ std::size_t world_object_byte_count(const WorldObjectsOutput& world_objects) {
 std::string render_package_manifest(const PilotRegionPackageOptions& options,
                                     const SourceManifest& source_manifest,
                                     const PilotPackageConfig& config,
+                                    const RegionManifest& region,
                                     const ImageryPackageMetadata& imagery,
                                     const std::vector<VectorLayerOutput>& vector_layers,
                                     const LabelOutput& labels,
@@ -3678,6 +4078,23 @@ std::string render_package_manifest(const PilotRegionPackageOptions& options,
   output << "  \"contentHash\": " << json_quote(content_hash) << ",\n";
   output << "  \"sourceManifestVersion\": "
          << json_quote(source_manifest.manifest_version) << ",\n";
+  output << "  \"regionManifest\": {\n";
+  output << "    \"schemaVersion\": \"flying.region-manifest.v1\",\n";
+  output << "    \"regionId\": " << json_quote(region.region_id) << ",\n";
+  output << "    \"displayName\": " << json_quote(region.display_name) << ",\n";
+  output << "    \"coverageScope\": " << json_quote(region.coverage_scope) << ",\n";
+  output << "    \"packageMode\": " << json_quote(region.package_mode) << ",\n";
+  output << "    \"sourceMarginM\": " << render_number(region.source_margin_m) << ",\n";
+  output << "    \"dataRoot\": {\n";
+  output << "      \"installVariable\": " << json_quote(region.data_root_variable) << ",\n";
+  output << "      \"defaultRelativePath\": "
+         << json_quote(region.data_root_relative_path.generic_string()) << "\n";
+  output << "    },\n";
+  output << "    \"runtimeCompatibility\": {\n";
+  output << "      \"minAppVersion\": " << json_quote(region.min_app_version) << ",\n";
+  output << "      \"runtimeNetworkRequired\": false\n";
+  output << "    }\n";
+  output << "  },\n";
   output << "  \"coverage\": {\n";
   output << "    \"scope\": " << json_quote(config.coverage_scope) << ",\n";
   output << "    \"countryCode\": \"CZ\",\n";
@@ -3686,6 +4103,22 @@ std::string render_package_manifest(const PilotRegionPackageOptions& options,
   output << "  },\n";
   output << "  \"sourceLineage\": "
          << render_source_lineage(source_manifest, used_source_ids, "  ") << ",\n";
+  output << "  \"packageInputs\": [\n";
+  for (std::size_t i = 0; i < config.package_inputs.size(); ++i) {
+    const PackageInputConfig& input = config.package_inputs[i];
+    output << "    {\"role\":" << json_quote(input.role)
+           << ",\"path\":" << json_quote(input.path.generic_string())
+           << ",\"sourceId\":" << json_quote(input.source_manifest_id);
+    if (input.bounds.has_value()) {
+      output << ",\"bounds\":" << render_bounds(*input.bounds);
+    }
+    output << "}";
+    if (i + 1U != config.package_inputs.size()) {
+      output << ",";
+    }
+    output << "\n";
+  }
+  output << "  ],\n";
   output << "  \"pilotRegion\": {\n";
   output << "    \"id\": " << json_quote(config.pilot_region.id) << ",\n";
   output << "    \"minEastM\": " << render_number(config.pilot_region.min_east_m) << ",\n";
@@ -3965,6 +4398,12 @@ PilotRegionPackageResult process_pilot_region_packages(
                 "pilot.options.source_manifest_path.missing",
                 "Pilot region package processing requires a source manifest path.");
     }
+    if (options.region_manifest_path.empty()) {
+      add_issue(result.report,
+                "error",
+                "pilot.options.region_manifest_path.missing",
+                "Region-aware package processing requires a region manifest path.");
+    }
     if (options.package_config_path.empty()) {
       add_issue(result.report,
                 "error",
@@ -4008,7 +4447,10 @@ PilotRegionPackageResult process_pilot_region_packages(
     const JsonValue config_root = JsonParser{read_text_file(options.package_config_path)}.parse();
     std::optional<PilotPackageConfig> config =
       parse_package_config(config_root, result.report);
-    if (!config.has_value()) {
+    const JsonValue region_root = JsonParser{read_text_file(options.region_manifest_path)}.parse();
+    std::optional<RegionManifest> region =
+      parse_region_manifest(region_root, result.report);
+    if (!config.has_value() || !region.has_value()) {
       finalize_report(result.report);
       write_report_if_requested(options, result.report);
       return result;
@@ -4022,6 +4464,7 @@ PilotRegionPackageResult process_pilot_region_packages(
                 "The Czech Republic package command requires the Czech Republic schema and coverageScope 'czech-republic'.");
     }
     validate_czech_republic_package_coverage(*config, result.report);
+    validate_source_scope(*config, *region, result.report);
     bind_config_sources(*config, *source_validation.manifest, result.report);
     if (has_errors(result.report)) {
       finalize_report(result.report);
@@ -4053,6 +4496,7 @@ PilotRegionPackageResult process_pilot_region_packages(
       options,
       *source_validation.manifest,
       *config,
+      *region,
       imagery,
       vector_layers,
       labels,
@@ -4066,6 +4510,7 @@ PilotRegionPackageResult process_pilot_region_packages(
     const std::string manifest_json = render_package_manifest(options,
                                                               *source_validation.manifest,
                                                               *config,
+                                                              *region,
                                                               imagery,
                                                               vector_layers,
                                                               labels,

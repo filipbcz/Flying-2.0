@@ -29,11 +29,11 @@ void print_usage(std::ostream& output) {
        "[--source-root DIR] [--package-name NAME]\n";
   output
     << "  flying-data-pipeline pilot-region-packages --source-manifest PATH "
-       "--package-config PATH --package-version VERSION --output-dir DIR --report PATH "
+       "--region-manifest PATH --package-config PATH --package-version VERSION --output-dir DIR --report PATH "
        "[--source-root DIR] [--package-name NAME]\n";
   output
     << "  flying-data-pipeline czech-republic-packages --source-manifest PATH "
-       "--package-config PATH --package-version VERSION --output-dir DIR --report PATH "
+       "--region-manifest PATH --package-config PATH --package-version VERSION --output-dir DIR --report PATH "
        "[--source-root DIR] [--package-name NAME]\n";
   output
     << "  flying-data-pipeline runway-import --airport-database PATH "
@@ -43,6 +43,7 @@ void print_usage(std::ostream& output) {
 struct ParsedArgs {
   std::string command;
   std::filesystem::path source_manifest;
+  std::filesystem::path region_manifest;
   std::filesystem::path source_root;
   std::filesystem::path report;
   std::filesystem::path output;
@@ -101,6 +102,12 @@ std::optional<ParsedArgs> parse_args(int argc, char** argv) {
         return std::nullopt;
       }
       parsed.source_manifest = *value;
+    } else if (flag == "--region-manifest") {
+      value = take_value(args, i, flag);
+      if (!value.has_value()) {
+        return std::nullopt;
+      }
+      parsed.region_manifest = *value;
     } else if (flag == "--source-root") {
       value = take_value(args, i, flag);
       if (!value.has_value()) {
@@ -211,6 +218,10 @@ std::optional<ParsedArgs> parse_args(int argc, char** argv) {
       std::cerr << "--package-config is required for " << parsed.command << "\n";
       return std::nullopt;
     }
+    if (parsed.region_manifest.empty()) {
+      std::cerr << "--region-manifest is required for " << parsed.command << "\n";
+      return std::nullopt;
+    }
     if (parsed.output_dir.empty()) {
       std::cerr << "--output-dir is required for " << parsed.command << "\n";
       return std::nullopt;
@@ -289,6 +300,7 @@ int main(int argc, char** argv) {
         parsed->command == "czech-republic-packages") {
       flying::data_pipeline::PilotRegionPackageOptions options;
       options.source_manifest_path = parsed->source_manifest;
+      options.region_manifest_path = parsed->region_manifest;
       options.source_root = parsed->source_root;
       options.package_config_path = parsed->package_config;
       options.output_directory = parsed->output_dir;

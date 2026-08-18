@@ -7,13 +7,13 @@ Scope: Flying 1.0.0 Win64 offline release family
 
 ## Installation
 
-Flying is distributed as a signed Win64 installer built by the packaging flow in `packaging/README.md`. Install on Windows 11 x64 with enough local storage for the simulator and selected Czech terrain packages. The installer places simulator binaries, cooked Unreal content, build metadata, local terrain packages, offline GIS packages and the offline navigation package on disk. Normal flight does not require an online map service or runtime API key.
+Flying is distributed as a signed Win64 installer built by the packaging flow in `packaging/README.md`. Install on Windows 11 x64 with enough local storage for the simulator and selected regional Czech terrain packages. The installer places simulator binaries, cooked Unreal content, build metadata, the selected region manifest, local terrain packages, offline GIS packages and the offline navigation package on disk under the configured `FLYING_DATA_ROOT`. Normal flight does not require an online map service or runtime API key.
 
 If the installer reports a signature or manifest failure, stop installation and obtain a replacement release package. Do not copy terrain package files from an untrusted source.
 
 ## First Start
 
-Start Flying from the Start menu entry created by the installer. The startup flow loads local build metadata and package manifests, then presents scenario selection. If required terrain, GIS or navigation packages are missing, use the installed repair tool before flying.
+Start Flying from the Start menu entry created by the installer. The startup flow loads local build metadata, the selected region manifest and package manifests, then presents scenario selection. If required terrain, GIS or navigation packages are missing, use the installed repair tool before flying.
 
 ## Controls
 

@@ -82,10 +82,65 @@ std::string source_manifest() {
     << source_entry("cuzk-zabaged-notable-fixture", "CUZK ZABAGED Notable Objects Fixture", "zabaged/notable.geojson", "Contains CUZK ZABAGED pilot notable objects.") << ",\n"
     << source_entry("project-airport-fixture", "Project Airport Fixture", "airports/airport-objects.geojson", "Contains project-derived approved airport objects.") << ",\n"
     << source_entry("project-runway-fixture", "Project Runway Fixture", "runways/runway-objects.geojson", "Contains project-derived approved runway objects.") << ",\n"
-    << source_entry("geonames-pilot-fixture", "Geonames Pilot Fixture", "geonames/labels.csv", "Contains Geonames pilot labels.") << "\n"
+    << source_entry("geonames-pilot-fixture", "Geonames Pilot Fixture", "geonames/labels.csv", "Contains Geonames pilot labels.") << ",\n"
+    << source_entry("terrain-elevation-fixture", "Terrain Elevation Fixture", "packages/terrain-elevation-manifest.json", "Contains scoped DMR 5G terrain elevation package.") << ",\n"
+    << source_entry("terrain-collision-fixture", "Terrain Collision Fixture", "packages/terrain-collision-manifest.json", "Contains scoped terrain collision package.") << ",\n"
+    << source_entry("airport-database-fixture", "Airport Database Fixture", "packages/airport-database.json", "Contains scoped airport database package.") << ",\n"
+    << source_entry("runway-surfaces-fixture", "Runway Surfaces Fixture", "packages/runway-surfaces.json", "Contains scoped runway surfaces package.") << ",\n"
+    << source_entry("navigation-map-fixture", "Navigation Map Fixture", "packages/navigation-map.json", "Contains scoped offline navigation map package.") << ",\n"
+    << source_entry("mask-sources-fixture", "Mask Sources Fixture", "packages/mask-sources.json", "Contains scoped mask source package.") << ",\n"
+    << source_entry("world-object-sources-fixture", "World Object Sources Fixture", "packages/world-object-sources.json", "Contains scoped world object source package.") << "\n"
     << "  ]\n"
     << "}\n";
   return output.str();
+}
+
+std::string region_manifest() {
+  return R"({
+  "schemaVersion": "flying.region-manifest.v1",
+  "regionId": "pilot-fixture-4m",
+  "displayName": "Pilot Fixture Region",
+  "coverageScope": "pilot-region",
+  "packageMode": "distributable",
+  "bounds": {
+    "crs": "EPSG:4326",
+    "minLonDeg": 16.0,
+    "maxLonDeg": 16.1,
+    "minLatDeg": 49.0,
+    "maxLatDeg": 49.1
+  },
+  "projectBounds": {"minEastM": 0, "maxEastM": 4, "minNorthM": 0, "maxNorthM": 4},
+  "sourceScope": {"allowedMarginM": 0.25, "rejectSyntheticFixtures": true},
+  "dataRoot": {
+    "installVariable": "FLYING_DATA_ROOT",
+    "defaultRelativePath": "Flying/Data/Regions/pilot-fixture-4m"
+  },
+  "runtimeCompatibility": {
+    "minAppVersion": "1.0.0-rc",
+    "runtimeNetworkRequired": false
+  }
+}
+)";
+}
+
+std::string czech_republic_region_manifest() {
+  std::string manifest = replace_once(region_manifest(),
+                                      "\"regionId\": \"pilot-fixture-4m\"",
+                                      "\"regionId\": \"czech-republic-fixture\"");
+  manifest = replace_once(manifest,
+                          "\"displayName\": \"Pilot Fixture Region\"",
+                          "\"displayName\": \"Czech Republic Fixture Region\"");
+  manifest = replace_once(manifest,
+                          "\"coverageScope\": \"pilot-region\"",
+                          "\"coverageScope\": \"czech-republic\"");
+  manifest = replace_once(
+    manifest,
+    "\"projectBounds\": {\"minEastM\": 0, \"maxEastM\": 4, \"minNorthM\": 0, \"maxNorthM\": 4}",
+    "\"projectBounds\": {\"minEastM\": 0, \"maxEastM\": 430000, \"minNorthM\": 0, \"maxNorthM\": 280000}");
+  manifest = replace_once(manifest,
+                          "Flying/Data/Regions/pilot-fixture-4m",
+                          "Flying/Data/Regions/czech-republic-fixture");
+  return manifest;
 }
 
 std::string package_config() {
@@ -122,21 +177,31 @@ std::string package_config() {
     ]
   },
   "vectorLayers": [
-    {"category": "roads", "path": "zabaged/roads.geojson", "format": "geojson", "lineWidthM": 1},
-    {"category": "rail", "path": "zabaged/rail.geojson", "format": "geojson", "lineWidthM": 1},
-    {"category": "water", "path": "zabaged/water.geojson", "format": "geojson"},
-    {"category": "settlements", "path": "zabaged/settlements.geojson", "format": "geojson"},
-    {"category": "vegetationAreas", "path": "zabaged/vegetation.geojson", "format": "geojson"},
-    {"category": "notableObjects", "path": "zabaged/notable.geojson", "format": "geojson"},
-    {"category": "airport", "path": "airports/airport-objects.geojson", "format": "geojson"},
-    {"category": "runway", "path": "runways/runway-objects.geojson", "format": "geojson"}
+    {"category": "roads", "path": "zabaged/roads.geojson", "format": "geojson", "lineWidthM": 1, "bounds": {"minEastM": 0, "maxEastM": 4, "minNorthM": 0, "maxNorthM": 4}},
+    {"category": "rail", "path": "zabaged/rail.geojson", "format": "geojson", "lineWidthM": 1, "bounds": {"minEastM": 0, "maxEastM": 4, "minNorthM": 0, "maxNorthM": 4}},
+    {"category": "water", "path": "zabaged/water.geojson", "format": "geojson", "bounds": {"minEastM": 0, "maxEastM": 4, "minNorthM": 0, "maxNorthM": 4}},
+    {"category": "settlements", "path": "zabaged/settlements.geojson", "format": "geojson", "bounds": {"minEastM": 0, "maxEastM": 4, "minNorthM": 0, "maxNorthM": 4}},
+    {"category": "vegetationAreas", "path": "zabaged/vegetation.geojson", "format": "geojson", "bounds": {"minEastM": 0, "maxEastM": 4, "minNorthM": 0, "maxNorthM": 4}},
+    {"category": "notableObjects", "path": "zabaged/notable.geojson", "format": "geojson", "bounds": {"minEastM": 0, "maxEastM": 4, "minNorthM": 0, "maxNorthM": 4}},
+    {"category": "airport", "path": "airports/airport-objects.geojson", "format": "geojson", "bounds": {"minEastM": 0, "maxEastM": 4, "minNorthM": 0, "maxNorthM": 4}},
+    {"category": "runway", "path": "runways/runway-objects.geojson", "format": "geojson", "bounds": {"minEastM": 0, "maxEastM": 4, "minNorthM": 0, "maxNorthM": 4}}
   ],
   "geonamesLabels": {
     "path": "geonames/labels.csv",
     "format": "csv",
     "xField": "eastM",
-    "yField": "northM"
+    "yField": "northM",
+    "bounds": {"minEastM": 0, "maxEastM": 4, "minNorthM": 0, "maxNorthM": 4}
   },
+  "packageInputs": [
+    {"role": "terrainElevation", "path": "packages/terrain-elevation-manifest.json", "bounds": {"minEastM": 0, "maxEastM": 4, "minNorthM": 0, "maxNorthM": 4}},
+    {"role": "terrainCollision", "path": "packages/terrain-collision-manifest.json", "bounds": {"minEastM": 0, "maxEastM": 4, "minNorthM": 0, "maxNorthM": 4}},
+    {"role": "airportDatabase", "path": "packages/airport-database.json", "bounds": {"minEastM": 0, "maxEastM": 4, "minNorthM": 0, "maxNorthM": 4}},
+    {"role": "runwaySurfaces", "path": "packages/runway-surfaces.json", "bounds": {"minEastM": 0, "maxEastM": 4, "minNorthM": 0, "maxNorthM": 4}},
+    {"role": "navigationMap", "path": "packages/navigation-map.json", "bounds": {"minEastM": 0, "maxEastM": 4, "minNorthM": 0, "maxNorthM": 4}},
+    {"role": "maskSources", "path": "packages/mask-sources.json", "bounds": {"minEastM": 0, "maxEastM": 4, "minNorthM": 0, "maxNorthM": 4}},
+    {"role": "worldObjectSources", "path": "packages/world-object-sources.json", "bounds": {"minEastM": 0, "maxEastM": 4, "minNorthM": 0, "maxNorthM": 4}}
+  ],
   "masks": {
     "cellSizeM": 1,
     "defaultMaterial": "terrain",
@@ -203,6 +268,7 @@ std::string feature_collection(std::string_view id,
 
 void write_fixture_inputs(const std::filesystem::path& root) {
   write_file(root / "source-manifest.json", source_manifest());
+  write_file(root / "region-manifest.json", region_manifest());
   write_file(root / "pilot-config.json", package_config());
   write_file(root / "ortofoto" / "pilot.ppm",
              "P3\n"
@@ -277,12 +343,20 @@ void write_fixture_inputs(const std::filesystem::path& root) {
              "id,name,eastM,northM,featureClass\n"
              "gn-1,Pilot Village,3,1,P\n"
              "gn-out,Outside,12,12,P\n");
+  write_file(root / "packages" / "terrain-elevation-manifest.json", "{}\n");
+  write_file(root / "packages" / "terrain-collision-manifest.json", "{}\n");
+  write_file(root / "packages" / "airport-database.json", "{}\n");
+  write_file(root / "packages" / "runway-surfaces.json", "{}\n");
+  write_file(root / "packages" / "navigation-map.json", "{}\n");
+  write_file(root / "packages" / "mask-sources.json", "{}\n");
+  write_file(root / "packages" / "world-object-sources.json", "{}\n");
 }
 
 flying::data_pipeline::PilotRegionPackageOptions make_options(
   const std::filesystem::path& root) {
   flying::data_pipeline::PilotRegionPackageOptions options;
   options.source_manifest_path = root / "source-manifest.json";
+  options.region_manifest_path = root / "region-manifest.json";
   options.source_root = root;
   options.package_config_path = root / "pilot-config.json";
   options.output_directory = root / "out";
@@ -328,6 +402,15 @@ int main() {
   assert(package_manifest.find("\"mipmapped\": true") != std::string::npos);
   assert(package_manifest.find("\"level\": 1") != std::string::npos);
   assert(package_manifest.find("\"runtimeNetworkRequired\": false") != std::string::npos);
+  assert(package_manifest.find("\"regionManifest\"") != std::string::npos);
+  assert(package_manifest.find("\"regionId\": \"pilot-fixture-4m\"") != std::string::npos);
+  assert(package_manifest.find("\"packageMode\": \"distributable\"") !=
+         std::string::npos);
+  assert(package_manifest.find("\"packageInputs\"") != std::string::npos);
+  assert(package_manifest.find("\"role\":\"terrainElevation\"") != std::string::npos);
+  assert(package_manifest.find("\"role\":\"airportDatabase\"") != std::string::npos);
+  assert(package_manifest.find("\"installVariable\": \"FLYING_DATA_ROOT\"") !=
+         std::string::npos);
   assert(package_manifest.find("\"streaming\"") != std::string::npos);
   assert(package_manifest.find("\"packagingLayout\"") != std::string::npos);
   assert(package_manifest.find("\"worldObjects\"") != std::string::npos);
@@ -413,6 +496,7 @@ int main() {
     const std::filesystem::path czech_root = make_temp_root();
     write_fixture_inputs(czech_root);
     write_file(czech_root / "pilot-config.json", czech_republic_package_config());
+    write_file(czech_root / "region-manifest.json", czech_republic_region_manifest());
     pipeline::PilotRegionPackageOptions czech_options = make_options(czech_root);
     czech_options.package_name = "Czech Republic Offline GIS";
     const pipeline::PilotRegionPackageResult czech_result =
@@ -429,6 +513,8 @@ int main() {
   {
     const std::filesystem::path czech_command_root = make_temp_root();
     write_fixture_inputs(czech_command_root);
+    write_file(czech_command_root / "region-manifest.json",
+               czech_republic_region_manifest());
     pipeline::PilotRegionPackageOptions czech_command_options =
       make_options(czech_command_root);
     czech_command_options.package_name = "Czech Republic Offline GIS";
@@ -441,6 +527,67 @@ int main() {
              "\"code\": \"pilot.options.czech_republic_config.required\"") !=
            std::string::npos);
     std::filesystem::remove_all(czech_command_root);
+  }
+
+  {
+    const std::filesystem::path scope_root = make_temp_root();
+    write_fixture_inputs(scope_root);
+    write_file(scope_root / "pilot-config.json",
+               replace_once(package_config(),
+                            "\"bounds\": {\"minEastM\": 0, \"maxEastM\": 4, \"minNorthM\": 0, \"maxNorthM\": 4}",
+                            "\"bounds\": {\"minEastM\": -10, \"maxEastM\": 4, \"minNorthM\": 0, \"maxNorthM\": 4}"));
+    pipeline::PilotRegionPackageOptions scope_options = make_options(scope_root);
+    const pipeline::PilotRegionPackageResult scope_result =
+      pipeline::process_pilot_region_packages(scope_options);
+    assert(!scope_result.created());
+    assert(!std::filesystem::exists(scope_root / "out" / "pilot-region-package.json"));
+    const std::string scope_report = read_file(scope_options.report_path);
+    assert(scope_report.find(
+             "\"code\": \"pilot.sourceScope.orthoImagery.out_of_region\"") !=
+           std::string::npos);
+    std::filesystem::remove_all(scope_root);
+  }
+
+  {
+    const std::filesystem::path package_scope_root = make_temp_root();
+    write_fixture_inputs(package_scope_root);
+    write_file(package_scope_root / "pilot-config.json",
+               replace_once(package_config(),
+                            "\"role\": \"terrainElevation\", \"path\": \"packages/terrain-elevation-manifest.json\", \"bounds\": {\"minEastM\": 0, \"maxEastM\": 4, \"minNorthM\": 0, \"maxNorthM\": 4}",
+                            "\"role\": \"terrainElevation\", \"path\": \"packages/terrain-elevation-manifest.json\", \"bounds\": {\"minEastM\": 0, \"maxEastM\": 14, \"minNorthM\": 0, \"maxNorthM\": 4}"));
+    pipeline::PilotRegionPackageOptions package_scope_options =
+      make_options(package_scope_root);
+    const pipeline::PilotRegionPackageResult package_scope_result =
+      pipeline::process_pilot_region_packages(package_scope_options);
+    assert(!package_scope_result.created());
+    assert(!std::filesystem::exists(package_scope_root / "out" /
+                                    "pilot-region-package.json"));
+    const std::string package_scope_report =
+      read_file(package_scope_options.report_path);
+    assert(package_scope_report.find(
+             "\"code\": \"pilot.sourceScope.packageInputs.out_of_region\"") !=
+           std::string::npos);
+    std::filesystem::remove_all(package_scope_root);
+  }
+
+  {
+    const std::filesystem::path package_missing_root = make_temp_root();
+    write_fixture_inputs(package_missing_root);
+    write_file(package_missing_root / "pilot-config.json",
+               replace_once(package_config(),
+                            "    {\"role\": \"terrainElevation\", \"path\": \"packages/terrain-elevation-manifest.json\", \"bounds\": {\"minEastM\": 0, \"maxEastM\": 4, \"minNorthM\": 0, \"maxNorthM\": 4}},\n",
+                            ""));
+    pipeline::PilotRegionPackageOptions package_missing_options =
+      make_options(package_missing_root);
+    const pipeline::PilotRegionPackageResult package_missing_result =
+      pipeline::process_pilot_region_packages(package_missing_options);
+    assert(!package_missing_result.created());
+    const std::string package_missing_report =
+      read_file(package_missing_options.report_path);
+    assert(package_missing_report.find(
+             "\"code\": \"pilot.config.packageInputs.role.missing\"") !=
+           std::string::npos);
+    std::filesystem::remove_all(package_missing_root);
   }
 
   {
