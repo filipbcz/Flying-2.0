@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "flying.shipping-high-profile-validation-report.v1",
+  "gate": "docs/validation/performance/shipping-high-profile-performance-gate.json",
+  "status": "blocked_until_reference_benchmark_report_passes",
+  "validatedAtUtc": "2026-08-18T00:00:00Z",
+  "graphicsProfileValidation": {
+    "profile": "High",
+    "result": "blocked",
+    "blocker": "Critical flight object retention and runway/terrain geometry preservation must be proven by the Win64 Unreal Shipping benchmark report, not by static config/source inspection.",
+    "evidence": [
+      "unreal/Config/DefaultScalability.ini",
+      "unreal/Config/DefaultEngine.ini",
+      "unreal/Config/DefaultGame.ini",
+      "unreal/Source/FlyingPresentation/Public/FlyingPresentationSettings.h",
+      "unreal/Source/FlyingPresentation/Private/FlyingOfflinePilotTerrainActor.cpp"
+    ],
+    "criticalObjectRetentionRequired": {
+      "source": "shipping-high-profile-benchmark-report",
+      "requiredState": "present",
+      "objects": [
+        "runway_physical_surfaces",
+        "runway_signs",
+        "runway_lights",
+        "windsocks",
+        "terrain_mesh_collision",
+        "terrain_materials",
+        "ortho_imagery",
+        "airport_obstacles",
+        "wires",
+        "water",
+        "state_driven_aircraft_audio"
+      ]
+    }
+  },
+  "benchmarkReportValidation": {
+    "result": "blocked",
+    "requiredCommand": "Flying-Win64-Shipping.exe -ExecCmds=\"flying.profile High; flying.benchmark shipping-high-profile --scenario perf.ceska-trebova-pilot.cross-country.v1 --duration-minutes 30 --offline --report Saved/Flying/Benchmarks/shipping-high-profile-report.json; quit\" -unattended -nosplash -NoLoadingScreen",
+    "requiredReport": "Saved/Flying/Benchmarks/shipping-high-profile-report.json",
+    "blocker": "Reference Windows 11 Win64 Unreal Shipping benchmark report has not been attached to this repository."
+  }
+}

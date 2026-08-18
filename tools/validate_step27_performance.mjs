@@ -48,6 +48,8 @@ const scalability = read("unreal/Config/DefaultScalability.ini");
 const cmake = read("tests/CMakeLists.txt");
 const timingTest = read("tests/core_sim/performance_timing_test.cpp");
 const gate = JSON.parse(read("docs/validation/performance/step27-performance-gate.json"));
+const shippingGate = JSON.parse(read("docs/validation/performance/shipping-high-profile-performance-gate.json"));
+const shippingReport = JSON.parse(read("docs/validation/performance/shipping-high-profile-validation-report.json"));
 
 requireCondition(gate.schemaVersion === "flying.step27-performance-gate.v1", "gate schema mismatch");
 requireCondition(gate.referenceHardwareClass.os === "Windows 11", "reference OS must be Windows 11");
@@ -61,6 +63,36 @@ requireCondition(gate.budgets.coreSimMissedStepsMax === 0, "CoreSim missed-step 
 requireCondition(gate.budgets.ramGiBMax <= 24, "RAM budget must be <= 24 GiB");
 requireCondition(gate.budgets.vramGiBMax <= 10, "VRAM budget must be <= 10 GiB");
 requireCondition(gate.budgets.soakDurationHours >= 10, "soak duration must be at least 10 hours");
+requireCondition(
+  shippingGate.schemaVersion === "flying.shipping-high-profile-performance-gate.v1",
+  "Shipping High-profile gate schema mismatch",
+);
+requireCondition(
+  shippingReport.schemaVersion === "flying.shipping-high-profile-validation-report.v1",
+  "Shipping High-profile validation report schema mismatch",
+);
+requireCondition(
+  shippingGate.referenceEnvironment.configuration === "Shipping",
+  "Shipping High-profile gate must require Shipping configuration",
+);
+requireCondition(
+  shippingGate.referenceEnvironment.graphicsProfile === "High",
+  "Shipping High-profile gate must require High graphics profile",
+);
+requireCondition(
+  shippingGate.benchmarkCommand.command.includes("flying.benchmark shipping-high-profile"),
+  "Shipping High-profile benchmark command missing",
+);
+requireCondition(
+  shippingGate.thresholds.averageFpsMin === gate.budgets.averageFpsMin &&
+    shippingGate.thresholds.onePercentLowFpsMin === gate.budgets.onePercentLowFpsMin &&
+    shippingGate.thresholds.maxObservedHitchMillisecondsMax === gate.budgets.streamingHitchMsMax &&
+    shippingGate.thresholds.inputLatencyMillisecondsP95Max === gate.budgets.inputLatencyMsMax &&
+    shippingGate.thresholds.coreSimMissedStepsMax === gate.budgets.coreSimMissedStepsMax &&
+    shippingGate.thresholds.ramPeakGiBMax === gate.budgets.ramGiBMax &&
+    shippingGate.thresholds.vramPeakGiBMax === gate.budgets.vramGiBMax,
+  "Shipping High-profile thresholds must match Step 27 performance budgets",
+);
 requireCondition(
   gate.inputLatencyEvidence?.measurement === "external input-to-photon capture at 60 FPS",
   "input latency evidence must require external input-to-photon capture",

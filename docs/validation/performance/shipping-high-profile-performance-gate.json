@@ -1,0 +1,96 @@
+{
+  "schemaVersion": "flying.shipping-high-profile-performance-gate.v1",
+  "documentId": "PERF-SHIPPING-HIGH-PROFILE-GATE",
+  "status": "blocked_until_reference_benchmark_report_passes",
+  "referenceEnvironment": {
+    "os": "Windows 11",
+    "platform": "Win64",
+    "configuration": "Shipping",
+    "graphicsProfile": "High",
+    "resolution": {"width": 2560, "height": 1440},
+    "runtimeNetworkRequired": false
+  },
+  "benchmarkCommand": {
+    "command": "Flying-Win64-Shipping.exe -ExecCmds=\"flying.profile High; flying.benchmark shipping-high-profile --scenario perf.ceska-trebova-pilot.cross-country.v1 --duration-minutes 30 --offline --report Saved/Flying/Benchmarks/shipping-high-profile-report.json; quit\" -unattended -nosplash -NoLoadingScreen",
+    "requiredBuild": {
+      "platform": "Win64",
+      "configuration": "Shipping",
+      "signed": true
+    },
+    "requiredInstalledPackages": [
+      "regional terrain package manifest",
+      "regional ortho/vector package manifest",
+      "regional airport and runway surface package manifest",
+      "validated aircraft package manifest"
+    ],
+    "reportPath": "Saved/Flying/Benchmarks/shipping-high-profile-report.json"
+  },
+  "benchmarkReportRequirements": {
+    "schemaVersion": "flying.shipping-high-profile-benchmark-report.v1",
+    "requiredFields": [
+      "build.id",
+      "build.platform",
+      "build.configuration",
+      "build.signed",
+      "scenarioId",
+      "graphicsProfile",
+      "resolution.width",
+      "resolution.height",
+      "startupTimeSeconds",
+      "cockpitLoadTimeSeconds",
+      "averageFps",
+      "onePercentLowFps",
+      "maxObservedHitchMilliseconds",
+      "inputLatencyMillisecondsP95",
+      "coreSimMissedSteps",
+      "ramPeakGiB",
+      "vramPeakGiB",
+      "criticalObjectRetention"
+    ]
+  },
+  "thresholds": {
+    "startupTimeSecondsMax": 20,
+    "cockpitLoadTimeSecondsMax": 30,
+    "averageFpsMin": 60,
+    "onePercentLowFpsMin": 45,
+    "maxObservedHitchMillisecondsMax": 100,
+    "inputLatencyMillisecondsP95Max": 50,
+    "coreSimMissedStepsMax": 0,
+    "ramPeakGiBMax": 24,
+    "vramPeakGiBMax": 10
+  },
+  "mandatoryFailPolicy": {
+    "decision": "fail_when_any_threshold_is_exceeded_or_any_required_field_is_missing",
+    "waiversAllowed": false
+  },
+  "graphicsProfileValidation": {
+    "profile": "High",
+    "scalabilityGroups": {
+      "AntiAliasingQuality": 2,
+      "ViewDistanceQuality": 2,
+      "ShadowQuality": 2,
+      "GlobalIlluminationQuality": 2,
+      "ReflectionQuality": 2,
+      "PostProcessQuality": 2,
+      "TextureQuality": 2,
+      "EffectsQuality": 2,
+      "FoliageQuality": 2
+    },
+    "criticalObjectRetention": {
+      "requiresAll": true,
+      "objects": [
+        "runway_physical_surfaces",
+        "runway_signs",
+        "runway_lights",
+        "windsocks",
+        "terrain_mesh_collision",
+        "terrain_materials",
+        "ortho_imagery",
+        "airport_obstacles",
+        "wires",
+        "water",
+        "state_driven_aircraft_audio"
+      ]
+    }
+  }
+}
