@@ -227,15 +227,24 @@ bool ReadJsonObject(const FString& FilePath, TSharedPtr<FJsonObject>& OutObject)
   return true;
 }
 
-bool HasDisallowedRuntimeDependency(const TSharedPtr<FJsonObject>& PilotPackage)
+bool HasNonEmptyJsonArrayField(
+  const TSharedPtr<FJsonObject>& Object,
+  const TCHAR* FieldName,
+  bool bMissingIsDisallowed)
 {
-  if (!PilotPackage.IsValid())
+  const TArray<TSharedPtr<FJsonValue>>* Values = nullptr;
+  if (!Object.IsValid() || !Object->TryGetArrayField(FieldName, Values))
   {
-    return true;
+    return bMissingIsDisallowed;
   }
 
-  const TSharedPtr<FJsonObject> RuntimeDependencies =
-    PilotPackage->GetObjectField(TEXT("runtimeDependencies"));
+  return Values->Num() != 0;
+}
+
+bool RuntimeDependencySectionUsesRemoteContent(
+  const TSharedPtr<FJsonObject>& RuntimeDependencies,
+  bool bRemoteTileServerUrlsRequired)
+{
   if (!RuntimeDependencies.IsValid())
   {
     return true;
@@ -250,16 +259,55 @@ bool HasDisallowedRuntimeDependency(const TSharedPtr<FJsonObject>& PilotPackage)
     return true;
   }
 
-  const TArray<TSharedPtr<FJsonValue>>* ExternalApis = nullptr;
-  if (!RuntimeDependencies->TryGetArrayField(TEXT("externalMapApis"), ExternalApis) ||
-      ExternalApis->Num() != 0)
+  if (HasNonEmptyJsonArrayField(
+        RuntimeDependencies,
+        TEXT("externalMapApis"),
+        true))
   {
     return true;
   }
 
-  const TArray<TSharedPtr<FJsonValue>>* RemoteTileServers = nullptr;
-  if (!RuntimeDependencies->TryGetArrayField(TEXT("remoteTileServerUrls"), RemoteTileServers) ||
-      RemoteTileServers->Num() != 0)
+  if (HasNonEmptyJsonArrayField(
+        RuntimeDependencies,
+        TEXT("remoteTileServerUrls"),
+        bRemoteTileServerUrlsRequired))
+  {
+    return true;
+  }
+
+  return false;
+}
+
+bool HasDisallowedTerrainRuntimeDependency(const TSharedPtr<FJsonObject>& TerrainPackage)
+{
+  if (!TerrainPackage.IsValid())
+  {
+    return true;
+  }
+
+  return RuntimeDependencySectionUsesRemoteContent(
+    TerrainPackage->GetObjectField(TEXT("streaming")),
+    false);
+}
+
+bool HasDisallowedPilotRuntimeDependency(const TSharedPtr<FJsonObject>& PilotPackage)
+{
+  if (!PilotPackage.IsValid())
+  {
+    return true;
+  }
+
+  if (RuntimeDependencySectionUsesRemoteContent(
+        PilotPackage->GetObjectField(TEXT("runtimeDependencies")),
+        true))
+  {
+    return true;
+  }
+
+  if (PilotPackage->HasField(TEXT("streaming")) &&
+      RuntimeDependencySectionUsesRemoteContent(
+        PilotPackage->GetObjectField(TEXT("streaming")),
+        true))
   {
     return true;
   }
@@ -355,8 +403,10 @@ bool LoadTerrainTiles(const FString& TerrainManifestPath,
                       int32 MaxTerrainSectionsPerLoad,
                       int32 MaxTerrainVerticesPerSection,
                       const FVector2D& TerrainStreamingFocusLocalMeters,
+                      bool& OutUsedRemoteMapDependencies,
                       TArray<FLocalTerrainTile>& OutTiles)
 {
+  OutUsedRemoteMapDependencies = true;
   TSharedPtr<FJsonObject> TerrainManifest;
   if (!ReadJsonObject(TerrainManifestPath, TerrainManifest))
   {
@@ -368,6 +418,14 @@ bool LoadTerrainTiles(const FString& TerrainManifestPath,
         kTerrainPackageSchemaVersion,
         TEXT("Terrain package")))
   {
+    return false;
+  }
+
+  OutUsedRemoteMapDependencies = HasDisallowedTerrainRuntimeDependency(TerrainManifest);
+  const UFlyingPresentationSettings* Settings = GetDefault<UFlyingPresentationSettings>();
+  if (Settings->bOfflineOnly && OutUsedRemoteMapDependencies)
+  {
+    UE_LOG(LogTemp, Error, TEXT("Terrain package declares runtime map dependencies."));
     return false;
   }
 
@@ -616,8 +674,12 @@ bool LoadPpmP3(const FString& FilePath, int32& OutWidth, int32& OutHeight, TArra
   return OutPixels.Num() == PixelCount;
 }
 
-bool LoadImageryPackage(const FString& PilotPackageManifestPath, TArray<FOfflineImageryTile>& OutTiles)
+bool LoadImageryPackage(
+  const FString& PilotPackageManifestPath,
+  bool& OutUsedRemoteMapDependencies,
+  TArray<FOfflineImageryTile>& OutTiles)
 {
+  OutUsedRemoteMapDependencies = true;
   TSharedPtr<FJsonObject> PilotPackage;
   if (!ReadJsonObject(PilotPackageManifestPath, PilotPackage))
   {
@@ -632,8 +694,9 @@ bool LoadImageryPackage(const FString& PilotPackageManifestPath, TArray<FOffline
     return false;
   }
 
+  OutUsedRemoteMapDependencies = HasDisallowedPilotRuntimeDependency(PilotPackage);
   const UFlyingPresentationSettings* Settings = GetDefault<UFlyingPresentationSettings>();
-  if (Settings->bOfflineOnly && HasDisallowedRuntimeDependency(PilotPackage))
+  if (Settings->bOfflineOnly && OutUsedRemoteMapDependencies)
   {
     UE_LOG(LogTemp, Error, TEXT("Pilot imagery package declares runtime map dependencies."));
     return false;
@@ -853,28 +916,50 @@ bool AFlyingOfflinePilotTerrainActor::LoadOfflinePackages()
   const FString TerrainManifestPath = ResolvePackagePath(TerrainPackageManifestPath);
   const FString PilotManifestPath = ResolvePackagePath(PilotRegionPackageManifestPath);
 
+  LastLoadedTerrainPackageManifestPath = TerrainManifestPath;
+  LastLoadedPilotRegionPackageManifestPath = PilotManifestPath;
+  LastLoadedTerrainTileCount = 0;
+  LastLoadedImageryTileCount = 0;
+  LastRenderedVertexCount = 0;
+  LastRenderedTriangleCount = 0;
+  FirstRenderedEcefPositionMeters = FVector::ZeroVector;
+  FirstRenderedUnrealPosition = FVector::ZeroVector;
+  bLastLoadUsedRemoteMapDependencies = true;
+
   TArray<FLocalTerrainTile> TerrainTiles;
+  bool bTerrainManifestUsedRemoteMapDependencies = true;
   if (!LoadTerrainTiles(
         TerrainManifestPath,
         RenderLodLevel,
         MaxTerrainSectionsPerLoad,
         MaxTerrainVerticesPerSection,
         TerrainStreamingFocusLocalMeters,
+        bTerrainManifestUsedRemoteMapDependencies,
         TerrainTiles))
   {
     UE_LOG(LogTemp, Warning, TEXT("No local terrain package tiles loaded from %s"), *TerrainManifestPath);
     return false;
   }
+  LastLoadedTerrainTileCount = TerrainTiles.Num();
 
   TArray<FOfflineImageryTile> ImageryTiles;
+  bool bPilotManifestUsedRemoteMapDependencies = false;
   if (!PilotManifestPath.IsEmpty())
   {
-    if (!LoadImageryPackage(PilotManifestPath, ImageryTiles))
+    bPilotManifestUsedRemoteMapDependencies = true;
+    if (!LoadImageryPackage(
+          PilotManifestPath,
+          bPilotManifestUsedRemoteMapDependencies,
+          ImageryTiles))
     {
       UE_LOG(LogTemp, Error, TEXT("Configured pilot imagery package failed to load: %s"), *PilotManifestPath);
       return false;
     }
   }
+  LastLoadedImageryTileCount = ImageryTiles.Num();
+  bLastLoadUsedRemoteMapDependencies =
+    bTerrainManifestUsedRemoteMapDependencies ||
+    bPilotManifestUsedRemoteMapDependencies;
 
   const auto Origin = flying::geo_terrain::make_geodetic_degrees(
     Settings->PilotOriginLatitudeDegrees,
@@ -890,6 +975,7 @@ bool AFlyingOfflinePilotTerrainActor::LoadOfflinePackages()
   }
 
   int32 SectionIndex = 0;
+  bool bCapturedFirstRenderedVertex = false;
   for (const FLocalTerrainTile& Tile : TerrainTiles)
   {
     TArray<FVector> Vertices;
@@ -918,8 +1004,17 @@ bool AFlyingOfflinePilotTerrainActor::LoadOfflinePackages()
           Sample.NorthMeters,
           LocalUpMeters);
         const FVector EcefNormal = EcefDirectionFromLocalEnu(Frame, Sample.NormalEnu);
+        const FVector UnrealPosition =
+          GeoreferenceComponent->TransformEcefPositionToUnreal(EcefPosition);
 
-        Vertices.Add(GeoreferenceComponent->TransformEcefPositionToUnreal(EcefPosition));
+        if (!bCapturedFirstRenderedVertex)
+        {
+          FirstRenderedEcefPositionMeters = EcefPosition;
+          FirstRenderedUnrealPosition = UnrealPosition;
+          bCapturedFirstRenderedVertex = true;
+        }
+
+        Vertices.Add(UnrealPosition);
         Normals.Add(GeoreferenceComponent->TransformEcefDirectionToUnreal(EcefNormal).GetSafeNormal());
         Uv0.Add(FVector2D(
           static_cast<double>(Col) / static_cast<double>(FMath::Max(1, Tile.Cols - 1)),
@@ -957,6 +1052,9 @@ bool AFlyingOfflinePilotTerrainActor::LoadOfflinePackages()
       Tangents,
       true);
 
+    LastRenderedVertexCount += Vertices.Num();
+    LastRenderedTriangleCount += Triangles.Num() / 3;
+
     if (VertexColorMaterial)
     {
       TerrainMesh->SetMaterial(SectionIndex, VertexColorMaterial);
@@ -975,4 +1073,49 @@ int32 AFlyingOfflinePilotTerrainActor::GetRenderedTerrainSectionCount() const
 bool AFlyingOfflinePilotTerrainActor::HasRenderedTerrainSections() const
 {
   return GetRenderedTerrainSectionCount() > 0;
+}
+
+FString AFlyingOfflinePilotTerrainActor::GetLoadedTerrainPackageManifestPath() const
+{
+  return LastLoadedTerrainPackageManifestPath;
+}
+
+FString AFlyingOfflinePilotTerrainActor::GetLoadedPilotRegionPackageManifestPath() const
+{
+  return LastLoadedPilotRegionPackageManifestPath;
+}
+
+int32 AFlyingOfflinePilotTerrainActor::GetLoadedTerrainTileCount() const
+{
+  return LastLoadedTerrainTileCount;
+}
+
+int32 AFlyingOfflinePilotTerrainActor::GetLoadedImageryTileCount() const
+{
+  return LastLoadedImageryTileCount;
+}
+
+int32 AFlyingOfflinePilotTerrainActor::GetLastRenderedVertexCount() const
+{
+  return LastRenderedVertexCount;
+}
+
+int32 AFlyingOfflinePilotTerrainActor::GetLastRenderedTriangleCount() const
+{
+  return LastRenderedTriangleCount;
+}
+
+FVector AFlyingOfflinePilotTerrainActor::GetFirstRenderedEcefPositionMeters() const
+{
+  return FirstRenderedEcefPositionMeters;
+}
+
+FVector AFlyingOfflinePilotTerrainActor::GetFirstRenderedUnrealPosition() const
+{
+  return FirstRenderedUnrealPosition;
+}
+
+bool AFlyingOfflinePilotTerrainActor::DidLastLoadUseRemoteMapDependencies() const
+{
+  return bLastLoadUsedRemoteMapDependencies;
 }

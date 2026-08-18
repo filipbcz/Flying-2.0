@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const automationTestName = "Flying.Presentation.GeoreferencedContent.StartupScenarioRendersOfflineRegionalContent";
+const canonicalEvidencePath = "docs/validation/visual/rc-startup-georef-rendering.json";
 
 function fail(message) {
   console.error(`validate_unreal_georeferenced_content: ${message}`);
@@ -152,11 +153,18 @@ function validateImplementation(evidence) {
   requireCodePattern(terrainHeader, /bool\s+LoadOfflinePackages\s*\(\s*\)\s*;/, terrainHeaderPath, "must expose the offline package load operation");
   requireCodePattern(terrainHeader, /int32\s+GetRenderedTerrainSectionCount\s*\(\s*\)\s+const\s*;/, terrainHeaderPath, "must expose rendered section count for runtime validation");
   requireCodePattern(terrainHeader, /bool\s+HasRenderedTerrainSections\s*\(\s*\)\s+const\s*;/, terrainHeaderPath, "must expose rendered section state for runtime validation");
+  requireCodePattern(terrainHeader, /FString\s+GetLoadedTerrainPackageManifestPath\s*\(\s*\)\s+const\s*;/, terrainHeaderPath, "must expose loaded terrain manifest path for runtime validation");
+  requireCodePattern(terrainHeader, /FString\s+GetLoadedPilotRegionPackageManifestPath\s*\(\s*\)\s+const\s*;/, terrainHeaderPath, "must expose loaded pilot region manifest path for runtime validation");
+  requireCodePattern(terrainHeader, /int32\s+GetLoadedTerrainTileCount\s*\(\s*\)\s+const\s*;/, terrainHeaderPath, "must expose observed terrain tile count for runtime validation");
+  requireCodePattern(terrainHeader, /int32\s+GetLoadedImageryTileCount\s*\(\s*\)\s+const\s*;/, terrainHeaderPath, "must expose observed imagery tile count for runtime validation");
+  requireCodePattern(terrainHeader, /FVector\s+GetFirstRenderedEcefPositionMeters\s*\(\s*\)\s+const\s*;/, terrainHeaderPath, "must expose an observed rendered ECEF position for runtime validation");
+  requireCodePattern(terrainHeader, /FVector\s+GetFirstRenderedUnrealPosition\s*\(\s*\)\s+const\s*;/, terrainHeaderPath, "must expose the Cesium-transformed Unreal position for runtime validation");
+  requireCodePattern(terrainHeader, /bool\s+DidLastLoadUseRemoteMapDependencies\s*\(\s*\)\s+const\s*;/, terrainHeaderPath, "must expose runtime external map dependency status");
   requireCodePattern(terrainHeader, /UFlyingCesiumGeoreferenceComponent/, terrainHeaderPath, "must own the Cesium georeference component");
 
   const terrainActor = read(terrainActorPath);
   requireCondition(
-    /Vertices\.Add\(\s*GeoreferenceComponent->TransformEcefPositionToUnreal\(EcefPosition\)\s*\)/.test(stripCppComments(terrainActor)),
+    /const\s+FVector\s+UnrealPosition\s*=\s*GeoreferenceComponent->TransformEcefPositionToUnreal\(EcefPosition\)\s*;[\s\S]*?Vertices\.Add\(UnrealPosition\)/.test(stripCppComments(terrainActor)),
     "terrain vertices must be placed through the Cesium georeference transform",
   );
   requireCondition(
@@ -165,6 +173,14 @@ function validateImplementation(evidence) {
   );
   requireCodePattern(terrainActor, /LoadTerrainTiles\([\s\S]*?TerrainTiles\)/, terrainActorPath, "must load offline terrain tiles");
   requireCodePattern(terrainActor, /LoadImageryPackage\([\s\S]*?ImageryTiles\)/, terrainActorPath, "must load offline imagery from the pilot region package");
+  requireCodePattern(terrainActor, /HasDisallowedTerrainRuntimeDependency\([\s\S]*?TerrainManifest[\s\S]*?\)/, terrainActorPath, "must inspect terrain package streaming dependencies");
+  requireCodePattern(terrainActor, /HasDisallowedPilotRuntimeDependency\([\s\S]*?PilotPackage[\s\S]*?\)/, terrainActorPath, "must inspect pilot package runtime dependencies");
+  requireCodePattern(terrainActor, /RuntimeDependencySectionUsesRemoteContent\([\s\S]*?runtimeNetworkRequired[\s\S]*?externalMapApis[\s\S]*?remoteTileServerUrls[\s\S]*?\)/, terrainActorPath, "must derive remote dependency state from manifest metadata");
+  requireCodePattern(terrainActor, /bLastLoadUsedRemoteMapDependencies\s*=\s*bTerrainManifestUsedRemoteMapDependencies\s*\|\|\s*bPilotManifestUsedRemoteMapDependencies\s*;/, terrainActorPath, "must report actual terrain and pilot manifest dependency state");
+  requireCondition(
+    !/bLastLoadUsedRemoteMapDependencies\s*=\s*false\s*;/.test(stripCppComments(terrainActor)),
+    "runtime external map dependency status must not be hardcoded false",
+  );
   requireCodePattern(terrainActor, /return\s+TerrainMesh\s*\?\s*TerrainMesh->GetNumSections\(\)\s*:\s*0\s*;/, terrainActorPath, "must report actual procedural mesh sections");
 
   const georef = read(georefPath);
@@ -183,7 +199,11 @@ function validateImplementation(evidence) {
   requireCodePattern(automationTest, /TerrainActor->LoadOfflinePackages\(\)/, automationTestPath, "must execute runtime offline package loading");
   requireCodePattern(automationTest, /TestTrue\([\s\S]*?bLoadedOfflinePackages[\s\S]*?\)/, automationTestPath, "must assert runtime offline package loading");
   requireCodePattern(automationTest, /TestTrue\([\s\S]*?TerrainActor->HasRenderedTerrainSections\(\)[\s\S]*?\)/, automationTestPath, "must assert actual rendered terrain mesh sections");
-  requireCodePattern(automationTest, /renderedTerrainSectionCount=%d/, automationTestPath, "must emit observed rendered section count for artifact generation");
+  requireCodePattern(automationTest, /terrainManifestPath=\\?"%s\\?"/, automationTestPath, "must emit observed terrain package manifest path for artifact generation");
+  requireCodePattern(automationTest, /pilotRegionManifestPath=\\?"%s\\?"/, automationTestPath, "must emit observed pilot region package manifest path for artifact generation");
+  requireCodePattern(automationTest, /usedRemoteMapDependencies=%s/, automationTestPath, "must emit observed external map dependency status for artifact generation");
+  requireCodePattern(automationTest, /firstEcef=\(%.3f,%.3f,%.3f\)/, automationTestPath, "must emit an observed ECEF position for artifact generation");
+  requireCodePattern(automationTest, /firstUnreal=\(%.3f,%.3f,%.3f\)/, automationTestPath, "must emit an observed Cesium-transformed Unreal position for artifact generation");
 
   if (Array.isArray(implementation.fileChecksums)) {
     for (const entry of implementation.fileChecksums) {
@@ -215,6 +235,37 @@ function validateCaptureArtifact(evidence) {
   requireCondition(capture.provenance?.exitCode === 0, "capture provenance exitCode must be zero");
   requireCondition(Number.isInteger(capture.observations?.renderedTerrainSectionCount), "capture observations.renderedTerrainSectionCount must be an integer");
   requireCondition(capture.observations.renderedTerrainSectionCount > 0, "capture observations.renderedTerrainSectionCount must be greater than zero");
+  requireCondition(Number.isInteger(capture.observations?.terrainTileCount), "capture observations.terrainTileCount must be an integer");
+  requireCondition(capture.observations.terrainTileCount > 0, "capture observations.terrainTileCount must be greater than zero");
+  requireCondition(Number.isInteger(capture.observations?.imageryTileCount), "capture observations.imageryTileCount must be an integer");
+  requireCondition(capture.observations.imageryTileCount > 0, "capture observations.imageryTileCount must be greater than zero");
+  requireCondition(Number.isInteger(capture.observations?.renderedVertexCount), "capture observations.renderedVertexCount must be an integer");
+  requireCondition(capture.observations.renderedVertexCount > 0, "capture observations.renderedVertexCount must be greater than zero");
+  requireCondition(Number.isInteger(capture.observations?.renderedTriangleCount), "capture observations.renderedTriangleCount must be an integer");
+  requireCondition(capture.observations.renderedTriangleCount > 0, "capture observations.renderedTriangleCount must be greater than zero");
+  requireCondition(capture.observations?.usedRemoteMapDependencies === false, "capture observations.usedRemoteMapDependencies must be false");
+  requireCondition(isObject(capture.offlinePackageManifests), "capture must include offlinePackageManifests");
+  for (const key of ["terrain", "pilotRegion"]) {
+    requireCondition(isObject(capture.offlinePackageManifests?.[key]), `capture offlinePackageManifests.${key} must be present`);
+    requireCondition(isNonEmptyString(capture.offlinePackageManifests?.[key]?.path), `capture offlinePackageManifests.${key}.path is required`);
+    requireCondition(/^[a-f0-9]{64}$/.test(capture.offlinePackageManifests?.[key]?.sha256 ?? ""), `capture offlinePackageManifests.${key}.sha256 must be a SHA-256 digest`);
+    requireCondition(capture.offlinePackageManifests?.[key]?.source === "installed-offline-regional-package", `capture offlinePackageManifests.${key}.source must be installed-offline-regional-package`);
+  }
+  requireCondition(isObject(capture.georeferenceTransform), "capture must include georeferenceTransform");
+  requireCondition(Array.isArray(capture.georeferenceTransform?.firstEcefPositionMeters), "capture georeferenceTransform.firstEcefPositionMeters must be an array");
+  requireCondition(Array.isArray(capture.georeferenceTransform?.firstUnrealPosition), "capture georeferenceTransform.firstUnrealPosition must be an array");
+  for (const [index, value] of (capture.georeferenceTransform?.firstEcefPositionMeters ?? []).entries()) {
+    requireCondition(typeof value === "number" && Number.isFinite(value), `capture georeferenceTransform.firstEcefPositionMeters[${index}] must be finite`);
+  }
+  for (const [index, value] of (capture.georeferenceTransform?.firstUnrealPosition ?? []).entries()) {
+    requireCondition(typeof value === "number" && Number.isFinite(value), `capture georeferenceTransform.firstUnrealPosition[${index}] must be finite`);
+  }
+  requireCondition(capture.georeferenceTransform.firstEcefPositionMeters.length === 3, "capture georeferenceTransform.firstEcefPositionMeters must contain 3 values");
+  requireCondition(capture.georeferenceTransform.firstUnrealPosition.length === 3, "capture georeferenceTransform.firstUnrealPosition must contain 3 values");
+  requireCondition(isObject(capture.externalMapApiRuntimeCheck), "capture must include externalMapApiRuntimeCheck");
+  requireCondition(capture.externalMapApiRuntimeCheck.runtimeNetworkRequired === false, "capture externalMapApiRuntimeCheck.runtimeNetworkRequired must be false");
+  requireCondition(Array.isArray(capture.externalMapApiRuntimeCheck.externalMapApis) && capture.externalMapApiRuntimeCheck.externalMapApis.length === 0, "capture externalMapApiRuntimeCheck.externalMapApis must be empty");
+  requireCondition(Array.isArray(capture.externalMapApiRuntimeCheck.remoteTileServerUrls) && capture.externalMapApiRuntimeCheck.remoteTileServerUrls.length === 0, "capture externalMapApiRuntimeCheck.remoteTileServerUrls must be empty");
   requireCondition(Array.isArray(capture.renderedObjects) && capture.renderedObjects.length > 0, "capture must include rendered object observations");
 
   const terrainObservation = capture.renderedObjects.find((object) => object?.type === "offline-regional-terrain-mesh");
@@ -258,7 +309,7 @@ function validateEvidence(relativeEvidencePath, options = {}) {
   requireCondition(isObject(evidence.runtimeValidation), "evidence must include runtimeValidation provenance");
   requireCondition(evidence.runtimeValidation?.automationTest === automationTestName, "runtimeValidation automationTest is invalid");
   requireCondition(
-    evidence.runtimeValidation?.command === "node tools/validate_unreal_georeferenced_content.mjs --evidence Build/VisualEvidence/rc-startup-georef-rendering.json --require-unreal-runtime",
+    evidence.runtimeValidation?.command === `node tools/validate_unreal_georeferenced_content.mjs --evidence ${canonicalEvidencePath} --require-unreal-runtime`,
     "runtimeValidation command must be the authoritative Unreal runtime validation command",
   );
   validateImplementation(evidence);
@@ -299,6 +350,31 @@ function assertUnreal58(unrealRoot) {
   const version = JSON.parse(fs.readFileSync(versionPath, "utf8"));
   requireCondition(version.MajorVersion === 5 && version.MinorVersion === 8, `Unreal toolchain must be UE 5.8, found ${version.MajorVersion}.${version.MinorVersion}`);
   return version;
+}
+
+function hashAbsoluteFile(filePath, label) {
+  requireCondition(fs.existsSync(filePath), `${label} does not exist: ${filePath}`);
+  return crypto.createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
+}
+
+function parseRuntimeObservation(combinedOutput) {
+  const pattern =
+    /FlyingGeoreferencedContentRendering:\s*renderedTerrainSectionCount=(\d+)\s+terrainTileCount=(\d+)\s+imageryTileCount=(\d+)\s+renderedVertexCount=(\d+)\s+renderedTriangleCount=(\d+)\s+usedRemoteMapDependencies=(true|false)\s+terrainManifestPath="([^"]+)"\s+pilotRegionManifestPath="([^"]+)"\s+firstEcef=\(([-+0-9.eE]+),([-+0-9.eE]+),([-+0-9.eE]+)\)\s+firstUnreal=\(([-+0-9.eE]+),([-+0-9.eE]+),([-+0-9.eE]+)\)/;
+  const match = combinedOutput.match(pattern);
+  requireCondition(match, "Unreal automation output did not emit the full georeferenced content observation");
+
+  return {
+    renderedTerrainSectionCount: Number.parseInt(match[1], 10),
+    terrainTileCount: Number.parseInt(match[2], 10),
+    imageryTileCount: Number.parseInt(match[3], 10),
+    renderedVertexCount: Number.parseInt(match[4], 10),
+    renderedTriangleCount: Number.parseInt(match[5], 10),
+    usedRemoteMapDependencies: match[6] === "true",
+    terrainManifestPath: match[7],
+    pilotRegionManifestPath: match[8],
+    firstEcefPositionMeters: [Number(match[9]), Number(match[10]), Number(match[11])],
+    firstUnrealPosition: [Number(match[12]), Number(match[13]), Number(match[14])],
+  };
 }
 
 function validateRuntime(evidence) {
@@ -342,10 +418,13 @@ function validateRuntime(evidence) {
   requireCondition(!/Error:/.test(combinedOutput), "Unreal automation output contains an error marker");
   requireCondition(evidence.runtimeValidation?.automationTest === automationTestName, "runtimeValidation evidence must name the executed automation test");
 
-  const sectionCountMatch = combinedOutput.match(/FlyingGeoreferencedContentRendering:\s*renderedTerrainSectionCount=(\d+)/);
-  requireCondition(sectionCountMatch, "Unreal automation output did not emit rendered terrain section count");
-  const renderedTerrainSectionCount = Number.parseInt(sectionCountMatch[1], 10);
-  requireCondition(renderedTerrainSectionCount > 0, "Unreal automation rendered terrain section count must be greater than zero");
+  const observation = parseRuntimeObservation(combinedOutput);
+  requireCondition(observation.renderedTerrainSectionCount > 0, "Unreal automation rendered terrain section count must be greater than zero");
+  requireCondition(observation.terrainTileCount > 0, "Unreal automation terrain tile count must be greater than zero");
+  requireCondition(observation.imageryTileCount > 0, "Unreal automation imagery tile count must be greater than zero");
+  requireCondition(observation.renderedVertexCount > 0, "Unreal automation rendered vertex count must be greater than zero");
+  requireCondition(observation.renderedTriangleCount > 0, "Unreal automation rendered triangle count must be greater than zero");
+  requireCondition(observation.usedRemoteMapDependencies === false, "Unreal automation must report no external map API or remote tile dependency use");
 
   const commit = runGit(["rev-parse", "HEAD"]);
   const captureArtifact = normalizedRepoPath(evidence.captureArtifact);
@@ -385,8 +464,37 @@ function validateRuntime(evidence) {
       pilotRegionManifestSetting: "Saved/Flying/PilotRegion/GIS/pilot-region-package.json",
       runtimeNetworkRequired: false,
     },
+    offlinePackageManifests: {
+      terrain: {
+        path: observation.terrainManifestPath,
+        sha256: hashAbsoluteFile(observation.terrainManifestPath, "terrain package manifest"),
+        source: "installed-offline-regional-package",
+      },
+      pilotRegion: {
+        path: observation.pilotRegionManifestPath,
+        sha256: hashAbsoluteFile(observation.pilotRegionManifestPath, "pilot region package manifest"),
+        source: "installed-offline-regional-package",
+      },
+    },
+    externalMapApiRuntimeCheck: {
+      runtimeNetworkRequired: false,
+      externalMapApis: [],
+      remoteTileServerUrls: [],
+      source: "AFlyingOfflinePilotTerrainActor::LoadImageryPackage",
+    },
+    georeferenceTransform: {
+      component: "UFlyingCesiumGeoreferenceComponent",
+      positionTransform: "TransformEcefPositionToUnreal",
+      firstEcefPositionMeters: observation.firstEcefPositionMeters,
+      firstUnrealPosition: observation.firstUnrealPosition,
+    },
     observations: {
-      renderedTerrainSectionCount,
+      renderedTerrainSectionCount: observation.renderedTerrainSectionCount,
+      terrainTileCount: observation.terrainTileCount,
+      imageryTileCount: observation.imageryTileCount,
+      renderedVertexCount: observation.renderedVertexCount,
+      renderedTriangleCount: observation.renderedTriangleCount,
+      usedRemoteMapDependencies: observation.usedRemoteMapDependencies,
     },
     renderedObjects: [
       {

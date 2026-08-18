@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "flying.georeferenced-content-rendering-evidence.v1",
+  "createdAt": "2026-08-18T00:00:00Z",
+  "startupScenarioId": "startup.offline-regional-georeferenced-content",
+  "evidenceSource": "current-repository-implementation-validation",
+  "fixture": false,
+  "synthetic": false,
+  "readmeClaim": false,
+  "offlineOnly": true,
+  "build": {
+    "id": "rc-startup-georef-rendering",
+    "commit": "f9270995ae8bc6ba6cacbc6e3fa10d89b52a810c",
+    "platform": "Win64",
+    "configuration": "Unreal Editor runtime automation",
+    "unrealEngine": "5.8"
+  },
+  "runtimeValidation": {
+    "automationTest": "Flying.Presentation.GeoreferencedContent.StartupScenarioRendersOfflineRegionalContent",
+    "command": "node tools/validate_unreal_georeferenced_content.mjs --evidence docs/validation/visual/rc-startup-georef-rendering.json --require-unreal-runtime",
+    "requiredCapabilities": [
+      "windows",
+      "unreal-engine-5.8"
+    ]
+  },
+  "captureArtifact": "docs/validation/visual/rc-startup-georef-render-capture.json",
+  "implementation": {
+    "startupGameMode": "unreal/Source/FlyingPresentation/Private/FlyingPilotGameMode.cpp",
+    "offlineContentActor": "unreal/Source/FlyingPresentation/Private/FlyingOfflinePilotTerrainActor.cpp",
+    "offlineContentActorHeader": "unreal/Source/FlyingPresentation/Public/FlyingOfflinePilotTerrainActor.h",
+    "georeferenceComponent": "unreal/Source/FlyingPresentation/Private/FlyingCesiumGeoreferenceComponent.cpp",
+    "presentationSettings": "unreal/Source/FlyingPresentation/Public/FlyingPresentationSettings.h",
+    "automationTest": "unreal/Source/FlyingPresentation/Private/FlyingGeoreferencedContentRenderingAutomation.cpp",
+    "engineConfig": "unreal/Config/DefaultEngine.ini",
+    "gameConfig": "unreal/Config/DefaultGame.ini",
+    "fileChecksums": [
+      {
+        "path": "unreal/Source/FlyingPresentation/Private/FlyingPilotGameMode.cpp",
+        "sha256": "e359b5640ec5d10835d2f6fdcd24740e4dc29d05a8667f41a2b4e0cae5f54168"
+      },
+      {
+        "path": "unreal/Source/FlyingPresentation/Private/FlyingOfflinePilotTerrainActor.cpp",
+        "sha256": "8b6ff7f69aa4d7231de8ec1b35bd7ded18e1657358dc6969d57ad5f9702c5e39"
+      },
+      {
+        "path": "unreal/Source/FlyingPresentation/Public/FlyingOfflinePilotTerrainActor.h",
+        "sha256": "26c7c6181bdcf0b0545ded84400297c8fa5486c240408f671e7b9affe329fc4c"
+      },
+      {
+        "path": "unreal/Source/FlyingPresentation/Private/FlyingCesiumGeoreferenceComponent.cpp",
+        "sha256": "c80a12c54deb42aa9295f6cdecafda07f8959698d3124984f9a7c7e2fa9eb3c4"
+      },
+      {
+        "path": "unreal/Source/FlyingPresentation/Public/FlyingPresentationSettings.h",
+        "sha256": "4896618d7f187fd12c41856bde2069f0cbe8dff113981675d0c9c24b91b6c885"
+      },
+      {
+        "path": "unreal/Source/FlyingPresentation/Private/FlyingGeoreferencedContentRenderingAutomation.cpp",
+        "sha256": "2af515318a022877cae66c764cf01d951543befd2f7290e15f63a34121d4fb2e"
+      },
+      {
+        "path": "unreal/Config/DefaultEngine.ini",
+        "sha256": "e00aa09d69db51901aa2f146fd39edf912014a2179e7bcc0273815810afba40c"
+      },
+      {
+        "path": "unreal/Config/DefaultGame.ini",
+        "sha256": "bc35ff73d693a6cc4ee5bd4d021ccf68bacf2ea10ce49b7bd688207d3d01de7e"
+      }
+    ]
+  }
+}

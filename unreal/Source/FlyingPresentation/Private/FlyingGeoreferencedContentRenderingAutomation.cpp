@@ -69,13 +69,60 @@ bool FFlyingGeoreferencedContentRenderingStartupTest::RunTest(const FString& Par
   TestTrue(
     TEXT("offline regional terrain section count is nonzero"),
     RenderedSectionCount > 0);
+  TestTrue(
+    TEXT("offline regional terrain package manifest path was observed"),
+    !TerrainActor->GetLoadedTerrainPackageManifestPath().IsEmpty());
+  TestTrue(
+    TEXT("offline pilot region package manifest path was observed"),
+    !TerrainActor->GetLoadedPilotRegionPackageManifestPath().IsEmpty());
+  TestTrue(
+    TEXT("offline regional terrain tiles were observed"),
+    TerrainActor->GetLoadedTerrainTileCount() > 0);
+  TestTrue(
+    TEXT("offline regional imagery tiles were observed"),
+    TerrainActor->GetLoadedImageryTileCount() > 0);
+  TestTrue(
+    TEXT("rendered georeferenced terrain vertices were observed"),
+    TerrainActor->GetLastRenderedVertexCount() > 0);
+  TestTrue(
+    TEXT("rendered georeferenced terrain triangles were observed"),
+    TerrainActor->GetLastRenderedTriangleCount() > 0);
+  TestFalse(
+    TEXT("startup load used no external map API or remote tile dependency"),
+    TerrainActor->DidLastLoadUseRemoteMapDependencies());
+
+  const FVector FirstEcefPosition = TerrainActor->GetFirstRenderedEcefPositionMeters();
+  const FVector FirstUnrealPosition = TerrainActor->GetFirstRenderedUnrealPosition();
+  TestFalse(
+    TEXT("first rendered ECEF position is observed"),
+    FirstEcefPosition.IsNearlyZero());
   UE_LOG(
     LogFlyingGeoreferencedContentRendering,
     Display,
-    TEXT("FlyingGeoreferencedContentRendering: renderedTerrainSectionCount=%d"),
-    RenderedSectionCount);
+    TEXT("FlyingGeoreferencedContentRendering: renderedTerrainSectionCount=%d terrainTileCount=%d imageryTileCount=%d renderedVertexCount=%d renderedTriangleCount=%d usedRemoteMapDependencies=%s terrainManifestPath=\"%s\" pilotRegionManifestPath=\"%s\" firstEcef=(%.3f,%.3f,%.3f) firstUnreal=(%.3f,%.3f,%.3f)"),
+    RenderedSectionCount,
+    TerrainActor->GetLoadedTerrainTileCount(),
+    TerrainActor->GetLoadedImageryTileCount(),
+    TerrainActor->GetLastRenderedVertexCount(),
+    TerrainActor->GetLastRenderedTriangleCount(),
+    TerrainActor->DidLastLoadUseRemoteMapDependencies() ? TEXT("true") : TEXT("false"),
+    *TerrainActor->GetLoadedTerrainPackageManifestPath(),
+    *TerrainActor->GetLoadedPilotRegionPackageManifestPath(),
+    FirstEcefPosition.X,
+    FirstEcefPosition.Y,
+    FirstEcefPosition.Z,
+    FirstUnrealPosition.X,
+    FirstUnrealPosition.Y,
+    FirstUnrealPosition.Z);
 
-  return bLoadedOfflinePackages && TerrainActor->HasRenderedTerrainSections();
+  return bLoadedOfflinePackages &&
+         TerrainActor->HasRenderedTerrainSections() &&
+         TerrainActor->GetLoadedTerrainTileCount() > 0 &&
+         TerrainActor->GetLoadedImageryTileCount() > 0 &&
+         TerrainActor->GetLastRenderedVertexCount() > 0 &&
+         TerrainActor->GetLastRenderedTriangleCount() > 0 &&
+         !TerrainActor->DidLastLoadUseRemoteMapDependencies() &&
+         !FirstEcefPosition.IsNearlyZero();
 }
 
 #endif // WITH_DEV_AUTOMATION_TESTS
