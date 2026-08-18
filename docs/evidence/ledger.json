@@ -1,0 +1,145 @@
+{
+  "schemaVersion": "flying.evidence-ledger.v1",
+  "contractId": "flying-2.0",
+  "generatedAtUtc": "2026-08-18T00:00:00Z",
+  "requirements": [
+    {
+      "requirementId": "REQ-CONTRACT-GOVERNANCE",
+      "milestone": "M0",
+      "mandatory": true,
+      "status": "pass",
+      "proofRefs": [
+        {
+          "kind": "document",
+          "path": "docs/contract/flying-2.0.yml",
+          "status": "pass"
+        },
+        {
+          "kind": "document",
+          "path": "docs/governance/v1-scope-freeze.md",
+          "status": "pass"
+        },
+        {
+          "kind": "document",
+          "path": "docs/governance/m0-go-no-go-checklist.md",
+          "status": "pass"
+        }
+      ],
+      "notes": "Immutable contract, governance gates, prohibited substitutes and No-Go blocker policy are recorded."
+    },
+    {
+      "requirementId": "REQ-EVIDENCE-TRACEABILITY",
+      "milestone": "M0",
+      "mandatory": true,
+      "status": "pass",
+      "proofRefs": [
+        {
+          "kind": "artifact",
+          "path": "docs/evidence/ledger.json",
+          "status": "pass"
+        },
+        {
+          "kind": "artifact",
+          "path": "docs/evidence/ledger.schema.json",
+          "status": "pass"
+        },
+        {
+          "kind": "command",
+          "path": "node tools/forge_validate.js evidence-ledger --ledger docs/evidence/ledger.json",
+          "status": "pass"
+        },
+        {
+          "kind": "command",
+          "path": "node tools/forge_validate.js missing-requirement-selftest",
+          "status": "pass"
+        }
+      ],
+      "notes": "This concrete ledger has exactly one current entry per immutable contract requirement and links each entry to passing proof or an external blocker."
+    },
+    {
+      "requirementId": "REQ-RELEASE-GATES",
+      "milestone": "M4",
+      "mandatory": true,
+      "status": "blocked",
+      "blockerRef": "docs/blockers/external-inputs.yml#production-visual-shipping-evidence",
+      "notes": "The release candidate gate record is blocked until real Win64 Unreal Shipping visual evidence is captured and approved; fixture or synthetic manifests are not accepted as release proof."
+    },
+    {
+      "requirementId": "REQ-AUTHORITATIVE-DOCS",
+      "milestone": "M0",
+      "mandatory": true,
+      "status": "pass",
+      "proofRefs": [
+        {
+          "kind": "document",
+          "path": "docs/contract/flying-2.0.yml",
+          "status": "pass"
+        },
+        {
+          "kind": "document",
+          "path": "docs/governance/v1-scope-freeze.md",
+          "status": "pass"
+        },
+        {
+          "kind": "document",
+          "path": "docs/release/data-transformation-protocol.md",
+          "status": "pass"
+        },
+        {
+          "kind": "document",
+          "path": "data_pipeline/README.md",
+          "status": "pass"
+        }
+      ],
+      "notes": "The active authoritative documents record regional GIS scope and identify AGENTS.md as non-authoritative task context."
+    },
+    {
+      "requirementId": "REQ-REGIONAL-GIS",
+      "milestone": "M2",
+      "mandatory": true,
+      "status": "pass",
+      "proofRefs": [
+        {
+          "kind": "artifact",
+          "path": "Config/Regions/ceska-trebova-pilot-region.json",
+          "status": "pass"
+        },
+        {
+          "kind": "document",
+          "path": "data_pipeline/README.md",
+          "status": "pass"
+        },
+        {
+          "kind": "command",
+          "path": "node tools/validate_regional_scope_delta.mjs",
+          "status": "pass"
+        }
+      ],
+      "notes": "Regional configuration and pipeline documentation prove the selected-region architecture; production package claims remain separately blocked until source/package evidence exists."
+    },
+    {
+      "requirementId": "REQ-DMR-TERRAIN-COVERAGE",
+      "milestone": "M2",
+      "mandatory": true,
+      "status": "blocked",
+      "blockerRef": "docs/blockers/external-inputs.yml#pilot-region-production-source-package",
+      "notes": "Checked-in slices and validation fixtures are not production DMR terrain package proof for the configured 10 x 10 km pilot release package."
+    },
+    {
+      "requirementId": "REQ-REGIONAL-DATA-PACKAGES",
+      "milestone": "M2",
+      "mandatory": true,
+      "status": "blocked",
+      "blockerRef": "docs/blockers/external-inputs.yml#pilot-region-production-source-package",
+      "notes": "The configurable package architecture is present, but production offline regional package manifests sourced from official payloads are not archived as release proof."
+    },
+    {
+      "requirementId": "REQ-PILOT-REGION",
+      "milestone": "M2",
+      "mandatory": true,
+      "status": "blocked",
+      "blockerRef": "docs/blockers/external-inputs.yml#pilot-region-production-source-package",
+      "notes": "The Ceska Trebova pilot region is configured, but completion of the first production 10 x 10 km package is blocked until source and generated package evidence are recorded."
+    }
+  ]
+}
