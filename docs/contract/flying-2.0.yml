@@ -5,10 +5,10 @@
   "project": {
     "name": "Flying",
     "platform": "Win64 desktop",
-    "runtime": "offline Czech Republic flight simulator",
+    "runtime": "offline Win64 flight simulator using installed regional packages; the first release package is Czech",
     "engine": "Unreal Engine 5.8 C++",
     "physicsCore": "standalone deterministic CoreSim/JSBSim",
-    "terrainRuntime": "Cesium for Unreal 2.28+ with manifest-backed regional Czech packages"
+    "terrainRuntime": "Cesium for Unreal 2.28+ with manifest-backed regional packages"
   },
   "authoritativeDocumentation": {
     "currentSources": [
@@ -24,6 +24,12 @@
     "supersededAssumption": "Prior whole-Czech-Republic GIS packaging assumptions are superseded for the Raspberry Pi target. Full-country coverage may remain a product goal or separately configured package mode, but it is not the default pipeline, storage or acceptance baseline for constrained hardware.",
     "pilotRegion": "Ceska Trebova is the first checked-in 10 x 10 km pilot region configuration used to prove the end-to-end process. Ceska Trebova coordinates must not be hard-coded into architecture or pipeline logic."
   },
+  "invariants": [
+    "Version 1 required geographic content is distributed as independently installable offline regional packages described by explicit versioned region configurations.",
+    "The first production package is the 10 x 10 km Ceska Trebova pilot region, but application code, data models, paths and algorithms must not hard-code Ceska Trebova or any other region-specific assumption.",
+    "Runtime flight inside an installed region package must not depend on external map APIs, public tile servers or source GIS download/normalization pipelines.",
+    "All region-aware tools and release gates must accept an explicit region manifest or package manifest path."
+  ],
   "governance": {
     "changeProcess": "mandatory requirements may change only by approved versioned contract update",
     "completionRule": "mandatory release gates must link to proof or an external blocker before completion",
@@ -36,7 +42,10 @@
       "cockpit instruments reading raw truth state instead of sensor models",
       "random health points as the basis for failures or damage",
       "unlicensed AIP/VFR redistribution or unrecorded data provenance",
-      "unsigned development build as release candidate evidence"
+      "unsigned development build as release candidate evidence",
+      "hard-coded Ceska Trebova coordinates, paths or algorithms outside approved pilot region configuration",
+      "whole-country source downloads or repository-stored GIS datasets as hidden prerequisites for regional package generation",
+      "synthetic renders, headless captures, test images or non-Shipping builds as production visual acceptance evidence"
     ]
   },
   "milestones": [
@@ -45,7 +54,8 @@
       "name": "Contract, Legal And Data Gates",
       "requiredRequirementIds": [
         "REQ-CONTRACT-GOVERNANCE",
-        "REQ-EVIDENCE-TRACEABILITY"
+        "REQ-EVIDENCE-TRACEABILITY",
+        "REQ-AUTHORITATIVE-DOCS"
       ],
       "exitGate": "legal, data provenance and aircraft data blockers are recorded before production claims"
     },
@@ -63,9 +73,11 @@
       "requiredRequirementIds": [
         "REQ-EVIDENCE-TRACEABILITY",
         "REQ-REGIONAL-GIS",
+        "REQ-DMR-TERRAIN-COVERAGE",
+        "REQ-REGIONAL-DATA-PACKAGES",
         "REQ-PILOT-REGION"
       ],
-      "exitGate": "production aircraft, configured regional Czech terrain packages, airport coverage, weather and cockpit evidence is recorded"
+      "exitGate": "production aircraft, configured regional package evidence, regional airport coverage, weather and cockpit evidence is recorded"
     },
     {
       "id": "M3",
@@ -73,7 +85,7 @@
       "requiredRequirementIds": [
         "REQ-EVIDENCE-TRACEABILITY"
       ],
-      "exitGate": "performance, stability, installer, signing, SBOM and license evidence is recorded"
+      "exitGate": "performance, stability, installer, signing, SBOM, visual quality and license evidence is recorded"
     },
     {
       "id": "M4",
@@ -106,7 +118,7 @@
       "title": "Final Release Gates",
       "mandatory": true,
       "milestone": "M4",
-      "summary": "Release completes only when performance, physics, terrain, airport coverage, legal/license, stability, installer, replay, telemetry, privacy and end-to-end workflow gates pass.",
+      "summary": "Release completes only when performance, physics, regional terrain packages, regional airport coverage, legal/license, production visual quality, stability, installer, replay, telemetry, privacy and end-to-end workflow gates pass for the pilot release package.",
       "evidenceGate": "must have linked proof and passing mandatory gate results for release"
     },
     {
@@ -124,6 +136,22 @@
       "milestone": "M2",
       "summary": "GIS source discovery, normalization and generated runtime packages are selected by region and configured margins, not by complete Czech Republic download or local storage by default.",
       "evidenceGate": "must have region configuration, source-selection evidence and package manifests before production terrain claims"
+    },
+    {
+      "id": "REQ-DMR-TERRAIN-COVERAGE",
+      "title": "Regional DMR Terrain Coverage",
+      "mandatory": true,
+      "milestone": "M2",
+      "summary": "Provide offline DMR 5G-based terrain coverage for each installed configured region, including the first 10 x 10 km Ceska Trebova pilot region, with LOD, water/material masks, normals, collision tiles, metadata and seam validation.",
+      "evidenceGate": "must have region package terrain manifests and validation reports before production terrain claims"
+    },
+    {
+      "id": "REQ-REGIONAL-DATA-PACKAGES",
+      "title": "Configurable Offline Regional Packages",
+      "mandatory": true,
+      "milestone": "M2",
+      "summary": "Geographic content is distributed as independently installable offline regional packages described by versioned region configurations; the first release includes the Ceska Trebova 10 x 10 km pilot package without hard-coded Czech-only or Ceska Trebova-specific application logic.",
+      "evidenceGate": "must have explicit region manifests, package manifests and runtime compatibility checks before release"
     },
     {
       "id": "REQ-PILOT-REGION",
