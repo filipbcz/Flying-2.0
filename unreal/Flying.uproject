@@ -8,6 +8,11 @@
       "Name": "FlyingPresentation",
       "Type": "Runtime",
       "LoadingPhase": "Default"
+    },
+    {
+      "Name": "FlyingCoreSimBridge",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
     }
   ],
   "Plugins": [

@@ -15,6 +15,7 @@ public class FlyingPresentation : ModuleRules
             "Core",
             "CoreUObject",
             "Engine",
+            "FlyingCoreSimBridge",
             "CesiumRuntime",
             "ProceduralMeshComponent",
             "UMG"
@@ -29,8 +30,8 @@ public class FlyingPresentation : ModuleRules
         });
 
         string RepositoryRoot = Path.GetFullPath(Path.Combine(ModuleDirectory, "..", "..", ".."));
-        PublicIncludePaths.Add(Path.Combine(RepositoryRoot, "core_sim", "include"));
-        PublicIncludePaths.Add(Path.Combine(RepositoryRoot, "geo_terrain", "include"));
+        PrivateIncludePaths.Add(Path.Combine(RepositoryRoot, "core_sim", "include"));
+        PrivateIncludePaths.Add(Path.Combine(RepositoryRoot, "geo_terrain", "include"));
 
         PrivateDefinitions.Add("FLYING_PRESENTATION_OFFLINE_ONLY=1");
     }

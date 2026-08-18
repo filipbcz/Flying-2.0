@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "FlyingCoreSimBridge.h"
 #include "FlyingCoreSimStateSnapshot.h"
 #include "FlyingInputMappingTypes.h"
 #include "FlyingPostFlightTypes.h"
