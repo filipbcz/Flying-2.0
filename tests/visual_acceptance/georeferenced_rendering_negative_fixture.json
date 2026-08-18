@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "flying.georeferenced-content-rendering-evidence.v1",
+  "createdAt": "2026-08-18T00:00:00Z",
+  "startupScenarioId": "startup.offline-regional-georeferenced-content",
+  "evidenceSource": "fixture-declaration",
+  "fixture": true,
+  "synthetic": true,
+  "readmeClaim": true,
+  "offlineOnly": false,
+  "captureArtifact": "tests/fixtures/synthetic-georef-rendering.json",
+  "implementation": {}
+}
