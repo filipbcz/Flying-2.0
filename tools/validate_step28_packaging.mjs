@@ -29,6 +29,7 @@ const packagingReadme = read("packaging/README.md");
 const buildScript = read("packaging/build-win64-shipping.ps1");
 const signScript = read("packaging/sign-artifacts.ps1");
 const repairScript = read("packaging/update-repair.ps1");
+const repairSelfTest = read("tools/validate_step28_update_repair.ps1");
 const installer = read("packaging/FlyingInstaller.iss");
 const buildMetadataExample = JSON.parse(read("packaging/FlyingBuildMetadata.example.json"));
 const target = read("unreal/Source/Flying.Target.cs");
@@ -80,6 +81,9 @@ for (const token of [
   "terrain\\elevation",
   "terrain\\gis",
   "terrain\\navigation",
+  "FLYING_DATA_ROOT",
+  "RegionDataRootSubdir",
+  "ceska-trebova-pilot-region.json",
   "FlyingReleaseManifest.json",
   "update-repair.ps1",
 ]) {
@@ -87,29 +91,90 @@ for (const token of [
 }
 
 for (const token of [
-  'DestDir: "{app}\\Flying\\Saved\\Flying\\PilotRegion\\Terrain"',
-  'DestDir: "{app}\\Flying\\Saved\\Flying\\PilotRegion\\GIS"',
-  'DestDir: "{app}\\Flying\\Saved\\Flying\\PilotRegion\\Navigation"',
+  'DestDir: "{userappdata}\\{#RegionDataRootSubdir}\\Terrain"',
+  'DestDir: "{userappdata}\\{#RegionDataRootSubdir}\\GIS"',
+  'DestDir: "{userappdata}\\{#RegionDataRootSubdir}\\Navigation"',
 ]) {
   requireToken(installer, token, "installer terrain package destination");
 }
 for (const invalidToken of [
+  'DestDir: "{app}\\Flying\\Saved\\Flying\\PilotRegion\\Terrain"',
+  'DestDir: "{app}\\Flying\\Saved\\Flying\\PilotRegion\\GIS"',
+  'DestDir: "{app}\\Flying\\Saved\\Flying\\PilotRegion\\Navigation"',
   'DestDir: "{app}\\Saved\\Flying\\PilotRegion\\Terrain"',
   'DestDir: "{app}\\Saved\\Flying\\PilotRegion\\GIS"',
   'DestDir: "{app}\\Saved\\Flying\\PilotRegion\\Navigation"',
 ]) {
   if (installer.includes(invalidToken)) {
-    fail(`installer terrain package destination must preserve archived Flying path, found: ${invalidToken}`);
+    fail(`installer terrain package destination must use the configured regional data root, found: ${invalidToken}`);
   }
 }
 
 for (const token of [
   "flying.release-manifest.v1",
-  "Get-FileHash -Algorithm SHA256",
+  "flying.region-manifest.v1",
+  "Configured FLYING_DATA_ROOT data root not found",
+  "RequireOfflineLaunch",
+  "Convert-ReleasePathToInstalledPath",
+  "OfflinePreflightExecutable",
+  'Flying\\Saved\\Flying\\PilotRegion\\',
   "PackageSource",
   "Missing or corrupt with no valid local repair source",
 ]) {
   requireToken(repairScript, token, "update and repair script");
+}
+
+const repairLoopIndex = repairScript.indexOf("foreach ($file in $manifest.files)");
+const regionManifestValidationIndex = repairScript.indexOf(
+  'if ($regionManifest.schemaVersion -ne "flying.region-manifest.v1")',
+);
+if (repairLoopIndex === -1 || regionManifestValidationIndex === -1 ||
+    repairLoopIndex > regionManifestValidationIndex) {
+  fail("update and repair script must repair manifest-listed regional DataRoot files before validating the installed region manifest");
+}
+
+for (const token of [
+  'return Join-Path $dataRootFull $regionalRelative',
+  'return Join-Path $installRootFull $relative',
+  '$valid = (Test-Path $installed) -and ((Get-Sha256 $installed) -eq $file.sha256)',
+  'function Copy-VerifiedRepairSource([string]$Source, [string]$Installed)',
+  '$installedParent = Split-Path -Parent $Installed',
+  'New-Item -ItemType Directory -Force -Path $installedParent',
+  'Copy-Item -Force $Source $Installed',
+  'Copy-VerifiedRepairSource $source $installed',
+  '$env:FLYING_DATA_ROOT = $dataRootFull',
+  'Start-Process',
+  '--offline-preflight',
+  '--no-network',
+  '--data-root',
+  '--region-manifest',
+  'Offline launch preflight failed with exit code',
+]) {
+  requireToken(repairScript, token, "update and repair script executable validation path");
+}
+
+const repairParentDirectoryIndex = repairScript.indexOf(
+  'New-Item -ItemType Directory -Force -Path $installedParent',
+);
+const repairCopyIndex = repairScript.indexOf('Copy-Item -Force $Source $Installed');
+if (repairParentDirectoryIndex === -1 || repairCopyIndex === -1 ||
+    repairParentDirectoryIndex > repairCopyIndex) {
+  fail("update and repair script must create the installed file parent directory before copying repaired regional DataRoot files");
+}
+
+for (const token of [
+  "packaging\\update-repair.ps1",
+  "-PackageSource $sourceRoot",
+  "-RequireOfflineLaunch",
+  "-OfflinePreflightExecutable $preflight",
+  "Flying/Saved/Flying/PilotRegion/Terrain/elevation.bin",
+  "Flying/Saved/Flying/PilotRegion/GIS/vector.bin",
+  "Flying/Saved/Flying/PilotRegion/Navigation/map.bin",
+  "Flying/Saved/Flying/PilotRegion/ceska-trebova-pilot-region.json",
+  "Assert-FileHash (Join-Path $dataRoot $relative) $file.sha256",
+  "offline-preflight.marker",
+]) {
+  requireToken(repairSelfTest, token, "update and repair executable self-test");
 }
 
 if (buildMetadataExample.schema !== "flying.build-metadata.v1") {
@@ -171,7 +236,8 @@ for (const token of [
 }
 
 for (const token of [
-  "selected Czech terrain packages",
+  "selected regional terrain packages",
+  "FLYING_DATA_ROOT",
   "without requiring network access",
   "signed releases",
   "minidump",

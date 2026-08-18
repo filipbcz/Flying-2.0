@@ -70,6 +70,7 @@ generated with:
 ```sh
 flying-data-pipeline czech-republic-packages \
   --source-manifest path/to/source-manifest.json \
+  --region-manifest path/to/region-manifest.json \
   --source-root path/to/source-payloads \
   --package-config path/to/czech-republic-package-config.json \
   --package-version 2026.08.0 \
@@ -80,6 +81,24 @@ flying-data-pipeline czech-republic-packages \
 Use `flying.czech-republic-package-config.v1` and local CUZK Ortofoto/ZABAGED
 payload paths. The package manifest rejects external map API and remote tile
 server references and documents image, vector and mask package sizes.
+
+Regional GIS packages use the same region-aware command shape:
+
+```sh
+flying-data-pipeline pilot-region-packages \
+  --source-manifest path/to/source-manifest.json \
+  --region-manifest Config/Regions/ceska-trebova-pilot-region.json \
+  --source-root path/to/source-payloads \
+  --package-config path/to/pilot-region-package-config.json \
+  --package-version 2026.08.0 \
+  --output-dir out/ceska-trebova-pilot-gis \
+  --report out/ceska-trebova-pilot-gis-validation.json
+```
+
+The region manifest selects the installed package region, WGS-84 bounds,
+project-local bounds, explicit source margin, configured data root and offline
+runtime compatibility. Package validation fails when source bounds are missing
+or extend beyond the selected region plus the declared margin.
 
 No downloader or runtime GIS renderer is implemented in this step.
 

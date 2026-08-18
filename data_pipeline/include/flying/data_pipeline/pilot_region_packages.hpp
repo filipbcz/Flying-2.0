@@ -9,6 +9,7 @@ namespace flying::data_pipeline {
 
 struct PilotRegionPackageOptions {
   std::filesystem::path source_manifest_path;
+  std::filesystem::path region_manifest_path;
   std::filesystem::path source_root;
   std::filesystem::path package_config_path;
   std::filesystem::path output_directory;

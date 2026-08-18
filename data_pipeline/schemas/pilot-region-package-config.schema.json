@@ -11,6 +11,7 @@
     "orthoImagery",
     "vectorLayers",
     "geonamesLabels",
+    "packageInputs",
     "masks"
   ],
   "properties": {
@@ -118,7 +119,31 @@
         "path": {"$ref": "#/$defs/localPath"},
         "format": {"const": "csv"},
         "xField": {"type": "string"},
-        "yField": {"type": "string"}
+        "yField": {"type": "string"},
+        "bounds": {"$ref": "#/$defs/bounds"}
+      }
+    },
+    "packageInputs": {
+      "type": "array",
+      "minItems": 7,
+      "items": {
+        "type": "object",
+        "required": ["role", "path", "bounds"],
+        "properties": {
+          "role": {
+            "enum": [
+              "terrainElevation",
+              "terrainCollision",
+              "airportDatabase",
+              "runwaySurfaces",
+              "navigationMap",
+              "maskSources",
+              "worldObjectSources"
+            ]
+          },
+          "path": {"$ref": "#/$defs/localPath"},
+          "bounds": {"$ref": "#/$defs/bounds"}
+        }
       }
     },
     "masks": {

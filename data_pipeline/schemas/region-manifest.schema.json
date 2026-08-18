@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flying.local/schemas/region-manifest.schema.json",
+  "title": "Flying Offline Region Manifest",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schemaVersion",
+    "regionId",
+    "displayName",
+    "coverageScope",
+    "packageMode",
+    "bounds",
+    "projectBounds",
+    "sourceScope",
+    "dataRoot",
+    "runtimeCompatibility"
+  ],
+  "properties": {
+    "schemaVersion": {"const": "flying.region-manifest.v1"},
+    "regionId": {"type": "string", "minLength": 1},
+    "displayName": {"type": "string", "minLength": 1},
+    "coverageScope": {"enum": ["pilot-region", "czech-republic"]},
+    "packageMode": {"enum": ["private-local", "distributable"]},
+    "bounds": {
+      "type": "object",
+      "required": ["crs", "minLonDeg", "maxLonDeg", "minLatDeg", "maxLatDeg"],
+      "properties": {
+        "crs": {"const": "EPSG:4326"},
+        "minLonDeg": {"type": "number"},
+        "maxLonDeg": {"type": "number"},
+        "minLatDeg": {"type": "number"},
+        "maxLatDeg": {"type": "number"}
+      }
+    },
+    "projectBounds": {"$ref": "#/$defs/localBounds"},
+    "sourceScope": {
+      "type": "object",
+      "required": ["allowedMarginM", "rejectSyntheticFixtures"],
+      "properties": {
+        "allowedMarginM": {"type": "number", "minimum": 0},
+        "rejectSyntheticFixtures": {"const": true}
+      }
+    },
+    "dataRoot": {
+      "type": "object",
+      "required": ["installVariable", "defaultRelativePath"],
+      "properties": {
+        "installVariable": {"const": "FLYING_DATA_ROOT"},
+        "defaultRelativePath": {
+          "type": "string",
+          "pattern": "^(?!/)(?!//)(?!.*://)(?!.*(^|/)\\.\\.(/|$)).+$"
+        }
+      }
+    },
+    "runtimeCompatibility": {
+      "type": "object",
+      "required": ["minAppVersion", "runtimeNetworkRequired"],
+      "properties": {
+        "minAppVersion": {"type": "string", "minLength": 1},
+        "runtimeNetworkRequired": {"const": false}
+      }
+    }
+  },
+  "$defs": {
+    "localBounds": {
+      "type": "object",
+      "required": ["minEastM", "maxEastM", "minNorthM", "maxNorthM"],
+      "properties": {
+        "minEastM": {"type": "number"},
+        "maxEastM": {"type": "number"},
+        "minNorthM": {"type": "number"},
+        "maxNorthM": {"type": "number"}
+      }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "flying.region-manifest.v1",
+  "regionId": "ceska-trebova-pilot-10km",
+  "displayName": "Ceska Trebova Pilot Region",
+  "coverageScope": "pilot-region",
+  "packageMode": "distributable",
+  "bounds": {
+    "crs": "EPSG:4326",
+    "minLonDeg": 16.396,
+    "maxLonDeg": 16.546,
+    "minLatDeg": 49.86,
+    "maxLatDeg": 49.95
+  },
+  "projectBounds": {
+    "minEastM": 0,
+    "maxEastM": 10000,
+    "minNorthM": 0,
+    "maxNorthM": 10000
+  },
+  "sourceScope": {
+    "allowedMarginM": 250,
+    "rejectSyntheticFixtures": true
+  },
+  "dataRoot": {
+    "installVariable": "FLYING_DATA_ROOT",
+    "defaultRelativePath": "Flying/Data/Regions/ceska-trebova-pilot-10km"
+  },
+  "runtimeCompatibility": {
+    "minAppVersion": "1.0.0-rc",
+    "runtimeNetworkRequired": false
+  }
+}
