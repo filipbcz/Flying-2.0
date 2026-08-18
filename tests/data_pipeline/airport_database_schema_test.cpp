@@ -51,6 +51,33 @@ std::string replace_all(std::string text,
   }
 }
 
+std::string remove_json_insignificant_whitespace(std::string_view text) {
+  std::string compact;
+  bool in_string = false;
+  bool escaping = false;
+  for (const char ch : text) {
+    if (escaping) {
+      compact.push_back(ch);
+      escaping = false;
+      continue;
+    }
+    if (in_string && ch == '\\') {
+      compact.push_back(ch);
+      escaping = true;
+      continue;
+    }
+    if (ch == '"') {
+      compact.push_back(ch);
+      in_string = !in_string;
+      continue;
+    }
+    if (in_string || (ch != ' ' && ch != '\n' && ch != '\r' && ch != '\t')) {
+      compact.push_back(ch);
+    }
+  }
+  return compact;
+}
+
 std::string remove_first_paved_threshold_coordinates(std::string text) {
   const std::size_t runway = text.find("\"id\": \"FPPV-RWY-09-27\"");
   require(runway != std::string::npos, "paved runway fixture not found");
@@ -229,19 +256,19 @@ void regional_master_list_schema_matches_runtime_required_runways_rule() {
   const std::string schema =
     read_file(repo_root() / "data_pipeline" / "schemas" /
               "regional-airport-master-list.schema.json");
-  const std::size_t conditional = schema.find("\"then\": {");
+  const std::string compact_schema = remove_json_insignificant_whitespace(schema);
+  const std::size_t conditional = compact_schema.find("\"then\":{");
   require(conditional != std::string::npos,
           "regional master-list schema must define an active-record conditional");
-  const std::size_t conditional_end = schema.find("\"runwayRequirement\"", conditional);
+  const std::size_t conditional_end =
+    compact_schema.find("\"runwayRequirement\"", conditional);
   require(conditional_end != std::string::npos,
           "regional master-list schema conditional end not found");
   const std::string conditional_schema =
-    schema.substr(conditional, conditional_end - conditional);
-  require(conditional_schema.find("\"required\": [\n              \"requiredRunways\"") !=
-            std::string::npos,
+    compact_schema.substr(conditional, conditional_end - conditional);
+  require(conditional_schema.find("\"required\":[\"requiredRunways\"]") != std::string::npos,
           "regional master-list schema must require requiredRunways for active airports and SLZ areas");
-  require(conditional_schema.find("\"requiredRunways\": {\n                \"minItems\": 1") !=
-            std::string::npos,
+  require(conditional_schema.find("\"requiredRunways\":{\"minItems\":1") != std::string::npos,
           "regional master-list schema must reject empty active requiredRunways arrays");
 
   const flying::data_pipeline::ValidationReport inactive_report =
