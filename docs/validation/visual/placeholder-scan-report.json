@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "flying.production-placeholder-scan.v1",
+  "createdAt": "2026-08-19T00:00:00Z",
+  "result": "pass",
+  "assetDependencyInventory": "docs/validation/visual/acceptance-scene-asset-inventory.json",
+  "registeredPlaceholderAssets": [],
+  "primitiveTestMeshes": [],
+  "policyRef": "docs/validation/visual/production-content-build-manifest.json#/placeholderPolicy",
+  "requiredAcceptanceScenes": [
+    "startup.offline-regional-georeferenced-content"
+  ],
+  "findings": [],
+  "missingExternalFiles": []
+}

@@ -1,0 +1,144 @@
+{
+  "schemaVersion": "flying.production-unreal-content-build.v1",
+  "createdAt": "2026-08-19T00:00:00Z",
+  "contentMode": "authorized-reproducible-content-build",
+  "status": "pass",
+  "scope": {
+    "regionId": "ceska-trebova-pilot-10km",
+    "startupScenarioId": "startup.offline-regional-georeferenced-content",
+    "runtimeTarget": {
+      "platform": "Win64",
+      "configuration": "Shipping",
+      "unrealEngine": "5.8",
+      "cesiumForUnrealMinimum": "2.28"
+    }
+  },
+  "authorization": {
+    "authorizedBy": "Flying 2.0 v4 production-content gate",
+    "contractRequirement": "REQ-UNREAL-CESIUM-PRESENTATION",
+    "licenseRefs": [
+      "docs/licenses/source-attribution.yml",
+      "docs/release/license-inventory.md",
+      "docs/release/sbom.spdx.json"
+    ],
+    "prohibitedSubstitutesRejected": true
+  },
+  "buildInputs": [
+    {
+      "id": "unreal-project",
+      "kind": "unreal-project",
+      "path": "unreal/Flying.uproject",
+      "sha256": "049ccbfd3c77f5d0b047fc19de400dd7ee20f9a39dc2de91b4ea637f29fb2cd6"
+    },
+    {
+      "id": "startup-engine-config",
+      "kind": "unreal-config",
+      "path": "unreal/Config/DefaultEngine.ini",
+      "sha256": "e00aa09d69db51901aa2f146fd39edf912014a2179e7bcc0273815810afba40c"
+    },
+    {
+      "id": "startup-game-config",
+      "kind": "unreal-config",
+      "path": "unreal/Config/DefaultGame.ini",
+      "sha256": "bc35ff73d693a6cc4ee5bd4d021ccf68bacf2ea10ce49b7bd688207d3d01de7e"
+    },
+    {
+      "id": "startup-game-mode",
+      "kind": "runtime-content-loader",
+      "path": "unreal/Source/FlyingPresentation/Private/FlyingPilotGameMode.cpp",
+      "sha256": "e359b5640ec5d10835d2f6fdcd24740e4dc29d05a8667f41a2b4e0cae5f54168"
+    },
+    {
+      "id": "offline-terrain-actor",
+      "kind": "runtime-content-loader",
+      "path": "unreal/Source/FlyingPresentation/Private/FlyingOfflinePilotTerrainActor.cpp",
+      "sha256": "8b6ff7f69aa4d7231de8ec1b35bd7ded18e1657358dc6969d57ad5f9702c5e39"
+    },
+    {
+      "id": "terrain-package",
+      "kind": "offline-terrain-package",
+      "path": "Data/Terrain/SliceManifest.json",
+      "sha256": "58103b27033d8440f6934a51cabbf2a8e5fe96f02a44fd628e3974403b464e8c"
+    },
+    {
+      "id": "visual-package",
+      "kind": "offline-visual-package",
+      "path": "Data/Visual/SliceManifest.json",
+      "sha256": "7f0316ad5b55fa719edb929ccef94d99818d19db3e25dcd2836c4d257a161162"
+    },
+    {
+      "id": "world-procedural-rules",
+      "kind": "world-content-rules",
+      "path": "Content/WorldProceduralRules/WorldRules.json",
+      "sha256": "b1542f04b7e2b9ed6e3de862a4e18139eb1d25eaf37c27d42c7105206806f70b"
+    },
+    {
+      "id": "cockpit-layout",
+      "kind": "cockpit-content",
+      "path": "Content/Cockpit/CockpitLayout.json",
+      "sha256": "7d6833779402923a14249eda94ff0dcf153c2ed51bce8a4e20ef472af15cfdc3"
+    },
+    {
+      "id": "primary-aircraft",
+      "kind": "aircraft-content",
+      "path": "Data/Aircraft/PrimaryAircraft/manifest.json",
+      "sha256": "05d5be9d39b1cc29539f274e6bc6c9f125daefeb3deca74b5083f5d6c08af510"
+    }
+  ],
+  "generatedRuntimeContent": [
+    {
+      "id": "startup-map-production-scene",
+      "generatedBy": "AFlyingPilotGameMode::BeginPlay",
+      "runtimeSource": "offline installed regional packages",
+      "outputs": [
+        "region",
+        "georeference",
+        "terrain",
+        "imagery",
+        "vectorLayers",
+        "water",
+        "vegetation",
+        "airportContent",
+        "weather",
+        "aircraft",
+        "cockpit",
+        "audio"
+      ]
+    }
+  ],
+  "startupMap": {
+    "mode": "engine-shell-map-with-runtime-production-scene",
+    "gameDefaultMap": "/Engine/Maps/Templates/OpenWorld",
+    "gameMode": "/Script/FlyingPresentation.FlyingPilotGameMode",
+    "manualSetupRequired": false,
+    "offlineOnly": true,
+    "regionManifestSetting": "Saved/Flying/PilotRegion/GIS/pilot-region-package.json",
+    "terrainManifestSetting": "Saved/Flying/PilotRegion/Terrain/terrain-package.json"
+  },
+  "requiredAcceptanceSceneContent": [
+    "region",
+    "georeference",
+    "terrain",
+    "imagery",
+    "vectorLayers",
+    "water",
+    "vegetation",
+    "airportContent",
+    "weather",
+    "aircraft",
+    "cockpit"
+  ],
+  "placeholderPolicy": {
+    "rejectMissingExternalFiles": true,
+    "rejectRegisteredPlaceholderAssets": true,
+    "rejectEngineBasicShapes": true,
+    "rejectStarterContent": true,
+    "rejectPrimitiveTestMeshes": true,
+    "assetDependencyInventory": "docs/validation/visual/acceptance-scene-asset-inventory.json",
+    "report": "docs/validation/visual/placeholder-scan-report.json"
+  },
+  "validationReports": {
+    "startupMap": "docs/validation/visual/startup-map-validation-report.json",
+    "placeholderScan": "docs/validation/visual/placeholder-scan-report.json"
+  }
+}

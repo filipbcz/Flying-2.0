@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "flying.acceptance-scene-asset-inventory.v1",
+  "scenes": [
+    {
+      "sceneId": "startup.offline-regional-georeferenced-content",
+      "dependencies": [
+        {
+          "content": "terrain",
+          "assetRef": "/Flying/OfflinePackages/Terrain/MissingTerrain",
+          "path": "Data/Terrain/missing-production-terrain-package.json"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "flying.acceptance-scene-asset-inventory.v1",
+  "scenes": [
+    {
+      "sceneId": "startup.offline-regional-georeferenced-content",
+      "dependencies": [
+        {
+          "content": "aircraft",
+          "assetRef": "/Flying/Aircraft/placeholder_mesh",
+          "path": "Data/Aircraft/PrimaryAircraft/manifest.json"
+        }
+      ]
+    }
+  ]
+}
