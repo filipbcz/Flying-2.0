@@ -2,6 +2,7 @@
   "schemaVersion": "flying.contract.v1",
   "contractId": "flying-2.0",
   "status": "immutable",
+  "contractDeltaVersion": 4,
   "project": {
     "name": "Flying",
     "platform": "Win64 desktop",
@@ -28,7 +29,11 @@
     "Version 1 required geographic content is distributed as independently installable offline regional packages described by explicit versioned region configurations.",
     "The first production package is the 10 x 10 km Ceska Trebova pilot region, but application code, data models, paths and algorithms must not hard-code Ceska Trebova or any other region-specific assumption.",
     "Runtime flight inside an installed region package must not depend on external map APIs, public tile servers or source GIS download/normalization pipelines.",
-    "All region-aware tools and release gates must accept an explicit region manifest or package manifest path."
+    "All region-aware tools and release gates must accept an explicit region manifest or package manifest path.",
+    "Production Unreal content requires versioned usable assets or an authorized reproducible content-build that creates identical runtime content from audited sources; manifests or missing external files alone are not production content evidence.",
+    "Runtime visual acceptance evidence must be captured from the current real signed Win64 Unreal Shipping build and tied to both commit SHA and build id.",
+    "Aircraft visual presentation proof must show CoreSim authoritative WGS-84 ECEF snapshots driving the rendered aircraft transform; presentation-owned transforms are not a substitute.",
+    "The contract, roadmap and evidence ledger must stay synchronized for every active immutable requirement, including blocker-backed requirements."
   ],
   "governance": {
     "changeProcess": "mandatory requirements may change only by approved versioned contract update",
@@ -45,7 +50,12 @@
       "unsigned development build as release candidate evidence",
       "hard-coded Ceska Trebova coordinates, paths or algorithms outside approved pilot region configuration",
       "whole-country source downloads or repository-stored GIS datasets as hidden prerequisites for regional package generation",
-      "synthetic renders, headless captures, test images or non-Shipping builds as production visual acceptance evidence"
+      "synthetic renders, headless captures, test images or non-Shipping builds as production visual acceptance evidence",
+      "visible placeholder assets or primitive meshes in required visual acceptance scenes",
+      "manifest-only regional or Unreal content in place of usable production assets or an authorized reproducible content-build",
+      "fixture-generated pilot regional package as evidence for production Ceska Trebova coverage",
+      "stale visual captures from a different commit or build id as current release evidence",
+      "presentation-owned aircraft transforms as a substitute for CoreSim authoritative ECEF snapshots"
     ]
   },
   "milestones": [
@@ -75,17 +85,21 @@
         "REQ-REGIONAL-GIS",
         "REQ-DMR-TERRAIN-COVERAGE",
         "REQ-REGIONAL-DATA-PACKAGES",
-        "REQ-PILOT-REGION"
+        "REQ-PILOT-REGION",
+        "REQ-PRODUCTION-UNREAL-CONTENT",
+        "REQ-PRODUCTION-PILOT-REGIONAL-PACKAGE"
       ],
-      "exitGate": "production aircraft, configured regional package evidence, regional airport coverage, weather and cockpit evidence is recorded"
+      "exitGate": "production aircraft, configured regional package evidence, usable Unreal content or authorized reproducible content-build evidence, regional airport coverage, weather and cockpit evidence is recorded"
     },
     {
       "id": "M3",
       "name": "Packaging, Licensing And Quality Gates",
       "requiredRequirementIds": [
-        "REQ-EVIDENCE-TRACEABILITY"
+        "REQ-EVIDENCE-TRACEABILITY",
+        "REQ-RUNTIME-SHIPPING-VISUAL-EVIDENCE",
+        "REQ-AIRCRAFT-ECEF-VISUAL-AUTHORITY"
       ],
-      "exitGate": "performance, stability, installer, signing, SBOM, visual quality and license evidence is recorded"
+      "exitGate": "performance, stability, installer, signing, SBOM, visual quality, ECEF-driven presentation proof and license evidence is recorded"
     },
     {
       "id": "M4",
@@ -110,15 +124,15 @@
       "title": "Requirement Evidence Traceability",
       "mandatory": true,
       "milestone": "M0",
-      "summary": "Every requirement links to concrete proof or an external blocker, and failed mandatory evidence blocks release.",
-      "evidenceGate": "must have linked proof or blocker before milestone completion"
+      "summary": "Every requirement links to concrete proof or an external blocker, failed mandatory evidence blocks release, and the contract, roadmap and evidence ledger stay synchronized for all active requirements.",
+      "evidenceGate": "must have exactly one current ledger entry with linked proof or blocker for every active immutable requirement before milestone completion"
     },
     {
       "id": "REQ-RELEASE-GATES",
       "title": "Final Release Gates",
       "mandatory": true,
       "milestone": "M4",
-      "summary": "Release completes only when performance, physics, regional terrain packages, regional airport coverage, legal/license, production visual quality, stability, installer, replay, telemetry, privacy and end-to-end workflow gates pass for the pilot release package.",
+      "summary": "Release completes only when performance, physics, regional terrain packages, regional airport coverage, legal/license, production visual quality from the signed Win64 Unreal Shipping build, stability, installer, replay, telemetry, privacy and end-to-end workflow gates pass for the pilot release package.",
       "evidenceGate": "must have linked proof and passing mandatory gate results for release"
     },
     {
@@ -152,6 +166,38 @@
       "milestone": "M2",
       "summary": "Geographic content is distributed as independently installable offline regional packages described by versioned region configurations; the first release includes the Ceska Trebova 10 x 10 km pilot package without hard-coded Czech-only or Ceska Trebova-specific application logic.",
       "evidenceGate": "must have explicit region manifests, package manifests and runtime compatibility checks before release"
+    },
+    {
+      "id": "REQ-PRODUCTION-UNREAL-CONTENT",
+      "title": "Production Unreal Content",
+      "mandatory": true,
+      "milestone": "M2",
+      "summary": "Production visual content is proved by versioned usable Unreal assets or an authorized reproducible content-build that creates identical usable runtime content from audited sources; manifest-only or missing external content is not evidence.",
+      "evidenceGate": "must have usable production assets or reproducible content-build evidence with audited source provenance before production visual acceptance"
+    },
+    {
+      "id": "REQ-PRODUCTION-PILOT-REGIONAL-PACKAGE",
+      "title": "Production Pilot Regional Package",
+      "mandatory": true,
+      "milestone": "M2",
+      "summary": "The Ceska Trebova pilot regional package used for production acceptance is built from licensed source payloads with complete manifest provenance, checksums, attribution, schema versioning and offline runtime compatibility evidence.",
+      "evidenceGate": "must have licensed source manifests and generated production package manifests before treating the pilot region as production coverage"
+    },
+    {
+      "id": "REQ-RUNTIME-SHIPPING-VISUAL-EVIDENCE",
+      "title": "Runtime Shipping Visual Evidence",
+      "mandatory": true,
+      "milestone": "M3",
+      "summary": "Production visual acceptance evidence is captured from the current real signed Win64 Unreal Shipping build, records commit SHA, build id, graphics profile, scenario id, artifact path and performance metrics, and rejects synthetic, stale or non-Shipping captures.",
+      "evidenceGate": "must have current signed Shipping runtime visual evidence before visual acceptance or release completion"
+    },
+    {
+      "id": "REQ-AIRCRAFT-ECEF-VISUAL-AUTHORITY",
+      "title": "Aircraft ECEF Visual Authority",
+      "mandatory": true,
+      "milestone": "M3",
+      "summary": "Aircraft rendering is proven to follow CoreSim authoritative WGS-84 ECEF double-precision snapshots through the presentation bridge; presentation-owned transforms cannot substitute for physics authority.",
+      "evidenceGate": "must have runtime proof linking rendered aircraft transforms to CoreSim ECEF snapshots before aircraft visual acceptance"
     },
     {
       "id": "REQ-PILOT-REGION",

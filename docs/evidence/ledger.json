@@ -1,7 +1,7 @@
 {
   "schemaVersion": "flying.evidence-ledger.v1",
   "contractId": "flying-2.0",
-  "generatedAtUtc": "2026-08-18T00:00:00Z",
+  "generatedAtUtc": "2026-08-19T00:00:00Z",
   "requirements": [
     {
       "requirementId": "REQ-CONTRACT-GOVERNANCE",
@@ -132,6 +132,38 @@
       "status": "blocked",
       "blockerRef": "docs/blockers/external-inputs.yml#pilot-region-production-source-package",
       "notes": "The configurable package architecture is present, but production offline regional package manifests sourced from official payloads are not archived as release proof."
+    },
+    {
+      "requirementId": "REQ-PRODUCTION-UNREAL-CONTENT",
+      "milestone": "M2",
+      "mandatory": true,
+      "status": "blocked",
+      "blockerRef": "docs/blockers/external-inputs.yml#production-visual-shipping-evidence",
+      "notes": "Production Unreal content remains blocked until usable versioned assets or an authorized reproducible content-build from audited sources are archived as release proof."
+    },
+    {
+      "requirementId": "REQ-PRODUCTION-PILOT-REGIONAL-PACKAGE",
+      "milestone": "M2",
+      "mandatory": true,
+      "status": "blocked",
+      "blockerRef": "docs/blockers/external-inputs.yml#pilot-region-production-source-package",
+      "notes": "The pilot regional package cannot be accepted as production coverage until licensed source payload manifests and generated package manifests are recorded."
+    },
+    {
+      "requirementId": "REQ-RUNTIME-SHIPPING-VISUAL-EVIDENCE",
+      "milestone": "M3",
+      "mandatory": true,
+      "status": "blocked",
+      "blockerRef": "docs/blockers/external-inputs.yml#production-visual-shipping-evidence",
+      "notes": "Runtime visual acceptance is blocked until the current signed Win64 Unreal Shipping build produces commit- and build-id-bound evidence with required metrics and manual approval."
+    },
+    {
+      "requirementId": "REQ-AIRCRAFT-ECEF-VISUAL-AUTHORITY",
+      "milestone": "M3",
+      "mandatory": true,
+      "status": "blocked",
+      "blockerRef": "docs/blockers/external-inputs.yml#production-visual-shipping-evidence",
+      "notes": "Aircraft visual authority is blocked until runtime evidence proves rendered transforms are driven by CoreSim WGS-84 ECEF snapshots rather than presentation-owned state."
     },
     {
       "requirementId": "REQ-PILOT-REGION",

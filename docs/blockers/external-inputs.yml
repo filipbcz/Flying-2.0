@@ -87,6 +87,7 @@ blockers:
     requirement_ids:
       - REQ-DMR-TERRAIN-COVERAGE
       - REQ-REGIONAL-DATA-PACKAGES
+      - REQ-PRODUCTION-PILOT-REGIONAL-PACKAGE
       - REQ-PILOT-REGION
       - REQ-EVIDENCE-TRACEABILITY
     external_input: "Official production source payloads and generated package manifests for the configured Ceska Trebova 10 x 10 km pilot region"
@@ -105,6 +106,9 @@ blockers:
     requirement_ids:
       - REQ-RELEASE-GATES
       - REQ-EVIDENCE-TRACEABILITY
+      - REQ-PRODUCTION-UNREAL-CONTENT
+      - REQ-RUNTIME-SHIPPING-VISUAL-EVIDENCE
+      - REQ-AIRCRAFT-ECEF-VISUAL-AUTHORITY
     external_input: "Manual-approved production visual evidence captured from a real Win64 Unreal Shipping runtime"
     current_status: blocked
     source_version: "Build/VisualEvidence/release-candidate-visual-evidence.json is not archived"

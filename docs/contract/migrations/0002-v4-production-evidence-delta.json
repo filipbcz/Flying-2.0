@@ -1,0 +1,187 @@
+{
+  "schemaVersion": "flying.contract-migration.v1",
+  "migrationId": "0002-v4-production-evidence-delta",
+  "title": "Apply Flying 2.0 Version 4 Production Evidence Delta",
+  "status": "applied",
+  "appliesToContractId": "flying-2.0",
+  "rationale": "Version 4 tightens proof standards for real production Unreal content, authorized reproducible content-builds, production pilot regional data, current signed Shipping runtime visual evidence, ECEF-driven aircraft visual authority and complete evidence-ledger synchronization without removing or weakening any mandatory requirement.",
+  "declaredDeltaFields": [
+    "contractDeltaVersion",
+    "invariants",
+    "governance.prohibitedSubstitutes",
+    "milestones[M2].requiredRequirementIds",
+    "milestones[M2].exitGate",
+    "milestones[M3].requiredRequirementIds",
+    "milestones[M3].exitGate",
+    "requirements[REQ-EVIDENCE-TRACEABILITY].summary",
+    "requirements[REQ-EVIDENCE-TRACEABILITY].evidenceGate",
+    "requirements[REQ-RELEASE-GATES].summary",
+    "requirements[REQ-PRODUCTION-UNREAL-CONTENT]",
+    "requirements[REQ-PRODUCTION-PILOT-REGIONAL-PACKAGE]",
+    "requirements[REQ-RUNTIME-SHIPPING-VISUAL-EVIDENCE]",
+    "requirements[REQ-AIRCRAFT-ECEF-VISUAL-AUTHORITY]"
+  ],
+  "preservedActiveRequirementIds": [
+    "REQ-CONTRACT-GOVERNANCE",
+    "REQ-EVIDENCE-TRACEABILITY",
+    "REQ-RELEASE-GATES",
+    "REQ-AUTHORITATIVE-DOCS",
+    "REQ-REGIONAL-GIS",
+    "REQ-DMR-TERRAIN-COVERAGE",
+    "REQ-REGIONAL-DATA-PACKAGES",
+    "REQ-PILOT-REGION"
+  ],
+  "addedRequirementIds": [
+    "REQ-PRODUCTION-UNREAL-CONTENT",
+    "REQ-PRODUCTION-PILOT-REGIONAL-PACKAGE",
+    "REQ-RUNTIME-SHIPPING-VISUAL-EVIDENCE",
+    "REQ-AIRCRAFT-ECEF-VISUAL-AUTHORITY"
+  ],
+  "supersededReleaseCriteria": [
+    "Treating manifest presence or missing external content as sufficient proof of production Unreal content",
+    "Treating fixture-generated regional packages as production Ceska Trebova coverage evidence",
+    "Treating non-Shipping, stale, headless or synthetic visual captures as production visual acceptance evidence",
+    "Treating presentation-owned aircraft transforms as proof of authoritative CoreSim visual positioning"
+  ],
+  "replacementReleaseCriteria": [
+    "Production Unreal content must be represented by versioned usable assets or an authorized reproducible content-build from audited sources",
+    "Production pilot regional package evidence must come from licensed source payloads and generated package manifests with provenance, checksums, attribution and offline runtime compatibility",
+    "Runtime visual evidence must be captured from the current signed Win64 Unreal Shipping build and must record commit SHA, build id, graphics profile, scenario id, artifact path and performance metrics",
+    "Aircraft visual proof must demonstrate rendered transforms driven by CoreSim authoritative WGS-84 ECEF snapshots",
+    "The evidence ledger must contain exactly one current proof-backed or blocker-backed entry for every active immutable Flying 2.0 requirement"
+  ],
+  "migrationImpactNotes": [
+    {
+      "area": "content manifests",
+      "impact": "Production content manifests must distinguish usable packaged Unreal assets from authorized reproducible content-build outputs and carry schemaVersion, createdAt, sourceRefs, checksums, licenseRefs, attribution and bounds. Manifest-only records, fixture-generated packages and missing external files remain invalid production proof."
+    },
+    {
+      "area": "visual evidence records",
+      "impact": "Production visual evidence records must include commit SHA, build id, signed Win64 Unreal Shipping configuration, graphics profile, scenario id, artifact path, performance metrics, manual approval state and the mandatory scene checklist. Evidence from non-Shipping builds, stale commits or synthetic/headless captures blocks release."
+    },
+    {
+      "area": "evidence ledger",
+      "impact": "Ledger synchronization is required for all active immutable requirements by semantic requirement id. New v4 requirements must be represented by proofRefs or external blockerRefs before milestone or release gate completion is considered."
+    }
+  ],
+  "baseContractSnapshot": {
+    "schemaVersion": "flying.contract.v1",
+    "contractId": "flying-2.0",
+    "status": "immutable",
+    "milestones": [
+      {
+        "id": "M0",
+        "name": "Contract, Legal And Data Gates",
+        "requiredRequirementIds": [
+          "REQ-CONTRACT-GOVERNANCE",
+          "REQ-EVIDENCE-TRACEABILITY",
+          "REQ-AUTHORITATIVE-DOCS"
+        ],
+        "exitGate": "legal, data provenance and aircraft data blockers are recorded before production claims"
+      },
+      {
+        "id": "M1",
+        "name": "Core Simulation And Vertical Slice",
+        "requiredRequirementIds": [
+          "REQ-EVIDENCE-TRACEABILITY"
+        ],
+        "exitGate": "headless simulation, initial terrain, airport, replay and telemetry evidence is recorded"
+      },
+      {
+        "id": "M2",
+        "name": "Production Content And Systems",
+        "requiredRequirementIds": [
+          "REQ-EVIDENCE-TRACEABILITY",
+          "REQ-REGIONAL-GIS",
+          "REQ-DMR-TERRAIN-COVERAGE",
+          "REQ-REGIONAL-DATA-PACKAGES",
+          "REQ-PILOT-REGION"
+        ],
+        "exitGate": "production aircraft, configured regional package evidence, regional airport coverage, weather and cockpit evidence is recorded"
+      },
+      {
+        "id": "M3",
+        "name": "Packaging, Licensing And Quality Gates",
+        "requiredRequirementIds": [
+          "REQ-EVIDENCE-TRACEABILITY"
+        ],
+        "exitGate": "performance, stability, installer, signing, SBOM, visual quality and license evidence is recorded"
+      },
+      {
+        "id": "M4",
+        "name": "Release Candidate Acceptance",
+        "requiredRequirementIds": [
+          "REQ-RELEASE-GATES"
+        ],
+        "exitGate": "release candidate is blocked unless every mandatory clean-machine, automated, coverage, validation, performance and soak result passes"
+      }
+    ],
+    "requirements": [
+      {
+        "id": "REQ-CONTRACT-GOVERNANCE",
+        "title": "Immutable Contract Governance",
+        "mandatory": true,
+        "milestone": "M0",
+        "summary": "Maintain a versioned contract, milestone gates, approved change process, prohibited substitutes and explicit blockers for mandatory obligations.",
+        "evidenceGate": "must have linked proof or blocker before milestone completion"
+      },
+      {
+        "id": "REQ-EVIDENCE-TRACEABILITY",
+        "title": "Requirement Evidence Traceability",
+        "mandatory": true,
+        "milestone": "M0",
+        "summary": "Every requirement links to concrete proof or an external blocker, and failed mandatory evidence blocks release.",
+        "evidenceGate": "must have linked proof or blocker before milestone completion"
+      },
+      {
+        "id": "REQ-RELEASE-GATES",
+        "title": "Final Release Gates",
+        "mandatory": true,
+        "milestone": "M4",
+        "summary": "Release completes only when performance, physics, regional terrain packages, regional airport coverage, legal/license, production visual quality, stability, installer, replay, telemetry, privacy and end-to-end workflow gates pass for the pilot release package.",
+        "evidenceGate": "must have linked proof and passing mandatory gate results for release"
+      },
+      {
+        "id": "REQ-AUTHORITATIVE-DOCS",
+        "title": "Authoritative Documentation Alignment",
+        "mandatory": true,
+        "milestone": "M0",
+        "summary": "Current authoritative Flying 2.0 documentation records regional GIS scope and treats AGENTS.md as non-authoritative task context.",
+        "evidenceGate": "must have updated documentation proving the active regional contract before dependent implementation work"
+      },
+      {
+        "id": "REQ-REGIONAL-GIS",
+        "title": "Regional GIS Pipeline",
+        "mandatory": true,
+        "milestone": "M2",
+        "summary": "GIS source discovery, normalization and generated runtime packages are selected by region and configured margins, not by complete Czech Republic download or local storage by default.",
+        "evidenceGate": "must have region configuration, source-selection evidence and package manifests before production terrain claims"
+      },
+      {
+        "id": "REQ-DMR-TERRAIN-COVERAGE",
+        "title": "Regional DMR Terrain Coverage",
+        "mandatory": true,
+        "milestone": "M2",
+        "summary": "Provide offline DMR 5G-based terrain coverage for each installed configured region, including the first 10 x 10 km Ceska Trebova pilot region, with LOD, water/material masks, normals, collision tiles, metadata and seam validation.",
+        "evidenceGate": "must have region package terrain manifests and validation reports before production terrain claims"
+      },
+      {
+        "id": "REQ-REGIONAL-DATA-PACKAGES",
+        "title": "Configurable Offline Regional Packages",
+        "mandatory": true,
+        "milestone": "M2",
+        "summary": "Geographic content is distributed as independently installable offline regional packages described by versioned region configurations; the first release includes the Ceska Trebova 10 x 10 km pilot package without hard-coded Czech-only or Ceska Trebova-specific application logic.",
+        "evidenceGate": "must have explicit region manifests, package manifests and runtime compatibility checks before release"
+      },
+      {
+        "id": "REQ-PILOT-REGION",
+        "title": "Ceska Trebova Pilot Region",
+        "mandatory": true,
+        "milestone": "M2",
+        "summary": "The first milestone for the regional GIS pipeline is a complete end-to-end 10 x 10 km Ceska Trebova pilot package; the pilot is configuration data, not architecture logic.",
+        "evidenceGate": "must have pilot region package evidence before broader regional rollout claims"
+      }
+    ]
+  },
+  "validationCommand": "node tools/forge_validate.js contract-migrations"
+}
