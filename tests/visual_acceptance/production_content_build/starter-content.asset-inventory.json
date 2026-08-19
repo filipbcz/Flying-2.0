@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "flying.acceptance-scene-asset-inventory.v1",
+  "scenes": [
+    {
+      "sceneId": "startup.offline-regional-georeferenced-content",
+      "dependencies": [
+        {
+          "content": "water",
+          "assetRef": "/StarterContent/Props/SM_Rock",
+          "path": "Content/WorldProceduralRules/WorldRules.json"
+        }
+      ]
+    }
+  ]
+}

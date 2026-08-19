@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "flying.acceptance-scene-asset-inventory.v1",
+  "createdAt": "2026-08-19T00:00:00Z",
+  "source": "resolved startup scene dependencies from the authorized reproducible content-build",
+  "scenes": [
+    {
+      "sceneId": "startup.offline-regional-georeferenced-content",
+      "runtimeProducer": "AFlyingPilotGameMode::BeginPlay",
+      "dependencies": [
+        {
+          "content": "region",
+          "assetRef": "/Flying/Config/Regions/CeskaTrebovaPilotRegion",
+          "path": "Config/Regions/ceska-trebova-pilot-region.json"
+        },
+        {
+          "content": "georeference",
+          "assetRef": "/Script/CesiumRuntime.CesiumGeoreference",
+          "path": "unreal/Source/FlyingPresentation/Private/FlyingPilotGameMode.cpp"
+        },
+        {
+          "content": "terrain",
+          "assetRef": "/Flying/OfflinePackages/Terrain/Dmr5gInitialSlice",
+          "path": "Data/Terrain/SliceManifest.json"
+        },
+        {
+          "content": "imagery",
+          "assetRef": "/Flying/OfflinePackages/Imagery/CuzkOrtofotoInitialSlice",
+          "path": "Data/Visual/SliceManifest.json"
+        },
+        {
+          "content": "vectorLayers",
+          "assetRef": "/Flying/OfflinePackages/Vectors/ZabagedInitialSlice",
+          "path": "Data/Visual/SliceManifest.json"
+        },
+        {
+          "content": "water",
+          "assetRef": "/Flying/ProceduralWorld/WaterSurfaceRules",
+          "path": "Content/WorldProceduralRules/WorldRules.json"
+        },
+        {
+          "content": "vegetation",
+          "assetRef": "/Flying/ProceduralWorld/VegetationRules",
+          "path": "Content/WorldProceduralRules/WorldRules.json"
+        },
+        {
+          "content": "airportContent",
+          "assetRef": "/Flying/Airports/DetailedPilotAirportSet",
+          "path": "data_pipeline/seeds/detailed-airport-manifest.json"
+        },
+        {
+          "content": "weather",
+          "assetRef": "/Flying/Weather/CoreSimDrivenWeatherPresentation",
+          "path": "Content/WorldProceduralRules/WorldRules.json"
+        },
+        {
+          "content": "aircraft",
+          "assetRef": "/Flying/Aircraft/FlyingTrainerOne/ExteriorAndSystems",
+          "path": "Data/Aircraft/PrimaryAircraft/manifest.json"
+        },
+        {
+          "content": "cockpit",
+          "assetRef": "/Flying/Aircraft/FlyingTrainerOne/Cockpit",
+          "path": "Content/Cockpit/CockpitLayout.json"
+        }
+      ]
+    }
+  ]
+}

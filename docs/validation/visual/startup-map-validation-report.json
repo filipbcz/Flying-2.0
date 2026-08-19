@@ -1,0 +1,90 @@
+{
+  "schemaVersion": "flying.startup-map-validation-report.v1",
+  "createdAt": "2026-08-19T00:00:00Z",
+  "result": "pass",
+  "validatedManifest": "docs/validation/visual/production-content-build-manifest.json",
+  "startupScenarioId": "startup.offline-regional-georeferenced-content",
+  "manualSetupRequired": false,
+  "offlineOnly": true,
+  "startupBindings": {
+    "engineConfig": "unreal/Config/DefaultEngine.ini",
+    "gameDefaultMap": "/Engine/Maps/Templates/OpenWorld",
+    "gameMode": "/Script/FlyingPresentation.FlyingPilotGameMode",
+    "presentationSettings": "unreal/Config/DefaultGame.ini",
+    "spawnDefaultSceneOnBeginPlay": true
+  },
+  "runtimeValidation": {
+    "automationTest": "Flying.Presentation.GeoreferencedContent.StartupScenarioRendersOfflineRegionalContent",
+    "command": "node tools/validate_production_unreal_content_build.mjs --require-unreal-runtime",
+    "delegatesTo": "node tools/validate_unreal_georeferenced_content.mjs --evidence docs/validation/visual/rc-startup-georef-rendering.json --require-unreal-runtime",
+    "requiredCapabilities": [
+      "windows",
+      "unreal-engine-5.8"
+    ]
+  },
+  "loadPath": [
+    {
+      "content": "region",
+      "source": "Config/Regions/ceska-trebova-pilot-region.json",
+      "loader": "UFlyingPresentationSettings"
+    },
+    {
+      "content": "georeference",
+      "source": "unreal/Source/FlyingPresentation/Private/FlyingPilotGameMode.cpp",
+      "loader": "UFlyingCesiumGeoreferenceComponent::SetOriginLongitudeLatitudeHeight"
+    },
+    {
+      "content": "terrain",
+      "source": "Data/Terrain/SliceManifest.json",
+      "loader": "AFlyingOfflinePilotTerrainActor::LoadTerrainTiles"
+    },
+    {
+      "content": "imagery",
+      "source": "Data/Visual/SliceManifest.json",
+      "loader": "AFlyingOfflinePilotTerrainActor::LoadImageryPackage"
+    },
+    {
+      "content": "vectorLayers",
+      "source": "Data/Visual/SliceManifest.json#/vectorPackages",
+      "loader": "AFlyingOfflinePilotTerrainActor"
+    },
+    {
+      "content": "water",
+      "source": "Content/WorldProceduralRules/WorldRules.json",
+      "loader": "AFlyingOfflinePilotTerrainActor"
+    },
+    {
+      "content": "vegetation",
+      "source": "Content/WorldProceduralRules/WorldRules.json",
+      "loader": "AFlyingOfflinePilotTerrainActor"
+    },
+    {
+      "content": "airportContent",
+      "source": "data_pipeline/seeds/detailed-airport-manifest.json",
+      "loader": "AFlyingPilotGameMode"
+    },
+    {
+      "content": "weather",
+      "source": "Content/WorldProceduralRules/WorldRules.json",
+      "loader": "CoreSim weather state through presentation rules"
+    },
+    {
+      "content": "aircraft",
+      "source": "Data/Aircraft/PrimaryAircraft/manifest.json",
+      "loader": "AFlyingCoreSimAircraftActor"
+    },
+    {
+      "content": "cockpit",
+      "source": "Content/Cockpit/CockpitLayout.json",
+      "loader": "Flying cockpit presentation"
+    }
+  ],
+  "requiredAssertions": {
+    "allRequiredContentPresent": true,
+    "noManualMapSetup": true,
+    "runtimeNetworkRequired": false,
+    "externalMapApis": [],
+    "remoteTileServerUrls": [],
+    "missingExternalFiles": []
+  }
+}
