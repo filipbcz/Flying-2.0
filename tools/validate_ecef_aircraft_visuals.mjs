@@ -150,6 +150,9 @@ const actorCpp = read("unreal/Source/FlyingPresentation/Private/FlyingCoreSimAir
 const automationCpp = read(
   "unreal/Source/FlyingPresentation/Private/FlyingAircraftEcefSnapshotVisualsAutomation.cpp",
 );
+const runtimeProof = JSON.parse(
+  read("docs/validation/visual/aircraft-ecef-snapshot-runtime-proof.json"),
+);
 requireCondition(
   actorHeader.includes("UpdatePresentationFromImmutableSnapshot") &&
     actorHeader.includes("DoCockpitAndExternalVisualsShareAuthoritativeSnapshotRoot") &&
@@ -193,13 +196,19 @@ for (const token of [
   "World->SpawnActor<AFlyingCoreSimAircraftActor>()",
   "Aircraft->FindComponentByClass<UFlyingCoreSimComponent>()",
   "CoreSim->GetCurrentImmutableSnapshot()",
+  "SameImmutableSnapshotIdentity(PublishedSnapshot, OriginShiftSnapshot)",
+  "InitialSnapshotStepIndex",
+  "InitialSnapshotStateHash",
   "Aircraft->UpdatePresentationFromImmutableSnapshot(PublishedSnapshot)",
   "Aircraft->SetCockpitCameraMode(EFlyingCockpitCameraMode::Pilot)",
   "Aircraft->SetCockpitCameraMode(EFlyingCockpitCameraMode::ExteriorOrbit)",
   "Aircraft->DoCockpitAndExternalVisualsShareAuthoritativeSnapshotRoot()",
   "Aircraft->DoesVisualPresentationMatchImmutableSnapshot(PublishedSnapshot)",
   "Aircraft->ApplyWorldOffset(",
-  "Aircraft->DoesVisualPresentationMatchImmutableSnapshot(CoreSim->GetCurrentImmutableSnapshot())",
+  "const double FrameDeltasSeconds[] = {1.0 / 120.0, 1.0 / 30.0, 1.0 / 75.0}",
+  "CoreSim->AdvanceCoreSim(FrameDeltaSeconds)",
+  "FrameRateSnapshot.StepIndex > InitialSnapshotStepIndex",
+  "Aircraft->DoesVisualPresentationMatchImmutableSnapshot(FrameRateSnapshot)",
 ]) {
   requireCondition(
     automationCpp.includes(token),
@@ -209,6 +218,36 @@ for (const token of [
 requireCondition(
   !/GetAttachParent\(\) == SceneRoot/.test(automationCpp),
   "runtime automation may not reduce cockpit/external evidence to direct source attachment checks",
+);
+
+requireCondition(
+  runtimeProof.schemaVersion === "flying.presentation-runtime-proof.v1",
+  "runtime synchronization report schemaVersion is unsupported",
+);
+requireCondition(
+  runtimeProof.requirementId === "REQ-AIRCRAFT-ECEF-VISUAL-AUTHORITY",
+  "runtime synchronization report must identify the ECEF visual authority requirement",
+);
+requireCondition(
+  runtimeProof.automationTestName === automationTestName,
+  "runtime synchronization report must reference the authoritative Unreal automation test",
+);
+for (const finding of [
+  "snapshot_identity_propagation",
+  "cockpit_external_visual_synchronization",
+  "origin_shift_regression",
+  "frame_rate_variation_regression",
+]) {
+  requireCondition(
+    runtimeProof.findings?.[finding]?.status === "covered-by-runtime-automation",
+    `runtime synchronization report missing covered finding ${finding}`,
+  );
+}
+requireCondition(
+  runtimeProof.boundaryChecks?.presentationRuntimeProofCanReadSnapshots === true &&
+    runtimeProof.boundaryChecks?.presentationRuntimeProofMutatesAuthoritativePhysicsState === false &&
+    runtimeProof.boundaryChecks?.presentationOwnsAircraftTransformState === false,
+  "runtime synchronization report must preserve Presentation/CoreSim boundary checks",
 );
 
 if (process.argv.includes("--require-unreal-runtime")) {

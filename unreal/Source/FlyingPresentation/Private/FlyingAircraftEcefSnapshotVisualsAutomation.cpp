@@ -33,6 +33,16 @@ UWorld* FindRuntimeWorld()
 
   return nullptr;
 }
+
+bool SameImmutableSnapshotIdentity(
+  const FFlyingCoreSimImmutableStateSnapshot& Left,
+  const FFlyingCoreSimImmutableStateSnapshot& Right)
+{
+  return Left.bValid == Right.bValid &&
+         Left.StepIndex == Right.StepIndex &&
+         Left.StateHash == Right.StateHash &&
+         Left.SimulationTimeSeconds == Right.SimulationTimeSeconds;
+}
 }
 
 bool FFlyingAircraftEcefSnapshotVisualsTest::RunTest(const FString& Parameters)
@@ -88,10 +98,37 @@ bool FFlyingAircraftEcefSnapshotVisualsTest::RunTest(const FString& Parameters)
     TEXT("aircraft visuals match the published immutable ECEF snapshot"),
     Aircraft->DoesVisualPresentationMatchImmutableSnapshot(PublishedSnapshot));
 
+  const int64 InitialSnapshotStepIndex = PublishedSnapshot.StepIndex;
+  const int64 InitialSnapshotStateHash = PublishedSnapshot.StateHash;
+
   Aircraft->ApplyWorldOffset(FVector(10000.0, 1000.0, -250.0), true);
+  const FFlyingCoreSimImmutableStateSnapshot OriginShiftSnapshot =
+    CoreSim->GetCurrentImmutableSnapshot();
+  TestTrue(
+    TEXT("origin shift preserves authoritative immutable ECEF snapshot identity"),
+    SameImmutableSnapshotIdentity(PublishedSnapshot, OriginShiftSnapshot));
   TestTrue(
     TEXT("origin shifts recompute visuals from the same immutable ECEF snapshot source"),
-    Aircraft->DoesVisualPresentationMatchImmutableSnapshot(CoreSim->GetCurrentImmutableSnapshot()));
+    Aircraft->DoesVisualPresentationMatchImmutableSnapshot(OriginShiftSnapshot));
+
+  const double FrameDeltasSeconds[] = {1.0 / 120.0, 1.0 / 30.0, 1.0 / 75.0};
+  for (double FrameDeltaSeconds : FrameDeltasSeconds)
+  {
+    CoreSim->AdvanceCoreSim(FrameDeltaSeconds);
+    const FFlyingCoreSimImmutableStateSnapshot FrameRateSnapshot =
+      CoreSim->GetCurrentImmutableSnapshot();
+    TestTrue(
+      TEXT("frame-rate variation advances the authoritative CoreSim snapshot id"),
+      FrameRateSnapshot.bValid &&
+        FrameRateSnapshot.StepIndex > InitialSnapshotStepIndex &&
+        FrameRateSnapshot.StateHash != InitialSnapshotStateHash);
+
+    Aircraft->UpdatePresentationFromImmutableSnapshot(FrameRateSnapshot);
+    TestTrue(
+      TEXT("frame-rate variation keeps cockpit and external visuals on the same CoreSim snapshot"),
+      Aircraft->DoCockpitAndExternalVisualsShareAuthoritativeSnapshotRoot() &&
+        Aircraft->DoesVisualPresentationMatchImmutableSnapshot(FrameRateSnapshot));
+  }
 
   Aircraft->Destroy();
   return true;
