@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const contractPath = path.join(repoRoot, "docs", "contract", "flying-2.0.yml");
+const contractMigrationsDir = path.join(repoRoot, "docs", "contract", "migrations");
 const ledgerSchemaPath = path.join(repoRoot, "docs", "evidence", "ledger.schema.json");
 const reqIdPattern = /^REQ-[A-Z0-9]+(?:-[A-Z0-9]+)*$/;
 const milestoneIdPattern = /^M[0-9]+$/;
@@ -158,6 +159,105 @@ function validateContract() {
   return contract;
 }
 
+function requirementMap(contractLike) {
+  return new Map((contractLike.requirements ?? []).map((requirement) => [requirement.id, requirement]));
+}
+
+function milestoneMap(contractLike) {
+  return new Map((contractLike.milestones ?? []).map((milestone) => [milestone.id, milestone]));
+}
+
+function validateRequirementNotWeakened(baseRequirement, currentRequirement, migrationId) {
+  requireCondition(currentRequirement, `${migrationId}: active contract removed requirement ${baseRequirement.id}`);
+  requireCondition(
+    currentRequirement.mandatory === baseRequirement.mandatory,
+    `${migrationId}: requirement mandatory flag changed for ${baseRequirement.id}`,
+  );
+  requireCondition(
+    currentRequirement.milestone === baseRequirement.milestone,
+    `${migrationId}: requirement milestone changed for ${baseRequirement.id}`,
+  );
+  requireCondition(
+    typeof currentRequirement.evidenceGate === "string" && currentRequirement.evidenceGate.length >= baseRequirement.evidenceGate.length,
+    `${migrationId}: requirement evidence gate was weakened for ${baseRequirement.id}`,
+  );
+  requireCondition(
+    typeof currentRequirement.summary === "string" && currentRequirement.summary.length >= baseRequirement.summary.length,
+    `${migrationId}: requirement summary was weakened for ${baseRequirement.id}`,
+  );
+}
+
+function validateMigrationImpactNotes(migration) {
+  if (migration.migrationId !== "0002-v4-production-evidence-delta") {
+    return;
+  }
+  requireCondition(
+    Array.isArray(migration.migrationImpactNotes) && migration.migrationImpactNotes.length >= 2,
+    `${migration.migrationId}: migration impact notes are required`,
+  );
+  const notedAreas = new Set(migration.migrationImpactNotes.map((note) => note.area));
+  requireCondition(notedAreas.has("content manifests"), `${migration.migrationId}: missing content manifest migration notes`);
+  requireCondition(notedAreas.has("visual evidence records"), `${migration.migrationId}: missing visual evidence record migration notes`);
+}
+
+function validateContractMigrations() {
+  const contract = validateContract();
+  const activeRequirements = requirementMap(contract);
+  const activeMilestones = milestoneMap(contract);
+  const migrationNames = fs.readdirSync(contractMigrationsDir)
+    .filter((name) => name.endsWith(".json"))
+    .sort();
+
+  requireCondition(migrationNames.length > 0, "no contract migrations found");
+  for (const migrationName of migrationNames) {
+    const migrationPath = path.join(contractMigrationsDir, migrationName);
+    const migration = readJson(migrationPath);
+    requireCondition(migration.schemaVersion === "flying.contract-migration.v1", `${migration.migrationId}: schemaVersion mismatch`);
+    requireCondition(/^0[0-9]{3}-[a-z0-9-]+$/.test(migration.migrationId), `${migrationName}: invalid migrationId`);
+    requireCondition(migration.status === "applied", `${migration.migrationId}: migration must be applied`);
+    requireCondition(migration.appliesToContractId === contract.contractId, `${migration.migrationId}: contract id mismatch`);
+    requireCondition(Array.isArray(migration.declaredDeltaFields) && migration.declaredDeltaFields.length > 0,
+      `${migration.migrationId}: declaredDeltaFields are required`);
+    requireCondition(migration.baseContractSnapshot?.contractId === contract.contractId,
+      `${migration.migrationId}: baseContractSnapshot is required`);
+
+    for (const requirementId of migration.preservedActiveRequirementIds ?? []) {
+      requireCondition(activeRequirements.has(requirementId), `${migration.migrationId}: preserved requirement missing: ${requirementId}`);
+    }
+    for (const requirementId of migration.addedRequirementIds ?? []) {
+      requireCondition(activeRequirements.has(requirementId), `${migration.migrationId}: added requirement missing: ${requirementId}`);
+    }
+
+    const baseRequirements = requirementMap(migration.baseContractSnapshot);
+    for (const baseRequirement of baseRequirements.values()) {
+      validateRequirementNotWeakened(baseRequirement, activeRequirements.get(baseRequirement.id), migration.migrationId);
+    }
+
+    for (const baseMilestone of migration.baseContractSnapshot.milestones ?? []) {
+      const activeMilestone = activeMilestones.get(baseMilestone.id);
+      requireCondition(activeMilestone, `${migration.migrationId}: active contract removed milestone ${baseMilestone.id}`);
+      for (const requirementId of baseMilestone.requiredRequirementIds ?? []) {
+        requireCondition(
+          (activeMilestone.requiredRequirementIds ?? []).includes(requirementId),
+          `${migration.migrationId}: milestone ${baseMilestone.id} no longer maps ${requirementId}`,
+        );
+      }
+    }
+    validateMigrationImpactNotes(migration);
+  }
+
+  const requiredV4Ids = [
+    "REQ-PRODUCTION-UNREAL-CONTENT",
+    "REQ-PRODUCTION-PILOT-REGIONAL-PACKAGE",
+    "REQ-RUNTIME-SHIPPING-VISUAL-EVIDENCE",
+    "REQ-AIRCRAFT-ECEF-VISUAL-AUTHORITY",
+  ];
+  requireCondition(contract.contractDeltaVersion === 4, "contractDeltaVersion must be 4");
+  for (const requirementId of requiredV4Ids) {
+    requireCondition(activeRequirements.has(requirementId), `active contract missing v4 requirement ${requirementId}`);
+  }
+}
+
 function validateLedgerEntries(contract, ledger) {
   requireCondition(ledger.schemaVersion === "flying.evidence-ledger.v1", "ledger schemaVersion mismatch");
   requireCondition(ledger.contractId === contract.contractId, "ledger contractId mismatch");
@@ -280,6 +380,10 @@ function main() {
     case "contract":
       validateContract();
       console.log("forge_validate: contract ok");
+      return;
+    case "contract-migrations":
+      validateContractMigrations();
+      console.log("forge_validate: contract migrations ok");
       return;
     case "architecture":
     case "architectur":
