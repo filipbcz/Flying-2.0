@@ -34,7 +34,6 @@ const repairSelfTest = read("tools/validate_step28_update_repair.ps1");
 const cleanInstallValidation = read("tools/validate_step28_clean_install.ps1");
 const installer = read("packaging/FlyingInstaller.iss");
 const buildMetadataExample = JSON.parse(read("packaging/FlyingBuildMetadata.example.json"));
-const target = read("unreal/Source/Flying.Target.cs");
 const defaultGame = read("unreal/Config/DefaultGame.ini");
 const defaultEngine = read("unreal/Config/DefaultEngine.ini");
 const buildMetadataHeader = read("unreal/Source/FlyingPresentation/Public/FlyingBuildMetadata.h");
@@ -252,12 +251,6 @@ if (buildMetadataExample.schema !== "flying.build-metadata.v1") {
 }
 if (buildMetadataExample.platform !== "Win64" || buildMetadataExample.configuration !== "Shipping") {
   fail("build metadata example must identify Win64 Shipping");
-}
-
-for (const token of [
-  "bUseCrashReportClient = true",
-]) {
-  requireToken(target, token, "Unreal target");
 }
 
 for (const token of [

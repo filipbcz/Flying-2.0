@@ -7,7 +7,6 @@ public class FlyingTarget : TargetRules
         Type = TargetType.Game;
         DefaultBuildSettings = BuildSettingsVersion.Latest;
         IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
-        bUseCrashReportClient = true;
         ExtraModuleNames.Add("FlyingPresentation");
     }
 }
