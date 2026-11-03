@@ -20,6 +20,7 @@ class FLYINGPRESENTATION_API UFlyingCoreSimComponent : public UActorComponent
 
 public:
   UFlyingCoreSimComponent();
+  UFlyingCoreSimComponent(FVTableHelper& Helper);
   ~UFlyingCoreSimComponent() override;
 
   void BeginPlay() override;

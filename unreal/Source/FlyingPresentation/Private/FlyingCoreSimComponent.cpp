@@ -1361,6 +1361,8 @@ UFlyingCoreSimComponent::UFlyingCoreSimComponent()
   PrimaryComponentTick.bCanEverTick = true;
 }
 
+UFlyingCoreSimComponent::UFlyingCoreSimComponent(FVTableHelper& Helper) : Super(Helper) {}
+
 UFlyingCoreSimComponent::~UFlyingCoreSimComponent() = default;
 
 void UFlyingCoreSimComponent::BeginPlay()

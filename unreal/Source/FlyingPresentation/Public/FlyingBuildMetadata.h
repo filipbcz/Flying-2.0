@@ -6,7 +6,7 @@
 #include "FlyingBuildMetadata.generated.h"
 
 USTRUCT(BlueprintType)
-struct FLYINGPRESENTATION_API FFlyingBuildMetadata
+struct FLYINGPRESENTATION_API FFlyingBuildMetadataRecord
 {
   GENERATED_BODY()
 
@@ -33,7 +33,7 @@ class FLYINGPRESENTATION_API UFlyingBuildMetadata : public UBlueprintFunctionLib
 
 public:
   UFUNCTION(BlueprintPure, Category="Flying|Build")
-  static FFlyingBuildMetadata GetBuildMetadata();
+  static FFlyingBuildMetadataRecord GetBuildMetadata();
 
   UFUNCTION(BlueprintPure, Category="Flying|Build")
   static FString GetBuildId();

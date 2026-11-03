@@ -1,0 +1,628 @@
+{
+  "schemaVersion": "flying.editor-baseline-acceptance.v1",
+  "status": "pass",
+  "recordedAtUtc": "2026-11-03T20:25:40.036Z",
+  "identity": {
+    "repository": "https://github.com/filipbcz/Flying-2.0.git",
+    "baseCommit": "6989695e85fec23a35e013d7d2fefe0bdee5521c",
+    "checkout": "C:\\Users\\borek-fil\\AppData\\Local\\ForgeMind\\windows-runner\\work\\a3ec850d-3925-4cbe-97e1-25170f0527ec",
+    "workerLeaseId": "a3ec850d-3925-4cbe-97e1-25170f0527ec",
+    "host": "BOREK-FILIP",
+    "windowsSessionId": 1,
+    "project": "unreal/Flying.uproject"
+  },
+  "buildId": "6989695e85fec23a35e013d7d2fefe0bdee5521c-editor-a3ec850d-3925-4cbe-97e1-25170f0527ec",
+  "classification": "build-validation",
+  "engineDiagnostics": [
+    "[2026.11.03-20.25.02:275][  0]LogClass: Error: EnumProperty FCesiumMetadataPropertyStatisticValue::Semantic is not initialized properly. Module:CesiumRuntime File:Public/CesiumFeaturesMetadataDescription.h",
+    "[2026.11.03-20.25.02:304][  0]LogAutomationTest: Error: Condition failed",
+    "[2026.11.03-20.25.02:307][  0]LogAutomationTest: Error: Condition failed",
+    "[2026.11.03-20.25.02:310][  0]LogAutomationTest: Error: LogClass: EnumProperty FCesiumMetadataPropertyStatisticValue::Semantic is not initialized properly. Module:CesiumRuntime File:Public/CesiumFeaturesMetadataDescription.h"
+  ],
+  "sourceInputs": [
+    {
+      "path": "Tools/UnrealBaseline/materialize_startup.py",
+      "sha256": "e0a0999226830efe92c9d3c75fc057906d7735e795142da944c5161bbc20d03c",
+      "sizeBytes": 7774,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "core_sim/include/flying/core_sim/aircraft_config.hpp",
+      "sha256": "efc1c37332f5fcdfd5d782f1e66da8fba40085535119570f19847e276f36326b",
+      "sizeBytes": 8566,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "core_sim/include/flying/core_sim/aircraft_systems.hpp",
+      "sha256": "136ec6a71fa55f941edf1a6311495b0fdc2ad39cb630b0def240669e5fef1d53",
+      "sizeBytes": 9567,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "core_sim/include/flying/core_sim/api.hpp",
+      "sha256": "7d64ca995b6097093002663589f162a484e0486bd4b7a630614727f668988f38",
+      "sizeBytes": 157,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "core_sim/include/flying/core_sim/determinism.hpp",
+      "sha256": "b032d8386e0e88e21d2f6add173b6a71a89b231797076f8f26b5db7e527029c9",
+      "sizeBytes": 273,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "core_sim/include/flying/core_sim/fixed_step.hpp",
+      "sha256": "d94b31352f5af87cc4314379d34c9ecd5ebe0b31abbb2e178fbcc8038ce22f1f",
+      "sizeBytes": 835,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "core_sim/include/flying/core_sim/flight_dynamics.hpp",
+      "sha256": "45d9b069e5b1a41703cd39cebdb7e8b1ba8d8247f78bfdbc47f1a7941d606ba4",
+      "sizeBytes": 4299,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "core_sim/include/flying/core_sim/input.hpp",
+      "sha256": "c2d1571f656830d460fdef08696148a8a54b85b82c49ef12c84aca6dc2bcc710",
+      "sizeBytes": 4674,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "core_sim/include/flying/core_sim/jsbsim_adapter.hpp",
+      "sha256": "3d52b7f61b2153ccad7365ef7e9d68fc038e93744a9db199865d1f91b7422f90",
+      "sizeBytes": 1865,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "core_sim/include/flying/core_sim/math.hpp",
+      "sha256": "244a56ce074f14d2ccdf9cad0ba087e9b5d6a0965c2acbe6fef85a5acfb97023",
+      "sizeBytes": 2814,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "core_sim/include/flying/core_sim/module.hpp",
+      "sha256": "608c907412464f6e191aeb731e7d212a6c94e42fb38c2a107df89086f676ed8c",
+      "sizeBytes": 231,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "core_sim/include/flying/core_sim/scenario.hpp",
+      "sha256": "0aa2f5f15ed4dee027ccbf56a3f0b1437febfd4e6cb659c80815119f31790c8e",
+      "sizeBytes": 2108,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "core_sim/include/flying/core_sim/simulator.hpp",
+      "sha256": "4e0b222d2c9bd68f584e3eb6f757677db7032990e37234935a989db4ee7c785b",
+      "sizeBytes": 2077,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "core_sim/include/flying/core_sim/state.hpp",
+      "sha256": "2f78aff2e22f3d1adbbf88d6e792c6eae847b0f705f1b4ad1e794942535c362a",
+      "sizeBytes": 1177,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "core_sim/include/flying/core_sim/telemetry.hpp",
+      "sha256": "eaf57b8046733e28873631c130c4faf080f023fd2288b64d27ea728743e41e93",
+      "sizeBytes": 6779,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "core_sim/include/flying/core_sim/terrain_contact.hpp",
+      "sha256": "061427332d4d29b2eff6951c09594eaf7c2e3dff3af3ace67c3f3d652f0db32e",
+      "sizeBytes": 1612,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "core_sim/include/flying/core_sim/units.hpp",
+      "sha256": "de06ee4d9cbe6cc8acb08c4233f5aefe7bf11415a273d85c4fd3a8592e2410ed",
+      "sizeBytes": 820,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "core_sim/include/flying/core_sim/weather.hpp",
+      "sha256": "fbcbe11c6d1dfca2b0045617f2b15bd22da3e3a61f9c1b9ddd36ea88549e4e64",
+      "sizeBytes": 4667,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "core_sim/src/flight_dynamics.cpp",
+      "sha256": "6a44aae1f6fe981f2c9790ac1b35048e688fea0684de0861f04feda3fb3025e1",
+      "sizeBytes": 10225,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "geo_terrain/include/flying/geo_terrain/api.hpp",
+      "sha256": "f3a69f4b644d6e58f28e37500b5a7135ba7948d288044285f90ed22cb5df8c76",
+      "sizeBytes": 163,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "geo_terrain/include/flying/geo_terrain/geodesy.hpp",
+      "sha256": "1c6b6819edb7d0c2db1d77e90070b7e300b49cdd94ea002fcb519f41571a6c1c",
+      "sizeBytes": 5714,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "geo_terrain/include/flying/geo_terrain/heights.hpp",
+      "sha256": "95a50d344944cde61b647d5eda68cd8d4135021fcbf2751593d181d269181d91",
+      "sizeBytes": 2176,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "geo_terrain/include/flying/geo_terrain/math.hpp",
+      "sha256": "6760926b61a69d122e43d160ba20967b44b3ba6ec3dc316655b17354321d4b37",
+      "sizeBytes": 2499,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "geo_terrain/include/flying/geo_terrain/module.hpp",
+      "sha256": "63ecc176529c20d8c5dfc7cd46bd5884ac5553ba4d684c6d206ee76d9bbfa555",
+      "sizeBytes": 237,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "geo_terrain/include/flying/geo_terrain/terrain_service.hpp",
+      "sha256": "31cd6407f9cd4b70b13a748c927ed006b12b4c7f0a5c20f74b26550d4084cf4f",
+      "sizeBytes": 6226,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "geo_terrain/include/flying/geo_terrain/units.hpp",
+      "sha256": "aabc985970cc7622e50bf16714bf233533706c49f486d1a88abfc085180c3cec",
+      "sizeBytes": 2887,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Config/DefaultEngine.ini",
+      "sha256": "ec6d269561bf585880de06377b0b19d2d8c1f8ef8e9935e74613f862aa6f21c9",
+      "sizeBytes": 1049,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Config/DefaultGame.ini",
+      "sha256": "bc35ff73d693a6cc4ee5bd4d021ccf68bacf2ea10ce49b7bd688207d3d01de7e",
+      "sizeBytes": 1130,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Config/DefaultInput.ini",
+      "sha256": "e1b7a60e4da1acca28b8540ed7b2746551df9ae1ddc0056eb45a0932ed82ea78",
+      "sizeBytes": 9483,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Config/DefaultScalability.ini",
+      "sha256": "23ff67ed0e333c1cfe234904ff57a03b4079176d3f2c13690b74df04d2cf2d1b",
+      "sizeBytes": 659,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Config/FlyingOfflineNavigationMapStyle.json",
+      "sha256": "cf15adb427c1cfb3c6d8edba61939cc21bf089437226269a7abe9ff905c723e5",
+      "sizeBytes": 838,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Flying.uproject",
+      "sha256": "da42807e7a402fa3bc0ef56f0d5b85b954401da6ea3ec7046060548435614a40",
+      "sizeBytes": 800,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/Flying.Target.cs",
+      "sha256": "8471e55e80717caf8d8bef33353054d59d02fb1c0e618a65ef693c13d9d41d52",
+      "sizeBytes": 346,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingCoreSimBridge/FlyingCoreSimBridge.Build.cs",
+      "sha256": "70833d9042c86fa11bc352076f0901f20de85ff2cee3e2d3a44f9d7a0cf01e91",
+      "sizeBytes": 1226,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingCoreSimBridge/Private/CoreSimStandalone/aircraft_systems.cpp",
+      "sha256": "a9fe0389ccbf5d863b237939895857e60f9a96addbe19e4e9c2e9be1c043b5dc",
+      "sizeBytes": 22848,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingCoreSimBridge/Private/CoreSimStandalone/determinism.cpp",
+      "sha256": "09be544ea76ea83bc565e460daded513c002697c85b46aa05fbb69d0891233c8",
+      "sizeBytes": 4352,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingCoreSimBridge/Private/CoreSimStandalone/fixed_step.cpp",
+      "sha256": "1fcc5b7b551255e37376a43c7b9a21aea05abfe7ad063d953eceb92a45fdb714",
+      "sizeBytes": 54,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingCoreSimBridge/Private/CoreSimStandalone/flight_dynamics.cpp",
+      "sha256": "2f5226d1368560800fab4c52fd347c9bc10ff5b824bd23a01ef2b333e29ffc7a",
+      "sizeBytes": 144,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingCoreSimBridge/Private/CoreSimStandalone/input.cpp",
+      "sha256": "543de4bba87599ddc254a050162931a7340a41c5170376941978c81c3e691a4a",
+      "sizeBytes": 269,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingCoreSimBridge/Private/CoreSimStandalone/scenario.cpp",
+      "sha256": "d8026aa75afaf9301183c52d542bae9ac34f61669fd208a02fc9c59acff30be0",
+      "sizeBytes": 52,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingCoreSimBridge/Private/CoreSimStandalone/simulator.cpp",
+      "sha256": "0927da1813cdb75a86a9e6d636ec72ebfa1ba75c26f460efe74d0e79103fc76f",
+      "sizeBytes": 10241,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingCoreSimBridge/Private/CoreSimStandalone/telemetry.cpp",
+      "sha256": "46b24d39998c65dd3b4ebcce15622e61079579c586e8e433c80e925e0915382a",
+      "sizeBytes": 53,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingCoreSimBridge/Private/CoreSimStandalone/terrain_contact.cpp",
+      "sha256": "ee59af1f900beba810da0cc11adff289c624e6c8e342b742030679a8cda3a530",
+      "sizeBytes": 3015,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingCoreSimBridge/Private/CoreSimStandalone/weather.cpp",
+      "sha256": "93198a1809cfafa02edcc5c6c3ba35dc1a39423123547e6df9ee25fa8dad3800",
+      "sizeBytes": 51,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingCoreSimBridge/Private/FlyingCoreSimBridge.cpp",
+      "sha256": "004ca470b7b26f3d7881d8570086398a9c4db78e0b434b9f6660a1ae5528bd47",
+      "sizeBytes": 611,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingCoreSimBridge/Private/GeoTerrainStandalone/geodesy.cpp",
+      "sha256": "93da179294475ea197cf3f3e8fcbb0576c89110671f1084cf23564e946dd4143",
+      "sizeBytes": 54,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingCoreSimBridge/Public/FlyingCoreSimBridge.h",
+      "sha256": "764b114ccda12f9bc3a135f77d849a73d4790cc575d586f083a6a68ff3d031b9",
+      "sizeBytes": 650,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingEditor.Target.cs",
+      "sha256": "041541fd37fddb573427bd1d7ad1ff46419bdbfe983fa3ba941e10f04547d7ad",
+      "sizeBytes": 360,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/FlyingPresentation.Build.cs",
+      "sha256": "e888adfc15e2bbf0f65f3e23b3a84efc986b8806bdf6027cc90b37098c4d4390",
+      "sizeBytes": 1125,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Private/FlyingAircraftEcefSnapshotVisualsAutomation.cpp",
+      "sha256": "9cc210c647f0f9f014d7d8565098d5fba1021999170898462691569e91687fa0",
+      "sizeBytes": 4750,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Private/FlyingBuildMetadata.cpp",
+      "sha256": "cd929cf24a12d5f8d4a04d214ac7feb2e61192a19297b8214671c51abe57ab33",
+      "sizeBytes": 2211,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Private/FlyingCesiumGeoreferenceComponent.cpp",
+      "sha256": "c80a12c54deb42aa9295f6cdecafda07f8959698d3124984f9a7c7e2fa9eb3c4",
+      "sizeBytes": 3107,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Private/FlyingCoreSimAircraftActor.cpp",
+      "sha256": "b9c332c79eb4642fb803eb56ea80f96764e1eaa434b777db2fb92912166c3d0d",
+      "sizeBytes": 32168,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Private/FlyingCoreSimComponent.cpp",
+      "sha256": "b6dbec5e4fa44f53bd318e0fe8316ec23555ffd5efbd6d7f8fbc1d9b73703eef",
+      "sizeBytes": 65884,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Private/FlyingDiagnosticsWidget.cpp",
+      "sha256": "91d160886c57cdc72a708e871cc17570839f2861e17e986ad70bd1459922e7b9",
+      "sizeBytes": 4652,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Private/FlyingGeoreferencedContentRenderingAutomation.cpp",
+      "sha256": "ebec8acc53ad93af51ffa6f23324bd4b2ee3a522892aedcc2ea179fe702adc52",
+      "sizeBytes": 4799,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Private/FlyingInputCalibrationWidget.cpp",
+      "sha256": "80c76391be5b250ad0cbd23fb15198c38db5bc0618db5782001bbd9c7b7a760c",
+      "sizeBytes": 1324,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Private/FlyingInputMappingSubsystem.cpp",
+      "sha256": "7fa2498b6f7954e1993e6ed8dc4a48f8312649bb43a3f819b384fb10ac208c23",
+      "sizeBytes": 16983,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Private/FlyingOfflineNavigationMapWidget.cpp",
+      "sha256": "347e4e4141395719d063042d8452d7610411f02b448bed918ce6a5082d1ac4ee",
+      "sizeBytes": 26751,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Private/FlyingOfflinePilotTerrainActor.cpp",
+      "sha256": "c2db38291b2bf5e2c3ebcb543d13619bf9eaf793b8664161bec67185f9a79b10",
+      "sizeBytes": 31793,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Private/FlyingPilotGameMode.cpp",
+      "sha256": "e359b5640ec5d10835d2f6fdcd24740e4dc29d05a8667f41a2b4e0cae5f54168",
+      "sizeBytes": 1307,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Private/FlyingPostFlightWidget.cpp",
+      "sha256": "533b78546e0f50160650f003df6ba7e3d7951e2a39cb67bfdc69a906d9bf8392",
+      "sizeBytes": 3669,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Private/FlyingPresentation.cpp",
+      "sha256": "1b27d52d4b1b3a12acdd48a5e9b8b52071901b1992a467a785cbffd2cc284582",
+      "sizeBytes": 4407,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Private/FlyingReplayWidget.cpp",
+      "sha256": "aa4ac4242a17f6ae9e246a4bd6717be289a74220dd23c8202381280b971babfc",
+      "sizeBytes": 1791,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Private/FlyingScenarioEditorWidget.cpp",
+      "sha256": "76ce160e7469178c552d3aff0d8359cc0c30e68c6e2b30f3ad6dae81017ce9a9",
+      "sizeBytes": 13307,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Private/FlyingScenarioSelectionWidget.cpp",
+      "sha256": "8ac95471e4fb21dcbd24f04aada994ec638f379418ee2067d68c3be8271916ef",
+      "sizeBytes": 2399,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Public/FlyingBuildMetadata.h",
+      "sha256": "3bad52ad471b3ae54dabc3c9829ae6d936551dafa2aca8bb6da458c2c4af98a7",
+      "sizeBytes": 1114,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Public/FlyingCesiumGeoreferenceComponent.h",
+      "sha256": "e1d926f468e66efb2bdf36ccb942eed26fbd0303f5c7b4a6c93f92cf902b167c",
+      "sizeBytes": 1341,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Public/FlyingCoreSimAircraftActor.h",
+      "sha256": "cb700a15efc0a959817fadae0eaf87f0f89e6387d26fc5f979744b565ad18c4a",
+      "sizeBytes": 9641,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Public/FlyingCoreSimComponent.h",
+      "sha256": "724396ed39c99b69869e696d36d49240ef48def6e1809aae09b01c03403028e0",
+      "sizeBytes": 9214,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Public/FlyingCoreSimStateSnapshot.h",
+      "sha256": "ac7b1a19199cfadf76709ff7c56ca7a6cdbb10433f3ee16dcb667f16534ccaff",
+      "sizeBytes": 8991,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Public/FlyingDiagnosticsWidget.h",
+      "sha256": "9f1f346ee05440377ac2d48621df871996ed823c83d65d4cfc988d77bb7345df",
+      "sizeBytes": 3892,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Public/FlyingInputCalibrationWidget.h",
+      "sha256": "21f58afca1d19a8b8eb1b87b3708545c40e4940027116b0400ed48e3000cb701",
+      "sizeBytes": 1048,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Public/FlyingInputMappingSubsystem.h",
+      "sha256": "9a17d85fa2d145b7d3f9ebb57a0aef2bc8039b8f2d510e5f6369dd161d7dac6a",
+      "sizeBytes": 1902,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Public/FlyingInputMappingTypes.h",
+      "sha256": "ef3705fc10488526533524c20084d2db9cd2b6d0651b6f25b64c72c07c173e0e",
+      "sizeBytes": 7762,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Public/FlyingOfflineNavigationMapWidget.h",
+      "sha256": "0aba5cc54b90afb99dc397e4fd493aea78cbe8ccef29e72333120b752b698e41",
+      "sizeBytes": 5304,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Public/FlyingOfflinePilotTerrainActor.h",
+      "sha256": "26c7c6181bdcf0b0545ded84400297c8fa5486c240408f671e7b9affe329fc4c",
+      "sizeBytes": 3435,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Public/FlyingPilotGameMode.h",
+      "sha256": "a2daa7fbcaaa263df3d424e90cabcc0f0d0ee91b352e8ca993c01a261820db73",
+      "sizeBytes": 268,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Public/FlyingPostFlightTypes.h",
+      "sha256": "8eb907a62d533192d9c76c2cd3f61af06a0faa02af850fc42089bf4dfda6fcd0",
+      "sizeBytes": 1381,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Public/FlyingPostFlightWidget.h",
+      "sha256": "b00fbcae7e4f291d7a30a1ece210f599252d0f3a54f7bc13c4d7491f6e54ee1b",
+      "sizeBytes": 2013,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Public/FlyingPresentation.h",
+      "sha256": "01d837f8500893ba160972aea75066634f4f9b69aee2864b249c39ddc40c8fae",
+      "sizeBytes": 194,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Public/FlyingPresentationSettings.h",
+      "sha256": "4896618d7f187fd12c41856bde2069f0cbe8dff113981675d0c9c24b91b6c885",
+      "sizeBytes": 4103,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Public/FlyingReplayWidget.h",
+      "sha256": "4771f160a234a69ccd2e339dccb4f624f3dd02f041e51a05ce1ceb377098d6b4",
+      "sizeBytes": 1657,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Public/FlyingScenarioEditorWidget.h",
+      "sha256": "4717de8a1fde7e82f9d1c0e5d1c69f06940cd7c51e1bb89dfd168f74016caba3",
+      "sizeBytes": 1432,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Public/FlyingScenarioSelectionWidget.h",
+      "sha256": "345fc819d32fe764cd659808af06634f699ee8d77d6bfec05c513269a50da242",
+      "sizeBytes": 1048,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/Public/FlyingScenarioTypes.h",
+      "sha256": "70dc578ede40b1e5ebd61972429c6646e26f249bde2a2b0a2a24d1951a720531",
+      "sizeBytes": 4881,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "unreal/Source/FlyingPresentation/README.md",
+      "sha256": "f17bfb0f2617de9e5377d7ab33278584be0a318abb1ef58bbbd3fd25e75f46b2",
+      "sizeBytes": 1273,
+      "hashMode": "utf8-lf"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "unreal/Content/Flying/Materials/M_OfflineVertexColor.uasset",
+      "sha256": "fd7e826093a6a15dfc729ea29aeddb95eb0f3f27414a36f3eee33062f91bbacd",
+      "sizeBytes": 8511
+    },
+    {
+      "path": "unreal/Content/Flying/Maps/FlyingStartup.umap",
+      "sha256": "8cceadeaaf2477c6cf54a696b703da4b93ed021ae09676160ba6a4655e7b689c",
+      "sizeBytes": 20106
+    },
+    {
+      "path": "unreal/Content/Flying/Blueprints/BP_FlyingPilotGameMode.uasset",
+      "sha256": "c046afe1523e28d53f5fb0ea5dfbe0e272fdf3c29e34fd768bb3f81295126d3e",
+      "sizeBytes": 21502
+    }
+  ],
+  "buildProducts": [
+    {
+      "path": "unreal/Binaries/Win64/UnrealEditor-FlyingPresentation.dll",
+      "sha256": "a6f3ec4541cb0f581d2cb6d59c12fb21396d77cbfd8c3652425e1423e364d3ec",
+      "sizeBytes": 1073152,
+      "hashMode": "raw"
+    },
+    {
+      "path": "unreal/Binaries/Win64/UnrealEditor-FlyingCoreSimBridge.dll",
+      "sha256": "e358e6378f7b3e31b992dee7baa601b1be75ffc908f05c178df14d1befc0e6d7",
+      "sizeBytes": 570880,
+      "hashMode": "raw"
+    },
+    {
+      "path": "unreal/Binaries/Win64/FlyingEditor.target",
+      "sha256": "87899d6dac3ee4184d6b1aa6d0bc3b1fae0dbd4ab46e8a67437a4a9f14ba94d9",
+      "sizeBytes": 947548,
+      "hashMode": "raw"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "docs/validation/editor-baseline/preflight.json",
+      "sha256": "cde567e2d62c0a82437a355f75ddbadf7f0eafd9e01d0a1ba828ce187d21d1e6",
+      "sizeBytes": 3934,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "docs/validation/editor-baseline/build-result.json",
+      "sha256": "2f8a70521497aa3dfdd6545116a9649edb606ec8428f14ef9619ce6dfec0285b",
+      "sizeBytes": 19419,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "docs/validation/editor-baseline/author-result.json",
+      "sha256": "323ce7778c441d609e86309c26062116f46eb50be539bd7976e3ef39610e1e0d",
+      "sizeBytes": 317798,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "docs/validation/editor-baseline/open-result.json",
+      "sha256": "a4ae29e0525895bff2feeae60943f08aba03d2cf1cec00e40417e6d01e464c67",
+      "sizeBytes": 294098,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "docs/validation/editor-baseline/materialization.json",
+      "sha256": "211629c12b4edd55bbfb75e7dc282a817b2f14342fb48d2e540d264393227859",
+      "sizeBytes": 1808,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "docs/validation/editor-baseline/editor-open.json",
+      "sha256": "c3665a4293921dd2448c9391b8a318f17370c8d61e281ee80c6e0a0659f62773",
+      "sizeBytes": 1803,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "docs/validation/editor-baseline/checkpoint.json",
+      "sha256": "18f069f821bfbc13bd6f1bef4bc49544e8fa3e0fc3fd22c92e30ae29f79cca13",
+      "sizeBytes": 743,
+      "hashMode": "utf8-lf"
+    }
+  ],
+  "scope": "Canonical Editor baseline; no Shipping, regional GIS or performance claim"
+}

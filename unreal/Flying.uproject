@@ -23,6 +23,17 @@
     {
       "Name": "ProceduralMeshComponent",
       "Enabled": true
+    },
+    {
+      "Name": "SQLiteCore",
+      "Enabled": true
+    },
+    {
+      "Name": "PythonScriptPlugin",
+      "Enabled": true,
+      "TargetAllowList": [
+        "Editor"
+      ]
     }
   ],
   "TargetPlatforms": [

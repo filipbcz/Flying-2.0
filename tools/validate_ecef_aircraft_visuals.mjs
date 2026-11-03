@@ -183,7 +183,7 @@ requireCondition(
   "aircraft actor must be able to verify runtime visuals against the last applied immutable snapshot",
 );
 requireCondition(
-  /DoCockpitAndExternalVisualsShareAuthoritativeSnapshotRoot\(\) const[\s\S]*?bHasAppliedImmutableSnapshot[\s\S]*?GetRootComponent\(\) == SceneRoot[\s\S]*?IsAttachedTo\(AircraftMesh, SceneRoot\)[\s\S]*?IsAttachedTo\(CockpitCamera, SceneRoot\)[\s\S]*?IsAttachedTo\(ExteriorCamera, SceneRoot\)/.test(actorCpp),
+  /DoCockpitAndExternalVisualsShareAuthoritativeSnapshotRoot\(\) const[\s\S]*?bHasAppliedImmutableSnapshot[\s\S]*?GetRootComponent\(\) == SceneRoot[\s\S]*?IsComponentAttachedToRoot\(AircraftMesh, SceneRoot\)[\s\S]*?IsComponentAttachedToRoot\(CockpitCamera, SceneRoot\)[\s\S]*?IsComponentAttachedToRoot\(ExteriorCamera, SceneRoot\)/.test(actorCpp),
   "cockpit and external runtime visual components must share the snapshot-driven actor root",
 );
 

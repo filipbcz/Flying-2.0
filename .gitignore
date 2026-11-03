@@ -16,3 +16,9 @@ CMakeUserPresets.json
 # Editor and OS noise
 .DS_Store
 Thumbs.db
+
+# Leased worker process caches
+/.forgemind-tmp/
+/unreal/cesium-request-cache.sqlite*
+/unreal/Content/CesiumSettings/
+/.ddc/

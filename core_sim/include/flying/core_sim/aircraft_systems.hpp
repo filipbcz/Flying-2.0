@@ -1,5 +1,7 @@
 #pragma once
 
+#include "flying/core_sim/api.hpp"
+
 #include "flying/core_sim/flight_dynamics.hpp"
 #include "flying/core_sim/math.hpp"
 #include "flying/core_sim/weather.hpp"
@@ -64,7 +66,7 @@ struct ElectricalSystemSnapshot {
   std::vector<ElectricalConsumerState> consumers;
 };
 
-class ElectricalSystem {
+class FLYING_CORE_SIM_API ElectricalSystem {
 public:
   void set_consumers(std::vector<ElectricalConsumerState> consumers);
   [[nodiscard]] const ElectricalSystemSnapshot& snapshot() const noexcept;
@@ -104,7 +106,7 @@ struct FuelSystemSnapshot {
   bool engine_fuel_starved{};
 };
 
-class FuelSystem {
+class FLYING_CORE_SIM_API FuelSystem {
 public:
   [[nodiscard]] const FuelSystemSnapshot& snapshot() const noexcept;
   void reset(FuelTankState tanks = {});
@@ -134,7 +136,7 @@ struct VacuumSystemSnapshot {
   std::vector<VacuumConsumerState> consumers;
 };
 
-class VacuumSystem {
+class FLYING_CORE_SIM_API VacuumSystem {
 public:
   void set_consumers(std::vector<VacuumConsumerState> consumers);
   [[nodiscard]] const VacuumSystemSnapshot& snapshot() const noexcept;
@@ -168,7 +170,7 @@ struct PitotStaticSnapshot {
   bool icing_present{};
 };
 
-class PitotStaticSystem {
+class FLYING_CORE_SIM_API PitotStaticSystem {
 public:
   [[nodiscard]] const PitotStaticSnapshot& snapshot() const noexcept;
   void reset(double altitude_m = 0.0, double airspeed_mps = 0.0);
@@ -194,7 +196,7 @@ struct CompassSnapshot {
   bool valid{true};
 };
 
-class CompassSystem {
+class FLYING_CORE_SIM_API CompassSystem {
 public:
   [[nodiscard]] const CompassSnapshot& snapshot() const noexcept;
   void reset(double heading_rad = 0.0) noexcept;
@@ -213,7 +215,7 @@ struct GyroSnapshot {
   bool heading_valid{};
 };
 
-class GyroSystem {
+class FLYING_CORE_SIM_API GyroSystem {
 public:
   [[nodiscard]] const GyroSnapshot& snapshot() const noexcept;
   void reset() noexcept;
@@ -238,7 +240,7 @@ struct GpsSnapshot {
   bool valid{};
 };
 
-class GpsSystem {
+class FLYING_CORE_SIM_API GpsSystem {
 public:
   [[nodiscard]] const GpsSnapshot& snapshot() const noexcept;
   void reset() noexcept;
@@ -265,7 +267,7 @@ struct EngineInstrumentSnapshot {
   bool fuel_starved{};
 };
 
-class EngineInstrumentSystem {
+class FLYING_CORE_SIM_API EngineInstrumentSystem {
 public:
   [[nodiscard]] const EngineInstrumentSnapshot& snapshot() const noexcept;
   void reset() noexcept;
@@ -316,7 +318,7 @@ struct InstrumentData {
   std::uint64_t sequence{};
 };
 
-class AircraftSystemsModel {
+class FLYING_CORE_SIM_API AircraftSystemsModel {
 public:
   AircraftSystemsModel();
 
@@ -345,7 +347,7 @@ private:
   InstrumentData instruments_{};
 };
 
-[[nodiscard]] AtmosphereSample sample_standard_atmosphere(double altitude_m,
+[[nodiscard]] FLYING_CORE_SIM_API AtmosphereSample sample_standard_atmosphere(double altitude_m,
                                                          double qnh_pa,
                                                          double temperature_k);
 

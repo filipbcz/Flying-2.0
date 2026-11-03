@@ -1,5 +1,7 @@
 #pragma once
 
+#include "flying/geo_terrain/api.hpp"
+
 #include "flying/geo_terrain/heights.hpp"
 #include "flying/geo_terrain/math.hpp"
 #include "flying/geo_terrain/units.hpp"
@@ -124,37 +126,37 @@ struct AnchoredLocalPosition {
   return {position.meters - delta.meters};
 }
 
-[[nodiscard]] EcefPosition geodetic_to_ecef(GeodeticCoordinates geodetic) noexcept;
-[[nodiscard]] GeodeticCoordinates ecef_to_geodetic(EcefPosition ecef) noexcept;
+[[nodiscard]] FLYING_GEO_TERRAIN_API EcefPosition geodetic_to_ecef(GeodeticCoordinates geodetic) noexcept;
+[[nodiscard]] FLYING_GEO_TERRAIN_API GeodeticCoordinates ecef_to_geodetic(EcefPosition ecef) noexcept;
 
-[[nodiscard]] LocalTangentFrame make_local_tangent_frame(GeodeticCoordinates origin) noexcept;
+[[nodiscard]] FLYING_GEO_TERRAIN_API LocalTangentFrame make_local_tangent_frame(GeodeticCoordinates origin) noexcept;
 
-[[nodiscard]] EcefVector ecef_vector_from_enu(LocalTangentFrame frame, EnuVector enu) noexcept;
-[[nodiscard]] EcefVector ecef_vector_from_ned(LocalTangentFrame frame, NedVector ned) noexcept;
-[[nodiscard]] EnuVector enu_from_ecef_vector(LocalTangentFrame frame, EcefVector ecef) noexcept;
-[[nodiscard]] NedVector ned_from_ecef_vector(LocalTangentFrame frame, EcefVector ecef) noexcept;
+[[nodiscard]] FLYING_GEO_TERRAIN_API EcefVector ecef_vector_from_enu(LocalTangentFrame frame, EnuVector enu) noexcept;
+[[nodiscard]] FLYING_GEO_TERRAIN_API EcefVector ecef_vector_from_ned(LocalTangentFrame frame, NedVector ned) noexcept;
+[[nodiscard]] FLYING_GEO_TERRAIN_API EnuVector enu_from_ecef_vector(LocalTangentFrame frame, EcefVector ecef) noexcept;
+[[nodiscard]] FLYING_GEO_TERRAIN_API NedVector ned_from_ecef_vector(LocalTangentFrame frame, EcefVector ecef) noexcept;
 
-[[nodiscard]] EcefPosition ecef_from_enu(LocalTangentFrame frame, EnuVector enu) noexcept;
-[[nodiscard]] EcefPosition ecef_from_ned(LocalTangentFrame frame, NedVector ned) noexcept;
-[[nodiscard]] EnuVector enu_from_ecef_position(LocalTangentFrame frame, EcefPosition ecef) noexcept;
-[[nodiscard]] NedVector ned_from_ecef_position(LocalTangentFrame frame, EcefPosition ecef) noexcept;
+[[nodiscard]] FLYING_GEO_TERRAIN_API EcefPosition ecef_from_enu(LocalTangentFrame frame, EnuVector enu) noexcept;
+[[nodiscard]] FLYING_GEO_TERRAIN_API EcefPosition ecef_from_ned(LocalTangentFrame frame, NedVector ned) noexcept;
+[[nodiscard]] FLYING_GEO_TERRAIN_API EnuVector enu_from_ecef_position(LocalTangentFrame frame, EcefPosition ecef) noexcept;
+[[nodiscard]] FLYING_GEO_TERRAIN_API NedVector ned_from_ecef_position(LocalTangentFrame frame, EcefPosition ecef) noexcept;
 
-[[nodiscard]] AnchoredLocalPosition anchor_in_frame(
+[[nodiscard]] FLYING_GEO_TERRAIN_API AnchoredLocalPosition anchor_in_frame(
     LocalTangentFrame frame,
     EcefPosition authoritative_ecef) noexcept;
-[[nodiscard]] AnchoredLocalPosition reanchor_in_frame(
+[[nodiscard]] FLYING_GEO_TERRAIN_API AnchoredLocalPosition reanchor_in_frame(
     LocalTangentFrame new_frame,
     AnchoredLocalPosition position) noexcept;
 
-[[nodiscard]] Matrix3d body_to_ned_matrix(BodyEulerAngles body_to_ned) noexcept;
-[[nodiscard]] Matrix3d ned_to_body_matrix(BodyEulerAngles body_to_ned) noexcept;
-[[nodiscard]] NedVector ned_from_body_vector(BodyEulerAngles body_to_ned, BodyVector body) noexcept;
-[[nodiscard]] BodyVector body_from_ned_vector(BodyEulerAngles body_to_ned, NedVector ned) noexcept;
-[[nodiscard]] EcefVector ecef_vector_from_body(
+[[nodiscard]] FLYING_GEO_TERRAIN_API Matrix3d body_to_ned_matrix(BodyEulerAngles body_to_ned) noexcept;
+[[nodiscard]] FLYING_GEO_TERRAIN_API Matrix3d ned_to_body_matrix(BodyEulerAngles body_to_ned) noexcept;
+[[nodiscard]] FLYING_GEO_TERRAIN_API NedVector ned_from_body_vector(BodyEulerAngles body_to_ned, BodyVector body) noexcept;
+[[nodiscard]] FLYING_GEO_TERRAIN_API BodyVector body_from_ned_vector(BodyEulerAngles body_to_ned, NedVector ned) noexcept;
+[[nodiscard]] FLYING_GEO_TERRAIN_API EcefVector ecef_vector_from_body(
     LocalTangentFrame frame,
     BodyEulerAngles body_to_ned,
     BodyVector body) noexcept;
-[[nodiscard]] BodyVector body_vector_from_ecef(
+[[nodiscard]] FLYING_GEO_TERRAIN_API BodyVector body_vector_from_ecef(
     LocalTangentFrame frame,
     BodyEulerAngles body_to_ned,
     EcefVector ecef) noexcept;

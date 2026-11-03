@@ -1,5 +1,7 @@
 #pragma once
 
+#include "flying/core_sim/api.hpp"
+
 #include "flying/core_sim/flight_dynamics.hpp"
 #include "flying/core_sim/math.hpp"
 
@@ -138,32 +140,32 @@ struct InputSettingsWriteResult {
   std::vector<std::string> errors;
 };
 
-[[nodiscard]] std::string_view to_string(InputDeviceClass value) noexcept;
-[[nodiscard]] std::string_view to_string(FlightControlAxis value) noexcept;
-[[nodiscard]] std::string_view to_string(FlightCommand value) noexcept;
+[[nodiscard]] FLYING_CORE_SIM_API std::string_view to_string(InputDeviceClass value) noexcept;
+[[nodiscard]] FLYING_CORE_SIM_API std::string_view to_string(FlightControlAxis value) noexcept;
+[[nodiscard]] FLYING_CORE_SIM_API std::string_view to_string(FlightCommand value) noexcept;
 
-[[nodiscard]] std::optional<InputDeviceClass> input_device_class_from_string(
+[[nodiscard]] FLYING_CORE_SIM_API std::optional<InputDeviceClass> input_device_class_from_string(
     std::string_view value) noexcept;
-[[nodiscard]] std::optional<FlightControlAxis> flight_control_axis_from_string(
+[[nodiscard]] FLYING_CORE_SIM_API std::optional<FlightControlAxis> flight_control_axis_from_string(
     std::string_view value) noexcept;
-[[nodiscard]] std::optional<FlightCommand> flight_command_from_string(
+[[nodiscard]] FLYING_CORE_SIM_API std::optional<FlightCommand> flight_command_from_string(
     std::string_view value) noexcept;
 
-[[nodiscard]] std::vector<FlightControlAxis> required_bindable_axes();
-[[nodiscard]] std::vector<FlightCommand> core_cockpit_commands();
+[[nodiscard]] FLYING_CORE_SIM_API std::vector<FlightControlAxis> required_bindable_axes();
+[[nodiscard]] FLYING_CORE_SIM_API std::vector<FlightCommand> core_cockpit_commands();
 
-[[nodiscard]] double apply_axis_calibration(double raw_value,
+[[nodiscard]] FLYING_CORE_SIM_API double apply_axis_calibration(double raw_value,
                                             const AxisCalibration& calibration) noexcept;
-[[nodiscard]] MappedInputState map_input_frame(const InputSettings& settings,
+[[nodiscard]] FLYING_CORE_SIM_API MappedInputState map_input_frame(const InputSettings& settings,
                                                const RawInputFrame& frame);
-[[nodiscard]] MappedInputState map_input_frame(const InputDeviceProfile& profile,
+[[nodiscard]] FLYING_CORE_SIM_API MappedInputState map_input_frame(const InputDeviceProfile& profile,
                                                const RawInputFrame& frame);
 
-[[nodiscard]] InputSettings make_default_input_settings();
-[[nodiscard]] std::vector<std::string> validate_input_settings(const InputSettings& settings);
+[[nodiscard]] FLYING_CORE_SIM_API InputSettings make_default_input_settings();
+[[nodiscard]] FLYING_CORE_SIM_API std::vector<std::string> validate_input_settings(const InputSettings& settings);
 
-[[nodiscard]] InputSettingsLoadResult load_input_settings(const std::filesystem::path& path);
-[[nodiscard]] InputSettingsWriteResult save_input_settings_atomic(
+[[nodiscard]] FLYING_CORE_SIM_API InputSettingsLoadResult load_input_settings(const std::filesystem::path& path);
+[[nodiscard]] FLYING_CORE_SIM_API InputSettingsWriteResult save_input_settings_atomic(
     const std::filesystem::path& path,
     const InputSettings& settings);
 

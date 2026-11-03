@@ -9,6 +9,8 @@ public class FlyingCoreSimBridge : ModuleRules
         CppStandard = CppStandardVersion.Cpp20;
         bEnableExceptions = true;
         bUseUnity = false;
+        PublicDefinitions.Add("FLYING_CORE_SIM_API=FLYINGCORESIMBRIDGE_API");
+        PublicDefinitions.Add("FLYING_GEO_TERRAIN_API=FLYINGCORESIMBRIDGE_API");
 
         PublicDependencyModuleNames.AddRange(new[]
         {

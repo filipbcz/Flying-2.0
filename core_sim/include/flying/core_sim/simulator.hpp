@@ -1,5 +1,7 @@
 #pragma once
 
+#include "flying/core_sim/api.hpp"
+
 #include "flying/core_sim/determinism.hpp"
 #include "flying/core_sim/fixed_step.hpp"
 #include "flying/core_sim/input.hpp"
@@ -17,7 +19,7 @@ struct AdvanceReport {
   std::uint64_t state_hash{};
 };
 
-class CoreSimulator {
+class FLYING_CORE_SIM_API CoreSimulator {
 public:
   explicit CoreSimulator(RigidBodyParameters parameters = {});
 

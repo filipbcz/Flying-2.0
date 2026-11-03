@@ -23,7 +23,7 @@ FString ResolveProjectPath(const FString& RawPath)
   return Resolved;
 }
 
-FString EscapeJsonString(FString Value)
+FString EscapeFlyingLogJsonString(FString Value)
 {
   Value.ReplaceInline(TEXT("\\"), TEXT("\\\\"));
   Value.ReplaceInline(TEXT("\""), TEXT("\\\""));
@@ -67,15 +67,15 @@ public:
 
   void Serialize(const TCHAR* Message, ELogVerbosity::Type Verbosity, const FName& Category) override
   {
-    const FFlyingBuildMetadata Metadata = UFlyingBuildMetadata::GetBuildMetadata();
+    const FFlyingBuildMetadataRecord Metadata = UFlyingBuildMetadata::GetBuildMetadata();
     const FString Line = FString::Printf(
       TEXT("{\"schema\":\"flying.structured-log.v1\",\"timestampUtc\":\"%s\",\"buildId\":\"%s\",\"version\":\"%s\",\"category\":\"%s\",\"verbosity\":\"%s\",\"message\":\"%s\",\"personalTelemetry\":false}\n"),
       *FDateTime::UtcNow().ToIso8601(),
-      *EscapeJsonString(Metadata.BuildId),
-      *EscapeJsonString(Metadata.Version),
-      *EscapeJsonString(Category.ToString()),
-      *EscapeJsonString(VerbosityToString(Verbosity)),
-      *EscapeJsonString(Message ? FString(Message) : FString()));
+      *EscapeFlyingLogJsonString(Metadata.BuildId),
+      *EscapeFlyingLogJsonString(Metadata.Version),
+      *EscapeFlyingLogJsonString(Category.ToString()),
+      *EscapeFlyingLogJsonString(VerbosityToString(Verbosity)),
+      *EscapeFlyingLogJsonString(Message ? FString(Message) : FString()));
     FFileHelper::SaveStringToFile(Line, *LogPath, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM, &IFileManager::Get(), FILEWRITE_Append);
   }
 
@@ -89,7 +89,7 @@ TUniquePtr<FFlyingStructuredLogOutput> GStructuredLogOutput;
 void FFlyingPresentationModule::StartupModule()
 {
   const UFlyingPresentationSettings* Settings = GetDefault<UFlyingPresentationSettings>();
-  const FFlyingBuildMetadata Metadata = UFlyingBuildMetadata::GetBuildMetadata();
+  const FFlyingBuildMetadataRecord Metadata = UFlyingBuildMetadata::GetBuildMetadata();
 
   FGenericCrashContext::SetGameData(TEXT("FlyingBuildId"), Metadata.BuildId);
   FGenericCrashContext::SetGameData(TEXT("FlyingBuildVersion"), Metadata.Version);

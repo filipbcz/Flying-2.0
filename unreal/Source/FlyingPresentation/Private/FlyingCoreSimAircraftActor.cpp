@@ -49,7 +49,7 @@ bool ControlEngaged(const TArray<FFlyingCockpitControlState>& Controls,
   return State ? State->bEngaged : bDefaultValue;
 }
 
-bool IsAttachedTo(const USceneComponent* Component, const USceneComponent* ExpectedRoot)
+bool IsComponentAttachedToRoot(const USceneComponent* Component, const USceneComponent* ExpectedRoot)
 {
   for (const USceneComponent* Current = Component; Current; Current = Current->GetAttachParent())
   {
@@ -374,12 +374,12 @@ bool AFlyingCoreSimAircraftActor::DoCockpitAndExternalVisualsShareAuthoritativeS
 {
   return bHasAppliedImmutableSnapshot &&
          SceneRoot && GetRootComponent() == SceneRoot &&
-         AircraftMesh && IsAttachedTo(AircraftMesh, SceneRoot) &&
-         CockpitRoot && IsAttachedTo(CockpitRoot, SceneRoot) &&
-         CockpitCamera && IsAttachedTo(CockpitCamera, SceneRoot) &&
-         InstrumentCamera && IsAttachedTo(InstrumentCamera, SceneRoot) &&
-         ExteriorSpringArm && IsAttachedTo(ExteriorSpringArm, SceneRoot) &&
-         ExteriorCamera && IsAttachedTo(ExteriorCamera, SceneRoot);
+         AircraftMesh && IsComponentAttachedToRoot(AircraftMesh, SceneRoot) &&
+         CockpitRoot && IsComponentAttachedToRoot(CockpitRoot, SceneRoot) &&
+         CockpitCamera && IsComponentAttachedToRoot(CockpitCamera, SceneRoot) &&
+         InstrumentCamera && IsComponentAttachedToRoot(InstrumentCamera, SceneRoot) &&
+         ExteriorSpringArm && IsComponentAttachedToRoot(ExteriorSpringArm, SceneRoot) &&
+         ExteriorCamera && IsComponentAttachedToRoot(ExteriorCamera, SceneRoot);
 }
 
 bool AFlyingCoreSimAircraftActor::DoesVisualPresentationMatchImmutableSnapshot(
