@@ -1,5 +1,7 @@
 #pragma once
 
+#include "flying/core_sim/api.hpp"
+
 #include "flying/core_sim/flight_dynamics.hpp"
 #include "flying/core_sim/simulator.hpp"
 
@@ -17,8 +19,8 @@ inline constexpr std::string_view kTelemetryJsonExportSchemaVersion =
 inline constexpr std::string_view kTelemetryCsvExportSchemaVersion =
     "flying.telemetry-export.csv.v1";
 
-[[nodiscard]] std::string_view core_sim_version() noexcept;
-[[nodiscard]] std::int64_t current_unix_time_ms() noexcept;
+[[nodiscard]] FLYING_CORE_SIM_API std::string_view core_sim_version() noexcept;
+[[nodiscard]] FLYING_CORE_SIM_API std::int64_t current_unix_time_ms() noexcept;
 
 struct DataPackageVersion {
   std::string package_id;
@@ -139,7 +141,7 @@ struct ReplayResult {
   std::vector<std::string> errors;
 };
 
-class TelemetryRecorder {
+class FLYING_CORE_SIM_API TelemetryRecorder {
 public:
   TelemetryRecorder(TelemetryMetadata metadata,
                     AuthoritativeState initial_state,
@@ -166,31 +168,31 @@ private:
   TelemetryRecording recording_;
 };
 
-[[nodiscard]] TelemetryMetadata make_default_telemetry_metadata();
-[[nodiscard]] EngineStateSample make_engine_state_sample(
+[[nodiscard]] FLYING_CORE_SIM_API TelemetryMetadata make_default_telemetry_metadata();
+[[nodiscard]] FLYING_CORE_SIM_API EngineStateSample make_engine_state_sample(
     const AircraftControlInputSample& controls,
     bool engine_running) noexcept;
-[[nodiscard]] ReplayEnvironment make_current_replay_environment();
+[[nodiscard]] FLYING_CORE_SIM_API ReplayEnvironment make_current_replay_environment();
 
-[[nodiscard]] std::vector<std::string> validate_telemetry_recording(
+[[nodiscard]] FLYING_CORE_SIM_API std::vector<std::string> validate_telemetry_recording(
     const TelemetryRecording& recording);
-[[nodiscard]] ReplayCompatibilityResult check_replay_compatibility(
+[[nodiscard]] FLYING_CORE_SIM_API ReplayCompatibilityResult check_replay_compatibility(
     const TelemetryMetadata& metadata,
     const ReplayEnvironment& environment);
-[[nodiscard]] ReplayResult replay_recording(
+[[nodiscard]] FLYING_CORE_SIM_API ReplayResult replay_recording(
     const TelemetryRecording& recording,
     CoreSimulator& simulator,
     const ReplayEnvironment& environment = make_current_replay_environment(),
     ReplayCompatibilityPolicy compatibility_policy = ReplayCompatibilityPolicy::RefuseOnMismatch);
 
-[[nodiscard]] TelemetryWriteResult save_telemetry_file_atomic(
+[[nodiscard]] FLYING_CORE_SIM_API TelemetryWriteResult save_telemetry_file_atomic(
     const std::filesystem::path& path,
     const TelemetryRecording& recording);
-[[nodiscard]] TelemetryLoadResult load_telemetry_file(const std::filesystem::path& path);
-[[nodiscard]] TelemetryExportResult export_telemetry_csv(
+[[nodiscard]] FLYING_CORE_SIM_API TelemetryLoadResult load_telemetry_file(const std::filesystem::path& path);
+[[nodiscard]] FLYING_CORE_SIM_API TelemetryExportResult export_telemetry_csv(
     const std::filesystem::path& path,
     const TelemetryRecording& recording);
-[[nodiscard]] TelemetryExportResult export_telemetry_json(
+[[nodiscard]] FLYING_CORE_SIM_API TelemetryExportResult export_telemetry_json(
     const std::filesystem::path& path,
     const TelemetryRecording& recording);
 

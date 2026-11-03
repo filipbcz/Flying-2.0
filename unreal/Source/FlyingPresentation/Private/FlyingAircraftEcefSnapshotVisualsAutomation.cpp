@@ -11,7 +11,7 @@
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
   FFlyingAircraftEcefSnapshotVisualsTest,
   "Flying.Presentation.Aircraft.EcefSnapshotDrivesCockpitAndExternalVisuals",
-  EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter)
+  EAutomationTestFlags_ApplicationContextMask | EAutomationTestFlags::ProductFilter)
 
 namespace
 {

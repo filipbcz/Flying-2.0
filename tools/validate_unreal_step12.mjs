@@ -204,7 +204,7 @@ function checkSourceContracts() {
   }
 
   requireCondition(
-    /if\s*\(!LoadImageryPackage\(PilotManifestPath,\s*ImageryTiles\)\)\s*\{[\s\S]*?return false;\s*\}/.test(
+    /if\s*\(!LoadImageryPackage\(\s*PilotManifestPath,\s*bPilotManifestUsedRemoteMapDependencies,\s*ImageryTiles\)\)\s*\{[\s\S]*?return false;\s*\}/.test(
       terrainCpp,
     ),
     "configured imagery package failures must fail LoadOfflinePackages",

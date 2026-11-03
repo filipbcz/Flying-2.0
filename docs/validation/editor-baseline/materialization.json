@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "flying.editor-baseline-open.v1",
+  "status": "pass",
+  "mode": "materialize",
+  "recordedAtUtc": "2026-11-03T20:24:03.683375+00:00",
+  "identity": {
+    "repository": "https://github.com/filipbcz/Flying-2.0.git",
+    "baseCommit": "6989695e85fec23a35e013d7d2fefe0bdee5521c",
+    "checkout": "C:\\Users\\borek-fil\\AppData\\Local\\ForgeMind\\windows-runner\\work\\a3ec850d-3925-4cbe-97e1-25170f0527ec",
+    "workerLeaseId": "a3ec850d-3925-4cbe-97e1-25170f0527ec",
+    "host": "BOREK-FILIP",
+    "windowsSessionId": 1,
+    "project": "unreal/Flying.uproject"
+  },
+  "engineVersion": "5.8.3-58210709+++UE5+Release-5.8",
+  "world": "/Game/Flying/Maps/FlyingStartup.FlyingStartup",
+  "gameMode": "/Game/Flying/Blueprints/BP_FlyingPilotGameMode.BP_FlyingPilotGameMode_C",
+  "nativeContentBuilder": "/Script/FlyingPresentation.FlyingPilotGameMode",
+  "georeferenceCount": 1,
+  "actors": [
+    "/Script/CesiumRuntime.CesiumGeoreference",
+    "/Script/Engine.DirectionalLight",
+    "/Script/Engine.PlayerStart",
+    "/Script/Engine.SkyAtmosphere",
+    "/Script/Engine.SkyLight"
+  ],
+  "artifacts": [
+    {
+      "path": "unreal/Content/Flying/Materials/M_OfflineVertexColor.uasset",
+      "sha256": "fd7e826093a6a15dfc729ea29aeddb95eb0f3f27414a36f3eee33062f91bbacd",
+      "sizeBytes": 8511
+    },
+    {
+      "path": "unreal/Content/Flying/Maps/FlyingStartup.umap",
+      "sha256": "8cceadeaaf2477c6cf54a696b703da4b93ed021ae09676160ba6a4655e7b689c",
+      "sizeBytes": 20106
+    },
+    {
+      "path": "unreal/Content/Flying/Blueprints/BP_FlyingPilotGameMode.uasset",
+      "sha256": "c046afe1523e28d53f5fb0ea5dfbe0e272fdf3c29e34fd768bb3f81295126d3e",
+      "sizeBytes": 21502
+    }
+  ],
+  "scope": "Editor baseline only; regional GIS, Shipping and performance acceptance are separate gates"
+}

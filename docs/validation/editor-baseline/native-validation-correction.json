@@ -1,0 +1,98 @@
+{
+  "schemaVersion": "flying.editor-baseline-native-validation.v1",
+  "status": "pass",
+  "identity": {
+    "repository": "https://github.com/filipbcz/Flying-2.0.git",
+    "baseCommit": "6989695e85fec23a35e013d7d2fefe0bdee5521c",
+    "checkout": "C:\\Users\\borek-fil\\AppData\\Local\\ForgeMind\\windows-runner\\work\\a3ec850d-3925-4cbe-97e1-25170f0527ec",
+    "workerLeaseId": "a3ec850d-3925-4cbe-97e1-25170f0527ec",
+    "host": "BOREK-FILIP",
+    "windowsSessionId": 1,
+    "project": "unreal/Flying.uproject"
+  },
+  "scope": "Correction of provider-check-5; eight native regression tests supporting the preserved Editor baseline. No Shipping or release-candidate claim.",
+  "reportedFailure": {
+    "checkId": "provider-check-5",
+    "task": "GetOutOfDateItems",
+    "component": "Microsoft.Build.Utilities.FileTracker",
+    "error": "MSB4018 / E_ACCESSDENIED",
+    "project": "out/build/test/ZERO_CHECK.vcxproj"
+  },
+  "correction": {
+    "generator": "NMake Makefiles",
+    "compiler": "MSVC 19.44.35228.0",
+    "architecture": "x64",
+    "configuration": "Debug",
+    "buildDirectory": "out/build/editor-baseline-native",
+    "testCount": 8,
+    "dependencyTracking": "Enabled; no MSBuild FileTracker dependency"
+  },
+  "inputs": [
+    {
+      "path": "Tools/UnrealBaseline/validate_native.cmake",
+      "sha256": "c1b0fe19799af1ce387f14f1e26fc9d2d8a1e2a64b9d5b9605398e0a9b3e75e1",
+      "sizeBytes": 3555,
+      "hashMode": "utf8-lf"
+    },
+    {
+      "path": "docs/validation/editor-baseline/acceptance.json",
+      "sha256": "28b4700a25632504dd559fb194f2a1d574c57fa9b91df530ad866daad1a1d684",
+      "sizeBytes": 23803,
+      "hashMode": "utf8-lf"
+    }
+  ],
+  "runs": [
+    {
+      "checkId": "correction-native-nmake-clean",
+      "command": "cmake -P Tools/UnrealBaseline/validate_native.cmake",
+      "shell": "system",
+      "exitCode": 0,
+      "stdout": "'C:/Program Files/CMake/bin/cmake.exe' '--preset' 'test' '--fresh' '-G' 'NMake Makefiles' '-B' 'C:/Users/borek-fil/AppData/Local/ForgeMind/windows-runner/work/a3ec850d-3925-4cbe-97e1-25170f0527ec/out/build/editor-baseline-native' '-DCMAKE_MAKE_PROGRAM=C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/nmake.exe' '-DCMAKE_POLICY_DEFAULT_CMP0141=NEW' '-DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded' '-DCMAKE_CXX_COMPILER=C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe'\n-- The CXX compiler identification is MSVC 19.44.35228.0\n-- Detecting CXX compiler ABI info\n-- Detecting CXX compiler ABI info - done\n-- Check for working CXX compiler: C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - skipped\n-- Detecting CXX compile features\n-- Detecting CXX compile features - done\n-- Could NOT find JSBSim (missing: JSBSIM_INCLUDE_DIR JSBSIM_LIBRARY) \n-- JSBSim adapter target disabled because JSBSim was not found. Set FLYING_CORE_SIM_FETCH_JSBSIM=ON or provide JSBSim development files to enable it.\n-- Configuring done (15.1s)\n-- Generating done (2.6s)\n-- Build files have been written to: C:/Users/borek-fil/AppData/Local/ForgeMind/windows-runner/work/a3ec850d-3925-4cbe-97e1-25170f0527ec/out/build/editor-baseline-native\n'C:/Program Files/CMake/bin/cmake.exe' '--build' 'C:/Users/borek-fil/AppData/Local/ForgeMind/windows-runner/work/a3ec850d-3925-4cbe-97e1-25170f0527ec/out/build/editor-baseline-native' '--parallel' '1' '--target' 'flying_core_sim_kernel_tests' 'flying_core_sim_determinism_tests' 'flying_core_sim_flight_dynamics_api_tests' 'flying_core_sim_aircraft_systems_tests' 'flying_core_sim_input_mapping_tests' 'flying_core_sim_scenario_start_tests' 'flying_core_sim_telemetry_replay_tests' 'flying_geo_terrain_geodesy_units_tests'\n[  5%] Building CXX object geo_terrain/CMakeFiles/flying_geo_terrain.dir/src/geodesy.cpp.obj\ngeodesy.cpp\n[ 10%] Building CXX object geo_terrain/CMakeFiles/flying_geo_terrain.dir/src/module.cpp.obj\nmodule.cpp\n[ 15%] Building CXX object geo_terrain/CMakeFiles/flying_geo_terrain.dir/src/terrain_service.cpp.obj\nterrain_service.cpp\n[ 21%] Linking CXX static library flying_geo_terrain.lib\n[ 21%] Built target flying_geo_terrain\n[ 26%] Building CXX object core_sim/CMakeFiles/flying_core_sim.dir/src/aircraft_systems.cpp.obj\naircraft_systems.cpp\n[ 31%] Building CXX object core_sim/CMakeFiles/flying_core_sim.dir/src/aircraft_config.cpp.obj\naircraft_config.cpp\nC:\\Users\\borek-fil\\AppData\\Local\\ForgeMind\\windows-runner\\work\\a3ec850d-3925-4cbe-97e1-25170f0527ec\\core_sim\\src\\aircraft_config.cpp(1705): warning C4834: zahazuje se n├ívratov├í hodnota funkce s atributem [[nodiscard]]\n[ 36%] Building CXX object core_sim/CMakeFiles/flying_core_sim.dir/src/determinism.cpp.obj\ndeterminism.cpp\n[ 42%] Building CXX object core_sim/CMakeFiles/flying_core_sim.dir/src/flight_dynamics.cpp.obj\nflight_dynamics.cpp\n[ 47%] Building CXX object core_sim/CMakeFiles/flying_core_sim.dir/src/fixed_step.cpp.obj\nfixed_step.cpp\n[ 52%] Building CXX object core_sim/CMakeFiles/flying_core_sim.dir/src/input.cpp.obj\ninput.cpp\n[ 57%] Building CXX object core_sim/CMakeFiles/flying_core_sim.dir/src/module.cpp.obj\nmodule.cpp\n[ 63%] Building CXX object core_sim/CMakeFiles/flying_core_sim.dir/src/scenario.cpp.obj\nscenario.cpp\n[ 68%] Building CXX object core_sim/CMakeFiles/flying_core_sim.dir/src/simulator.cpp.obj\nsimulator.cpp\n[ 73%] Building CXX object core_sim/CMakeFiles/flying_core_sim.dir/src/telemetry.cpp.obj\ntelemetry.cpp\n[ 78%] Building CXX object core_sim/CMakeFiles/flying_core_sim.dir/src/terrain_contact.cpp.obj\nterrain_contact.cpp\n[ 84%] Building CXX object core_sim/CMakeFiles/flying_core_sim.dir/src/weather.cpp.obj\nweather.cpp\n[ 89%] Linking CXX static library flying_core_sim.lib\n[ 89%] Built target flying_core_sim\n[ 94%] Building CXX object tests/CMakeFiles/flying_core_sim_kernel_tests.dir/core_sim/kernel_test.cpp.obj\nkernel_test.cpp\n[100%] Linking CXX executable flying_core_sim_kernel_tests.exe\n[100%] Built target flying_core_sim_kernel_tests\n[ 21%] Built target flying_geo_terrain\n[ 89%] Built target flying_core_sim\n[ 94%] Building CXX object tests/CMakeFiles/flying_core_sim_determinism_tests.dir/__/Source/CoreSim/Tests/CoreSimDeterminismTests.cpp.obj\nCoreSimDeterminismTests.cpp\n[100%] Linking CXX executable flying_core_sim_determinism_tests.exe\n[100%] Built target flying_core_sim_determinism_tests\n[ 21%] Built target flying_geo_terrain\n[ 89%] Built target flying_core_sim\n[ 94%] Building CXX object tests/CMakeFiles/flying_core_sim_flight_dynamics_api_tests.dir/core_sim/flight_dynamics_api_test.cpp.obj\nflight_dynamics_api_test.cpp\n[100%] Linking CXX executable flying_core_sim_flight_dynamics_api_tests.exe\n[100%] Built target flying_core_sim_flight_dynamics_api_tests\n[ 20%] Built target flying_geo_terrain\n[ 85%] Built target flying_core_sim\n[ 90%] Building CXX object tests/CMakeFiles/flying_core_sim_aircraft_systems_tests.dir/AircraftSystemsTests.cpp.obj\nAircraftSystemsTests.cpp\n[ 95%] Building CXX object tests/CMakeFiles/flying_core_sim_aircraft_systems_tests.dir/__/Source/CoreSim/SensorModels.cpp.obj\nSensorModels.cpp\n[100%] Linking CXX executable flying_core_sim_aircraft_systems_tests.exe\n[100%] Built target flying_core_sim_aircraft_systems_tests\n[ 21%] Built target flying_geo_terrain\n[ 89%] Built target flying_core_sim\n[ 94%] Building CXX object tests/CMakeFiles/flying_core_sim_input_mapping_tests.dir/core_sim/input_mapping_test.cpp.obj\ninput_mapping_test.cpp\n[100%] Linking CXX executable flying_core_sim_input_mapping_tests.exe\n[100%] Built target flying_core_sim_input_mapping_tests\n[ 21%] Built target flying_geo_terrain\n[ 89%] Built target flying_core_sim\n[ 94%] Building CXX object tests/CMakeFiles/flying_core_sim_scenario_start_tests.dir/core_sim/scenario_start_test.cpp.obj\nscenario_start_test.cpp\n[100%] Linking CXX executable flying_core_sim_scenario_start_tests.exe\n[100%] Built target flying_core_sim_scenario_start_tests\n[ 21%] Built target flying_geo_terrain\n[ 89%] Built target flying_core_sim\n[ 94%] Building CXX object tests/CMakeFiles/flying_core_sim_telemetry_replay_tests.dir/core_sim/telemetry_replay_test.cpp.obj\ntelemetry_replay_test.cpp\n[100%] Linking CXX executable flying_core_sim_telemetry_replay_tests.exe\n[100%] Built target flying_core_sim_telemetry_replay_tests\n[ 66%] Built target flying_geo_terrain\n[ 83%] Building CXX object tests/CMakeFiles/flying_geo_terrain_geodesy_units_tests.dir/geo_terrain/geodesy_units_test.cpp.obj\ngeodesy_units_test.cpp\n[100%] Linking CXX executable flying_geo_terrain_geodesy_units_tests.exe\n[100%] Built target flying_geo_terrain_geodesy_units_tests\n'C:/Program Files/CMake/bin/ctest.exe' '--test-dir' 'C:/Users/borek-fil/AppData/Local/ForgeMind/windows-runner/work/a3ec850d-3925-4cbe-97e1-25170f0527ec/out/build/editor-baseline-native' '-C' 'Debug' '--output-on-failure' '--no-tests=error' '-R' '^flying\\.(core_sim\\.(kernel|determinism|flight_dynamics_api|aircraft_systems|input_mapping|scenario_start|telemetry_replay)|geo_terrain\\.geodesy_units)$'\nTest project C:/Users/borek-fil/AppData/Local/ForgeMind/windows-runner/work/a3ec850d-3925-4cbe-97e1-25170f0527ec/out/build/editor-baseline-native\n    Start 11: flying.core_sim.kernel\n1/8 Test #11: flying.core_sim.kernel ................   Passed    0.09 sec\n    Start 12: flying.core_sim.determinism\n2/8 Test #12: flying.core_sim.determinism ...........   Passed    0.08 sec\n    Start 13: flying.core_sim.flight_dynamics_api\n3/8 Test #13: flying.core_sim.flight_dynamics_api ...   Passed    0.07 sec\n    Start 15: flying.core_sim.aircraft_systems\n4/8 Test #15: flying.core_sim.aircraft_systems ......   Passed    0.07 sec\n    Start 16: flying.core_sim.input_mapping\n5/8 Test #16: flying.core_sim.input_mapping .........   Passed    0.12 sec\n    Start 21: flying.core_sim.scenario_start\n6/8 Test #21: flying.core_sim.scenario_start ........   Passed    0.09 sec\n    Start 22: flying.core_sim.telemetry_replay\n7/8 Test #22: flying.core_sim.telemetry_replay ......   Passed    0.20 sec\n    Start 28: flying.geo_terrain.geodesy_units\n8/8 Test #28: flying.geo_terrain.geodesy_units ......   Passed    0.07 sec\n\n100% tests passed out of 8\n\nLabel Time Summary:\nm1-vertical-slice    =   0.72 sec*proc (7 tests)\nsmoke                =   0.80 sec*proc (8 tests)\n\nTotal Test time (real) =   0.88 sec\n",
+      "stderr": "CMake Warning (author) at core_sim/CMakeLists.txt:124 (find_package):\n  The module name\n\n    FindJSBSIM.cmake\n\n  does not match the case of the module file name on disk\n\n    C:/Users/borek-fil/AppData/Local/ForgeMind/windows-runner/work/a3ec850d-3925-4cbe-97e1-25170f0527ec/cmake/FindJSBSim.cmake\n\n  This may fail on case-sensitive file systems.  Use the module name\n\n    FindJSBSim.cmake\n\n  instead.\nThis warning is for project developers.  Use -Wno-author to suppress it.\n\nCMake Warning (author) at C:/Program Files/CMake/share/cmake-4.4/Modules/FindPackageHandleStandardArgs.cmake:493 (message):\n  The package name passed to find_package_handle_standard_args() (JSBSim)\n  does not match the name of the calling package (JSBSIM).  This can lead to\n  problems in calling code that expects find_package() result variables\n  (e.g., `_FOUND`) to follow a certain pattern.\nCall Stack (most recent call first):\n  cmake/FindJSBSIM.cmake:19 (find_package_handle_standard_args)\n  core_sim/CMakeLists.txt:124 (find_package)\nThis warning is for project developers.  Use -Wno-author to suppress it.\n\nCMake Warning (unused-cli):\n  Manually-specified variables were not used by the project:\n\n    CMAKE_POLICY_DEFAULT_CMP0141\n\n\nWarning: NMake does not support parallel builds. Ignoring parallel build command line option.\n",
+      "startedAt": "2026-10-11T15:39:33.434Z",
+      "completedAt": "2026-10-11T15:42:51.513Z"
+    },
+    {
+      "checkId": "correction-native-nmake-repeat",
+      "command": "cmake -P Tools/UnrealBaseline/validate_native.cmake",
+      "shell": "system",
+      "exitCode": 0,
+      "stdout": "'C:/Program Files/CMake/bin/cmake.exe' '--preset' 'test' '--fresh' '-G' 'NMake Makefiles' '-B' 'C:/Users/borek-fil/AppData/Local/ForgeMind/windows-runner/work/a3ec850d-3925-4cbe-97e1-25170f0527ec/out/build/editor-baseline-native' '-DCMAKE_MAKE_PROGRAM=C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/nmake.exe' '-DCMAKE_POLICY_DEFAULT_CMP0141=NEW' '-DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded' '-DCMAKE_CXX_COMPILER=C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe'\n-- The CXX compiler identification is MSVC 19.44.35228.0\n-- Detecting CXX compiler ABI info\n-- Detecting CXX compiler ABI info - done\n-- Check for working CXX compiler: C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - skipped\n-- Detecting CXX compile features\n-- Detecting CXX compile features - done\n-- Could NOT find JSBSim (missing: JSBSIM_INCLUDE_DIR JSBSIM_LIBRARY) \n-- JSBSim adapter target disabled because JSBSim was not found. Set FLYING_CORE_SIM_FETCH_JSBSIM=ON or provide JSBSim development files to enable it.\n-- Configuring done (14.8s)\n-- Generating done (3.7s)\n-- Build files have been written to: C:/Users/borek-fil/AppData/Local/ForgeMind/windows-runner/work/a3ec850d-3925-4cbe-97e1-25170f0527ec/out/build/editor-baseline-native\n'C:/Program Files/CMake/bin/cmake.exe' '--build' 'C:/Users/borek-fil/AppData/Local/ForgeMind/windows-runner/work/a3ec850d-3925-4cbe-97e1-25170f0527ec/out/build/editor-baseline-native' '--parallel' '1' '--target' 'flying_core_sim_kernel_tests' 'flying_core_sim_determinism_tests' 'flying_core_sim_flight_dynamics_api_tests' 'flying_core_sim_aircraft_systems_tests' 'flying_core_sim_input_mapping_tests' 'flying_core_sim_scenario_start_tests' 'flying_core_sim_telemetry_replay_tests' 'flying_geo_terrain_geodesy_units_tests'\n[ 21%] Built target flying_geo_terrain\n[ 89%] Built target flying_core_sim\n[100%] Built target flying_core_sim_kernel_tests\n[ 21%] Built target flying_geo_terrain\n[ 89%] Built target flying_core_sim\n[100%] Built target flying_core_sim_determinism_tests\n[ 21%] Built target flying_geo_terrain\n[ 89%] Built target flying_core_sim\n[100%] Built target flying_core_sim_flight_dynamics_api_tests\n[ 20%] Built target flying_geo_terrain\n[ 85%] Built target flying_core_sim\n[100%] Built target flying_core_sim_aircraft_systems_tests\n[ 21%] Built target flying_geo_terrain\n[ 89%] Built target flying_core_sim\n[100%] Built target flying_core_sim_input_mapping_tests\n[ 21%] Built target flying_geo_terrain\n[ 89%] Built target flying_core_sim\n[100%] Built target flying_core_sim_scenario_start_tests\n[ 21%] Built target flying_geo_terrain\n[ 89%] Built target flying_core_sim\n[100%] Built target flying_core_sim_telemetry_replay_tests\n[ 66%] Built target flying_geo_terrain\n[100%] Built target flying_geo_terrain_geodesy_units_tests\n'C:/Program Files/CMake/bin/ctest.exe' '--test-dir' 'C:/Users/borek-fil/AppData/Local/ForgeMind/windows-runner/work/a3ec850d-3925-4cbe-97e1-25170f0527ec/out/build/editor-baseline-native' '-C' 'Debug' '--output-on-failure' '--no-tests=error' '-R' '^flying\\.(core_sim\\.(kernel|determinism|flight_dynamics_api|aircraft_systems|input_mapping|scenario_start|telemetry_replay)|geo_terrain\\.geodesy_units)$'\nTest project C:/Users/borek-fil/AppData/Local/ForgeMind/windows-runner/work/a3ec850d-3925-4cbe-97e1-25170f0527ec/out/build/editor-baseline-native\n    Start 11: flying.core_sim.kernel\n1/8 Test #11: flying.core_sim.kernel ................   Passed    0.07 sec\n    Start 12: flying.core_sim.determinism\n2/8 Test #12: flying.core_sim.determinism ...........   Passed    0.07 sec\n    Start 13: flying.core_sim.flight_dynamics_api\n3/8 Test #13: flying.core_sim.flight_dynamics_api ...   Passed    0.07 sec\n    Start 15: flying.core_sim.aircraft_systems\n4/8 Test #15: flying.core_sim.aircraft_systems ......   Passed    0.06 sec\n    Start 16: flying.core_sim.input_mapping\n5/8 Test #16: flying.core_sim.input_mapping .........   Passed    0.11 sec\n    Start 21: flying.core_sim.scenario_start\n6/8 Test #21: flying.core_sim.scenario_start ........   Passed    0.07 sec\n    Start 22: flying.core_sim.telemetry_replay\n7/8 Test #22: flying.core_sim.telemetry_replay ......   Passed    0.18 sec\n    Start 28: flying.geo_terrain.geodesy_units\n8/8 Test #28: flying.geo_terrain.geodesy_units ......   Passed    0.07 sec\n\n100% tests passed out of 8\n\nLabel Time Summary:\nm1-vertical-slice    =   0.64 sec*proc (7 tests)\nsmoke                =   0.70 sec*proc (8 tests)\n\nTotal Test time (real) =   0.79 sec\n",
+      "stderr": "CMake Warning (author) at core_sim/CMakeLists.txt:124 (find_package):\n  The module name\n\n    FindJSBSIM.cmake\n\n  does not match the case of the module file name on disk\n\n    C:/Users/borek-fil/AppData/Local/ForgeMind/windows-runner/work/a3ec850d-3925-4cbe-97e1-25170f0527ec/cmake/FindJSBSim.cmake\n\n  This may fail on case-sensitive file systems.  Use the module name\n\n    FindJSBSim.cmake\n\n  instead.\nThis warning is for project developers.  Use -Wno-author to suppress it.\n\nCMake Warning (author) at C:/Program Files/CMake/share/cmake-4.4/Modules/FindPackageHandleStandardArgs.cmake:493 (message):\n  The package name passed to find_package_handle_standard_args() (JSBSim)\n  does not match the name of the calling package (JSBSIM).  This can lead to\n  problems in calling code that expects find_package() result variables\n  (e.g., `_FOUND`) to follow a certain pattern.\nCall Stack (most recent call first):\n  cmake/FindJSBSIM.cmake:19 (find_package_handle_standard_args)\n  core_sim/CMakeLists.txt:124 (find_package)\nThis warning is for project developers.  Use -Wno-author to suppress it.\n\nCMake Warning (unused-cli):\n  Manually-specified variables were not used by the project:\n\n    CMAKE_POLICY_DEFAULT_CMP0141\n\n\nWarning: NMake does not support parallel builds. Ignoring parallel build command line option.\n",
+      "startedAt": "2026-10-11T15:43:10.756Z",
+      "completedAt": "2026-10-11T15:43:52.803Z"
+    }
+  ],
+  "preservedBaselineChecks": [
+    {
+      "checkId": "correction-verify-baseline-evidence",
+      "command": "node Tools/UnrealBaseline/validate_evidence.mjs",
+      "shell": "system",
+      "exitCode": 0,
+      "stdout": "Canonical Flying-2.0 Editor baseline evidence: PASS\n",
+      "stderr": "",
+      "startedAt": "2026-10-11T15:38:38.141Z",
+      "completedAt": "2026-10-11T15:38:39.899Z"
+    },
+    {
+      "checkId": "correction-verify-baseline-rejections",
+      "command": "node Tests/editor_baseline_evidence_test.mjs",
+      "shell": "system",
+      "exitCode": 0,
+      "stdout": "Editor baseline evidence: valid bundle passes; 7 negative cases rejected\n",
+      "stderr": "",
+      "startedAt": "2026-10-11T15:38:41.835Z",
+      "completedAt": "2026-10-11T15:38:45.468Z"
+    },
+    {
+      "checkId": "correction-verify-production-content",
+      "command": "node tools/validate_production_unreal_content_build.mjs",
+      "shell": "system",
+      "exitCode": 0,
+      "stdout": "validate_production_unreal_content_build: ok\n",
+      "stderr": "",
+      "startedAt": "2026-10-11T15:38:47.346Z",
+      "completedAt": "2026-10-11T15:38:48.479Z"
+    }
+  ]
+}

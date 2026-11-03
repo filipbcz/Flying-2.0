@@ -1,5 +1,7 @@
 #pragma once
 
+#include "flying/core_sim/api.hpp"
+
 #include "flying/core_sim/flight_dynamics.hpp"
 #include "flying/core_sim/simulator.hpp"
 
@@ -45,21 +47,21 @@ struct ScenarioInitialState {
   bool parking_brake_set{};
 };
 
-[[nodiscard]] std::string_view to_string(ScenarioStartMode value) noexcept;
-[[nodiscard]] ScenarioStartMode scenario_start_mode_from_string(std::string_view value);
+[[nodiscard]] FLYING_CORE_SIM_API std::string_view to_string(ScenarioStartMode value) noexcept;
+[[nodiscard]] FLYING_CORE_SIM_API ScenarioStartMode scenario_start_mode_from_string(std::string_view value);
 
-[[nodiscard]] std::vector<PilotScenarioLocation> default_pilot_scenario_locations();
+[[nodiscard]] FLYING_CORE_SIM_API std::vector<PilotScenarioLocation> default_pilot_scenario_locations();
 
-[[nodiscard]] ScenarioInitialState make_scenario_initial_state(
+[[nodiscard]] FLYING_CORE_SIM_API ScenarioInitialState make_scenario_initial_state(
     const ScenarioSelection& selection);
-[[nodiscard]] ScenarioInitialState make_scenario_initial_state(
+[[nodiscard]] FLYING_CORE_SIM_API ScenarioInitialState make_scenario_initial_state(
     const ScenarioSelection& selection,
     std::span<const PilotScenarioLocation> locations);
 
-[[nodiscard]] ScenarioInitialState reset_simulator_to_scenario(
+[[nodiscard]] FLYING_CORE_SIM_API ScenarioInitialState reset_simulator_to_scenario(
     CoreSimulator& simulator,
     const ScenarioSelection& selection);
-[[nodiscard]] ScenarioInitialState reset_simulator_to_scenario(
+[[nodiscard]] FLYING_CORE_SIM_API ScenarioInitialState reset_simulator_to_scenario(
     CoreSimulator& simulator,
     const ScenarioSelection& selection,
     std::span<const PilotScenarioLocation> locations);

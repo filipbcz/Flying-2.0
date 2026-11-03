@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "flying.editor-baseline-checkpoint.v1",
+  "identity": {
+    "repository": "https://github.com/filipbcz/Flying-2.0.git",
+    "baseCommit": "6989695e85fec23a35e013d7d2fefe0bdee5521c",
+    "checkout": "C:\\Users\\borek-fil\\AppData\\Local\\ForgeMind\\windows-runner\\work\\a3ec850d-3925-4cbe-97e1-25170f0527ec",
+    "workerLeaseId": "a3ec850d-3925-4cbe-97e1-25170f0527ec",
+    "host": "BOREK-FILIP",
+    "windowsSessionId": 1,
+    "project": "unreal/Flying.uproject"
+  },
+  "status": "complete",
+  "completedSteps": [
+    "preflight",
+    "editor-build",
+    "materialize-startup",
+    "fresh-editor-open",
+    "artifact-verification"
+  ],
+  "nextStep": null,
+  "updatedAtUtc": "2026-11-03T20:25:40.027Z",
+  "reason": null
+}

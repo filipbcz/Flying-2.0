@@ -1,0 +1,71 @@
+{
+    "schemaVersion":  "flying.editor-baseline-preflight.v1",
+    "recordedAtUtc":  "2026-11-03T20:17:07.9208470Z",
+    "identity":  {
+                     "repository":  "https://github.com/filipbcz/Flying-2.0.git",
+                     "baseCommit":  "6989695e85fec23a35e013d7d2fefe0bdee5521c",
+                     "checkout":  "C:\\Users\\borek-fil\\AppData\\Local\\ForgeMind\\windows-runner\\work\\a3ec850d-3925-4cbe-97e1-25170f0527ec",
+                     "workerLeaseId":  "a3ec850d-3925-4cbe-97e1-25170f0527ec",
+                     "host":  "BOREK-FILIP",
+                     "windowsSessionId":  1,
+                     "project":  "unreal/Flying.uproject"
+                 },
+    "status":  "pass",
+    "unreal":  {
+                   "root":  "C:/Program Files/Epic Games/UE_5.8",
+                   "editor":  "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe",
+                   "buildVersion":  {
+                                        "MajorVersion":  5,
+                                        "MinorVersion":  8,
+                                        "PatchVersion":  3,
+                                        "Changelist":  58210709,
+                                        "CompatibleChangelist":  55116800,
+                                        "IsLicenseeVersion":  0,
+                                        "IsPromotedBuild":  1,
+                                        "BranchName":  "++UE5+Release-5.8"
+                                    },
+                   "buildVersionSha256":  "eab58750e84719489f3ee0d42d05a533ceb357eb3ee511777e9408d27a85f43c"
+               },
+    "cesium":  {
+                   "descriptor":  "C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Plugins\\Marketplace\\Cesiumfo5b7c98b8073cV11\\CesiumForUnreal.uplugin",
+                   "version":  "2.29.1",
+                   "engineVersion":  "5.8.0",
+                   "sha256":  "58572a14b6b0b10ce463ff67d745aff1ea9417ddf7d781d70974b7146e0a4d6f"
+               },
+    "toolchain":  {
+                      "visualStudioVersion":  "17.14.37502.11",
+                      "compilers":  [
+                                        {
+                                            "toolset":  "14.44.35207",
+                                            "executable":  "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+                                            "fileVersion":  "19.44.35228.0"
+                                        }
+                                    ],
+                      "windowsSDKs":  [
+                                          "10.0.26100.0"
+                                      ],
+                      "selectionEvidence":  "build-result.json stdout records the compiler and SDK actually selected by UBT"
+                  },
+    "windows":  {
+                    "build":  "26300",
+                    "revision":  9711,
+                    "displayVersion":  "26H2",
+                    "version":  "10.0.26300.0"
+                },
+    "capabilities":  {
+                         "gpu":  [
+                                     {
+                                         "name":  "Intel(R) Arc(TM) Graphics",
+                                         "driverVersion":  "32.0.101.8801"
+                                     }
+                                 ],
+                         "interactiveDesktop":  true,
+                         "probe":  "OpenInputDesktop + registry display adapter; actual RHI device is also recorded by the Editor log"
+                     },
+    "disk":  {
+                 "path":  "C:\\Users\\borek-fil\\AppData\\Local\\ForgeMind\\windows-runner\\work\\a3ec850d-3925-4cbe-97e1-25170f0527ec",
+                 "availableBytes":  192675786752,
+                 "totalBytes":  988292313088,
+                 "freeBytes":  192675786752
+             }
+}

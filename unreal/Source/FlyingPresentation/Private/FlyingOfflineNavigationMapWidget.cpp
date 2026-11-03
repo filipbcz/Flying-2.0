@@ -290,6 +290,19 @@ void DrawPointSymbol(FPaintContext& Context,
     Color, true, 2.0f);
 }
 
+bool TryGetSharedObjectField(const TSharedPtr<FJsonObject>& Object,
+                            const FString& Name,
+                            TSharedPtr<FJsonObject>& OutObject)
+{
+  const TSharedPtr<FJsonObject>* Value = nullptr;
+  if (Object.IsValid() && Object->TryGetObjectField(Name, Value) && Value)
+  {
+    OutObject = *Value;
+    return OutObject.IsValid();
+  }
+  OutObject.Reset();
+  return false;
+}
 void DrawFeatureGeometry(FPaintContext& Context,
                          const FVector2D& Origin,
                          const FString& LayerId,
@@ -303,7 +316,7 @@ void DrawFeatureGeometry(FPaintContext& Context,
   FString Category;
   FeatureObject->TryGetStringField(TEXT("category"), Category);
   TSharedPtr<FJsonObject> GeometryObject;
-  if (!FeatureObject->TryGetObjectField(TEXT("geometry"), GeometryObject) ||
+  if (!TryGetSharedObjectField(FeatureObject, TEXT("geometry"), GeometryObject) ||
       !GeometryObject.IsValid())
   {
     return;
@@ -360,14 +373,14 @@ bool RenderDecodedTileLayer(FPaintContext& Context,
   }
 
   TSharedPtr<FJsonObject> LayersObject;
-  if (!Root->TryGetObjectField(TEXT("layers"), LayersObject) ||
+  if (!TryGetSharedObjectField(Root, TEXT("layers"), LayersObject) ||
       !LayersObject.IsValid())
   {
     return false;
   }
 
   TSharedPtr<FJsonObject> LayerObject;
-  if (!LayersObject->TryGetObjectField(LayerId, LayerObject) ||
+  if (!TryGetSharedObjectField(LayersObject, LayerId, LayerObject) ||
       !LayerObject.IsValid())
   {
     return false;
@@ -385,7 +398,7 @@ bool RenderDecodedTileLayer(FPaintContext& Context,
         TSharedPtr<FJsonObject> PositionObject;
         FVector2D Point;
         if (LabelObject.IsValid() &&
-            LabelObject->TryGetObjectField(TEXT("position"), PositionObject) &&
+            TryGetSharedObjectField(LabelObject, TEXT("position"), PositionObject) &&
             JsonPointToCanvas(PositionObject, Point))
         {
           UWidgetBlueprintLibrary::DrawLine(
@@ -536,7 +549,7 @@ bool UFlyingOfflineNavigationMapWidget::LoadManifest()
   }
 
   TSharedPtr<FJsonObject> RuntimeDependencies;
-  if (Root->TryGetObjectField(TEXT("runtimeDependencies"), RuntimeDependencies) &&
+  if (TryGetSharedObjectField(Root, TEXT("runtimeDependencies"), RuntimeDependencies) &&
       RuntimeDependencies.IsValid())
   {
     bool bRuntimeNetworkRequired = true;

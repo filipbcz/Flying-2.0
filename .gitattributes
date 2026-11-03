@@ -1,0 +1,3 @@
+# Preserve serialized Unreal packages byte-for-byte on all checkout platforms.
+*.uasset binary
+*.umap binary

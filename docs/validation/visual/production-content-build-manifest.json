@@ -28,13 +28,13 @@
       "id": "unreal-project",
       "kind": "unreal-project",
       "path": "unreal/Flying.uproject",
-      "sha256": "049ccbfd3c77f5d0b047fc19de400dd7ee20f9a39dc2de91b4ea637f29fb2cd6"
+      "sha256": "da42807e7a402fa3bc0ef56f0d5b85b954401da6ea3ec7046060548435614a40"
     },
     {
       "id": "startup-engine-config",
       "kind": "unreal-config",
       "path": "unreal/Config/DefaultEngine.ini",
-      "sha256": "e00aa09d69db51901aa2f146fd39edf912014a2179e7bcc0273815810afba40c"
+      "sha256": "bfc4ea02316158e6f8d4d5eb8b35740ac2b219b4ae06bffdf638f2022919c781"
     },
     {
       "id": "startup-game-config",
@@ -52,7 +52,7 @@
       "id": "offline-terrain-actor",
       "kind": "runtime-content-loader",
       "path": "unreal/Source/FlyingPresentation/Private/FlyingOfflinePilotTerrainActor.cpp",
-      "sha256": "8b6ff7f69aa4d7231de8ec1b35bd7ded18e1657358dc6969d57ad5f9702c5e39"
+      "sha256": "c2db38291b2bf5e2c3ebcb543d13619bf9eaf793b8664161bec67185f9a79b10"
     },
     {
       "id": "terrain-package",
@@ -107,8 +107,8 @@
     }
   ],
   "startupMap": {
-    "mode": "engine-shell-map-with-runtime-production-scene",
-    "gameDefaultMap": "/Engine/Maps/Templates/OpenWorld",
+    "mode": "versioned-editor-map-with-runtime-production-scene",
+    "gameDefaultMap": "/Game/Flying/Maps/FlyingStartup",
     "gameMode": "/Script/FlyingPresentation.FlyingPilotGameMode",
     "manualSetupRequired": false,
     "offlineOnly": true,
@@ -140,5 +140,11 @@
   "validationReports": {
     "startupMap": "docs/validation/visual/startup-map-validation-report.json",
     "placeholderScan": "docs/validation/visual/placeholder-scan-report.json"
+  },
+  "editorBaseline": {
+    "project": "unreal/Flying.uproject",
+    "authoringScript": "Tools/UnrealBaseline/materialize_startup.py",
+    "evidence": "docs/validation/editor-baseline/acceptance.json",
+    "scope": "Saved Editor entry point for the existing runtime builder; regional GIS remains a separate gate"
   }
 }

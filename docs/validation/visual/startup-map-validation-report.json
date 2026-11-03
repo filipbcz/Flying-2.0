@@ -8,7 +8,7 @@
   "offlineOnly": true,
   "startupBindings": {
     "engineConfig": "unreal/Config/DefaultEngine.ini",
-    "gameDefaultMap": "/Engine/Maps/Templates/OpenWorld",
+    "gameDefaultMap": "/Game/Flying/Maps/FlyingStartup",
     "gameMode": "/Script/FlyingPresentation.FlyingPilotGameMode",
     "presentationSettings": "unreal/Config/DefaultGame.ini",
     "spawnDefaultSceneOnBeginPlay": true

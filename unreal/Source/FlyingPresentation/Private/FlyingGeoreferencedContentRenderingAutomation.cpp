@@ -13,7 +13,7 @@ DEFINE_LOG_CATEGORY_STATIC(LogFlyingGeoreferencedContentRendering, Log, All);
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
   FFlyingGeoreferencedContentRenderingStartupTest,
   "Flying.Presentation.GeoreferencedContent.StartupScenarioRendersOfflineRegionalContent",
-  EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter)
+  EAutomationTestFlags_ApplicationContextMask | EAutomationTestFlags::ProductFilter)
 
 namespace
 {

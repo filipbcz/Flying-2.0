@@ -136,7 +136,7 @@ function requireRepoFile(value, label) {
 }
 
 function sha256(relativePath) {
-  return crypto.createHash("sha256").update(fs.readFileSync(path.join(repoRoot, relativePath))).digest("hex");
+  return crypto.createHash("sha256").update(fs.readFileSync(path.join(repoRoot, relativePath), "utf8").replaceAll("\r\n", "\n")).digest("hex");
 }
 
 function jsonPointers(value, base = "") {

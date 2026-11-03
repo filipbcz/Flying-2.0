@@ -848,7 +848,7 @@ AFlyingOfflinePilotTerrainActor::AFlyingOfflinePilotTerrainActor()
     CreateDefaultSubobject<UFlyingCesiumGeoreferenceComponent>(TEXT("CesiumGeoreference"));
 
   static ConstructorHelpers::FObjectFinder<UMaterialInterface> VertexColorMaterialAsset(
-    TEXT("/Engine/EngineMaterials/VertexColorMaterial.VertexColorMaterial"));
+    TEXT("/Game/Flying/Materials/M_OfflineVertexColor.M_OfflineVertexColor"));
   if (VertexColorMaterialAsset.Succeeded())
   {
     VertexColorMaterial = VertexColorMaterialAsset.Object;

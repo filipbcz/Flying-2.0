@@ -15,11 +15,12 @@ bool TryReadStringField(const TSharedPtr<FJsonObject>& Root, const TCHAR* Field,
   return Root.IsValid() && Root->TryGetStringField(Field, OutValue) && !OutValue.IsEmpty();
 }
 
-FFlyingBuildMetadata LoadBuildMetadata()
+FFlyingBuildMetadataRecord LoadBuildMetadata()
 {
-  FFlyingBuildMetadata Metadata;
+  FFlyingBuildMetadataRecord Metadata;
   Metadata.BuildId = kUnknownBuildId;
-  Metadata.Version = FApp::GetBuildVersion().IsEmpty() ? TEXT("0.0.0-dev") : FApp::GetBuildVersion();
+  const FString EngineBuildVersion(FApp::GetBuildVersion());
+  Metadata.Version = EngineBuildVersion.IsEmpty() ? TEXT("0.0.0-dev") : EngineBuildVersion;
   Metadata.Channel = TEXT("local");
   Metadata.Commit = TEXT("unknown");
   Metadata.BuiltAtUtc = TEXT("unknown");
@@ -51,9 +52,9 @@ FFlyingBuildMetadata LoadBuildMetadata()
 }
 }
 
-FFlyingBuildMetadata UFlyingBuildMetadata::GetBuildMetadata()
+FFlyingBuildMetadataRecord UFlyingBuildMetadata::GetBuildMetadata()
 {
-  static const FFlyingBuildMetadata Cached = LoadBuildMetadata();
+  static const FFlyingBuildMetadataRecord Cached = LoadBuildMetadata();
   return Cached;
 }
 
@@ -64,7 +65,7 @@ FString UFlyingBuildMetadata::GetBuildId()
 
 FString UFlyingBuildMetadata::GetAboutBuildSummary()
 {
-  const FFlyingBuildMetadata Metadata = GetBuildMetadata();
+  const FFlyingBuildMetadataRecord Metadata = GetBuildMetadata();
   return FString::Printf(
     TEXT("Flying %s (%s) [%s]"),
     *Metadata.Version,
