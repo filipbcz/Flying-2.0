@@ -286,6 +286,7 @@ def validate_source(
     base_dir: Path,
     verify_files: bool,
     findings: list[ValidationFinding],
+    require_rights: bool = True,
 ) -> None:
     source = require_object(value, path, findings)
     if source is None:
@@ -296,8 +297,9 @@ def validate_source(
     validate_checksum(require_field(source, "checksum", path, findings), f"{path}.checksum", base_dir, verify_files, findings)
     validate_crs(require_field(source, "crs", path, findings), f"{path}.crs", findings)
     validate_transform(require_field(source, "transform", path, findings), f"{path}.transform", findings)
-    validate_license(require_field(source, "license", path, findings), f"{path}.license", findings)
-    validate_attribution(require_field(source, "attribution", path, findings), f"{path}.attribution", findings)
+    if require_rights:
+        validate_license(require_field(source, "license", path, findings), f"{path}.license", findings)
+        validate_attribution(require_field(source, "attribution", path, findings), f"{path}.attribution", findings)
     validate_provenance(require_field(source, "provenance", path, findings), f"{path}.provenance", findings)
 
 

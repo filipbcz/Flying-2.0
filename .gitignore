@@ -19,6 +19,10 @@ Thumbs.db
 
 # Leased worker process caches
 /.forgemind-tmp/
+/data/sources/
+/artifacts/acquisition/
+__pycache__/
+*.pyc
 /unreal/cesium-request-cache.sqlite*
 /unreal/Content/CesiumSettings/
 /.ddc/

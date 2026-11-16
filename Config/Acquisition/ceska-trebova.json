@@ -1,0 +1,222 @@
+{
+  "schemaVersion": "flying.regional-acquisition-config.v1",
+  "regionManifest": "Config/Regions/ceska-trebova-pilot-region.json",
+  "persistentRootVariable": "FLYING_DATA_ROOT",
+  "allowedDomains": [
+    "ags.cuzk.gov.cz",
+    "cdn.proj.org"
+  ],
+  "transport": "forgemind_native.fetch_https",
+  "sources": [
+    {
+      "id": "dmr5g-regional-export",
+      "name": "DMR 5G source-native height export",
+      "path": "dmr/dmr5g.tif",
+      "group": "dmr",
+      "kind": "tiff",
+      "crs": "5514",
+      "crsName": "S-JTSK / Krovak East North",
+      "publisher": "CUZK",
+      "url": "https://ags.cuzk.gov.cz/arcgis2/rest/services/dmr5g/ImageServer/exportImage?bbox=16.396,49.86,16.546,49.95&bboxSR=4326&imageSR=5514&size=2048,2048&format=tiff&pixelType=F32&renderingRule=%7B%22rasterFunction%22%3A%22None%22%7D&noData=-9999&f=image",
+      "maxBytes": 30000000,
+      "limitations": [
+        "2048 x 2048 service-resampled regional export, not native TIN or full-resolution tile collection.",
+        "Baltic 1957 heights; no transformation performed."
+      ]
+    },
+    {
+      "id": "dmp1g-regional-export",
+      "name": "DMP 1G source-native surface export",
+      "path": "dmp/dmp1g.tif",
+      "group": "dmp",
+      "kind": "tiff",
+      "crs": "5514",
+      "crsName": "S-JTSK / Krovak East North",
+      "publisher": "CUZK",
+      "url": "https://ags.cuzk.gov.cz/arcgis2/rest/services/dmp1g/ImageServer/exportImage?bbox=16.396,49.86,16.546,49.95&bboxSR=4326&imageSR=5514&size=2048,2048&format=tiff&pixelType=F32&renderingRule=%7B%22rasterFunction%22%3A%22None%22%7D&noData=-9999&f=image",
+      "maxBytes": 30000000,
+      "limitations": [
+        "2048 x 2048 service-resampled regional export, not native point cloud.",
+        "Baltic 1957 heights; no transformation performed."
+      ]
+    },
+    {
+      "id": "ortofoto-regional-export",
+      "name": "CUZK regional orthophoto export",
+      "path": "ortofoto/ortofoto.jpg",
+      "group": "ortofoto",
+      "kind": "jpeg",
+      "crs": "4326",
+      "crsName": "WGS 84",
+      "publisher": "CUZK",
+      "url": "https://ags.cuzk.gov.cz/arcgis1/rest/services/ORTOFOTO/MapServer/export?bbox=16.396,49.86,16.546,49.95&bboxSR=4326&imageSR=4326&size=2048,2048&format=jpg&f=image",
+      "maxBytes": 30000000,
+      "limitations": [
+        "2048 x 2048 service-rendered image; request bounds provide georeferencing, not a native-resolution orthophoto tile."
+      ]
+    },
+    {
+      "id": "zabaged-water",
+      "name": "ZABAGED water polygons",
+      "path": "zabaged/water.json",
+      "group": "zabaged",
+      "kind": "geojson",
+      "crs": "4326",
+      "crsName": "WGS 84",
+      "publisher": "CUZK",
+      "url": "https://ags.cuzk.gov.cz/arcgis/rest/services/ZABAGED_POLOHOPIS/MapServer/132/query?where=1%3D1&geometry=16.396,49.86,16.546,49.95&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&outSR=4326&returnGeometry=true&f=geojson",
+      "maxBytes": 30000000,
+      "limitations": []
+    },
+    {
+      "id": "zabaged-roads",
+      "name": "ZABAGED road network",
+      "path": "zabaged/roads.json",
+      "group": "zabaged",
+      "kind": "geojson",
+      "crs": "4326",
+      "crsName": "WGS 84",
+      "publisher": "CUZK",
+      "url": "https://ags.cuzk.gov.cz/arcgis/rest/services/ZABAGED_POLOHOPIS/MapServer/79/query?where=1%3D1&geometry=16.396,49.86,16.546,49.95&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&outSR=4326&returnGeometry=true&f=geojson",
+      "maxBytes": 30000000,
+      "limitations": []
+    },
+    {
+      "id": "zabaged-forest",
+      "name": "ZABAGED forest polygons",
+      "path": "zabaged/forest.json",
+      "group": "zabaged",
+      "kind": "geojson",
+      "crs": "4326",
+      "crsName": "WGS 84",
+      "publisher": "CUZK",
+      "url": "https://ags.cuzk.gov.cz/arcgis/rest/services/ZABAGED_POLOHOPIS/MapServer/142/query?where=1%3D1&geometry=16.396,49.86,16.546,49.95&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&outSR=4326&returnGeometry=true&f=geojson",
+      "maxBytes": 30000000,
+      "limitations": []
+    },
+    {
+      "id": "geonames-settlements",
+      "name": "CUZK Geonames settlements",
+      "path": "geonames/settlements.json",
+      "group": "geonames",
+      "kind": "geojson",
+      "crs": "4326",
+      "crsName": "WGS 84",
+      "publisher": "CUZK",
+      "url": "https://ags.cuzk.gov.cz/arcgis/rest/services/GEONAMES/Geonames/MapServer/0/query?where=1%3D1&geometry=16.396,49.86,16.546,49.95&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&outSR=4326&returnGeometry=true&f=geojson",
+      "maxBytes": 30000000,
+      "limitations": [
+        "Settlement names only; not all Geonames thematic layers."
+      ]
+    },
+    {
+      "id": "zabaged-airports",
+      "name": "ZABAGED airport footprint fallback",
+      "path": "aero/airports.json",
+      "group": "aeronautical_fallback",
+      "kind": "geojson",
+      "crs": "4326",
+      "crsName": "WGS 84",
+      "publisher": "CUZK",
+      "url": "https://ags.cuzk.gov.cz/arcgis/rest/services/ZABAGED_POLOHOPIS/MapServer/125/query?where=1%3D1&geometry=16.396,49.86,16.546,49.95&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&outSR=4326&returnGeometry=true&f=geojson",
+      "maxBytes": 30000000,
+      "limitations": [
+        "No features intersect the configured polygon. Not an approved aeronautical database."
+      ]
+    },
+    {
+      "id": "zabaged-runways",
+      "name": "ZABAGED runway centreline fallback",
+      "path": "aero/runways.json",
+      "group": "aeronautical_fallback",
+      "kind": "geojson",
+      "crs": "4326",
+      "crsName": "WGS 84",
+      "publisher": "CUZK",
+      "url": "https://ags.cuzk.gov.cz/arcgis/rest/services/ZABAGED_POLOHOPIS/MapServer/85/query?where=1%3D1&geometry=16.396,49.86,16.546,49.95&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&outSR=4326&returnGeometry=true&f=geojson",
+      "maxBytes": 30000000,
+      "limitations": [
+        "No features intersect the configured polygon. No runway operational status, thresholds, dimensions, or AIRAC validity inferred."
+      ]
+    },
+    {
+      "id": "cz-cuzk-cr-2005",
+      "name": "Official CUZK CR-2005 vertical transformation grid",
+      "path": "grids/cz_cuzk_CR-2005.tif",
+      "group": "grids",
+      "kind": "grid",
+      "crs": "4937",
+      "crsName": "ETRS89 3D",
+      "publisher": "CUZK (official PROJ CDN mirror)",
+      "url": "https://cdn.proj.org/cz_cuzk_CR-2005.tif",
+      "maxBytes": 30000000,
+      "limitations": [
+        "National transformation support grid; discovery exception for the grid covering the region."
+      ],
+      "sha256": "2fba4e5bcd3e48f737b3655d5a7c196de1c56e199967f7e12311710646d4f0a1",
+      "version": "CR-2005"
+    },
+    {
+      "id": "cz-cuzk-table-v1710",
+      "name": "Official CUZK S-JTSK correction grid",
+      "path": "grids/cz_cuzk_table_-y-x_3_v1710.tif",
+      "group": "grids",
+      "kind": "grid",
+      "crs": "5514",
+      "crsName": "S-JTSK / Krovak East North",
+      "publisher": "CUZK (official PROJ CDN mirror)",
+      "url": "https://cdn.proj.org/cz_cuzk_table_-y-x_3_v1710.tif",
+      "maxBytes": 30000000,
+      "limitations": [
+        "National transformation support grid; discovery exception for the grid covering the region."
+      ],
+      "sha256": "9f7b519e8928ec9663b916c07708d956821d09a0e25b61c742e31995d183148c",
+      "version": "v1710"
+    }
+  ],
+  "coverageLimitations": [
+    {
+      "groups": [
+        "ucl",
+        "aip",
+        "vfr",
+        "operator_inputs"
+      ],
+      "reason": "No technically accessible operational aeronautical source acquired. Official AIM access returned 403/404; access controls were not bypassed. Regional ZABAGED airport and runway fallback queries returned zero features. Do not infer airport or runway production coverage."
+    },
+    {
+      "groups": [
+        "zabaged"
+      ],
+      "reason": "Water, road and forest layers acquired; other thematic layers are not yet part of this collection. Intersecting source features remain unmodified and may extend beyond the query envelope."
+    },
+    {
+      "groups": [
+        "dmr",
+        "dmp",
+        "ortofoto"
+      ],
+      "reason": "Regional service exports acquired at 2048 x 2048. They are real payloads, not a claim of native-resolution coverage or offline package readiness."
+    },
+    {
+      "groups": [
+        "all"
+      ],
+      "reason": "Service snapshot dates identify acquisition, not original survey dates. Licensing, redistribution permission and attribution are not private acquisition completion gates; no redistribution approval is asserted."
+    }
+  ],
+  "accessAttempts": [
+    {
+      "url": "https://aim.rlp.cz/vfrmanual/actual/ad/lkuo_text_cz.html",
+      "attemptedAtUtc": "2026-11-16T12:49:05Z",
+      "status": 404,
+      "decision": "Unavailable public endpoint; no access-control bypass."
+    },
+    {
+      "url": "https://aim.rlp.cz/vfrmanual/actual/",
+      "attemptedAtUtc": "2026-11-16T12:49:27Z",
+      "status": 403,
+      "decision": "Stop at denied access; use regional CUZK fallback independently."
+    }
+  ]
+}
