@@ -52,7 +52,7 @@
       "url": "https://ags.cuzk.gov.cz/arcgis1/rest/services/ORTOFOTO/MapServer/export?bbox=16.396,49.86,16.546,49.95&bboxSR=4326&imageSR=4326&size=2048,2048&format=jpg&f=image",
       "maxBytes": 30000000,
       "limitations": [
-        "2048 x 2048 service-rendered image; request bounds provide georeferencing, not a native-resolution orthophoto tile."
+        "2048 x 2048 service-rendered image; georeferencing requires the returned export extent bound to the JPEG checksum, not the request bounds. Not a native-resolution tile."
       ]
     },
     {
