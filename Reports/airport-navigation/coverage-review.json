@@ -1,0 +1,1793 @@
+{
+  "schemaVersion": "flying.airport-coverage-report.v1",
+  "generatedAtUtc": "2026-11-18T14:36:35Z",
+  "scope": "technically-discovered-bounded-project-list",
+  "airac": {
+    "effectiveDate": "2026-11-12",
+    "notes": "AIM WEF; operator page has no declared AIRAC"
+  },
+  "approvedMasterList": {
+    "sourcePath": "master-list.json",
+    "checksumSha256": "7565436587b9bb8341cc2ec92c7233179c7e029e69b86a440346edfc4afa59fd"
+  },
+  "counts": {
+    "masterListActiveAerodromes": 0,
+    "masterListActiveSlzAreas": 1,
+    "importedAerodromes": 1,
+    "importedRunways": 1
+  },
+  "missing": {
+    "aerodromes": [],
+    "runways": [],
+    "slzAreas": []
+  },
+  "diff": {
+    "previousAirac": null,
+    "currentAirac": {
+      "effectiveDate": "2026-11-12",
+      "notes": "AIM WEF; operator page has no declared AIRAC"
+    },
+    "changes": []
+  },
+  "blockedAutomaticOverwrites": [],
+  "passed": true,
+  "productionValidatedRunways": 0,
+  "missingProductionValidatedProvenance": 0,
+  "nationalCompletenessClaim": false,
+  "verifiedRecords": [],
+  "unverifiedRecords": [
+    "LKCTRE"
+  ],
+  "excludedRecords": [
+    {
+      "id": "LKUO",
+      "state": "excluded",
+      "verificationStatus": "official-AIM-record",
+      "operationalStatus": "active",
+      "source": "lkuo.html",
+      "referencePointWgs84": {
+        "latDeg": 49.978611111111114,
+        "lonDeg": 16.42638888888889
+      },
+      "distanceToPilotBoundsM": 3182.367423294601,
+      "sourceArpText": "ARP: 49° 58' 43\" N, 16° 25' 35\" E 2,5 km E od středu města Ústí nad Orlicí ELEV: 1342 ft / 409 m Okruh: 2600 ft / 800 m AMSL",
+      "reason": "Outside configured pilot polygon and 250 m margin; no runway/contact/start emitted; no two-airport flight claimed"
+    },
+    {
+      "id": "LKVM",
+      "state": "excluded",
+      "verificationStatus": "official-AIM-record",
+      "operationalStatus": "active",
+      "source": "lkvm.html",
+      "referencePointWgs84": {
+        "latDeg": 49.926944444444445,
+        "lonDeg": 16.185833333333335
+      },
+      "distanceToPilotBoundsM": 15090.873428066514,
+      "sourceArpText": "ARP: 49° 55' 37\" N, 16° 11' 09\" E 3 km SE Vysoké Mýto ELEV: 988 ft / 301 m Okruh: 2000 ft / 610 m AMSL",
+      "reason": "Outside configured pilot polygon and 250 m margin; no runway/contact/start emitted; no two-airport flight claimed"
+    },
+    {
+      "id": "LKMK",
+      "state": "excluded",
+      "verificationStatus": "official-AIM-record",
+      "operationalStatus": "active",
+      "source": "lkmk.html",
+      "referencePointWgs84": {
+        "latDeg": 49.79833333333333,
+        "lonDeg": 16.68777777777778
+      },
+      "distanceToPilotBoundsM": 12292.348328698417,
+      "sourceArpText": "ARP: 49° 47' 54\" N, 16° 41' 16\" E 4,7 km NNE Moravská Třebová ELEV: 1322 ft / 403 m Okruh: 2300 ft / 700 m AMSL",
+      "reason": "Outside configured pilot polygon and 250 m margin; no runway/contact/start emitted; no two-airport flight claimed"
+    },
+    {
+      "id": "LKCHOC",
+      "state": "excluded",
+      "verificationStatus": "official-AIM-record",
+      "operationalStatus": "active",
+      "source": "lkchoc.html",
+      "referencePointWgs84": {
+        "latDeg": 49.9775,
+        "lonDeg": 16.185277777777777
+      },
+      "distanceToPilotBoundsM": 15425.548182995626,
+      "sourceArpText": "ARP: 49° 58' 39\" N, 16° 11' 07\" E 3.8 km SW Choceň ELEV: 866 ft / 264 m",
+      "reason": "Outside configured pilot polygon and 250 m margin; no runway/contact/start emitted; no two-airport flight claimed"
+    }
+  ],
+  "indexDisposition": [
+    {
+      "id": "LKBE",
+      "name": "LKBE Benešov",
+      "href": "lkbe_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKBO",
+      "name": "LKBO Bohuňovice",
+      "href": "lkbo_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKTB",
+      "name": "LKTB BRNO/Tuřany",
+      "href": "lktb_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKBR",
+      "name": "LKBR Broumov",
+      "href": "lkbr_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKBA",
+      "name": "LKBA Břeclav",
+      "href": "lkba_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKBU",
+      "name": "LKBU Bubovice",
+      "href": "lkbu_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKCE",
+      "name": "LKCE Česká Lípa",
+      "href": "lkce_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKCS",
+      "name": "LKCS České Budějovice",
+      "href": "lkcs_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKDK",
+      "name": "LKDK Dvůr Králové",
+      "href": "lkdk_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKER",
+      "name": "LKER Erpužice",
+      "href": "lker_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKFR",
+      "name": "LKFR Frýdlant",
+      "href": "lkfr_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKHB",
+      "name": "LKHB Havlíčkův Brod",
+      "href": "lkhb_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKHD",
+      "name": "LKHD Hodkovice",
+      "href": "lkhd_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKHC",
+      "name": "LKHC Hořice",
+      "href": "lkhc_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKHV",
+      "name": "LKHV Hořovice",
+      "href": "lkhv_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKHS",
+      "name": "LKHS Hosín",
+      "href": "lkhs_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKHK",
+      "name": "LKHK Hradec Králové",
+      "href": "lkhk_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKHN",
+      "name": "LKHN Hranice",
+      "href": "lkhn_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKCB",
+      "name": "LKCB Cheb",
+      "href": "lkcb_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKCH",
+      "name": "LKCH Chomutov",
+      "href": "lkch_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKCT",
+      "name": "LKCT Chotěboř",
+      "href": "lkct_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKCR",
+      "name": "LKCR Chrudim",
+      "href": "lkcr_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKJA",
+      "name": "LKJA Jaroměř",
+      "href": "lkja_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKJC",
+      "name": "LKJC Jičín",
+      "href": "lkjc_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKJI",
+      "name": "LKJI Jihlava",
+      "href": "lkji_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKJH",
+      "name": "LKJH Jindřichův Hradec",
+      "href": "lkjh_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKKV",
+      "name": "LKKV Karlovy Vary",
+      "href": "lkkv_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKKL",
+      "name": "LKKL Kladno",
+      "href": "lkkl_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKKT",
+      "name": "LKKT Klatovy",
+      "href": "lkkt_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKKO",
+      "name": "LKKO Kolín",
+      "href": "lkko_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKKR",
+      "name": "LKKR Krnov",
+      "href": "lkkr_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKKM",
+      "name": "LKKM Kroměříž",
+      "href": "lkkm_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKKA",
+      "name": "LKKA Křižanov",
+      "href": "lkka_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKKU",
+      "name": "LKKU Kunovice",
+      "href": "lkku_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKKY",
+      "name": "LKKY Kyjov",
+      "href": "lkky_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPL",
+      "name": "LKPL Letkov",
+      "href": "lkpl_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKLT",
+      "name": "LKLT Letňany",
+      "href": "lklt_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKLB",
+      "name": "LKLB Liberec",
+      "href": "lklb_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKLU",
+      "name": "LKLU Luhačovice",
+      "href": "lklu_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKMR",
+      "name": "LKMR Mariánské Lázně",
+      "href": "lkmr_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKCM",
+      "name": "LKCM Medlánky",
+      "href": "lkcm_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKMI",
+      "name": "LKMI Mikulovice",
+      "href": "lkmi_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKMB",
+      "name": "LKMB Mladá Boleslav",
+      "href": "lkmb_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKMH",
+      "name": "LKMH Mnichovo Hradiště",
+      "href": "lkmh_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKMK",
+      "name": "LKMK Moravská Třebová",
+      "href": "lkmk_text_cz.html",
+      "state": "excluded-outside-margin",
+      "reason": "Outside configured pilot polygon and 250 m margin; no runway/contact/start emitted; no two-airport flight claimed"
+    },
+    {
+      "id": "LKMO",
+      "name": "LKMO Most",
+      "href": "lkmo_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKNM",
+      "name": "LKNM Nové Město",
+      "href": "lknm_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKOL",
+      "name": "LKOL Olomouc",
+      "href": "lkol_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKMT",
+      "name": "LKMT OSTRAVA/Mošnov",
+      "href": "lkmt_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPC",
+      "name": "LKPC Panenský Týnec",
+      "href": "lkpc_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPD",
+      "name": "LKPD Pardubice",
+      "href": "lkpd_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPS",
+      "name": "LKPS Plasy",
+      "href": "lkps_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKLN",
+      "name": "LKLN Plzeň/Líně",
+      "href": "lkln_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPN",
+      "name": "LKPN Podhořany",
+      "href": "lkpn_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPA",
+      "name": "LKPA Polička",
+      "href": "lkpa_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPR",
+      "name": "LKPR PRAHA/Ruzyně",
+      "href": "lkpr_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKVO",
+      "name": "LKVO PRAHA/Vodochody",
+      "href": "lkvo_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPJ",
+      "name": "LKPJ Prostějov",
+      "href": "lkpj_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPO",
+      "name": "LKPO Přerov",
+      "href": "lkpo_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPM",
+      "name": "LKPM Příbram",
+      "href": "lkpm_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPI",
+      "name": "LKPI Přibyslav",
+      "href": "lkpi_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKRK",
+      "name": "LKRK Rakovník",
+      "href": "lkrk_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKRA",
+      "name": "LKRA Raná",
+      "href": "lkra_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKRY",
+      "name": "LKRY Rokycany",
+      "href": "lkry_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKRO",
+      "name": "LKRO Roudnice",
+      "href": "lkro_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKSZ",
+      "name": "LKSZ Sazená",
+      "href": "lksz_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKSK",
+      "name": "LKSK Skuteč",
+      "href": "lksk_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKSN",
+      "name": "LKSN Slaný",
+      "href": "lksn_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKSO",
+      "name": "LKSO Soběslav",
+      "href": "lkso_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKSA",
+      "name": "LKSA Staňkov",
+      "href": "lksa_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKSB",
+      "name": "LKSB Stichovice",
+      "href": "lksb_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKST",
+      "name": "LKST Strakonice",
+      "href": "lkst_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKSR",
+      "name": "LKSR Strunkovice",
+      "href": "lksr_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKSU",
+      "name": "LKSU Šumperk",
+      "href": "lksu_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKTA",
+      "name": "LKTA Tábor",
+      "href": "lkta_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKTD",
+      "name": "LKTD Tachov",
+      "href": "lktd_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKTC",
+      "name": "LKTC Točná",
+      "href": "lktc_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKTO",
+      "name": "LKTO Toužim",
+      "href": "lkto_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKUL",
+      "name": "LKUL Ústí nad Labem",
+      "href": "lkul_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKUO",
+      "name": "LKUO Ústí nad Orlicí",
+      "href": "lkuo_text_cz.html",
+      "state": "excluded-outside-margin",
+      "reason": "Outside configured pilot polygon and 250 m margin; no runway/contact/start emitted; no two-airport flight claimed"
+    },
+    {
+      "id": "LKVP",
+      "name": "LKVP Velké Poříčí",
+      "href": "lkvp_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKVL",
+      "name": "LKVL Vlašim",
+      "href": "lkvl_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKVR",
+      "name": "LKVR Vrchlabí",
+      "href": "lkvr_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKVM",
+      "name": "LKVM Vysoké Mýto",
+      "href": "lkvm_text_cz.html",
+      "state": "excluded-outside-margin",
+      "reason": "Outside configured pilot polygon and 250 m margin; no runway/contact/start emitted; no two-airport flight claimed"
+    },
+    {
+      "id": "LKVY",
+      "name": "LKVY Vyškov",
+      "href": "lkvy_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKZA",
+      "name": "LKZA Zábřeh",
+      "href": "lkza_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKZB",
+      "name": "LKZB Zbraslavice",
+      "href": "lkzb_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKZL",
+      "name": "LKZL Zlín",
+      "href": "lkzl_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKZN",
+      "name": "LKZN Znojmo",
+      "href": "lkzn_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKZM",
+      "name": "LKZM Žamberk",
+      "href": "lkzm_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKZD",
+      "name": "LKZD Žatec/Macerka",
+      "href": "lkzd_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKBORE",
+      "name": "LKBORE Borek",
+      "href": "lkbore_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKBOLE",
+      "name": "LKBOLE Boleradice",
+      "href": "lkbole_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKBRTO",
+      "name": "LKBRTO Brťov",
+      "href": "lkbrto_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKBRUS",
+      "name": "LKBRUS Brusné",
+      "href": "lkbrus_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKBREZ",
+      "name": "LKBREZ Březí Falcon",
+      "href": "lkbrez_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKBUDK",
+      "name": "LKBUDK Budkovice",
+      "href": "lkbudk_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKBYNO",
+      "name": "LKBYNO Bynovec",
+      "href": "lkbyno_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKBYST",
+      "name": "LKBYST Bystřice nad Pernštejnem",
+      "href": "lkbyst_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKCAST",
+      "name": "LKCAST Částkovice",
+      "href": "lkcast_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKCEBI",
+      "name": "LKCEBI Čebín",
+      "href": "lkcebi_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKCDUB",
+      "name": "LKCDUB Český Dub",
+      "href": "lkcdub_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKDETR",
+      "name": "LKDETR Dětřichov Oáza",
+      "href": "lkdetr_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKDOUD",
+      "name": "LKDOUD Doudleby",
+      "href": "lkdoud_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKDRUZ",
+      "name": "LKDRUZ Druzcov u Lípy",
+      "href": "lkdruz_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKDUSN",
+      "name": "LKDUSN Dušníky",
+      "href": "lkdusn_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKEXCA",
+      "name": "LKEXCA Hatě Excalibur",
+      "href": "lkexca_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKHATH",
+      "name": "LKHATH Hať u Hlučína",
+      "href": "lkhath_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKHLAS",
+      "name": "LKHLAS Hláska",
+      "href": "lkhlas_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPOCA",
+      "name": "LKPOCA Horní Počaply",
+      "href": "lkpoca_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPRIM",
+      "name": "LKPRIM Horní Přím",
+      "href": "lkprim_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKHRAD",
+      "name": "LKHRAD Hradčany",
+      "href": "lkhrad_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKCHAR",
+      "name": "LKCHAR Charvátce",
+      "href": "lkchar_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKCHOC",
+      "name": "LKCHOC Choceň",
+      "href": "lkchoc_text_cz.html",
+      "state": "excluded-outside-margin",
+      "reason": "Outside configured pilot polygon and 250 m margin; no runway/contact/start emitted; no two-airport flight claimed"
+    },
+    {
+      "id": "LKCHOR",
+      "name": "LKCHOR Chornice",
+      "href": "lkchor_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKCHOT",
+      "name": "LKCHOT Choteč",
+      "href": "lkchot_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKCHOV",
+      "name": "LKCHOV Chotěšov",
+      "href": "lkchov_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKCHRA",
+      "name": "LKCHRA Chrášťany",
+      "href": "lkchra_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKCHRI",
+      "name": "LKCHRI Chřibská",
+      "href": "lkchri_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKCHVO",
+      "name": "LKCHVO Chvojenec",
+      "href": "lkchvo_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKKAPL",
+      "name": "LKKAPL Kaplice",
+      "href": "lkkapl_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKKEJZ",
+      "name": "LKKEJZ Kejžlice",
+      "href": "lkkejz_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKKOST",
+      "name": "LKKOST Kostomlaty",
+      "href": "lkkost_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKKOTV",
+      "name": "LKKOTV Kotvrdovice",
+      "href": "lkkotv_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKKOZY",
+      "name": "LKKOZY Kozmice",
+      "href": "lkkozy_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKKRAM",
+      "name": "LKKRAM Kramolín",
+      "href": "lkkram_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKKRPY",
+      "name": "LKKRPY Krpy",
+      "href": "lkkrpy_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKJIRI",
+      "name": "LKJIRI Křelovice - Jiřičky",
+      "href": "lkjiri_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKKRIZ",
+      "name": "LKKRIZ Kříženec",
+      "href": "lkkriz_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKKUNE",
+      "name": "LKKUNE Kunětice",
+      "href": "lkkune_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKLETO",
+      "name": "LKLETO Letovice",
+      "href": "lkleto_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKLIBA",
+      "name": "LKLIBA Libáň",
+      "href": "lkliba_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKLOMN",
+      "name": "LKLOMN Lomnice nad Popelkou",
+      "href": "lklomn_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKLOUC",
+      "name": "LKLOUC Loučeň",
+      "href": "lklouc_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKLUKL",
+      "name": "LKLUKL Lukla",
+      "href": "lklukl_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKMILO",
+      "name": "LKMILO Milovice",
+      "href": "lkmilo_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKMIRO",
+      "name": "LKMIRO Miroslav",
+      "href": "lkmiro_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKMIRA",
+      "name": "LKMIRA Miroslav AirCon",
+      "href": "lkmira_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKMIST",
+      "name": "LKMIST Místek",
+      "href": "lkmist_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKMLAD",
+      "name": "LKMLAD Mladá",
+      "href": "lkmlad_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKNABO",
+      "name": "LKNABO Nabočany",
+      "href": "lknabo_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKNACH",
+      "name": "LKNACH Náchod",
+      "href": "lknach_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKNAPA",
+      "name": "LKNAPA Napajedla",
+      "href": "lknapa_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKNEPL",
+      "name": "LKNEPL Neplachov",
+      "href": "lknepl_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKNVCE",
+      "name": "LKNVCE Nová Včelnice",
+      "href": "lknvce_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKNUCI",
+      "name": "LKNUCI Nučice",
+      "href": "lknuci_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKNYMB",
+      "name": "LKNYMB Nymburk",
+      "href": "lknymb_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKOPAV",
+      "name": "LKOPAV Opava",
+      "href": "lkopav_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKOSIC",
+      "name": "LKOSIC Osičiny",
+      "href": "lkosic_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKOSTR",
+      "name": "LKOSTR Ostrov",
+      "href": "lkostr_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPANO",
+      "name": "LKPANO Panoší Újezd",
+      "href": "lkpano_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPISK",
+      "name": "LKPISK Písek - Krašovice",
+      "href": "lkpisk_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPOLE",
+      "name": "LKPOLE Polepy",
+      "href": "lkpole_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKRAMS",
+      "name": "LKRAMS Ramš",
+      "href": "lkrams_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKSLUS",
+      "name": "LKSLUS Slušovice",
+      "href": "lkslus_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKSPAK",
+      "name": "LKSPAK Stará Paka",
+      "href": "lkspak_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKSTRZ",
+      "name": "LKSTRZ Strážnice",
+      "href": "lkstrz_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKSTET",
+      "name": "LKSTET Štětí",
+      "href": "lkstet_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKTEPL",
+      "name": "LKTEPL Teplice",
+      "href": "lktepl_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKTERE",
+      "name": "LKTERE Terezín",
+      "href": "lktere_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKTRUT",
+      "name": "LKTRUT Trutnov",
+      "href": "lktrut_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKTRBH",
+      "name": "LKTRBH Třebihošť",
+      "href": "lktrbh_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPAVL",
+      "name": "LKPAVL Velké Pavlovice",
+      "href": "lkpavl_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKVRAT",
+      "name": "LKVRAT Vrátkov",
+      "href": "lkvrat_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKZAHO",
+      "name": "LKZAHO Záhoří",
+      "href": "lkzaho_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKSTIP",
+      "name": "LKSTIP Zlín - Štípa",
+      "href": "lkstip_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKBH",
+      "name": "LKBH Benešov",
+      "href": "lkbh_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKBL",
+      "name": "LKBL Blansko",
+      "href": "lkbl_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKBS",
+      "name": "LKBS Boskovice",
+      "href": "lkbs_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKBG",
+      "name": "LKBG Brno - Bohunice MAIN",
+      "href": "lkbg_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKBN",
+      "name": "LKBN Brno - Bohunice RESERVE",
+      "href": "lkbn_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKBP",
+      "name": "LKBP Brno - Černá Pole",
+      "href": "lkbp_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKBV",
+      "name": "LKBV Brno - Sv. Anna",
+      "href": "lkbv_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKBD",
+      "name": "LKBD Brodek u Přerova",
+      "href": "lkbd_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKBI",
+      "name": "LKBI Břeclav - Nemocnice",
+      "href": "lkbi_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKCC",
+      "name": "LKCC České Budějovice - Nemocnice",
+      "href": "lkcc_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKCA",
+      "name": "LKCA České Budějovice - Základna HEMS",
+      "href": "lkca_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKDC",
+      "name": "LKDC Děčín",
+      "href": "lkdc_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKDO",
+      "name": "LKDO Domažlice",
+      "href": "lkdo_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKFM",
+      "name": "LKFM Frýdek-Místek",
+      "href": "lkfm_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKHA",
+      "name": "LKHA Havířov",
+      "href": "lkha_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKHL",
+      "name": "LKHL Havlíčkův Brod - Nemocnice",
+      "href": "lkhl_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKHR",
+      "name": "LKHR Hradec Králové - Nemocnice",
+      "href": "lkhr_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKHH",
+      "name": "LKHH Hradec Králové - Základna HEMS",
+      "href": "lkhh_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKCP",
+      "name": "LKCP Chodová Planá",
+      "href": "lkcp_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKCU",
+      "name": "LKCU Chomutov - Nemocnice",
+      "href": "lkcu_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKCO",
+      "name": "LKCO Chotouň",
+      "href": "lkco_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKCD",
+      "name": "LKCD Chrudim - Nemocnice",
+      "href": "lkcd_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKJE",
+      "name": "LKJE Jeseník",
+      "href": "lkje_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKJL",
+      "name": "LKJL Jihlava - Základna HEMS",
+      "href": "lkjl_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKJR",
+      "name": "LKJR Jindřichův Hradec - Nemocnice",
+      "href": "lkjr_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKKE",
+      "name": "LKKE Karlov",
+      "href": "lkke_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKKN",
+      "name": "LKKN Karlovy Vary - Nemocnice",
+      "href": "lkkn_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKKI",
+      "name": "LKKI Krnov - Nemocnice",
+      "href": "lkki_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKKZ",
+      "name": "LKKZ Kroměříž - Nemocnice",
+      "href": "lkkz_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKKJ",
+      "name": "LKKJ Kyjov - Nemocnice",
+      "href": "lkkj_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKLA",
+      "name": "LKLA Liberec - ACL",
+      "href": "lkla_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKLC",
+      "name": "LKLC Liberec - Nemocnice",
+      "href": "lklc_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKLH",
+      "name": "LKLH Liberec - Základna HEMS",
+      "href": "lklh_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKLO",
+      "name": "LKLO Litoměřice",
+      "href": "lklo_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKME",
+      "name": "LKME Mělník",
+      "href": "lkme_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKML",
+      "name": "LKML Mladá Boleslav - Nemocnice",
+      "href": "lkml_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKMS",
+      "name": "LKMS Most - Nemocnice",
+      "href": "lkms_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKNC",
+      "name": "LKNC Náchod",
+      "href": "lknc_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKNE",
+      "name": "LKNE Nedanice",
+      "href": "lkne_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKNR",
+      "name": "LKNR Neratovice",
+      "href": "lknr_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKNK",
+      "name": "LKNK Nová Amerika",
+      "href": "lknk_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKNO",
+      "name": "LKNO Nové Město na Moravě",
+      "href": "lkno_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKOC",
+      "name": "LKOC Olomouc - Nemocnice",
+      "href": "lkoc_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKOT",
+      "name": "LKOT Olomouc - Základna HEMS",
+      "href": "lkot_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKOV",
+      "name": "LKOV Opava",
+      "href": "lkov_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKOP",
+      "name": "LKOP Ostrava - Nemocnice",
+      "href": "lkop_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKOZ",
+      "name": "LKOZ Ostrava - Základna HEMS",
+      "href": "lkoz_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPU",
+      "name": "LKPU Pardubice - Nemocnice",
+      "href": "lkpu_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPE",
+      "name": "LKPE Pelhřimov",
+      "href": "lkpe_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPF",
+      "name": "LKPF Písek",
+      "href": "lkpf_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPZ",
+      "name": "LKPZ Plzeň - MAIN",
+      "href": "lkpz_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPY",
+      "name": "LKPY Praha 10 - Vinohrady",
+      "href": "lkpy_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKLK",
+      "name": "LKLK Praha 19 - Kbely",
+      "href": "lklk_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPK",
+      "name": "LKPK Praha 4 - Krč",
+      "href": "lkpk_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPH",
+      "name": "LKPH Praha 5 - Motol",
+      "href": "lkph_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPT",
+      "name": "LKPT Praha 6 - Střešovice (MIL)",
+      "href": "lkpt_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPB",
+      "name": "LKPB Praha 8 - Bulovka",
+      "href": "lkpb_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPG",
+      "name": "LKPG Prachatice",
+      "href": "lkpg_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKPP",
+      "name": "LKPP Přední Kopanina",
+      "href": "lkpp_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKRV",
+      "name": "LKRV Rakovník - Nemocnice",
+      "href": "lkrv_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKRZ",
+      "name": "LKRZ Rozvadov",
+      "href": "lkrz_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKSL",
+      "name": "LKSL Solnice - ACL",
+      "href": "lksl_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKSV",
+      "name": "LKSV Svitavy",
+      "href": "lksv_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKSP",
+      "name": "LKSP Šumperk - Nemocnice",
+      "href": "lksp_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKTR",
+      "name": "LKTR Tábor - Nemocnice",
+      "href": "lktr_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKTH",
+      "name": "LKTH Těchonín",
+      "href": "lkth_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKTU",
+      "name": "LKTU Trutnov",
+      "href": "lktu_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKUH",
+      "name": "LKUH Uherské Hradiště - Mařatice",
+      "href": "lkuh_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKUN",
+      "name": "LKUN Uherské Hradiště - Nemocnice",
+      "href": "lkun_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKUS",
+      "name": "LKUS Ústí nad Labem - Nemocnice",
+      "href": "lkus_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKUB",
+      "name": "LKUB Ústí nad Labem - Základna HEMS",
+      "href": "lkub_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKVN",
+      "name": "LKVN Vyškov - Nemocnice",
+      "href": "lkvn_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKZI",
+      "name": "LKZI Zlín - Nemocnice",
+      "href": "lkzi_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    },
+    {
+      "id": "LKZO",
+      "name": "LKZO Znojmo - Nemocnice",
+      "href": "lkzo_text_cz.html",
+      "state": "not-spatially-reviewed",
+      "reason": "National index discovery only, not a spatial exclusion or evidence of absence. Only the nearby reviewed records are spatially classified."
+    }
+  ],
+  "limitations": [
+    "Empty bounded ZABAGED airport/runway responses are not evidence of absence of SLZ",
+    "No national completeness or regulator verification assertion"
+  ],
+  "discoveryEvidence": [
+    "aim-index.html",
+    "lkctre.html",
+    "airport-areas.geojson",
+    "runway-boundaries.geojson"
+  ],
+  "allowedMarginM": 250,
+  "regionBoundsUnchanged": true
+}

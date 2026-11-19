@@ -1,0 +1,29 @@
+{
+  "status": "blocked-production-geometry-precision",
+  "releaseCandidateAccepted": false,
+  "task": "Complete Production Airport And Navigation Package",
+  "packageIntegrity": {
+    "status": "pass",
+    "filesChecked": 172,
+    "airportCount": 1,
+    "runwayCount": 1,
+    "safeStartCount": 1,
+    "offlineLayerCount": 9,
+    "offlineTileCount": 1027,
+    "geometryPrecisionAccepted": false,
+    "scope": "Private bounded package integrity, not RC or operational approval"
+  },
+  "regionChanged": false,
+  "limitations": [
+    "Unverified operator SLZ retained as unverified",
+    "Full published 350x20 m dimensions on derived axis; mandatory absolute geometry precision remains unmeasured and blocked",
+    "Nominal ATZ and reference chapters are not a complete operational airspace database",
+    "No Unreal/runtime flight, two-airport flight or release gate acceptance claimed"
+  ],
+  "artifacts": {
+    "archive": "ceska-trebova-airport-navigation-2026-11-19-private-3.zip",
+    "masterList": "master-list.json",
+    "surfaces": "runway-surfaces.json",
+    "starts": "safe-starts.json"
+  }
+}

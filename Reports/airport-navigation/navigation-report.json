@@ -1,0 +1,126 @@
+{
+  "regionId": "ceska-trebova-pilot-10km",
+  "runtimeNetworkRequired": false,
+  "tileArchive": {
+    "path": "navigation.mbtiles",
+    "format": "mbtiles",
+    "tileFormat": "png",
+    "scheme": "tms",
+    "sha256": "7f0f5550a3a7914a19919c90b9198a5477b0d5b0bb0c61f5f5df3de7068d5ab4",
+    "tileCount": 1027,
+    "minzoom": 12,
+    "maxzoom": 16
+  },
+  "style": {
+    "path": "style.json",
+    "sha256": "1a650cf9b9739519379bf9e3c7db924f5958696f815e23862c9224b87edde95e"
+  },
+  "renderedFeatureCounts": {
+    "zabaged-forest": 260,
+    "zabaged-water": 85,
+    "zabaged-roads": 41,
+    "geonames-settlements": 8,
+    "power-lines": 333,
+    "power-masts": 612,
+    "airspaces": 1,
+    "runways": 1,
+    "airports": 1
+  },
+  "legend": {
+    "zabaged-forest": [
+      160,
+      193,
+      144
+    ],
+    "zabaged-water": [
+      121,
+      184,
+      224
+    ],
+    "zabaged-roads": [
+      115,
+      104,
+      90
+    ],
+    "geonames-settlements": [
+      174,
+      151,
+      134
+    ],
+    "power-lines": [
+      161,
+      94,
+      161
+    ],
+    "power-masts": [
+      161,
+      94,
+      161
+    ],
+    "airspaces": [
+      52,
+      105,
+      191
+    ],
+    "runways": [
+      42,
+      42,
+      42
+    ],
+    "airports": [
+      200,
+      47,
+      44
+    ]
+  },
+  "coordinateFrames": {
+    "baseVectors": "EPSG:5514",
+    "airportRunwayAirspaceObstacles": "EPSG:4326"
+  },
+  "layers": [
+    {
+      "path": "airports.geojson",
+      "sha256": "1963af9bb562f90a549342f59b01708f190d6c5a3e218f4343e7fb161eab45b8"
+    },
+    {
+      "path": "airspaces.geojson",
+      "sha256": "ab62cb5d91284d5e5c4b18c76bbcb604946e67f7cc99d6de766a356e21073bf4"
+    },
+    {
+      "path": "geonames-settlements.geojson",
+      "sha256": "5e9be463f6694b9f9c71770266e574c64d5ff7a796eea9e6e45f49b25991cad1"
+    },
+    {
+      "path": "power-lines.geojson",
+      "sha256": "a66b8a344ae5e50794592be9e11ed475117701b19d951cd35a7d6900b498af21"
+    },
+    {
+      "path": "power-masts.geojson",
+      "sha256": "37f75d5259e35478d03f21b97c76db9801256f0c33f95ff2aaf05f7fe4dde906"
+    },
+    {
+      "path": "runways.geojson",
+      "sha256": "5a428825e10d6f56e78084ff565be5d0b55052d42ded1bbf52e597d18ca30d07"
+    },
+    {
+      "path": "zabaged-forest.geojson",
+      "sha256": "c86f7a07b45f925bf3b56da37c49c0d08a5a1481049bce757cfdb9ecf6125788"
+    },
+    {
+      "path": "zabaged-roads.geojson",
+      "sha256": "5da7a3639b7c3d9902d92618544224156cc9278c569be6e5162fe2ce9efeb8f2"
+    },
+    {
+      "path": "zabaged-water.geojson",
+      "sha256": "42106158a53c2c958f7cf3f1a44ab9be98e1a3d761c2f33f1426d2233d30216a"
+    }
+  ],
+  "externalTiles": [],
+  "sourceReferencesAreNotRuntimeDependencies": true,
+  "limitations": [
+    "Private simulator map, not for real navigation",
+    "Nominal ATZ is not a complete controlled/restricted/temporary airspace database",
+    "No live AUP, NOTAM, obstacle completeness or operational clearance claim",
+    "Local reference HTML is an evidence copy; its remote links are not loaded by the map"
+  ]
+}

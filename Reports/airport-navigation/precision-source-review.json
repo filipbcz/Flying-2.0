@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-11-19",
+  "task": "Complete Production Airport And Navigation Package",
+  "status": "blocked-independent-physical-geometry-control",
+  "sourceAcquisition": {
+    "status": "succeeded",
+    "url": "https://www.aeroklubceskatrebova.cz/pro-piloty/informace-o-letisti",
+    "managedRoot": "source-assets",
+    "path": "airport-navigation-precision-review/lkctre.html",
+    "sha256": "ff9b51ce4c2b44dfc8bc1461a8804fbc1b7fda13a35e23021da2122b64ee4d5e",
+    "downloadedAt": "2026-11-19T07:05:51.770Z"
+  },
+  "operatorPublished": {
+    "status": "Plocha SLZ neověřená",
+    "runway": "15/33",
+    "dimensions": "VPD 350x20 tráva",
+    "direction": "Směr: NIL",
+    "referencePoint": "N49°54′31″ E016°27′34″",
+    "thresholdCoordinatesPublished": false,
+    "accuracyStatementPublished": false
+  },
+  "linkedRunwayEvidence": [
+    "https://www.aeroklubceskatrebova.cz/files/gallery_images/0/dvuhv/ct15.png",
+    "https://www.aeroklubceskatrebova.cz/files/gallery_images/0/vtehx/ct33.png"
+  ],
+  "assessment": "The current operator page links the same approach images already acquired by the checkpoint and no threshold survey. A whole-arcsecond reference point is not physical threshold control. The existing checksum-bound Ortofoto marker corridor and DMR elevations do not independently identify or establish the absolute accuracy of the physical thresholds or edges. No physical geometry was changed or promoted.",
+  "requiredMaximumErrors": {
+    "thresholdM": 1,
+    "headingDeg": 0.1,
+    "dimensionM": 0.5
+  },
+  "measuredErrors": null,
+  "independentControlSource": null,
+  "unblockingInput": "Independent control identifying both physical thresholds and runway edges, with coordinate reference frame, epoch where applicable, measurement method and accuracy sufficient to test all three limits; then compute errors against the generated geometry and rebuild the package.",
+  "productionGate": {
+    "command": "python.exe Tools/data_pipeline/build_airport_navigation.py production-gate --root .forgemind-tmp/managed/precision-review/data/packages/regional-airport-navigation",
+    "exitCode": 1,
+    "error": "Production geometry blocked: independent measured threshold, heading and dimension accuracy is unavailable",
+    "packageIntegrityCompletedBeforePrecisionFailure": true
+  },
+  "preserved": {
+    "archive": "data/packages/ceska-trebova-airport-navigation-2026-11-19-private-3.zip",
+    "geometry": "Derived centered 350 x 20 m simulation surface; not surveyed physical thresholds",
+    "unverifiedStatus": true,
+    "pilotBounds": true,
+    "mandatoryPrecisionLimits": true
+  },
+  "releaseCandidateAccepted": false
+}

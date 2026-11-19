@@ -1,0 +1,138 @@
+{
+  "method": "Least-squares axis through five paired bright ground markers in returned-extent CUZK Ortofoto; 350 m subset centered inside observed marker span",
+  "selectedMarkerPairsPixels": [
+    [
+      [
+        286.5,
+        389
+      ],
+      [
+        261.5,
+        402
+      ]
+    ],
+    [
+      [
+        374,
+        564
+      ],
+      [
+        350,
+        576
+      ]
+    ],
+    [
+      [
+        474.5,
+        763
+      ],
+      [
+        451.5,
+        776
+      ]
+    ],
+    [
+      [
+        569,
+        949
+      ],
+      [
+        544.5,
+        962
+      ]
+    ],
+    [
+      [
+        666,
+        1141
+      ],
+      [
+        640,
+        1156
+      ]
+    ]
+  ],
+  "markerSpanM": 411.6213647212804,
+  "markerSeparationM": [
+    13.758791800395871,
+    13.10196080566283,
+    12.90023907580362,
+    13.542654539412757,
+    14.656573261526987
+  ],
+  "centerlineFitResidualsM": [
+    0.09746711518627407,
+    0.05175421233966818,
+    0.1716931213694845,
+    0.19886426837927557,
+    0.2213360622228251
+  ],
+  "imagePixelSizeM": 0.48828125,
+  "imageSha256": "33b3f960f5237912799c7a3615f5a6de3109cfe9b719cefacd2ebd10e9be5b0e",
+  "placementSha256": "72587fa77d3b67f68aececc49f769548f4a1b34aa52997f7088cee14fe2be1a8",
+  "publishedDimensionsM": {
+    "length": 350,
+    "width": 20
+  },
+  "simulationContactDimensionsM": {
+    "length": 350,
+    "width": 20
+  },
+  "interpretation": "Full published 350 x 20 m dimensions placed on the imagery-derived axis. Endpoints are derived, not surveyed physical thresholds; absolute accuracy remains unmeasured.",
+  "horizontalUncertaintyM": 5,
+  "headingUncertaintyDeg": 1,
+  "thresholdStationUncertaintyM": 25,
+  "uncertaintyKind": "Conservative engineering allowances, NOT measured absolute accuracy or survey precision",
+  "productionValidated": false,
+  "precisionAcceptance": {
+    "status": "blocked-unmeasured",
+    "requiredMaximumErrors": {
+      "thresholdM": 1,
+      "headingDeg": 0.1,
+      "dimensionM": 0.5
+    },
+    "measuredErrors": null,
+    "independentControlSource": null,
+    "reason": "No independent surveyed threshold/edge control in acquired sources. Fit residuals, pixel resolution and engineering allowances do not measure absolute accuracy."
+  },
+  "trueHeadingDeg": 146.97921600443811,
+  "dmrPixelSizeM": [
+    0.9765625,
+    0.9765625
+  ],
+  "sampledBaltic1957M": [
+    412.0778503417969,
+    412.56494140625,
+    413.12762451171875,
+    411.7987060546875,
+    412.228271484375,
+    412.70257568359375,
+    411.6346435546875,
+    411.85540771484375,
+    412.3771667480469,
+    411.36932373046875,
+    411.65203857421875,
+    412.17333984375,
+    410.74365234375,
+    411.0804138183594,
+    411.78936767578125,
+    410.4815368652344,
+    410.80194091796875,
+    411.3876647949219,
+    410.0982971191406,
+    410.6044921875,
+    410.94940185546875,
+    409.60198974609375,
+    410.0389709472656,
+    410.4963684082031,
+    409.3709716796875,
+    409.8033142089844,
+    410.3629455566406
+  ],
+  "verticalAccuracyM": null,
+  "verticalAccuracyNote": "DMR export sampling resolution is not survey accuracy",
+  "transformationPipeline": "proj=pipeline step proj=gridshift grids=cz_cuzk_table_-y-x_3_v1710.tif step proj=push v_3 omit_inv step proj=push v_4 step proj=set v_4=0 omit_fwd step inv proj=axisswap order=1,2,4,3 omit_fwd step inv proj=mod_krovak lat_0=49.5 lon_0=24.8333333333333 alpha=30.2881397222222 k=0.9999 x_0=5000000 y_0=5000000 ellps=bessel step proj=cart ellps=bessel step proj=helmert x=572.213 y=85.334 z=461.94 rx=-4.9732 ry=-1.529 rz=-5.2484 s=3.5378 convention=coordinate_frame step inv proj=cart ellps=GRS80 step proj=push v_3 omit_fwd step inv proj=axisswap order=1,2,4,3 omit_fwd step proj=set v_4=0 omit_fwd step proj=pop v_4 step proj=pop v_3 omit_inv step proj=vgridshift grids=cz_cuzk_CR-2005.tif multiplier=1 step proj=pop v_3 omit_fwd step proj=unitconvert xy_in=rad xy_out=deg",
+  "transformationDeclaredAccuracyM": 0.05,
+  "horizontalFrame": "ETRS89 from official grids, WGS84-compatible simulator coordinates; no epoch equivalence claim",
+  "heightDatum": "ellipsoidal for ENU vertices; source samples Baltic 1957"
+}

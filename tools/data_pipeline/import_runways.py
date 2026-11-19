@@ -152,6 +152,8 @@ def validate_json_schema_subset(value: Any, schema_node: dict[str, Any], root_sc
             if "if" in item_schema and "then" in item_schema:
                 if not validate_json_schema_subset(value, require_dict(item_schema["if"], f"{path}.if"), root_schema, path):
                     errors.extend(validate_json_schema_subset(value, require_dict(item_schema["then"], f"{path}.then"), root_schema, path))
+                elif "else" in item_schema:
+                    errors.extend(validate_json_schema_subset(value, require_dict(item_schema["else"], f"{path}.else"), root_schema, path))
             else:
                 errors.extend(validate_json_schema_subset(value, item_schema, root_schema, path))
     return errors

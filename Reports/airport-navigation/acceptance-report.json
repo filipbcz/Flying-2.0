@@ -1,0 +1,45 @@
+{
+  "status": "pass",
+  "gate": "private-pilot-technical-package",
+  "privatePackageAccepted": true,
+  "privateNonDistributed": true,
+  "releaseCandidateAccepted": false,
+  "productionGeometryAccepted": false,
+  "geometryStatus": "derived-unverified-private",
+  "sourcePublishedStatus": "Plocha SLZ neověřená",
+  "sourceRecordsChecked": 31,
+  "packageIntegrity": {
+    "status": "pass",
+    "filesChecked": 172,
+    "airportCount": 1,
+    "runwayCount": 1,
+    "safeStartCount": 1,
+    "offlineLayerCount": 9,
+    "offlineTileCount": 1027,
+    "geometryPrecisionAccepted": false,
+    "scope": "Private bounded package integrity, not RC or operational approval"
+  },
+  "coverage": {
+    "missing": {
+      "aerodromes": [],
+      "runways": [],
+      "slzAreas": []
+    },
+    "nationalCompletenessClaim": false
+  },
+  "archiveSha256": "0e7449e6143d1d1c67f7fa46bf564920848a3f2f57eca6c21d31639bb11c1308",
+  "relocation": "pass",
+  "runtimeNetworkRequired": false,
+  "regionChanged": false,
+  "surveyPrecisionRequiredForThisGate": false,
+  "productionGate": {
+    "command": "production-gate",
+    "status": "blocked-unmeasured"
+  },
+  "limitations": [
+    "Derived endpoints are not surveyed physical thresholds",
+    "Unverified SLZ; opt-in static mesh start only",
+    "Nominal advisory ATZ; no operational airspace completeness",
+    "No two-airport flight, Unreal flight or release acceptance claim"
+  ]
+}
