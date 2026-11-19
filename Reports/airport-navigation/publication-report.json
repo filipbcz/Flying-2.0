@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "gate": "private-pilot-technical-package",
+  "validation": {
+    "checkId": "private-package-corrected-checkpoint",
+    "exitCode": 0,
+    "completedAt": "2026-11-19T09:02:19.534Z",
+    "command": "Tools/data_pipeline/build_airport_navigation.py private-package-gate --output .forgemind-tmp/managed/private-acceptance"
+  },
+  "correction": "Published the preserved, passing private-package checkpoint. Previously managed data had a stale master-list checksum in coverage-review.json and a production-blocker acceptance report.",
+  "archiveSha256": "0e7449e6143d1d1c67f7fa46bf564920848a3f2f57eca6c21d31639bb11c1308",
+  "publications": [
+    {
+      "root": "project-data",
+      "path": "data/sources",
+      "sizeBytes": 37195064,
+      "sha256": "b2cf1ea5b09b9eb642fa78aa99220832d41a98475fe6e3655e08cf78964c61e3",
+      "fileCount": 23,
+      "publishedAt": "2026-11-19T09:02:37.377Z"
+    },
+    {
+      "root": "project-data",
+      "path": "data/packages",
+      "sizeBytes": 598066248,
+      "sha256": "90943e6eb478b115370557b89a3f99809b5373e87f2d3b26fea6e9bd7bb62a43",
+      "fileCount": 174,
+      "publishedAt": "2026-11-19T09:02:45.631Z"
+    },
+    {
+      "root": "project-data",
+      "path": "artifacts/airport-navigation",
+      "sizeBytes": 112537,
+      "sha256": "2e15b3535870b573c93fde4fe82fafbe6054f65335eef4f5643c4b6b448ab55c",
+      "fileCount": 12,
+      "publishedAt": "2026-11-19T09:02:46.189Z"
+    }
+  ],
+  "productionGateAccepted": false,
+  "geometryStatus": "derived-unverified-private"
+}

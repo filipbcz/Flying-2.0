@@ -23,6 +23,8 @@
     "packageName": {"type": "string", "minLength": 1},
     "packageVersion": {"type": "string", "minLength": 1},
     "packageId": {"type": "string", "minLength": 1},
+    "heightDatum": {"enum": ["ellipsoidal"]},
+    "geometryStatus": {"enum": ["derived-unverified-private-inset-lane", "derived-unverified-private-full-width"]},
     "airportDatabaseVersion": {"type": "string", "minLength": 1},
     "coordinateFrame": {"const": "airport-local-ENU-per-aerodrome"},
     "runtimeDependencies": {
@@ -57,7 +59,7 @@
     },
     "surfaces": {
       "type": "array",
-      "minItems": 2,
+      "minItems": 1,
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -135,7 +137,7 @@
           "collisionMesh": {"$ref": "#/$defs/surfaceMesh"},
           "transitionBands": {
             "type": "array",
-            "minItems": 2,
+            "minItems": 0,
             "items": {
               "type": "object",
               "additionalProperties": false,
@@ -180,7 +182,7 @@
             "properties": {
               "longitudinalPercent": {"type": "number"},
               "transversePercent": {"type": "number"},
-              "source": {"const": "verified_threshold_geometry"}
+              "source": {"enum": ["verified_threshold_geometry", "derived_DMR_samples_not_verified_threshold_geometry"]}
             }
           },
           "markings": {
@@ -214,7 +216,7 @@
         "headingChecksIncluded": {"const": true},
         "dimensionChecksIncluded": {"const": true},
         "ortofotoAlignmentChecksIncluded": {"const": true},
-        "terrainTransitionChecksIncluded": {"const": true},
+        "terrainTransitionChecksIncluded": {"type": "boolean"},
         "provenanceChecksIncluded": {"const": true}
       }
     },
@@ -250,6 +252,14 @@
       }
     }
   },
+  "allOf": [{
+    "if": {"properties": {"geometryStatus": {"enum": ["derived-unverified-private-inset-lane", "derived-unverified-private-full-width"]}}, "required": ["geometryStatus"]},
+    "then": {"properties": {"surfaces": {"items": {"properties": {"transitionBands": {"maxItems": 0}}}}, "validation": {"properties": {"terrainTransitionChecksIncluded": {"const": false}}}}},
+    "else": {"properties": {
+      "surfaces": {"minItems": 2, "items": {"properties": {"transitionBands": {"minItems": 2}, "slopes": {"properties": {"source": {"const": "verified_threshold_geometry"}}}}}},
+      "validation": {"properties": {"terrainTransitionChecksIncluded": {"const": true}}}
+    }}
+  }],
   "$defs": {
     "wgs84Position": {
       "type": "object",

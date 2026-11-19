@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "flying.regional-airport-master-list.v1",
+  "regionId": "ceska-trebova-pilot-10km",
+  "masterList": [
+    {
+      "aerodromeId": "LKCTRE",
+      "name": "Česká Třebová",
+      "classification": "slz_field",
+      "operationalStatus": "active",
+      "requiredRunways": [
+        {
+          "id": "RWY-15-33",
+          "designator": "15/33"
+        }
+      ],
+      "notes": "Operator-published unverified SLZ; full 350x20 m published dimensions on derived axis; mandatory absolute precision unmeasured"
+    }
+  ]
+}

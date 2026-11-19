@@ -1,0 +1,20 @@
+{
+    "status":  "pass",
+    "archive":  "ceska-trebova-airport-navigation-2026-11-19-private-3.zip",
+    "sha256":  "db34cc2ea79db555a78ab9d51f97abcdb5aaef06731ccc0eb8b42ab69f40ecf2",
+    "sizeBytes":  299046286,
+    "manifestSha256":  "22fd1ba32b3344599d8157f9642b78007eb489f367d1539ed4dfe00cea0eef40",
+    "scope":  "private-regional-archive-and-relocated-payload",
+    "packageIntegrity":  {
+                             "status":  "pass",
+                             "filesChecked":  172,
+                             "airportCount":  1,
+                             "runwayCount":  1,
+                             "safeStartCount":  1,
+                             "offlineLayerCount":  9,
+                             "offlineTileCount":  1027,
+                             "geometryPrecisionAccepted":  false,
+                             "scope":  "Private bounded package integrity, not RC or operational approval"
+                         },
+    "productionAcceptance":  "blocked-unmeasured-geometry"
+}

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "sourceUrl": "https://ags.cuzk.gov.cz/arcgis/rest/services/ZABAGED_POLOHOPIS/MapServer/85/query?where=1%3D1&geometry=16.396,49.86,16.546,49.95&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&outSR=4326&returnGeometry=true&f=geojson",
+  "finalUrl": "https://ags.cuzk.gov.cz/arcgis/rest/services/ZABAGED_POLOHOPIS/MapServer/85/query?where=1%3D1&geometry=16.396,49.86,16.546,49.95&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&outSR=4326&returnGeometry=true&f=geojson",
+  "destinationRelativePath": "pilot/aero/runways.json",
+  "sizeBytes": 42,
+  "sha256": "ed778c73ea51338d6576fb5992b189f2b94d9f3d5e199f46c1af520d6b0b3e6c",
+  "etag": "\"1791117771\"",
+  "lastModified": null,
+  "downloadedAt": "2026-11-16T12:52:15.579Z"
+}

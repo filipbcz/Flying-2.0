@@ -1,0 +1,194 @@
+{
+  "status": "pass",
+  "privateNonDistributed": true,
+  "redistributionApprovalClaim": false,
+  "permissionIsCompletionGate": false,
+  "sources": [
+    {
+      "path": "aero/airports.json",
+      "sha256": "ed778c73ea51338d6576fb5992b189f2b94d9f3d5e199f46c1af520d6b0b3e6c",
+      "sourceUri": "https://ags.cuzk.gov.cz/arcgis/rest/services/ZABAGED_POLOHOPIS/MapServer/125/query?where=1%3D1&geometry=16.396,49.86,16.546,49.95&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&outSR=4326&returnGeometry=true&f=geojson",
+      "retrievedAt": "2026-11-16T12:51:01.294Z"
+    },
+    {
+      "path": "aero/runways.json",
+      "sha256": "ed778c73ea51338d6576fb5992b189f2b94d9f3d5e199f46c1af520d6b0b3e6c",
+      "sourceUri": "https://ags.cuzk.gov.cz/arcgis/rest/services/ZABAGED_POLOHOPIS/MapServer/85/query?where=1%3D1&geometry=16.396,49.86,16.546,49.95&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&outSR=4326&returnGeometry=true&f=geojson",
+      "retrievedAt": "2026-11-16T12:52:15.579Z"
+    },
+    {
+      "path": "airport-navigation/aim-index.html",
+      "sha256": "16e5237c632161dc60bbd574f546d35060fb25ff949fbd21a9cc1e9fe3d4ba3f",
+      "sourceUri": "https://aim.rlp.cz/vfrmanual/actual/ad_1_cz.html",
+      "retrievedAt": "2026-11-18T11:23:24.520Z"
+    },
+    {
+      "path": "airport-navigation/airport-areas.geojson",
+      "sha256": "ed778c73ea51338d6576fb5992b189f2b94d9f3d5e199f46c1af520d6b0b3e6c",
+      "sourceUri": "https://ags.cuzk.gov.cz/arcgis/rest/services/ZABAGED_POLOHOPIS/MapServer/125/query?where=1%3D1&geometry=16.3926,49.8578,16.5494,49.9522&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&outSR=4326&returnGeometry=true&f=geojson",
+      "retrievedAt": "2026-11-18T14:15:12.245Z"
+    },
+    {
+      "path": "airport-navigation/dmr-airport.tif",
+      "sha256": "0a2875bcc39ecb6023dcf89d04c63c890fb90c7a9f780980fb5e6ed4873f279b",
+      "sourceUri": "https://ags.cuzk.gov.cz/arcgis2/rest/services/dmr5g/ImageServer/exportImage?bbox=-600740,-1081206,-599740,-1080206&bboxSR=5514&imageSR=5514&size=1024,1024&format=tiff&pixelType=F32&renderingRule=%7B%22rasterFunction%22%3A%22None%22%7D&noData=-9999&f=image",
+      "retrievedAt": "2026-11-18T14:04:46.190Z"
+    },
+    {
+      "path": "airport-navigation/enr-1.html",
+      "sha256": "c824a7466c65706bc49eca0553b2f4935a9d8199b784af21a48dcb40feed149a",
+      "sourceUri": "https://aim.rlp.cz/vfrmanual/actual/enr_1_cz.html",
+      "retrievedAt": "2026-11-18T14:14:00.351Z"
+    },
+    {
+      "path": "airport-navigation/enr-2.html",
+      "sha256": "573a266236f9f613e920f30d3f7597e259b207b08593ef251e4df4b000d1373e",
+      "sourceUri": "https://aim.rlp.cz/vfrmanual/actual/enr_2_cz.html",
+      "retrievedAt": "2026-11-18T14:09:04.429Z"
+    },
+    {
+      "path": "airport-navigation/enr-3.html",
+      "sha256": "0dfddff701be748df627c17d67e2393b50c309a3e865a39019ce8b31c0e5d03e",
+      "sourceUri": "https://aim.rlp.cz/vfrmanual/actual/enr_3_cz.html",
+      "retrievedAt": "2026-11-18T14:09:05.311Z"
+    },
+    {
+      "path": "airport-navigation/lkchoc.html",
+      "sha256": "13f991d20f793e4fb4a50f23a900e047ad1d0dea88985b606d12c60092b1acc3",
+      "sourceUri": "https://aim.rlp.cz/vfrmanual/actual/lkchoc_text_cz.html",
+      "retrievedAt": "2026-11-18T14:14:06.682Z"
+    },
+    {
+      "path": "airport-navigation/lkctre-15.png",
+      "sha256": "6074096de42e0b220f7af6e72367ce1e40489d1ad7082adafadc11cd3edf35a8",
+      "sourceUri": "https://www.aeroklubceskatrebova.cz/files/gallery_images/0/dvuhv/ct15.png",
+      "retrievedAt": "2026-11-18T14:01:46.807Z"
+    },
+    {
+      "path": "airport-navigation/lkctre-33.png",
+      "sha256": "77dcc89be901037fc8180b4725a978d13b95970f45569f45d6426f9d7e31f32e",
+      "sourceUri": "https://www.aeroklubceskatrebova.cz/files/gallery_images/0/vtehx/ct33.png",
+      "retrievedAt": "2026-11-18T14:01:47.956Z"
+    },
+    {
+      "path": "airport-navigation/lkctre.html",
+      "sha256": "17f98ee7cd3bfe9c4492f31ccbd3e045b6b59231ff72318cddd8f27ace15ccf6",
+      "sourceUri": "https://www.aeroklubceskatrebova.cz/pro-piloty/informace-o-letisti",
+      "retrievedAt": "2026-11-18T11:23:25.706Z"
+    },
+    {
+      "path": "airport-navigation/lkmk.html",
+      "sha256": "bdadd0711dcb0e1c6e5d9d849bbe306db0e7c09390fdb5bc38ff6c68792ef51f",
+      "sourceUri": "https://aim.rlp.cz/vfrmanual/actual/lkmk_text_cz.html",
+      "retrievedAt": "2026-11-18T14:09:06.926Z"
+    },
+    {
+      "path": "airport-navigation/lkuo-map.pdf",
+      "sha256": "7bc9984218926aa1bbf021dc6f73f456ff9bd5e4255a0666d50b2fcaef5ca900",
+      "sourceUri": "https://aim.rlp.cz/vfrmanual/actual/pdf/ad-lkuo_map_cz.pdf",
+      "retrievedAt": "2026-11-18T14:01:45.585Z"
+    },
+    {
+      "path": "airport-navigation/lkuo.html",
+      "sha256": "fb55b19db14a1921f06ce296e8375b2127fe30eb61d45725bd2b77859c3d1aba",
+      "sourceUri": "https://aim.rlp.cz/vfrmanual/actual/lkuo_text_cz.html",
+      "retrievedAt": "2026-11-18T11:23:24.772Z"
+    },
+    {
+      "path": "airport-navigation/lkvm.html",
+      "sha256": "f150aa73ecaf13535378b5a0a61d21fc5890939f29d79c84b81f42d0af52f565",
+      "sourceUri": "https://aim.rlp.cz/vfrmanual/actual/lkvm_text_cz.html",
+      "retrievedAt": "2026-11-18T14:09:05.847Z"
+    },
+    {
+      "path": "airport-navigation/ortofoto-airport.png",
+      "sha256": "33b3f960f5237912799c7a3615f5a6de3109cfe9b719cefacd2ebd10e9be5b0e",
+      "sourceUri": "https://ags.cuzk.gov.cz/arcgis1/rest/directories/arcgisoutput/ORTOFOTO_MapServer/_ags_mapa644fd5e4d1e4bec9fa2e0e30df520d5.png",
+      "retrievedAt": "2026-11-18T14:05:06.567Z"
+    },
+    {
+      "path": "airport-navigation/ortofoto-export.json",
+      "sha256": "72587fa77d3b67f68aececc49f769548f4a1b34aa52997f7088cee14fe2be1a8",
+      "sourceUri": "https://ags.cuzk.gov.cz/arcgis1/rest/services/ORTOFOTO/MapServer/export?bbox=-600740,-1081206,-599740,-1080206&bboxSR=5514&imageSR=5514&size=2048,2048&format=png&f=json",
+      "retrievedAt": "2026-11-18T14:04:35.355Z"
+    },
+    {
+      "path": "airport-navigation/power-lines.geojson",
+      "sha256": "a66b8a344ae5e50794592be9e11ed475117701b19d951cd35a7d6900b498af21",
+      "sourceUri": "https://ags.cuzk.gov.cz/arcgis/rest/services/ZABAGED_POLOHOPIS/MapServer/88/query?where=1%3D1&geometry=16.3926,49.8578,16.5494,49.9522&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&outSR=4326&returnGeometry=true&f=geojson",
+      "retrievedAt": "2026-11-18T14:15:15.013Z"
+    },
+    {
+      "path": "airport-navigation/power-masts.geojson",
+      "sha256": "37f75d5259e35478d03f21b97c76db9801256f0c33f95ff2aaf05f7fe4dde906",
+      "sourceUri": "https://ags.cuzk.gov.cz/arcgis/rest/services/ZABAGED_POLOHOPIS/MapServer/87/query?where=1%3D1&geometry=16.3926,49.8578,16.5494,49.9522&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&outSR=4326&returnGeometry=true&f=geojson",
+      "retrievedAt": "2026-11-18T14:15:13.464Z"
+    },
+    {
+      "path": "airport-navigation/runway-boundaries.geojson",
+      "sha256": "ed778c73ea51338d6576fb5992b189f2b94d9f3d5e199f46c1af520d6b0b3e6c",
+      "sourceUri": "https://ags.cuzk.gov.cz/arcgis/rest/services/ZABAGED_POLOHOPIS/MapServer/124/query?where=1%3D1&geometry=16.3926,49.8578,16.5494,49.9522&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&outSR=4326&returnGeometry=true&f=geojson",
+      "retrievedAt": "2026-11-18T14:15:11.259Z"
+    },
+    {
+      "path": "airport-navigation/zabaged-service.json",
+      "sha256": "e2b7ce0156c1db2497b3b864dce07a98ac69c7f2ce3a46eb5408e5b1b52c0f1b",
+      "sourceUri": "https://ags.cuzk.gov.cz/arcgis/rest/services/ZABAGED_POLOHOPIS/MapServer?f=pjson",
+      "retrievedAt": "2026-11-18T14:13:58.248Z"
+    },
+    {
+      "path": "dmp/dmp1g.tif",
+      "sha256": "82dc3ab5c8bab53d4a5fe3014904f385c7e98894e579f97b94fbe014825683c9",
+      "sourceUri": "https://ags.cuzk.gov.cz/arcgis2/rest/services/dmp1g/ImageServer/exportImage?bbox=16.396,49.86,16.546,49.95&bboxSR=4326&imageSR=5514&size=2048,2048&format=tiff&pixelType=F32&renderingRule=%7B%22rasterFunction%22%3A%22None%22%7D&noData=-9999&f=image",
+      "retrievedAt": "2026-11-16T12:50:46.375Z"
+    },
+    {
+      "path": "dmr/dmr5g.tif",
+      "sha256": "f600b25ed7b0b9709108986155c23d474686b4baf2e92041d4269c8e053eb8cb",
+      "sourceUri": "https://ags.cuzk.gov.cz/arcgis2/rest/services/dmr5g/ImageServer/exportImage?bbox=16.396,49.86,16.546,49.95&bboxSR=4326&imageSR=5514&size=2048,2048&format=tiff&pixelType=F32&renderingRule=%7B%22rasterFunction%22%3A%22None%22%7D&noData=-9999&f=image",
+      "retrievedAt": "2026-11-16T12:49:27.480Z"
+    },
+    {
+      "path": "geonames/settlements.json",
+      "sha256": "0547ae253a6bd4020ab3a02efce7114c3ec21dfd99148d6b2ebc4ec22a425b9c",
+      "sourceUri": "https://ags.cuzk.gov.cz/arcgis/rest/services/GEONAMES/Geonames/MapServer/0/query?where=1%3D1&geometry=16.396,49.86,16.546,49.95&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&outSR=4326&returnGeometry=true&f=geojson",
+      "retrievedAt": "2026-11-16T12:50:57.865Z"
+    },
+    {
+      "path": "grids/cz_cuzk_CR-2005.tif",
+      "sha256": "2fba4e5bcd3e48f737b3655d5a7c196de1c56e199967f7e12311710646d4f0a1",
+      "sourceUri": "https://cdn.proj.org/cz_cuzk_CR-2005.tif",
+      "retrievedAt": "2026-11-16T12:49:48.423Z"
+    },
+    {
+      "path": "grids/cz_cuzk_table_-y-x_3_v1710.tif",
+      "sha256": "9f7b519e8928ec9663b916c07708d956821d09a0e25b61c742e31995d183148c",
+      "sourceUri": "https://cdn.proj.org/cz_cuzk_table_-y-x_3_v1710.tif",
+      "retrievedAt": "2026-11-16T12:49:49.649Z"
+    },
+    {
+      "path": "ortofoto/ortofoto.jpg",
+      "sha256": "f66898f325d77d46976b8103dafc6efd7404b98a5c31e222c885382214641f9e",
+      "sourceUri": "https://ags.cuzk.gov.cz/arcgis1/rest/services/ORTOFOTO/MapServer/export?bbox=16.396,49.86,16.546,49.95&bboxSR=4326&imageSR=4326&size=2048,2048&format=jpg&f=image",
+      "retrievedAt": "2026-11-16T12:50:53.285Z"
+    },
+    {
+      "path": "zabaged/forest.json",
+      "sha256": "837c2ba348ee7261b235d9628fabd97fccd7ad9a4dcbaf6cd7356b6e575e767d",
+      "sourceUri": "https://ags.cuzk.gov.cz/arcgis/rest/services/ZABAGED_POLOHOPIS/MapServer/142/query?where=1%3D1&geometry=16.396,49.86,16.546,49.95&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&outSR=4326&returnGeometry=true&f=geojson",
+      "retrievedAt": "2026-11-16T12:52:12.608Z"
+    },
+    {
+      "path": "zabaged/roads.json",
+      "sha256": "acd7a2be18e5ed2911d1dcbe197d07a0c950c89ad3628f3451f051608c865f90",
+      "sourceUri": "https://ags.cuzk.gov.cz/arcgis/rest/services/ZABAGED_POLOHOPIS/MapServer/79/query?where=1%3D1&geometry=16.396,49.86,16.546,49.95&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&outSR=4326&returnGeometry=true&f=geojson",
+      "retrievedAt": "2026-11-16T12:52:03.513Z"
+    },
+    {
+      "path": "zabaged/water.json",
+      "sha256": "c45dc470a5451574ac4145e7735fbdd40d22947d592838ce8e1a549cecfd9a5c",
+      "sourceUri": "https://ags.cuzk.gov.cz/arcgis/rest/services/ZABAGED_POLOHOPIS/MapServer/132/query?where=1%3D1&geometry=16.396,49.86,16.546,49.95&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&outSR=4326&returnGeometry=true&f=geojson",
+      "retrievedAt": "2026-11-16T12:50:59.829Z"
+    }
+  ]
+}

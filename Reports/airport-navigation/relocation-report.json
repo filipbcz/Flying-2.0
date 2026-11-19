@@ -1,0 +1,18 @@
+{
+  "status": "pass",
+  "archiveSha256": "0e7449e6143d1d1c67f7fa46bf564920848a3f2f57eca6c21d31639bb11c1308",
+  "installedUnderUnrelatedPath": true,
+  "validation": {
+    "status": "pass",
+    "filesChecked": 172,
+    "airportCount": 1,
+    "runwayCount": 1,
+    "safeStartCount": 1,
+    "offlineLayerCount": 9,
+    "offlineTileCount": 1027,
+    "geometryPrecisionAccepted": false,
+    "scope": "Private bounded package integrity, not RC or operational approval"
+  },
+  "sourceCheckoutRequired": false,
+  "networkUsed": false
+}
