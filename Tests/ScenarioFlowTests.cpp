@@ -6,6 +6,7 @@
 #include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 
@@ -57,11 +58,13 @@ void unavailable_data_blocks_start_with_clear_errors() {
           "terrain, visual, and aircraft failures must each be reported");
 
   flying::presentation::ScenarioSetup setup{};
+  setup.position_mode = flying::presentation::ScenarioPositionMode::GeographicPosition;
   const auto start = flying::presentation::start_scenario_from_setup(setup, missing);
   require(!start.started, "scenario start must fail when required data is unavailable");
   require(start.errors.size() == 3, "scenario start must return clear availability errors");
 
   flying::presentation::ScenarioSetup wrong_aircraft{};
+  wrong_aircraft.position_mode = flying::presentation::ScenarioPositionMode::GeographicPosition;
   wrong_aircraft.aircraft_id = "unavailable_selected_aircraft";
   const auto aircraft_mismatch =
       flying::presentation::start_scenario_from_setup(wrong_aircraft, valid_availability());
@@ -71,8 +74,11 @@ void unavailable_data_blocks_start_with_clear_errors() {
 
 void start_modes_initialize_distinct_validated_states() {
   flying::presentation::ScenarioSetup setup{};
-  setup.position_mode = flying::presentation::ScenarioPositionMode::AirportOrRunway;
-  setup.location_id = "FPPV-RWY-09";
+  setup.position_mode = flying::presentation::ScenarioPositionMode::GeographicPosition;
+  setup.latitude_deg = 49.2;
+  setup.longitude_deg = 14.4942;
+  setup.altitude_m = 429.2;
+  setup.true_heading_deg = 90.0;
 
   setup.start_mode = flying::presentation::ScenarioStartMode::ColdAndDark;
   const auto cold =
@@ -110,6 +116,19 @@ void start_modes_initialize_distinct_validated_states() {
           "airborne throttle must be distinct from taxi idle");
   require(altitude_m(airborne.initial_state) > altitude_m(taxi.initial_state) + 400.0,
           "airborne start must initialize above the runway start state");
+}
+
+void unavailable_installed_package_blocks_catalog_start_with_clear_error() {
+  flying::presentation::ScenarioSetup setup{};
+  setup.position_mode = flying::presentation::ScenarioPositionMode::AirportOrRunway;
+  setup.location_id = "missing-package-start";
+
+  const auto start =
+      flying::presentation::start_scenario_from_setup(setup, valid_availability());
+  require(!start.started, "catalog start must fail when no installed package is selected");
+  require(!start.errors.empty(), "missing package must return an actionable diagnostic");
+  require(start.errors.front().find("No validated regional package selected") != std::string::npos,
+          "missing package diagnostic must identify selected-package configuration");
 }
 
 void scenario_setup_supports_geographic_weather_mass_fuel_and_failures() {
@@ -233,9 +252,15 @@ void cockpit_and_external_cameras_share_authoritative_state() {
 } // namespace
 
 int main() {
-  unavailable_data_blocks_start_with_clear_errors();
-  start_modes_initialize_distinct_validated_states();
-  scenario_setup_supports_geographic_weather_mass_fuel_and_failures();
-  cockpit_and_external_cameras_share_authoritative_state();
-  return 0;
+  try {
+    unavailable_data_blocks_start_with_clear_errors();
+    start_modes_initialize_distinct_validated_states();
+    unavailable_installed_package_blocks_catalog_start_with_clear_error();
+    scenario_setup_supports_geographic_weather_mass_fuel_and_failures();
+    cockpit_and_external_cameras_share_authoritative_state();
+    return 0;
+  } catch (const std::exception& error) {
+    std::cerr << error.what() << '\n';
+    return 1;
+  }
 }
