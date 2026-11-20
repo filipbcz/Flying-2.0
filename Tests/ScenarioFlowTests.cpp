@@ -6,6 +6,7 @@
 #include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 
@@ -249,10 +250,15 @@ void cockpit_and_external_cameras_share_authoritative_state() {
 } // namespace
 
 int main() {
-  unavailable_data_blocks_start_with_clear_errors();
-  start_modes_initialize_distinct_validated_states();
-  unavailable_installed_package_blocks_catalog_start_with_clear_error();
-  scenario_setup_supports_geographic_weather_mass_fuel_and_failures();
-  cockpit_and_external_cameras_share_authoritative_state();
-  return 0;
+  try {
+    unavailable_data_blocks_start_with_clear_errors();
+    start_modes_initialize_distinct_validated_states();
+    unavailable_installed_package_blocks_catalog_start_with_clear_error();
+    scenario_setup_supports_geographic_weather_mass_fuel_and_failures();
+    cockpit_and_external_cameras_share_authoritative_state();
+    return 0;
+  } catch (const std::exception& error) {
+    std::cerr << error.what() << '\n';
+    return 1;
+  }
 }
