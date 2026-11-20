@@ -13,6 +13,7 @@
 #include "flying/core_sim/telemetry.hpp"
 #include "flying/core_sim/weather.hpp"
 #include "flying/geo_terrain/geodesy.hpp"
+#include "flying/core_sim/selected_package.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -486,20 +487,16 @@ bool TryMakeUnrealDataPackages(
   std::vector<DataPackageVersion>& OutPackages,
   std::string& OutError)
 {
-  const UFlyingPresentationSettings* Settings = GetDefault<UFlyingPresentationSettings>();
   OutPackages.clear();
-  return TryAppendManifestDataPackage(
-           Settings->TerrainPackageManifestPath,
-           kTerrainPackageSchemaVersion,
-           TEXT("Terrain"),
-           OutPackages,
-           OutError) &&
-         TryAppendManifestDataPackage(
-           Settings->PilotRegionPackageManifestPath,
-           kPilotRegionPackageSchemaVersion,
-           TEXT("Pilot region"),
-           OutPackages,
-           OutError);
+  try
+  {
+    auto& Runtime = flying::core_sim::selected_package_runtime();
+    Runtime.revalidate();
+    const auto& Config = Runtime.current();
+    OutPackages.push_back({Config.package_id, Config.version + ":" + Config.manifest_sha256});
+    return true;
+  }
+  catch (const std::exception& Error) { OutError = Error.what(); return false; }
 }
 
 void AppendReplayEnvironmentErrors(
@@ -600,7 +597,10 @@ EFlyingScenarioStartMode ToUnreal(flying::core_sim::ScenarioStartMode Value)
 
 flying::core_sim::ScenarioSelection ToCore(const FFlyingScenarioSelection& Value)
 {
-  return {ToStdString(Value.LocationId), ToCore(Value.StartMode)};
+  const auto& Config = flying::core_sim::selected_package_runtime().current();
+  if (ToStdString(Value.PackageManifestSha256) != Config.manifest_sha256)
+    throw std::invalid_argument("Scenario package manifest differs from selected package; reselect a start");
+  return {ToStdString(Value.LocationId), ToCore(Value.StartMode), static_cast<std::uint64_t>(Value.PackageGeneration)};
 }
 
 FFlyingScenarioLocation ToUnreal(const flying::core_sim::PilotScenarioLocation& Value)
@@ -609,6 +609,9 @@ FFlyingScenarioLocation ToUnreal(const flying::core_sim::PilotScenarioLocation& 
   Result.LocationId = ToFName(Value.location_id);
   Result.AerodromeId = ToFString(Value.aerodrome_id);
   Result.RunwayEndId = ToFString(Value.runway_end_id);
+  Result.RunwayId = ToFString(Value.runway_id);
+  Result.bGroundEligible = Value.ground_eligible;
+  Result.Diagnostic = ToFString(Value.diagnostic);
   Result.DisplayName = ToFString(Value.display_name);
   Result.LatitudeDegrees = Value.latitude_deg;
   Result.LongitudeDegrees = Value.longitude_deg;
@@ -623,6 +626,8 @@ FFlyingScenarioSelection ToUnreal(const flying::core_sim::ScenarioSelection& Val
   FFlyingScenarioSelection Result;
   Result.LocationId = ToFName(Value.location_id);
   Result.StartMode = ToUnreal(Value.start_mode);
+  Result.PackageGeneration = static_cast<int64>(Value.package_generation);
+  Result.PackageManifestSha256 = ToFString(flying::core_sim::selected_package_runtime().current().manifest_sha256);
   return Result;
 }
 
@@ -822,7 +827,8 @@ struct FFlyingCoreSimBridgeImpl
     Recorder.reset();
     RecreateSimulatorForScenarioStart();
     flying::core_sim::ScenarioInitialState State =
-      flying::core_sim::reset_simulator_to_scenario(Simulator, Selection);
+      flying::core_sim::selected_package_runtime().start(Selection, LoadedAircraftId == ActiveAircraftId);
+    Simulator.reset(State.rigid_body_state, State.flight_dynamics_initial_condition, State.initial_controls);
     ApplyRequestedLoadout();
     Systems.reset();
     LastAircraftControls = Simulator.initial_aircraft_controls();
@@ -853,10 +859,10 @@ struct FFlyingCoreSimBridgeImpl
     Location.true_heading_deg = TrueHeadingDegrees;
     Location.selectable = true;
 
-    const flying::core_sim::ScenarioSelection Selection{Location.location_id, StartMode};
-    const flying::core_sim::PilotScenarioLocation Locations[] = {Location};
-    flying::core_sim::ScenarioInitialState State =
-      flying::core_sim::reset_simulator_to_scenario(Simulator, Selection, Locations);
+    auto& Runtime = flying::core_sim::selected_package_runtime();
+    const auto Selection = Runtime.selection(Location.location_id, StartMode);
+    auto State = Runtime.airborne(Selection, Location, AltitudeMeters, LoadedAircraftId == ActiveAircraftId);
+    Simulator.reset(State.rigid_body_state, State.flight_dynamics_initial_condition, State.initial_controls);
     ApplyRequestedLoadout();
     Systems.reset();
     LastAircraftControls = Simulator.initial_aircraft_controls();

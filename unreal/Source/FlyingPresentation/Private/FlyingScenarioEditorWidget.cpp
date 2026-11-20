@@ -1,6 +1,8 @@
 #include "FlyingScenarioEditorWidget.h"
 
 #include "FlyingCoreSimComponent.h"
+#include "FlyingInstalledPackageLibrary.h"
+#include "flying/core_sim/selected_package.hpp"
 #include "HAL/FileManager.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
@@ -192,6 +194,7 @@ TSharedRef<FJsonObject> ScenarioToJson(const FFlyingScenarioEditorData& Data,
   Root->SetStringField(TEXT("aircraftId"), Data.AircraftId);
   Root->SetStringField(TEXT("positionMode"), PositionModeToString(Data.PositionMode));
   Root->SetStringField(TEXT("locationId"), Data.AirportSelection.LocationId.ToString());
+  Root->SetStringField(TEXT("packageManifestSha256"), Data.AirportSelection.PackageManifestSha256);
   Root->SetStringField(TEXT("startMode"), StartModeToString(Data.AirportSelection.StartMode));
   Root->SetNumberField(TEXT("latitudeDeg"), Data.LatitudeDegrees);
   Root->SetNumberField(TEXT("longitudeDeg"), Data.LongitudeDegrees);
@@ -226,6 +229,8 @@ bool JsonToScenario(const TSharedPtr<FJsonObject>& Root, FFlyingScenarioEditorDa
   FString LocationId;
   Root->TryGetStringField(TEXT("locationId"), LocationId);
   Data.AirportSelection.LocationId = FName(*LocationId);
+  Root->TryGetStringField(TEXT("packageManifestSha256"), Data.AirportSelection.PackageManifestSha256);
+  Data.AirportSelection.PackageGeneration = 0;
   FString StartMode;
   Root->TryGetStringField(TEXT("startMode"), StartMode);
   Data.AirportSelection.StartMode = StartModeFromString(StartMode);
@@ -295,6 +300,11 @@ bool UFlyingScenarioEditorWidget::ApplyEditedScenario(UFlyingCoreSimComponent* C
     return false;
   }
 
+  if (EditedScenario.AirportSelection.PackageGeneration != static_cast<int64>(flying::core_sim::selected_package_runtime().generation()))
+  {
+    LastStatus = TEXT("Stale package selection; explicitly select a package location again");
+    return false;
+  }
   CoreSimComponent->SetAircraftId(EditedScenario.AircraftId);
 
   const bool bStarted =
@@ -337,6 +347,17 @@ bool UFlyingScenarioEditorWidget::LoadScenario()
     return false;
   }
   JsonToScenario(Root, EditedScenario);
+  try
+  {
+    const auto& Config = flying::core_sim::selected_package_runtime().current();
+    if (EditedScenario.AirportSelection.PackageManifestSha256 != UTF8_TO_TCHAR(Config.manifest_sha256.c_str()))
+    {
+      LastStatus = TEXT("Saved scenario package differs from selected installed package; reselect a location");
+      return false;
+    }
+    if (!UFlyingInstalledPackageLibrary::BindSelection(EditedScenario.AirportSelection, LastStatus)) return false;
+  }
+  catch (const std::exception& Error) { LastStatus = UTF8_TO_TCHAR(Error.what()); return false; }
   LastStatus = TEXT("Scenario loaded");
   return true;
 }
@@ -355,5 +376,20 @@ bool UFlyingScenarioEditorWidget::LoadSettings()
   }
   JsonToScenario(Root, EditedScenario);
   LastStatus = TEXT("Settings loaded");
+  return true;
+}
+
+void UFlyingScenarioEditorWidget::RefreshPackageLocations()
+{
+  PackageLocations = UFlyingInstalledPackageLibrary::GetPackageLocations(LastStatus);
+  EditedScenario.AirportSelection = {};
+}
+bool UFlyingScenarioEditorWidget::SelectPackageLocation(FName LocationId, EFlyingScenarioStartMode StartMode)
+{
+  FFlyingScenarioSelection Selection;
+  Selection.LocationId = LocationId;
+  Selection.StartMode = StartMode;
+  if (!UFlyingInstalledPackageLibrary::BindSelection(Selection, LastStatus)) return false;
+  EditedScenario.AirportSelection = Selection;
   return true;
 }

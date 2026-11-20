@@ -1,4 +1,5 @@
 #include "flying/core_sim/scenario.hpp"
+#include "flying/core_sim/selected_package.hpp"
 
 #include "flying/geo_terrain/geodesy.hpp"
 
@@ -239,57 +240,11 @@ ScenarioStartMode scenario_start_mode_from_string(std::string_view value) {
 }
 
 std::vector<PilotScenarioLocation> default_pilot_scenario_locations() {
-  return {
-    {
-      "FPPV-RWY-09",
-      "FPPV",
-      "09",
-      "Flying Pilot Paved Airport runway 09",
-      49.2,
-      14.4942,
-      429.2,
-      90.0,
-      true,
-    },
-    {
-      "FPPV-RWY-27",
-      "FPPV",
-      "27",
-      "Flying Pilot Paved Airport runway 27",
-      49.2,
-      14.5058,
-      430.9,
-      270.0,
-      true,
-    },
-    {
-      "FPGS-RWY-16",
-      "FPGS",
-      "16",
-      "Flying Pilot Grass SLZ Field runway 16",
-      49.2083,
-      14.5146,
-      420.4,
-      160.0,
-      true,
-    },
-    {
-      "FPGS-RWY-34",
-      "FPGS",
-      "34",
-      "Flying Pilot Grass SLZ Field runway 34",
-      49.2037,
-      14.5174,
-      423.6,
-      340.0,
-      true,
-    },
-  };
+  return selected_package_runtime().current().locations;
 }
 
 ScenarioInitialState make_scenario_initial_state(const ScenarioSelection& selection) {
-  const std::vector<PilotScenarioLocation> locations = default_pilot_scenario_locations();
-  return make_scenario_initial_state(selection, locations);
+  return selected_package_runtime().start(selection, true);
 }
 
 ScenarioInitialState make_scenario_initial_state(
@@ -300,8 +255,9 @@ ScenarioInitialState make_scenario_initial_state(
 
 ScenarioInitialState reset_simulator_to_scenario(CoreSimulator& simulator,
                                                  const ScenarioSelection& selection) {
-  const std::vector<PilotScenarioLocation> locations = default_pilot_scenario_locations();
-  return reset_simulator_to_scenario(simulator, selection, locations);
+  auto state = make_scenario_initial_state(selection);
+  simulator.reset(state.rigid_body_state, state.flight_dynamics_initial_condition, state.initial_controls);
+  return state;
 }
 
 ScenarioInitialState reset_simulator_to_scenario(

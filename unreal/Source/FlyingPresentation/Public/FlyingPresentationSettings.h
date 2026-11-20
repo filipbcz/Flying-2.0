@@ -29,16 +29,13 @@ public:
     TEXT("Saved/Flying/Diagnostics/Crashes");
 
   UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Offline Packages")
-  FString TerrainPackageManifestPath =
-    TEXT("Saved/Flying/PilotRegion/Terrain/terrain-package.json");
+  FString TerrainPackageManifestPath;
 
   UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Offline Packages")
-  FString PilotRegionPackageManifestPath =
-    TEXT("Saved/Flying/PilotRegion/GIS/pilot-region-package.json");
+  FString PilotRegionPackageManifestPath;
 
   UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Offline Packages")
-  FString NavigationMapManifestPath =
-    TEXT("Saved/Flying/PilotRegion/Navigation/navigation-map.json");
+  FString NavigationMapManifestPath;
 
   UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Offline Packages")
   FString NavigationMapStylePath =
@@ -49,13 +46,13 @@ public:
     TEXT("Saved/Flying/Input/input-settings.txt");
 
   UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Georeference")
-  double PilotOriginLatitudeDegrees = 49.2;
+  double PilotOriginLatitudeDegrees = 0.0;
 
   UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Georeference")
-  double PilotOriginLongitudeDegrees = 14.5;
+  double PilotOriginLongitudeDegrees = 0.0;
 
   UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|Georeference")
-  double PilotOriginHeightMeters = 1500.0;
+  double PilotOriginHeightMeters = 0.0;
 
   UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Flying|CoreSim")
   double DefaultAircraftInitialSpeedEastMetersPerSecond = 35.0;

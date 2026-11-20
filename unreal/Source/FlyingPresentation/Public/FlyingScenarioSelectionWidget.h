@@ -20,6 +20,9 @@ public:
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Scenario")
   FFlyingScenarioSelection SelectedScenario;
 
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Scenario")
+  FString LastStatus;
+
   UFUNCTION(BlueprintCallable, Category="Flying|Scenario")
   void RefreshPilotLocations();
 
@@ -33,5 +36,6 @@ protected:
   virtual void NativeConstruct() override;
 
 private:
+  uint64 CatalogGeneration = 0;
   void EnsurePilotLocations();
 };

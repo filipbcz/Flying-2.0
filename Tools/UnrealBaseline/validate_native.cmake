@@ -4,7 +4,11 @@ cmake_minimum_required(VERSION 3.25)
 # FileTracker (MSB4018 / E_ACCESSDENIED). Makefile generators retain dependency
 # tracking without loading that component. Leave the general test preset unchanged.
 get_filename_component(repo_root "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
-set(build_dir "${repo_root}/out/build/editor-baseline-native")
+if(DEFINED FLYING_NATIVE_BUILD_DIR)
+  set(build_dir "${FLYING_NATIVE_BUILD_DIR}")
+else()
+  set(build_dir "${repo_root}/out/build/editor-baseline-native")
+endif()
 file(MAKE_DIRECTORY "${build_dir}")
 
 if(CMAKE_HOST_WIN32)
@@ -56,8 +60,9 @@ endfunction()
 run_required("${CMAKE_COMMAND}" --preset test --fresh -G "${native_generator}" -B "${build_dir}"
   "-DCMAKE_MAKE_PROGRAM=${make_program}"
   -DCMAKE_POLICY_DEFAULT_CMP0141=NEW -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded
-  ${compiler_option})
-run_required("${CMAKE_COMMAND}" --build "${build_dir}" --parallel 1 --target
+  ${compiler_option} ${FLYING_NATIVE_CONFIGURE_OPTIONS})
+if(NOT DEFINED FLYING_NATIVE_TARGETS)
+  set(FLYING_NATIVE_TARGETS
   flying_core_sim_kernel_tests
   flying_core_sim_determinism_tests
   flying_core_sim_flight_dynamics_api_tests
@@ -66,6 +71,12 @@ run_required("${CMAKE_COMMAND}" --build "${build_dir}" --parallel 1 --target
   flying_core_sim_scenario_start_tests
   flying_core_sim_telemetry_replay_tests
   flying_geo_terrain_geodesy_units_tests)
+endif()
+if(NOT DEFINED FLYING_NATIVE_TEST_REGEX)
+  set(FLYING_NATIVE_TEST_REGEX
+    "^flying\\.(core_sim\\.(kernel|determinism|flight_dynamics_api|aircraft_systems|input_mapping|scenario_start|telemetry_replay)|geo_terrain\\.geodesy_units)$")
+endif()
+run_required("${CMAKE_COMMAND}" --build "${build_dir}" --parallel 1 --target ${FLYING_NATIVE_TARGETS})
 run_required("${ctest_program}" --test-dir "${build_dir}" -C Debug
   --output-on-failure --no-tests=error -R
-  "^flying\\.(core_sim\\.(kernel|determinism|flight_dynamics_api|aircraft_systems|input_mapping|scenario_start|telemetry_replay)|geo_terrain\\.geodesy_units)$")
+  "${FLYING_NATIVE_TEST_REGEX}")
