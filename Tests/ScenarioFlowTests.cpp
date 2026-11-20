@@ -58,11 +58,13 @@ void unavailable_data_blocks_start_with_clear_errors() {
           "terrain, visual, and aircraft failures must each be reported");
 
   flying::presentation::ScenarioSetup setup{};
+  setup.position_mode = flying::presentation::ScenarioPositionMode::GeographicPosition;
   const auto start = flying::presentation::start_scenario_from_setup(setup, missing);
   require(!start.started, "scenario start must fail when required data is unavailable");
   require(start.errors.size() == 3, "scenario start must return clear availability errors");
 
   flying::presentation::ScenarioSetup wrong_aircraft{};
+  wrong_aircraft.position_mode = flying::presentation::ScenarioPositionMode::GeographicPosition;
   wrong_aircraft.aircraft_id = "unavailable_selected_aircraft";
   const auto aircraft_mismatch =
       flying::presentation::start_scenario_from_setup(wrong_aircraft, valid_availability());
