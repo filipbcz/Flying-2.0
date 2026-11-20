@@ -1,6 +1,7 @@
 #include "ScenarioSubsystem.h"
 
 #include "flying/core_sim/aircraft_config.hpp"
+#include "flying/core_sim/selected_package.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -441,23 +442,24 @@ ScenarioStartResult start_scenario_from_setup(
     return result;
   }
 
-  const core_sim::ScenarioSelection selection{
-      setup.position_mode == ScenarioPositionMode::AirportOrRunway
-          ? setup.location_id
-          : std::string{"custom-geographic-position"},
-      to_core_start_mode(setup.start_mode),
-  };
-
-  if (setup.position_mode == ScenarioPositionMode::GeographicPosition) {
-    const core_sim::PilotScenarioLocation location =
-        make_geographic_scenario_location(setup);
-    result.initial_state =
-        core_sim::make_scenario_initial_state(selection, std::span{&location, 1});
-  } else {
-    result.initial_state = core_sim::make_scenario_initial_state(selection);
-  }
-
   try {
+    if (setup.position_mode == ScenarioPositionMode::GeographicPosition) {
+      const core_sim::ScenarioSelection selection{
+          "custom-geographic-position",
+          to_core_start_mode(setup.start_mode),
+      };
+      const core_sim::PilotScenarioLocation location =
+          make_geographic_scenario_location(setup);
+      result.initial_state =
+          core_sim::make_scenario_initial_state(selection, std::span{&location, 1});
+    } else {
+      auto& packages = core_sim::selected_package_runtime();
+      const auto selection = packages.selection(
+          setup.location_id,
+          to_core_start_mode(setup.start_mode));
+      result.initial_state = packages.start(selection, true);
+    }
+
     apply_runtime_setup(setup, loaded_aircraft.configuration, result);
     apply_runtime_failures(setup, result);
   } catch (const std::exception& exception) {

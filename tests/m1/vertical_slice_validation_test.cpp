@@ -429,9 +429,21 @@ void scripted_pilot_region_flight_records_and_replays() {
 
   const RigidBodyParameters parameters{975.0, {875.0, 1'060.0, 1'420.0}};
   CoreSimulator simulator{parameters};
+  const flying::core_sim::PilotScenarioLocation runway_start{
+    "FPPV-RWY-09",
+    "FPPV",
+    "09",
+    "M1 synthetic runway fixture",
+    49.2,
+    14.4942,
+    kRunwayOriginElevationM,
+    90.0,
+    true,
+  };
   const auto initial = flying::core_sim::reset_simulator_to_scenario(
       simulator,
-      ScenarioSelection{"FPPV-RWY-09", ScenarioStartMode::ReadyToTaxi});
+      ScenarioSelection{"FPPV-RWY-09", ScenarioStartMode::ReadyToTaxi},
+      std::span<const flying::core_sim::PilotScenarioLocation>{&runway_start, 1});
 
   auto metadata = flying::core_sim::make_default_telemetry_metadata();
   metadata.session_id = "m1-vertical-slice-scripted-flight";

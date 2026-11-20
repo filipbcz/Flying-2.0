@@ -71,8 +71,11 @@ void unavailable_data_blocks_start_with_clear_errors() {
 
 void start_modes_initialize_distinct_validated_states() {
   flying::presentation::ScenarioSetup setup{};
-  setup.position_mode = flying::presentation::ScenarioPositionMode::AirportOrRunway;
-  setup.location_id = "FPPV-RWY-09";
+  setup.position_mode = flying::presentation::ScenarioPositionMode::GeographicPosition;
+  setup.latitude_deg = 49.2;
+  setup.longitude_deg = 14.4942;
+  setup.altitude_m = 429.2;
+  setup.true_heading_deg = 90.0;
 
   setup.start_mode = flying::presentation::ScenarioStartMode::ColdAndDark;
   const auto cold =
@@ -110,6 +113,19 @@ void start_modes_initialize_distinct_validated_states() {
           "airborne throttle must be distinct from taxi idle");
   require(altitude_m(airborne.initial_state) > altitude_m(taxi.initial_state) + 400.0,
           "airborne start must initialize above the runway start state");
+}
+
+void unavailable_installed_package_blocks_catalog_start_with_clear_error() {
+  flying::presentation::ScenarioSetup setup{};
+  setup.position_mode = flying::presentation::ScenarioPositionMode::AirportOrRunway;
+  setup.location_id = "missing-package-start";
+
+  const auto start =
+      flying::presentation::start_scenario_from_setup(setup, valid_availability());
+  require(!start.started, "catalog start must fail when no installed package is selected");
+  require(!start.errors.empty(), "missing package must return an actionable diagnostic");
+  require(start.errors.front().find("No validated regional package selected") != std::string::npos,
+          "missing package diagnostic must identify selected-package configuration");
 }
 
 void scenario_setup_supports_geographic_weather_mass_fuel_and_failures() {
@@ -235,6 +251,7 @@ void cockpit_and_external_cameras_share_authoritative_state() {
 int main() {
   unavailable_data_blocks_start_with_clear_errors();
   start_modes_initialize_distinct_validated_states();
+  unavailable_installed_package_blocks_catalog_start_with_clear_error();
   scenario_setup_supports_geographic_weather_mass_fuel_and_failures();
   cockpit_and_external_cameras_share_authoritative_state();
   return 0;

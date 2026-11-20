@@ -51,7 +51,7 @@ struct ScenarioRuntimeConfiguration {
 struct ScenarioSetup {
   std::string aircraft_id{"flying_trainer_one"};
   ScenarioPositionMode position_mode{ScenarioPositionMode::AirportOrRunway};
-  std::string location_id{"FPPV-RWY-09"};
+  std::string location_id;
   double latitude_deg{49.2};
   double longitude_deg{14.5};
   double altitude_m{430.0};
