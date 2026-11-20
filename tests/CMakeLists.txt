@@ -310,7 +310,7 @@ target_compile_definitions(WorldAutomationTests
 add_test(NAME flying.presentation.world_automation COMMAND WorldAutomationTests)
 
 add_executable(flying_core_sim_scenario_start_tests
-  core_sim/scenario_start_test.cpp
+  ${PROJECT_SOURCE_DIR}/Tests/core_sim/scenario_start_test.cpp
 )
 
 target_link_libraries(flying_core_sim_scenario_start_tests

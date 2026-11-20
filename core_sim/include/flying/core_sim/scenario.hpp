@@ -6,6 +6,7 @@
 #include "flying/core_sim/simulator.hpp"
 
 #include <span>
+#include <cstdint>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -28,11 +29,15 @@ struct PilotScenarioLocation {
   double elevation_m{};
   double true_heading_deg{};
   bool selectable{true};
+  std::string runway_id;
+  bool ground_eligible{false};
+  std::string diagnostic;
 };
 
 struct ScenarioSelection {
-  std::string location_id{"FPPV-RWY-09"};
+  std::string location_id;
   ScenarioStartMode start_mode{ScenarioStartMode::ReadyToTaxi};
+  std::uint64_t package_generation{};
 };
 
 struct ScenarioInitialState {

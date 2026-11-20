@@ -26,6 +26,15 @@ public:
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Scenario")
   FString LastStatus;
 
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Scenario")
+  TArray<FFlyingScenarioLocation> PackageLocations;
+
+  UFUNCTION(BlueprintCallable, Category="Flying|Scenario")
+  void RefreshPackageLocations();
+
+  UFUNCTION(BlueprintCallable, Category="Flying|Scenario")
+  bool SelectPackageLocation(FName LocationId, EFlyingScenarioStartMode StartMode);
+
   UFUNCTION(BlueprintCallable, Category="Flying|Scenario")
   void AddOrUpdateFailure(FName FailureId, bool bFailed);
 

@@ -7,6 +7,7 @@ add_library(flying_core_sim STATIC
   src/input.cpp
   src/module.cpp
   src/scenario.cpp
+  src/selected_package.cpp
   src/simulator.cpp
   src/telemetry.cpp
   src/terrain_contact.cpp

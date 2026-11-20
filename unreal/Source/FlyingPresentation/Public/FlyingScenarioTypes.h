@@ -35,6 +35,15 @@ struct FLYINGPRESENTATION_API FFlyingScenarioLocation
   FString RunwayEndId;
 
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Scenario")
+  FString RunwayId;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Scenario")
+  bool bGroundEligible = false;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Scenario")
+  FString Diagnostic;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Scenario")
   FString DisplayName;
 
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Scenario")
@@ -59,7 +68,13 @@ struct FLYINGPRESENTATION_API FFlyingScenarioSelection
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Scenario")
-  FName LocationId = FName(TEXT("FPPV-RWY-09"));
+  FName LocationId;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Scenario")
+  int64 PackageGeneration = 0;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Flying|Scenario")
+  FString PackageManifestSha256;
 
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Scenario")
   EFlyingScenarioStartMode StartMode = EFlyingScenarioStartMode::ReadyToTaxi;
@@ -95,13 +110,13 @@ struct FLYINGPRESENTATION_API FFlyingScenarioEditorData
   FFlyingScenarioSelection AirportSelection;
 
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Scenario")
-  double LatitudeDegrees = 49.2;
+  double LatitudeDegrees = 0.0;
 
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Scenario")
-  double LongitudeDegrees = 14.5;
+  double LongitudeDegrees = 0.0;
 
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Scenario")
-  double AltitudeMeters = 430.0;
+  double AltitudeMeters = 0.0;
 
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Flying|Scenario")
   double TrueHeadingDegrees = 90.0;
